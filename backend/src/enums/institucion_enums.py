@@ -1,6 +1,7 @@
 import enum
 
-class TipoInstitucion(enum.Enum):
+
+class TipoInstitucion(str, enum.Enum):
     escuela = "escuela"
     colegio = "colegio"
     instituto = "instituto"
@@ -11,13 +12,15 @@ class TipoInstitucion(enum.Enum):
     fundacion = "fundacion"
     academia = "academia"
 
-class NivelEducativoInstitucion(enum.Enum):
+
+class NivelEducativoInstitucion(str, enum.Enum):
     basica = "basica"
     media = "media"
     tecnica = "tecnica"
     tecnologica = "tecnologica"
     superior = "superior"
 
-class SectorInstitucion(enum.Enum):
+
+class SectorInstitucion(str, enum.Enum):
     publico = "publico"
     privado = "privado"

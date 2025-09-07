@@ -1,6 +1,7 @@
 import enum
 
-class NivelPrograma(enum.Enum):
+
+class NivelPrograma(str, enum.Enum):
     basico = "basico"
     media = "media"
     tecnico = "tecnico"
@@ -11,7 +12,8 @@ class NivelPrograma(enum.Enum):
     doctorado = "doctorado"
     otro = "otro"
 
-class TipoPrograma(enum.Enum):
+
+class TipoPrograma(str, enum.Enum):
     presencial = "presencial"
     virtual = "virtual"
     mixto = "mixto"

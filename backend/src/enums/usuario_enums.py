@@ -1,17 +1,20 @@
 import enum
 
-class TipoDocumentoUsuario(enum.Enum):
+
+class TipoDocumentoUsuario(str, enum.Enum):
     cc = "cc"
     ti = "ti"
     ce = "ce"
 
-class RolUsuario(enum.Enum):
+
+class RolUsuario(str, enum.Enum):
     administrador = "administrador"
     coordinador = "coordinador"
     docente = "docente"
     estudiante = "estudiante"
 
-class EstadoCuentaUsuario(enum.Enum):
+
+class EstadoCuentaUsuario(str, enum.Enum):
     activo = "activo"
     inactivo = "inactivo"
     suspendido = "suspendido"

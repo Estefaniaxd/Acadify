@@ -1,6 +1,7 @@
 import enum
 
-class TipoVinculacionDocente(enum.Enum):
+
+class TipoVinculacionDocente(str, enum.Enum):
     planta = "planta"
     catedra = "catedra"
     ocasional = "ocasional"

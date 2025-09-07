@@ -1,8 +1,7 @@
-import uuid
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 from src.db.base_class import Base
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class AdministradorSistema(Base):
@@ -10,13 +9,14 @@ class AdministradorSistema(Base):
 
     administrador_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("Usuario.usuario_id", ondelete="CASCADE"),
+        ForeignKey("usuario.usuario_id", ondelete="CASCADE"),
         primary_key=True,
-        default=uuid.uuid4,
     )
 
-    usuario = relationship("Usuario", back_populates="administrador_sistema")
+    usuario = relationship(
+        "usuario", back_populates="administrador_sistema", passive_deletes=True
+    )
 
     instituciones = relationship(
-        "Institucion", back_populates="administrador", cascade="all, delete-orphan"
+        "institucion", back_populates="administrador_sistema", passive_deletes=True
     )

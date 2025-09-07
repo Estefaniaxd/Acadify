@@ -1,6 +1,7 @@
 import enum
 
-class EtapaFormativaEstudiante(enum.Enum):
+
+class EtapaFormativaEstudiante(str, enum.Enum):
     i = "i"
     ii = "ii"
     iii = "iii"

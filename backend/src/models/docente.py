@@ -1,9 +1,8 @@
-import uuid
 from src.db.base_class import Base
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, Date, Enum, SmallInteger, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, ENUM, DATE, SMALLINT
+from sqlalchemy import Column, String, ForeignKey
 from src.enums.docente_enums import TipoVinculacionDocente
-from sqlalchemy.orm import relationship 
+from sqlalchemy.orm import relationship
 
 
 class Docente(Base):
@@ -11,18 +10,21 @@ class Docente(Base):
 
     docente_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("Usuario.usuario_id"),
+        ForeignKey("usuario.usuario_id", ondelete="CASCADE"),
         primary_key=True,
-        default=uuid.uuid4,
     )
     area_conocimiento = Column(String(50), nullable=False)
-    fecha_vinculacion = Column(Date, nullable=False)
+    fecha_vinculacion = Column(DATE, nullable=False)
     tipo_vinculacion = Column(
-        Enum(TipoVinculacionDocente, name="tipo_vinculacion_institucion"),
+        ENUM(
+            TipoVinculacionDocente,
+            name="tipo_vinculacion_institucion",
+            create_type=False,
+        ),
         nullable=False,
         default=TipoVinculacionDocente.planta,
     )
-    titulo_academico = Column(String(50), nullable=True)
-    horas_semanales = Column(SmallInteger, nullable=True)
-    
-    usuario = relationship("Usuario", back_populates="docente")
+    titulo_academico = Column(String(50))
+    horas_semanales = Column(SMALLINT)
+
+    usuario = relationship("usuario", back_populates="docente", passive_deletes=True)
