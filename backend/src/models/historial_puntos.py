@@ -1,12 +1,11 @@
 from src.db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, CheckConstraint, func
 from sqlalchemy.dialects.postgresql import UUID, INTEGER, TEXT, TIMESTAMP
-from sqlalchemy.orm import relationship
 from sqlalchemy import func
 
 
-class UsuarioPuntos(Base):
-    __tablename__ = "UsuarioPuntos"
+class HistorialPuntos(Base):
+    __tablename__ = "HistorialPuntos"
 
     __table_args__ = (CheckConstraint("cambio <> 0"),)
 
