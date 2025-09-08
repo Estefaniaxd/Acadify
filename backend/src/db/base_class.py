@@ -7,4 +7,7 @@ class Base:
 
     @declared_attr
     def __tablename__(cls) -> str:
-        return cls.__name__  
+        return cls.__name__
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__}(id={getattr(self, 'id', None)})>"

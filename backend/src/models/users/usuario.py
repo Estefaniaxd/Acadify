@@ -1,5 +1,5 @@
 from src.db.base_class import Base
-from sqlalchemy import Column, String, CheckConstraint
+from sqlalchemy import Column, String, CheckConstraint, BOOLEAN, SMALLINT, text
 from sqlalchemy.dialects.postgresql import UUID, ENUM, TIMESTAMP, TEXT
 from src.enums.users.usuario_enums import (
     RolUsuario,
@@ -52,7 +52,11 @@ class Usuario(Base):
     portada_url = Column(TEXT)
     telefono = Column(String(20))
     descripcion = Column(TEXT)
-
+    email_verified = Column(BOOLEAN, nullable=False, server_default=text("false"))
+    failed_login_attempts = Column(SMALLINT, nullable=False, server_default=text("0"))
+    locked_until = Column(TIMESTAMP(timezone=True), nullable=True)
+    twofa_enabled = Column(BOOLEAN, nullable=False, server_default=text("false"))
+    twofa_secret = Column(String(32), nullable=True)
     administrador = relationship(
         "AdministradorSistema", backref="usuario", uselist=False
     )
@@ -72,3 +76,4 @@ class Usuario(Base):
     historial_puntos = relationship("HistorialPuntos", backref="usuario", passive_deletes=True)
 
     temas_personalizados = relationship("TemaPersonalizado", backref="usuario", passive_deletes=True)
+    oauth_providers = relationship("OAuthProvider", back_populates="usuario", passive_deletes=True)

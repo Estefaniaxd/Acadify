@@ -1,7 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import engine
 from src.core.config import settings
 
-engine = create_engine(settings.DATABASE_URL) 
+engine = create_engine(settings.DATABASE_URL, echo=True)  # echo=True para debug de SQL
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

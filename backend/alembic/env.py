@@ -1,96 +1,16 @@
 from logging.config import fileConfig
+
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+
 from alembic import context
-import os 
-from dotenv import load_dotenv
-from src.db.base_class import Base
 
-# Cargar los modelo Usuario, AdministradorSistema, Coordinador, Docente, Estudiante 
-from src.models.administrador_sistema import AdministradorSistema
-from src.models.archivo_chat import ArchivoChat
-from src.models.asistencia import Asistencia
-
-
-
-from src.models.chat_bot import ChatBot
-from src.models.chat_grupo import ChatGrupo
-from src.models.clase import Clase
-from src.models.coordinador import Coordinador
-
-from src.models.curso_docente import CursoDocente
-from src.models.curso import Curso
-from src.models.docente import Docente
-from src.models.entregar_tarea import EntregarTarea
-from src.models.escala_calificacion import EscalaCalificacion
-
-
-
-
-from src.models.estudiante_grupo import EstudianteGrupo
-from src.models.estudiante import Estudiante
-from src.models.faqbot_id import FAQBot
-from src.models.grupo_curso import GrupoCurso
-from src.models.grupo import Grupo
-
-from src.models.historial_puntos import HistorialPuntos
-from src.models.insignia import Insignia
-from src.models.institucion_coordinador import InstitucionCoordinador
-
-from src.models.institucion import Institucion
-
-from src.models.material_educativo import MaterialEducativo
-from src.models.material_clase import MaterialClase
-from src.models.material_curso import Ma
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from src.models.usuario import Usuario
-from src.models.usuario import AdministradorSistema
-from src.models.coordinador import Coordinador
-from src.models.docente import Docente
-from src.models.estudiante import Estudiante
-
-load_dotenv()
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option(
-    "sqlalchemy.url", os.environ.get("DATABASE_URL")
-)
-
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
@@ -98,7 +18,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

@@ -1,5 +1,3 @@
 from src.db.base_class import Base  
-
-# Importar los modelos por separado
-
-from src.models.usuario import Usuario
+from src.models.users.usuario import Usuario
+from src.models.users.oauth_provider import OAuthProvider
