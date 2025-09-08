@@ -1,6 +1,6 @@
 from src.db.base_class import Base
+from sqlalchemy import Column, text, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, ENUM, TEXT
-from sqlalchemy import Column, String, ForeignKey, UniqueConstraint
 from src.enums.programa_enums import NivelPrograma, TipoPrograma
 from sqlalchemy.orm import relationship
 
@@ -15,11 +15,11 @@ class Programa(Base):
     programa_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-        server_default="gen_random_uuid()",
+        server_default=text("gen_random_uuid()"),
     )
     institucion_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("institucion.institucion_id", ondelete="CASCADE"),
+        ForeignKey("Institucion.institucion_id", ondelete="CASCADE"),
         nullable=False,
     )
     nombre = Column(String(100), nullable=False)
@@ -33,9 +33,6 @@ class Programa(Base):
         nullable=False,
     )
 
-    institucion = relationship(
-        "institucion", back_populates="programa", passive_deletes=True
-    )
-    estudiantes = relationship(
-        "estudiante", back_populates="programa", passive_deletes=True
-    )
+    estudiantes = relationship("Estudiante", backref="programa", passive_deletes=True)
+
+    grupos = relationship("Grupo", backref="programa")

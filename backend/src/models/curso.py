@@ -1,7 +1,8 @@
 from src.db.base_class import Base
+from sqlalchemy import Column, text, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, ENUM, DATE, TEXT
-from sqlalchemy import Column, ForeignKey, String, UniqueConstraint
 from src.enums.curso_enums import ModalidadCurso
+from sqlalchemy.orm import relationship
 
 
 class Curso(Base):
@@ -14,16 +15,16 @@ class Curso(Base):
     curso_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-        server_default="gen_random_uuid()",
+        server_default=text("gen_random_uuid()"),
     )
     institucion_id = Column(
-        ForeignKey("institucion.insititucion_id", ondelete="CASCADE"), nullable=False
+        ForeignKey("Institucion.insititucion_id", ondelete="CASCADE"), nullable=False
     )
     coordinador_id = Column(
-        ForeignKey("coordinador.coordinador_id", ondelete="SET NULL")
+        ForeignKey("Coordinador.coordinador_id", ondelete="SET NULL")
     )
     programa_id = Column(
-        ForeignKey("programa.programa_id", ondelete="CASCADE"), nullable=True
+        ForeignKey("Programa.programa_id", ondelete="CASCADE"), nullable=True
     )
     nombre = Column(String(50), nullable=False)
     descripcion = Column(TEXT)
@@ -32,3 +33,6 @@ class Curso(Base):
     )
     fecha_inicio = Column(DATE)
     fecha_fin = Column(DATE)
+
+    curso_docentes = relationship("CursoDocente", back_populates="curso")
+    grupo_cursos = relationship("GrupoCursos", back_populates="curso")

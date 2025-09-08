@@ -1,6 +1,6 @@
 from src.db.base_class import Base
+from sqlalchemy import Column, text, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID, ENUM, BOOLEAN
-from sqlalchemy import Column, String, ForeignKey
 from src.enums.institucion_enums import (
     TipoInstitucion,
     NivelEducativoInstitucion,
@@ -13,11 +13,11 @@ class Institucion(Base):
     __tablename__ = "Institucion"
 
     institucion_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default="gen_random_uuid()"
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
-    administrador_id = Column(
+    administrador_id_creador = Column(
         UUID(as_uuid=True),
-        ForeignKey("administrador_sistema.administrador_id", ondelete="SET NULL"),
+        ForeignKey("AdministradorSistema.administrador_id", ondelete="SET NULL"),
     )
 
     nombre = Column(String(150), unique=True, nullable=False)
@@ -47,15 +47,14 @@ class Institucion(Base):
     pais = Column(String(100), nullable=False)
 
     correo_institucional = Column(String(100), unique=True, nullable=False)
-    telefono = Column(String(20), unique=True, nullable=False)
+    telefono = Column(String(25 - 30), nullable=False)
     nit = Column(String(20), unique=True)
 
-    administrador = relationship(
-        "administrador_sistema", back_populates="institucion", passive_deletes=True
+    escalas = relationship(
+        "EscalaCalificacion", backref="institucion", passive_deletes=True
     )
-    coordinadores = relationship(
-        "coordinador", back_populates="institucion", passive_deletes=True
-    )
-    programas = relationship(
-        "programa", back_populates="institucion", passive_deletes=True
+    programas = relationship("Programa", backref="institucion")
+
+    institucion_coordinadores = relationship(
+        "InstitucionCoordinador", back_populates="institucion"
     )

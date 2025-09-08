@@ -1,6 +1,6 @@
 from src.db.base_class import Base
+from sqlalchemy import Column, text, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, ENUM, NUMERIC
-from sqlalchemy import Column, String, ForeignKey
 from src.enums.escala_calificacion_eunms import TipoEscalafonEnum
 from sqlalchemy.orm import relationship
 
@@ -9,12 +9,12 @@ class EscalaCalificacion(Base):
     __tablename__ = "EscalaCalificacion"
 
     escala_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default="gen_random_uuid()"
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
 
     institucion_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("institucion.institucion_id", ondelete="CASCADE"),
+        ForeignKey("Institucion.institucion_id", ondelete="CASCADE"),
         nullable=False,
     )
 
@@ -28,10 +28,6 @@ class EscalaCalificacion(Base):
     min_valor = Column(NUMERIC(5, 2))
     max_valor = Column(NUMERIC(5, 2))
 
-    institucion = relationship(
-        "institucion", back_populates="escala_calificacion", passive_deletes=True
-    )
-
     valores = relationship(
-        "valor_calificacion", back_populates="escala_calificacion", passive_deletes=True
+        "ValorCalificacion", backref="escala_calificacion"
     )

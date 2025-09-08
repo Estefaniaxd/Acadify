@@ -1,6 +1,6 @@
 from src.db.base_class import Base
+from sqlalchemy import Column, text, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, ENUM
-from sqlalchemy import Column, String, ForeignKey
 from src.enums.grupo_enums import JornadaGrupo
 from sqlalchemy.orm import relationship
 
@@ -11,16 +11,16 @@ class Grupo(Base):
     grupo_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-        server_default="gen_random_uuid",
+        server_default=text("gen_random_uuid"),
     )
     programa_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("programa.programa_id", ondelete="CASCADE"),
+        ForeignKey("Programa.programa_id", ondelete="CASCADE"),
         nullable=False,
     )
     docente_tutor = Column(
         UUID(as_uuid=True),
-        ForeignKey("docente.docente_id", ondelete="SET NULL"),
+        ForeignKey("Docente.docente_id", ondelete="SET NULL"),
         nullable=True,
         unique=True,
     )
@@ -30,10 +30,13 @@ class Grupo(Base):
         ENUM(JornadaGrupo, name="jornada_grupo", create_type=False),
         nullable=False,
         default=JornadaGrupo.manana,
+        server_default=text("'manana'"),
     )
 
-    programa = relationship("programa", back_populates="grupo", passive_deletes=True)
+    estudiantes = relationship("Estudiante", backref="grupo")
 
-    estudiantes = relationship(
-        "estudiante", back_populates="grupo", passive_deletes=True
-    )
+    estudiantes_grupos = relationship("EstudianteGrupo", back_populates="estudiante")
+
+    grupo_cursos = relationship("GrupoCurso", back_populates="grupo")
+
+    chat_grupos = relationship("ChatGrupo", backref="grupo")

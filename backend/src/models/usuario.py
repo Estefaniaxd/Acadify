@@ -1,6 +1,6 @@
 from src.db.base_class import Base
-from sqlalchemy.dialects.postgresql import UUID, ENUM, TIMESTAMP, TEXT
 from sqlalchemy import Column, String, CheckConstraint
+from sqlalchemy.dialects.postgresql import UUID, ENUM, TIMESTAMP, TEXT
 from src.enums.usuario_enums import (
     RolUsuario,
     TipoDocumentoUsuario,
@@ -53,5 +53,22 @@ class Usuario(Base):
     telefono = Column(String(20))
     descripcion = Column(TEXT)
 
-    coordinador = relationship("coordinador", back_populates="usuario", uselist=False)
-    estudiante = relationship("estudiante", back_populates="usuario", uselist=False)
+    administrador = relationship(
+        "AdministradorSistema", backref="usuario", uselist=False
+    )
+    coordinador = relationship("Coordinador", backref="usuario", uselist=False)
+    estudiante = relationship("Estudiante", backref="usuario", uselist=False)
+
+    mensajes = relationship("Mensaje", backref="usuario")
+
+    archivos = relationship("ArchivoChat", backref="usuario")
+
+    usuario_insignias = relationship("UsuarioInsignia", back_populates="usuario", passive_deletes=True)
+
+    usuario_recompensas = relationship("UsuarioRecompensa", back_populates="usuario", passive_deletes=True)
+
+    puntos = relationship("UsuarioPuntos", backref="usuario")
+
+    historial_puntos = relationship("HistorialPuntos", backref="usuario", passive_deletes=True)
+
+    temas_personalizados = relationship("TemaPersonalizado", backref="usuario", passive_deletes=True)
