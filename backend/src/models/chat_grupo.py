@@ -21,7 +21,7 @@ class ChatGrupo(Base):
     )
     descripcion = Column(TEXT)
     foto_perfil = Column(TEXT)
-    permite_archivos = Column(BOOLEAN, nullable=False, server_default=True)
+    permite_archivos = Column(BOOLEAN, nullable=False, server_default=text("true"))
     capacidad_almacenamiento = Column(
         INTEGER(), nullable=False, server_default=text("52428800")
     )

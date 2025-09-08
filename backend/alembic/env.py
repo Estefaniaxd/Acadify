@@ -6,83 +6,46 @@ import os
 from dotenv import load_dotenv
 from src.db.base_class import Base
 
-# Cargar los modelo Usuario, AdministradorSistema, Coordinador, Docente, Estudiante 
+# Cargar los 38 mkodelos 
+
 from src.models.administrador_sistema import AdministradorSistema
 from src.models.archivo_chat import ArchivoChat
 from src.models.asistencia import Asistencia
-
-
-
 from src.models.chat_bot import ChatBot
 from src.models.chat_grupo import ChatGrupo
 from src.models.clase import Clase
 from src.models.coordinador import Coordinador
-
 from src.models.curso_docente import CursoDocente
 from src.models.curso import Curso
 from src.models.docente import Docente
 from src.models.entregar_tarea import EntregarTarea
 from src.models.escala_calificacion import EscalaCalificacion
-
-
-
-
 from src.models.estudiante_grupo import EstudianteGrupo
 from src.models.estudiante import Estudiante
 from src.models.faqbot_id import FAQBot
 from src.models.grupo_curso import GrupoCurso
 from src.models.grupo import Grupo
-
 from src.models.historial_puntos import HistorialPuntos
 from src.models.insignia import Insignia
 from src.models.institucion_coordinador import InstitucionCoordinador
-
 from src.models.institucion import Institucion
-
 from src.models.material_educativo import MaterialEducativo
 from src.models.material_clase import MaterialClase
-from src.models.material_curso import Ma
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+from src.models.material_curso import MaterialCurso
+from src.models.mensaje_bot import MensajeBot
+from src.models.mensaje import Mensaje
+from src.models.plataforma import Platafroma
+from src.models.programa import Programa
+from src.models.recompensa import Recompensa
+from src.models.tarea import Tarea
+from src.models.tema_personalizado import TemaPersonalizado
+from src.models.tema_predefinido import TemaPredefinido
+from src.models.tema import Tema
+from src.models.usuario_insignia import UsuarioInsignia
+from src.models.usuario_puntos import UsuarioPuntos
+from src.models.usuario_recompensa import UsuarioRecompensa
 from src.models.usuario import Usuario
-from src.models.usuario import AdministradorSistema
-from src.models.coordinador import Coordinador
-from src.models.docente import Docente
-from src.models.estudiante import Estudiante
+from src.models.valor_calificacion import ValorCalificacion
 
 load_dotenv()
 config = context.config
