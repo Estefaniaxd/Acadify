@@ -1,7 +1,7 @@
 import enum
 
 
-class TipoInsignia(enum.Enum):
+class TipoInsignia(str, enum.Enum):
     objetivo = "objetivo"
     calificacion = "calificacion"
     racha = "racha"

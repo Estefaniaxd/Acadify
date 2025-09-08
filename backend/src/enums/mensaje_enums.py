@@ -1,7 +1,7 @@
 import enum
 
 
-class TipoMensaje(enum.Enum):
+class TipoMensaje(str, enum.Enum):
     texto = "texto"
     archivo = "archivo"
     imagen = "imagen"

@@ -1,6 +1,6 @@
 import enum
 
-class EstadoAsistencia(enum.Enum):
+class EstadoAsistencia(str, enum.Enum):
     presente = "presente"
     ausente = "ausente"
     justificado = "justificado"

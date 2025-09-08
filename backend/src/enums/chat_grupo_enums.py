@@ -1,7 +1,7 @@
 import enum
 
 
-class EstadoChatGrupo(enum.Enum):
+class EstadoChatGrupo(str, enum.Enum):
     activo = "activo"
     archivado = "archivado"
     eliminado = "eliminado"
