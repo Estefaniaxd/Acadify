@@ -1,45 +1,14 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-
-"""
-class MensajeBot(Base):
-    __tablename__ = "MensajeBot"
-
-    mensaje_bot_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
-    )
-    usuario_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("Usuario.usuario_id", ondelete="SET NULL"),
-        nullable=True,
-    )
-    chat_grupo_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("ChatGrupo.chat_grupo_id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    referencia_material_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("MaterialEducativo.material_id", ondelete="SET NULL"),
-        nullable=True,
-    )
-    contenido = Column(TEXT, nullable=False)
-    respuesta = Column(TEXT, nullable=False)
-    contexto = Column(Enum(ContextoMensaje), nullable=False)
-    fecha_hora = Column(TIMESTAMP, server_default=func.now(), nullable=False)
-
-"""
-
-
-
-
+from typing import Optional
 
 
 class MensajeBotBase(BaseModel):
-    usuario_id: UUID | None = None
+    usuario_id: Optional[UUID] = None
     chat_grupo_id: UUID
-    referencia_material_id: UUID | None = None
+    referencia_material_id: Optional[UUID] = None
     contenido: str
     respuesta: str
     contexto: str 
+    fecha_hora: datetime

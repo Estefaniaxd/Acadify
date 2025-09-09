@@ -24,8 +24,8 @@ class ChatGrupoUpdate(BaseModel):
     estado_chat: EstadoChatGrupo = None
 
 class ChatGrupoInDBBase(ChatGrupoBase):
-    archivo_id: UUID
-    fecha_envio: datetime
+    chat_grupo_id: UUID
+    fecha_creacion: datetime
 
     class Config:
         from_attributes = True
