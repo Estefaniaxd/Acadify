@@ -3,7 +3,6 @@ from sqlalchemy import Column, text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT
 from sqlalchemy.sql import func
 
-
 class ArchivoChat(Base):
     __tablename__ = "ArchivoChat"
 

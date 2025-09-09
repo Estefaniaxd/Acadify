@@ -29,4 +29,3 @@ class Tarea(Base):
     permite_entregas_tardias = Column(BOOLEAN, nullable=False)
     
     entrega_tareas = relationship("EntregaTarea", backref="tarea", passive_deletes=True)
-    

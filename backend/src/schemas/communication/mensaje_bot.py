@@ -1,10 +1,8 @@
-from src.db.base_class import Base
-from sqlalchemy import Column, text, ForeignKey, Enum
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT
-from sqlalchemy.sql import func
-from src.enums.communication.mensaje_bots_enum import ContextoMensaje
+from pydantic import BaseModel
+from uuid import UUID
+from datetime import datetime
 
-
+"""
 class MensajeBot(Base):
     __tablename__ = "MensajeBot"
 
@@ -30,3 +28,18 @@ class MensajeBot(Base):
     respuesta = Column(TEXT, nullable=False)
     contexto = Column(Enum(ContextoMensaje), nullable=False)
     fecha_hora = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+
+"""
+
+
+
+
+
+
+class MensajeBotBase(BaseModel):
+    usuario_id: UUID | None = None
+    chat_grupo_id: UUID
+    referencia_material_id: UUID | None = None
+    contenido: str
+    respuesta: str
+    contexto: str 

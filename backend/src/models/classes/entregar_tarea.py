@@ -3,7 +3,6 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     text,
-    Numeric,
     CheckConstraint,
     UniqueConstraint,
     func,
@@ -22,7 +21,7 @@ class EntregarTarea(Base):
     )
 
     entrega_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
 
     tarea_id = Column(
@@ -43,6 +42,6 @@ class EntregarTarea(Base):
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
 
-    calificacion = Column(Numeric(3, 1))
+    calificacion = Column(NUMERIC(3, 1))
 
     fecha_revision = Column(TIMESTAMP(timezone=True))

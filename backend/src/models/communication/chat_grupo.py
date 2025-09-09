@@ -4,7 +4,6 @@ from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ENUM, TEXT, BOOLEAN,
 from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
 from sqlalchemy.orm import relationship
 
-
 class ChatGrupo(Base):
     __tablename__ = "ChatGrupo"
 
