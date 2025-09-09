@@ -2,9 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Importa los routers
-from src.api.routes import auth, usuario
+from src.api.routes.auth import auth
+from src.api.routes.usuario import usuario
+
 from src.services.auth.redis_service import RedisService
 from src.core.config import settings
+from src.api.routes.gamificacion import gamificacion as gamificacion_router
 
 # Inicializa la app FastAPI
 app = FastAPI(
@@ -38,8 +41,10 @@ async def shutdown_event():
 
 
 # Incluir routers
+
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(usuario.router, prefix="/usuarios", tags=["Usuarios"])
+app.include_router(gamificacion_router.router, prefix="/gamificacion", tags=["Gamificación"])
 
 
 # Ruta raíz (opcional)

@@ -15,6 +15,6 @@ class HistorialPuntos(Base):
     usuario_id = Column(
         UUID(as_uuid=True), ForeignKey("Usuario.usuario_id", ondelete="CASCADE")
     )
-    cambio = (Column(INTEGER, nullable=False),)
-    motivo = (Column(TEXT),)
+    cambio = Column(INTEGER, nullable=False)
+    motivo = Column(TEXT)
     fecha = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
