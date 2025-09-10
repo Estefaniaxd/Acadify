@@ -25,6 +25,8 @@ class UserCRUD:
     
     def get_by_email(self, db: Session, email: str) -> Optional[Usuario]:
         """Obtener usuario por email institucional"""
+        if not email:
+            return None
         return db.query(Usuario).filter(
             Usuario.correo_institucional == email.lower()
         ).first()

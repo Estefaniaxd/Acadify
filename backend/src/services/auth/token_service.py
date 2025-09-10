@@ -40,8 +40,8 @@ class TokenService:
         
         payload = {
             "sub": str(user_id),  # Subject: usuario
-            "exp": expire,        # Expiration time
-            "iat": utcnow_aware(),  # Issued at
+            "exp": int(expire.timestamp()),        # Expiration time
+            "iat": int(utcnow_aware().timestamp()),  # Issued at
             "jti": jti,          # JWT ID para revocación
             "roles": roles,      # Roles del usuario
             "type": "access"     # Tipo de token
@@ -81,9 +81,9 @@ class TokenService:
         token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
         return token, jti
     
-    def decode_token(self, token: str) -> Dict[str, Any]:
+    async def decode_token(self, token: str) -> Dict[str, Any]:
         """
-        Decodificar y validar token JWT
+        Decodificar y validar token JWT de acceso
         
         Raises:
             JWTError: Si el token es inválido, expiró o está revocado
@@ -94,22 +94,47 @@ class TokenService:
                 self.secret_key, 
                 algorithms=[self.algorithm]
             )
-            
             # Verificar si el token está revocado
             jti = payload.get("jti")
-            if jti and self.is_token_revoked(jti):
-                raise JWTError("Token revocado")
-            
+            if jti and await self.is_token_revoked(jti):
+                raise JWTError("El token ha sido revocado")
+            if payload.get("type") != "access":
+                raise JWTError("El token no es de tipo acceso")
             return payload
-            
         except jwt.ExpiredSignatureError:
-            raise JWTError("Token expirado")
+            raise JWTError("El token ha expirado")
         except jwt.InvalidTokenError:
-            raise JWTError("Token inválido")
+            raise JWTError("El token es inválido")
+
+    async def decode_refresh_token(self, token: str) -> str:
+        """
+        Decodificar y validar token JWT de refresco
+        
+        Returns:
+            str: user_id (sub)
+        Raises:
+            JWTError: Si el token es inválido, expiró o está revocado
+        """
+        try:
+            payload = jwt.decode(
+                token,
+                self.secret_key,
+                algorithms=[self.algorithm]
+            )
+            jti = payload.get("jti")
+            if jti and await self.is_token_revoked(jti):
+                raise JWTError("El token de refresco ha sido revocado")
+            if payload.get("type") != "refresh":
+                raise JWTError("El token no es de tipo refresco")
+            return payload.get("sub")
+        except jwt.ExpiredSignatureError:
+            raise JWTError("El token de refresco ha expirado")
+        except jwt.InvalidTokenError:
+            raise JWTError("El token de refresco es inválido")
     
-    def is_token_revoked(self, jti: str) -> bool:
+    async def is_token_revoked(self, jti: str) -> bool:
         """Verificar si un token está en la blacklist de Redis"""
-        return self.redis_service.is_token_blacklisted(jti)
+        return await self.redis_service.is_token_blacklisted(jti)
     
     def revoke_token(self, jti: str, ttl_seconds: int) -> None:
         """Agregar token a la blacklist de Redis"""

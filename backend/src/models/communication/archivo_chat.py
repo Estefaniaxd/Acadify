@@ -8,7 +8,7 @@ class ArchivoChat(Base):
     __tablename__ = "ArchivoChat"
 
     archivo_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
     )
     chat_grupo_id = Column(
         UUID(as_uuid=True),

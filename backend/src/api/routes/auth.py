@@ -6,20 +6,42 @@ import uuid
 import httpx
 
 # Importaciones de tu proyecto
-from src.services.auth import email_service,token_service, oauth_service
+from src.services.auth import email_service, oauth_service
 from src.schemas.auth import auth_schemas
 from src.schemas.users import usuario as usuario_schemas
 from src.crud.auth import UserCRUD
 from src.services.auth.password_service import PasswordService
+from src.services.auth.redis_service import RedisService
+from src.services.auth.token_service import TokenService
 from src.core.config import settings
 from src.utils.security import verify_password
 from src.db.session import get_db
 
-# Instancia global de UserCRUD con PasswordService
+
+# Instancias globales de servicios
 password_service = PasswordService()
+redis_service = RedisService()
+token_service = TokenService(redis_service)
 crud_usuario = UserCRUD(password_service)
 
 router = APIRouter()
+
+# Endpoint temporal para depuración de tokens
+import logging
+logger = logging.getLogger("auth-debug")
+logging.basicConfig(level=logging.INFO)
+
+
+@router.post("/debug/token")
+async def debug_token(token: str):
+    """Endpoint temporal para depurar el contenido de un token JWT"""
+    try:
+        payload = await token_service.decode_token(token)
+        logger.info(f"Payload decodificado: {payload}")
+        return {"payload": payload}
+    except Exception as e:
+        logger.error(f"Error al decodificar token: {e}")
+        return {"error": str(e)}
 
 
 @router.post("/login", response_model=auth_schemas.TokenResponse,
@@ -30,7 +52,13 @@ async def login(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
-    usuario = crud_usuario.get_by_email(db, email=form_data.username)
+
+    # Primero intenta buscar por username (para administradores)
+    usuario = crud_usuario.get_by_username(db, form_data.username)
+    if not usuario:
+        # Si no existe username, intenta buscar por correo institucional
+        usuario = crud_usuario.get_by_email(db, email=form_data.username)
+
     if not usuario or not password_service.verify_password(form_data.password, usuario.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,12 +69,13 @@ async def login(
     access_token_expires = timedelta(minutes=60)
     refresh_token_expires = timedelta(days=7)
 
-    access_token = token_service.create_access_token(
-        data={"sub": str(usuario.usuario_id), "scopes": ["read_users"]},
+    access_token, _ = token_service.create_access_token(
+        user_id=str(usuario.usuario_id),
+        roles=[usuario.rol],
         expires_delta=access_token_expires
     )
-    refresh_token = token_service.create_refresh_token(
-        data={"sub": str(usuario.usuario_id)},
+    refresh_token, _ = token_service.create_refresh_token(
+        user_id=str(usuario.usuario_id),
         expires_delta=refresh_token_expires
     )
 
@@ -56,7 +85,8 @@ async def login(
     return auth_schemas.TokenResponse(
         access_token=access_token,
         token_type="bearer",
-        refresh_token=refresh_token
+        refresh_token=refresh_token,
+        expires_in=int(access_token_expires.total_seconds())
     )
 
 
@@ -87,12 +117,12 @@ async def refresh_token(request: Request, response: Response, db: Session = Depe
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token de refresco no proporcionado",
         )
-
-    user_id = token_service.decode_refresh_token(refresh_token)
-    if not user_id:
+    try:
+        user_id = await token_service.decode_refresh_token(refresh_token)
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token de refresco inválido o expirado"
+            detail=f"Token de refresco inválido o expirado: {str(e)}"
         )
 
     usuario = crud_usuario.get_by_id(db, user_id=uuid.UUID(user_id))
@@ -103,13 +133,14 @@ async def refresh_token(request: Request, response: Response, db: Session = Depe
         )
 
     access_token_expires = timedelta(minutes=60)
-    new_access_token = token_service.create_access_token(
-        data={"sub": str(usuario.usuario_id), "scopes": ["read_users"]},
-        expires_delta=access_token_expires
+    new_access_token, _ = token_service.create_access_token(
+        user_id=str(usuario.usuario_id),
+        roles=[str(usuario.rol)],
+        expires_delta=timedelta(minutes=60)
     )
 
-    new_refresh_token = token_service.create_refresh_token(
-        data={"sub": str(usuario.usuario_id)},
+    new_refresh_token, _ = token_service.create_refresh_token(
+        user_id=str(usuario.usuario_id),
         expires_delta=timedelta(days=7)
     )
     response.set_cookie(key="refresh_token", value=new_refresh_token,

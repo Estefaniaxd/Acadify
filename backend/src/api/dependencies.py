@@ -45,12 +45,12 @@ def get_user_crud() -> UserCRUD:
     return user_crud
 
 
-def get_current_user(
+async def get_current_user(
     db: Session = Depends(get_db),
     token_service: TokenService = Depends(get_token_service),
     user_crud: UserCRUD = Depends(get_user_crud),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-    access_token: Optional[str] = Cookie(None)  # También soportar cookies
+    access_token_cookie: Optional[str] = Cookie(None, alias="access_token")  # Soportar cookie access_token
 ) -> Usuario:
     """
     Dependency para obtener usuario actual desde JWT token
@@ -63,40 +63,60 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     
-    # Obtener token desde header Authorization o cookie
+    # Obtener token desde header Authorization o cookie access_token
+    import logging
+    logger = logging.getLogger("auth-debug")
     token = None
-    if credentials:
+    if credentials and credentials.scheme.lower() == "bearer":
         token = credentials.credentials
-    elif access_token:
-        token = access_token
-    
+        logger.info(f"Token recibido por header: {token}")
+    elif access_token_cookie:
+        token = access_token_cookie
+        logger.info(f"Token recibido por cookie access_token: {token}")
+
     if not token:
+        logger.warning("No se recibió token en header Authorization ni en cookie 'access_token'")
         raise credentials_exception
-    
+
     try:
-        # Decodificar y validar token
-        payload = token_service.decode_token(token)
+        # Decodificar y validar token (async)
+        payload = await token_service.decode_token(token)
+        logger.info(f"Payload decodificado: {payload}")
         user_id: str = payload.get("sub")
         token_type: str = payload.get("type")
-        
+        roles = payload.get("roles", [])
+
         if user_id is None or token_type != "access":
+            logger.warning(f"Token inválido: user_id={user_id}, token_type={token_type}")
             raise credentials_exception
-        
+
         # Obtener usuario desde DB
         user = user_crud.get_by_id(db, user_id)
         if user is None:
+            logger.warning(f"No se encontró usuario con id {user_id}")
             raise credentials_exception
-        
+
         # Verificar que la cuenta esté activa
-        if user.estado_cuenta != "activo":
+        if hasattr(user, "estado_cuenta") and str(user.estado_cuenta) != "activo":
+            logger.warning(f"Usuario {user_id} no está activo: estado={user.estado_cuenta}")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is not active"
             )
-        
+
+        # Validar que el rol del usuario esté en el token (defensa extra)
+        if roles and str(user.rol) not in [str(r) for r in roles]:
+            logger.warning(f"Rol de usuario no coincide: en token={roles}, en usuario={user.rol}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Rol de usuario no coincide con el token"
+            )
+
+        logger.info(f"Usuario autenticado correctamente: {user_id}, rol={user.rol}")
         return user
-        
-    except JWTError:
+
+    except JWTError as e:
+        logger.error(f"Error al decodificar token: {e}")
         raise credentials_exception
 
 

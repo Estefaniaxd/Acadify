@@ -25,7 +25,7 @@ class Usuario(Base):
         UUID(as_uuid=True),
         primary_key=True,
         index=True,
-        server_default="gen_random_uuid()",
+    server_default=text('gen_random_uuid()'),
     )
     correo_institucional = Column(String(100), unique=True, index=True)
     username = Column(String(50), unique=True, index=True)
@@ -67,7 +67,12 @@ class Usuario(Base):
 
     archivos = relationship("ArchivoChat", backref="usuario")
 
-    usuario_insignias = relationship("UsuarioInsignia", back_populates="usuario", passive_deletes=True)
+    usuario_insignias = relationship(
+        "UsuarioInsignia",
+        back_populates="usuario",
+        foreign_keys="UsuarioInsignia.usuario_id",
+        passive_deletes=True
+    )
 
     usuario_recompensas = relationship("UsuarioRecompensa", back_populates="usuario", passive_deletes=True)
 
