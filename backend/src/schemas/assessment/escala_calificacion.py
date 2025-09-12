@@ -1,7 +1,7 @@
 import uuid
 from pydantic import BaseModel
 from typing import Optional
-from src.enums.assessment.escala_calificacion_enums import TipoEscalafonEnum
+from src.enums.assessment.escala_calificacion_eunms import TipoEscalafonEnum
 
 class EscalaCalificacionBase(BaseModel):
     nombre: str

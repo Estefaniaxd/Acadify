@@ -5,15 +5,14 @@ from sqlalchemy.orm import Session
 from typing import List
 
 # Importa tus funciones CRUD y esquemas
+from backend.src.schemas.gamification import recompensa as schemas_recompensas, tema as schemas_temas
 from src.crud.gamificacion import puntos as crud_puntos
 from src.crud.gamificacion import insignias as crud_insignias
 from src.crud.gamificacion import recompensas as crud_recompensas
 from src.crud.gamificacion import temas as crud_temas
-from src.schemas.gamificacion import (
+from src.schemas.gamification import (
     puntos as schemas_puntos,
     insignias as schemas_insignias,
-    recompensas as schemas_recompensas,
-    temas as schemas_temas,
 )
 # Asume que ya tienes una dependencia para la sesión de DB
 from src.db.session import get_db

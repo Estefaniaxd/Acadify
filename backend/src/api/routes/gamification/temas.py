@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.crud.gamificacion import temas as crud_temas
-from src.schemas.gamificacion import temas as schemas_temas
+from backend.src.schemas.gamification import tema as schemas_temas
 from src.db.session import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario

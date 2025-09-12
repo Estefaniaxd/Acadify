@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.crud.gamificacion import insignias as crud_insignias
-from src.schemas.gamificacion import insignias as schemas_insignias
+from src.schemas.gamification import insignias as schemas_insignias
 from src.db.session import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario

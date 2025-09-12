@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from src.crud.gamificacion import puntos as crud_puntos
-from src.schemas.gamificacion import puntos as schemas_puntos
+from src.schemas.gamification import puntos as schemas_puntos
 from src.db.session import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario

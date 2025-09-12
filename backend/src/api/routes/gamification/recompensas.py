@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from src.crud.gamificacion import recompensas as crud_recompensas
-from src.schemas.gamificacion import recompensas as schemas_recompensas
+from backend.src.schemas.gamification import recompensa as schemas_recompensas
 from src.db.session import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario
