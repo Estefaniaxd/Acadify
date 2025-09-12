@@ -34,7 +34,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="p-6 bg-white shadow-lg rounded-2xl hover:scale-105 transition">
-            <h3 className="text-xl font-semibold text-red-900">˚ ༘♡ ⋆｡˚ ❀Personalización</h3>
+            <h3 className="text-xl font-semibold text-blue-900">˚ ༘♡ ⋆｡˚ ❀Personalización</h3>
             <p className="mt-3 text-gray-600">
               Cada estudiante tiene un recorrido único. Nuestro sistema adapta el contenido 
               a tu estilo de aprendizaje y nivel de progreso.
