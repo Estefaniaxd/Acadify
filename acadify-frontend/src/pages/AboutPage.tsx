@@ -48,7 +48,7 @@ const AboutPage: React.FC = () => {
           {/* Desarrollador Principal */}
           <div className="flex flex-col items-center text-center">
             <img
-              src="/images/dev-principal.png"
+              src="src/components/images/harrison.png"
               alt="Desarrollador Principal"
               className="w-40 h-40 rounded-full object-cover shadow-lg"
             />
@@ -62,7 +62,7 @@ const AboutPage: React.FC = () => {
           {/* Diseñadora Frontend */}
           <div className="flex flex-col items-center text-center">
             <img
-              src="/images/dis-frontend.png"
+              src="src/components/images/yo.png"
               alt="Diseñadora Frontend"
               className="w-40 h-40 rounded-full object-cover shadow-lg"
             />
@@ -76,7 +76,7 @@ const AboutPage: React.FC = () => {
           {/* Diseñador Backend */}
           <div className="flex flex-col items-center text-center">
             <img
-              src="/images/dis-backend.png"
+              src="src/components/images/juan.png"
               alt="Diseñador Backend"
               className="w-40 h-40 rounded-full object-cover shadow-lg"
             />
@@ -90,7 +90,7 @@ const AboutPage: React.FC = () => {
           {/* QA Tester */}
           <div className="flex flex-col items-center text-center">
             <img
-              src="/images/qa-tester.png"
+              src="src/components/images/harry.png"
               alt="QA Tester"
               className="w-40 h-40 rounded-full object-cover shadow-lg"
             />

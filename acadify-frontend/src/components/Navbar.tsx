@@ -14,16 +14,16 @@ export default function Navbar() {
   <div className="bg-white p-2 rounded-full shadow-md">
     <img src={logo} alt="Logo Acadify" className="h-10 w-10" />
   </div>
-  <span className="text-xl font-bold text-indigo-950 ">Acadify</span>
+  <a href="/" className="font-bold hover:text-green-300 transition">Acadify</a>
 </div>
 
 
       {/* Menú */}
       <div className="relative flex gap-6 text-white font-medium">
-        <a href="/" className="hover:text-green-300 transition">Inicio</a>
-        <a href="/register" className="hover:text-indigo-900 transition">Regístrate</a>
-        <a href="/login" className="hover:text-green-300 transition">Iniciar sesión</a>
-        <a href="/about" className="hover:text-indigo-900 transition">Sobre nosotros</a>
+        <a href="/" className="hover:text-green-300 transition">➥Inicio</a>
+        <a href="/register" className="hover:text-indigo-900 transition">➥Regístrate</a>
+        <a href="/login" className="hover:text-green-300 transition">➥Iniciar sesión</a>
+        <a href="/about" className="hover:text-indigo-900 transition">➥Sobre nosotros</a>
       </div>
     </nav>
   );

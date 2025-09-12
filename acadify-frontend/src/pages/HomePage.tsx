@@ -54,14 +54,14 @@ export default function HomePage() {
       <section className="py-16 px-6 max-w-5xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-indigo-900">♥ Conoce a Rutilio, nuestra mascota ♥</h2>
         <p className="mt-4 text-gray-700 text-lg">
-          Rutilio es un simpático pez que nos acompaña en el viaje del aprendizaje. Representa la 
+          Rutilio es un simpático gato que nos acompaña en el viaje del aprendizaje. Representa la 
           curiosidad, la constancia y la alegría de descubrir cosas nuevas.
         </p>
 
         <div className="mt-10 flex flex-col md:flex-row items-center justify-center gap-8">
          
         <img
-            src="images/rutiliolike.png"
+            src="src/components/images/rutiliolike.png"
             className="w-40 h-40 rounded-full shadow-lg"
           />
           <div className="max-w-md text-left">
