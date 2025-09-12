@@ -1,5 +1,6 @@
 from .auth.user_crud import UserCRUD
 from .auth.oauth_crud import OAuthCRUD
+<<<<<<< HEAD
 
 # Imports de CRUD - Modulo de classes
 
@@ -30,3 +31,16 @@ chat_grupo = CRUDChatGrupo()
 faq_bot = CRUDFAQBot()
 mensaje_bot = CRUDMensajeBot()
 mensaje = CRUDMensaje()
+=======
+from .academic.crud_institucion import institucion_crud
+from .academic.crud_programa import programa_crud
+from .academic.crud_curso import curso_crud     
+from .academic.crud_curso_docente import curso_docente_crud
+from .academic.crud_estudiante_grupo import estudiante_curso_crud
+from .academic.crud_estudiante_grupo import estudiante_grupo_crud
+from .academic.crud_grupo import grupo_crud
+from .academic.crud_grupo_curso import grupo_curso_crud
+from .academic.crud_material_educativo import material_educativo_crud
+from .academic.crud_material_clase import material_clase_crud
+from .academic.crud_material_curso import material_curso_crud
+>>>>>>> origin/model-academic

@@ -11,7 +11,7 @@ class ChatGrupoBase(BaseModel):
     foto_perfil: Optional[str] = None
     permite_archivos: bool
     capacidad_almacenamiento: int
-    estado_chat: EstadoChatGrupo
+    estado_chat: Optional[EstadoChatGrupo] = None
     
 class ChatGrupoCreate(ChatGrupoBase):
     pass
