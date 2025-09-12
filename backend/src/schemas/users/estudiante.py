@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from datetime import date
 import uuid
+from datetime import date
+from typing import Optional
 from src.enums.users.estudiante_enums import EtapaFormativaEstudiante
 
 
@@ -8,7 +9,7 @@ class EstudianteBase(BaseModel):
     programa_id: uuid.UUID
     fecha_ingreso: date
     creditos_aprobados: int | None = None
-    etapa_formativa: EtapaFormativaEstudiante = EtapaFormativaEstudiante.i
+    etapa_formativa: Optional[EtapaFormativaEstudiante] = None
     promedio_acumulado: float | None = None
 
 

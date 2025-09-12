@@ -1,13 +1,14 @@
 from pydantic import BaseModel
-from datetime import date
 import uuid
+from datetime import date
+from typing import Optional
 from src.enums.users.coordinador_enums import EstadoCoordinador
 
 class InstitucionCoordinadorBase(BaseModel):
     institucion_id: uuid.UUID
     coordinador_id: uuid.UUID
     fecha_asignacion: date
-    estado: EstadoCoordinador = EstadoCoordinador.activo
+    estado: Optional[EstadoCoordinador] = None
 
 class InstitucionCoordinadorCreate(InstitucionCoordinadorBase):
     pass

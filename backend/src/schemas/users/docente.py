@@ -9,7 +9,7 @@ from src.enums.users.docente_enums import TipoVinculacionDocente
 class DocenteBase(BaseModel):
     area_conocimiento: str
     fecha_vinculacion: date
-    tipo_vinculacion: TipoVinculacionDocente = TipoVinculacionDocente.planta
+    tipo_vinculacion: Optional[TipoVinculacionDocente] = None
     titulo_academico: Optional[str] = None
     horas_semanales: Optional[int] = None
 

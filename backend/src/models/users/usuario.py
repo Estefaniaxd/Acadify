@@ -44,7 +44,8 @@ class Usuario(Base):
     estado_cuenta = Column(
         ENUM(EstadoCuentaUsuario, name="estado_cuenta_usuario", create_type=False),
         nullable=False,
-        server_default=EstadoCuentaUsuario.activo.name,
+        default=EstadoCuentaUsuario.activo,
+        server_default=text("'activo'"),
     )
     fecha_creacion = Column(TIMESTAMP(timezone=True), server_default=func.now())
     ultimo_acceso = Column(TIMESTAMP(timezone=True), server_default=func.now())

@@ -17,6 +17,7 @@ class Insignia(Base):
     tipo = Column(
         ENUM(TipoInsignia, name="tipo_insignia", create_type=False),
         nullable=False,
+        default=TipoInsignia.manual,
         server_default=text("'manual'"),
     )
     es_unica = Column(BOOLEAN, nullable=False)

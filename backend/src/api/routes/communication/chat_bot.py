@@ -19,14 +19,6 @@ from src.schemas.communication.chat_bot import (
     ChatBotUpdate,
 )
 
-from src.schemas.communication.mensaje import (
-    Mensaje,
-    MensajeCreate,
-    MensajeUpdate,
-    MensajeInDB
-)
-
-
 from src.enums.communication.mensaje_enums import TipoMensaje
 
 # Crear instancias de los CRUDs
@@ -35,6 +27,7 @@ crud_chatbot = CRUDChatBot()
 # Crear router principal
 router = APIRouter()
 
+CHAT_BOT_NOT_FOUND = "Chat Bot no encontrado"
 
 # ============================================================================
 # ENDPOINTS PARA CHATBOT
@@ -85,7 +78,7 @@ def read_chatbot(
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chatbot no encontrado"
+            detail=CHAT_BOT_NOT_FOUND
         )
     return chatbot
 
@@ -161,7 +154,7 @@ def update_chatbot(
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chatbot no encontrado"
+            detail=CHAT_BOT_NOT_FOUND
         )
     
     chatbot = crud_chatbot.update(db=db, db_obj=chatbot, obj_in=chatbot_in)
@@ -180,7 +173,7 @@ def activate_chatbot(
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chatbot no encontrado"
+            detail=CHAT_BOT_NOT_FOUND
         )
     return chatbot
 
@@ -197,7 +190,7 @@ def deactivate_chatbot(
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chatbot no encontrado"
+            detail=CHAT_BOT_NOT_FOUND
         )
     return chatbot
 
@@ -214,12 +207,6 @@ def delete_chatbot(
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chatbot no encontrado"
+            detail=CHAT_BOT_NOT_FOUND
         )
     return chatbot
-
-
-
-
-
-

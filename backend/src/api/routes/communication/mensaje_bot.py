@@ -1,8 +1,9 @@
 # api/v1/endpoints/communication.py
-from typing import List, Any
+from typing import List, Any, Dict
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from datetime import datetime 
 
 # Importar dependencias de base de datos
 from src.db.session import get_db
@@ -11,10 +12,10 @@ from src.crud.communication.mensaje_bot import CRUDMensajeBot
 
 from src.enums.communication.mensaje_bots_enum import ContextoMensaje
 
-
 from src.schemas.communication.mensaje_bot import (
     MensajeBot,
     MensajeBotCreate,
+    MensajeBotUpdate,
 )
 
 from src.enums.communication.mensaje_bots_enum import ContextoMensaje
@@ -23,6 +24,8 @@ crud_mensaje_bot = CRUDMensajeBot()
 
 # Crear router principal
 router = APIRouter()
+
+MENSAJE_BOT_NOT_FOUND = "Mensaje del Bot no encontrado"
 
 # ============================================================================
 # ENDPOINTS PARA MENSAJE BOT
@@ -65,7 +68,7 @@ def read_mensaje_bot(
     if not mensaje_bot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Mensaje bot no encontrado"
+            detail=MENSAJE_BOT_NOT_FOUND
         )
     return mensaje_bot
 
@@ -127,7 +130,7 @@ def search_mensaje_bots(
 @router.get("/mensaje-bots/conversacion/historial", response_model=List[MensajeBot])
 def read_conversation_history(
     *,
-    db: Session = Depends(Session.get_db),
+    db: Session = Depends(get_db),
     usuario_id: UUID = Query(..., description="ID del usuario"),
     chat_grupo_id: UUID = Query(..., description="ID del chat grupo"),
     limit: int = Query(100, ge=1, le=500)
@@ -135,10 +138,122 @@ def read_conversation_history(
     """
     Obtener historial de conversación de un usuario en un chat específico.
     """
-    historial = Session.crud_mensaje_bot.get_conversation_history(
-        db=db,
+    return crud_mensaje_bot.get_conversation_history(
+        db,
         usuario_id=usuario_id,
         chat_grupo_id=chat_grupo_id,
         limit=limit
     )
-    return historial
+
+@router.get("/mensaje-bots/sin-respuesta", response_model=List[MensajeBot])
+def read_unanswered_mensaje_bots(
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Obtener mensajes bot sin respuesta.
+    """
+    return crud_mensaje_bot.get_unanswered_messages(db)
+
+@router.get("/mensaje-bots/recientes/", response_model=List[MensajeBot])
+def read_recent_mensaje_bots(
+    db: Session = Depends(get_db),
+    limit: int = Query(50, ge=1, le=200)
+) -> Any:
+    """
+    Obtener mensajes bot más recientes.
+    """
+    return crud_mensaje_bot.get_recent_messages(db, limit=limit)
+
+@router.get("/mensaje-bots/estadisticas/contexto", response_model=Dict[str, int])
+def read_mensaje_bot_count_by_contexto(
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Contar mensajes bot por contexto.
+    """
+    return crud_mensaje_bot.count_messages_by_context(db)
+
+@router.get("/mensaje-bots/estadisticas/usuarios-activos", response_model=Dict[str, int])
+def read_active_users_mensaje_bot(
+    db: Session = Depends(get_db),
+    limit: int = Query(10, ge=1, le=50)
+) -> Any:
+    """
+    Obtener usuarios más activos en mensajes bot.
+    """
+    return crud_mensaje_bot.count_messages_by_user(db, limit=limit)
+
+@router.put("/mensaje-bots/{mensaje_bot_id}", response_model=MensajeBot)
+def update_mensaje_bot(
+    *,
+    db: Session = Depends(get_db),
+    mensaje_bot_id: UUID,
+    mensaje_bot_in: MensajeBotUpdate
+) -> Any:
+    """
+    Actualizar mensaje bot.
+    """
+    mensaje_bot = crud_mensaje_bot.get(db=db, mensaje_bot_id=mensaje_bot_id)
+    if not mensaje_bot:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MENSAJE_BOT_NOT_FOUND
+        )
+    
+    mensaje_bot = crud_mensaje_bot.update(db=db, db_obj=mensaje_bot, obj_in=mensaje_bot_in)
+    return mensaje_bot
+
+@router.patch("/mensaje-bots/{mensaje_bot_id}/respuesta", response_model=MensajeBot)
+def update_mensaje_bot_response(
+    *,
+    db: Session = Depends(get_db),
+    mensaje_bot_id: UUID,
+    new_response: str = Query(..., description="Nueva respuesta")
+) -> Any:
+    """
+    Actualizar solo la respuesta de un mensaje bot.
+    """
+    mensaje_bot = crud_mensaje_bot.update_response(
+        db=db,
+        mensaje_bot_id=mensaje_bot_id,
+        new_response=new_response
+    )
+    if not mensaje_bot:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MENSAJE_BOT_NOT_FOUND
+        )
+    return mensaje_bot
+
+@router.delete("/mensaje-bots/{mensaje_bot_id}", response_model=MensajeBot)
+def delete_mensaje_bot(
+    *,
+    db: Session = Depends(get_db),
+    mensaje_bot_id: UUID
+) -> Any:
+    """
+    Eliminar mensaje bot.
+    """
+    mensaje_bot = crud_mensaje_bot.remove(db=db, mensaje_bot_id=mensaje_bot_id)
+    if not mensaje_bot:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=MENSAJE_BOT_NOT_FOUND
+        )
+    return mensaje_bot
+
+@router.delete("/mensaje-bots/antiguos/limpiar", response_model=Dict[str, Any])
+def delete_old_mensaje_bots(
+    *,
+    db: Session = Depends(get_db),
+    older_than: datetime = Query(..., description="Eliminar mensajes más antiguos que esta fecha")
+) -> Any:
+    """
+    Eliminar mensajes bot más antiguos que una fecha específica.
+    """
+    deleted_count = crud_mensaje_bot.remove_old_messages(db=db, older_than=older_than)
+    return {
+        "message": "Mensajes bot antiguos eliminados exitosamente",
+        "registros_eliminados": deleted_count,
+        "fecha_corte": older_than.isoformat()
+    }
