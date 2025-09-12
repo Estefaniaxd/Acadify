@@ -7,8 +7,8 @@ from passlib.context import CryptContext
 from src.services.auth.redis_service import RedisService
 import pyotp
 
-# 🔑 Configuración básica
-SECRET_KEY = "cambia_esto_por_un_secret_key_muy_seguro"  # ⚠️ Usa dotenv
+
+SECRET_KEY = "cambia_esto_por_un_secret_key_muy_seguro"  
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7

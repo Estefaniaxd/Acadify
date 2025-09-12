@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+<<<<<<< HEAD
 # Importa los routers existentes
 from src.api.routes import auth, usuario
 
@@ -17,9 +18,15 @@ from src.api.routes.academic import (
     material_clase,
     material_curso,
 )
+=======
+# Importa los routers
+from src.api.routes.auth import auth
+from src.api.routes.usuario import usuario
+>>>>>>> origin/feature-gamification
 
 from src.services.auth.redis_service import RedisService
 from src.core.config import settings
+from src.api.routes.gamificacion import gamificacion as gamificacion_router
 
 # Inicializa la app FastAPI
 app = FastAPI(
@@ -49,9 +56,16 @@ async def startup_event():
 async def shutdown_event():
     await redis_service.disconnect()
 
+<<<<<<< HEAD
 # Incluir routers existentes
+=======
+
+# Incluir routers
+
+>>>>>>> origin/feature-gamification
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(usuario.router, prefix="/usuarios", tags=["Usuarios"])
+app.include_router(gamificacion_router.router, prefix="/gamificacion", tags=["Gamificación"])
 
 # Incluir routers del módulo academic
 app.include_router(institucion.router, prefix="/instituciones", tags=["Instituciones"])
