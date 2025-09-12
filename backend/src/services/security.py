@@ -1,14 +1,12 @@
-# src/services/security.py
 from datetime import timedelta
 from src.services.auth.datetime_utils import utcnow_aware
-from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from src.services.auth.redis_service import RedisService
 import pyotp
 
 
-SECRET_KEY = "cambia_esto_por_un_secret_key_muy_seguro"  
+SECRET_KEY = "cambia_esto_por_un_secret_key_muy_seguro"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
@@ -36,10 +34,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # -------------------------------
 # 🔑 JWT Tokens
 # -------------------------------
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Genera un access token JWT"""
     to_encode = data.copy()
-    expire = utcnow_aware() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = utcnow_aware() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire, "type": "access"})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 

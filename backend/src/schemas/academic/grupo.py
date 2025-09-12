@@ -1,14 +1,13 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import Optional
 from src.enums.academic.grupo_enums import JornadaGrupo
 
 
 class GrupoBase(BaseModel):
     programa_id: UUID
-    docente_tutor_id: Optional[UUID] = None
+    docente_tutor_id: UUID | None = None
     nombre: str
-    jornada: Optional[JornadaGrupo] = None
+    jornada: JornadaGrupo | None = None
 
 
 class GrupoCreate(GrupoBase):
@@ -16,13 +15,13 @@ class GrupoCreate(GrupoBase):
 
 
 class GrupoUpdate(BaseModel):
-    docente_tutor_id: Optional[UUID] = None
-    nombre: Optional[str] = None
-    jornada: Optional[JornadaGrupo] = None
+    docente_tutor_id: UUID | None = None
+    nombre: str | None = None
+    jornada: JornadaGrupo | None = None
 
 
 class GrupoResponse(GrupoBase):
     grupo_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True

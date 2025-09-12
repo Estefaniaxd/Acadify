@@ -1,6 +1,7 @@
 alembic==1.16.5
 altgraph==0.17.4
 annotated-types==0.7.0
+Authlib==1.6.3
 anyio==4.9.0
 black==25.1.0
 certifi==2025.6.15
@@ -45,7 +46,9 @@ passlib==1.7.4
 pathspec==0.12.1
 pefile==2023.2.7
 pillow==11.0.0
+pyotp==2.9.0
 pip==25.2
+python-jose==3.5.0
 platformdirs==4.2.0
 psycopg2-binary==2.9.10
 pydantic==2.11.7
@@ -55,6 +58,7 @@ pydantic-settings==2.10.1
 Pygments==2.19.2
 pyinstaller==6.5.0
 pyinstaller-hooks-contrib==2024.3
+PyJWT==2.10.1
 PyMySQL==1.1.1
 pyparsing==3.2.1
 python-dateutil==2.9.0.post0
@@ -64,6 +68,7 @@ pytz==2024.1
 pywin32-ctypes==0.2.2
 PyYAML==6.0.2
 qrcode==8.2
+redis==6.4.0
 rich==14.0.0
 rich-toolkit==0.14.8
 setuptools==65.5.0

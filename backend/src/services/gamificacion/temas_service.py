@@ -1,16 +1,12 @@
-"""
-Servicio para lógica de compra y asignación de temas.
-"""
 from sqlalchemy.orm import Session
-import uuid
-
+from uuid import UUID
 from src.models.gamification.tema import Tema
 from src.models.gamification.tema_personalizado import TemaPersonalizado
 from src.models.gamification.usuario_puntos import UsuarioPuntos
 
 class TemasService:
     @staticmethod
-    def comprar_tema(db: Session, usuario_id: uuid.UUID, tema_id: uuid.UUID, costo: int = 10):
+    def comprar_tema(db: Session, usuario_id: UUID, tema_id: UUID, costo: int = 10):
         """
         Permite comprar y asignar un tema personalizado al usuario si tiene suficientes puntos.
         """
@@ -32,7 +28,7 @@ class TemasService:
         return tema_personalizado
 
     @staticmethod
-    def listar_temas_disponibles(db: Session, usuario_id: uuid.UUID):
+    def listar_temas_disponibles(db: Session, usuario_id: UUID):
         """
         Lista los temas que el usuario aún no ha comprado.
         """

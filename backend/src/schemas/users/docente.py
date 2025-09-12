@@ -1,25 +1,23 @@
-import uuid
+from uuid import UUID
 from datetime import date
 from pydantic import BaseModel
-from typing import Optional
-from enum import Enum
 from src.enums.users.docente_enums import TipoVinculacionDocente
 
 
 class DocenteBase(BaseModel):
     area_conocimiento: str
     fecha_vinculacion: date
-    tipo_vinculacion: Optional[TipoVinculacionDocente] = None
-    titulo_academico: Optional[str] = None
-    horas_semanales: Optional[int] = None
+    tipo_vinculacion: TipoVinculacionDocente | None = None
+    titulo_academico: str | None = None
+    horas_semanales: int | None = None
 
 
 class DocenteCreate(DocenteBase):
-    docente_id: uuid.UUID
+    docente_id: UUID
 
 
 class DocenteRead(DocenteBase):
-    docente_id: uuid.UUID
+    docente_id: UUID
 
     class Config:
         from_attributes = True

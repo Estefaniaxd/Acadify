@@ -1,14 +1,13 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
 
 
 class MensajeBotBase(BaseModel):
-    usuario_id: Optional[UUID] = None
+    usuario_id: UUID | None = None
     chat_grupo_id: UUID
-    referencia_material_id: Optional[UUID] = None
+    referencia_material_id: UUID | None = None
     contenido: str
     respuesta: str
-    contexto: str 
+    contexto: str
     fecha_hora: datetime

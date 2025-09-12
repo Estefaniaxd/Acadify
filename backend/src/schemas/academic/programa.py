@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from sqlalchemy.dialects.postgresql import UUID
+from uuid import UUID
 from src.enums.academic.programa_enums import NivelPrograma, TipoPrograma
+
 
 class ProgramaBase(BaseModel):
     institucion_id: UUID
@@ -9,8 +10,10 @@ class ProgramaBase(BaseModel):
     nivel: NivelPrograma
     tipo: TipoPrograma
 
+
 class ProgramaCreate(ProgramaBase):
     pass
+
 
 class ProgramaUpdate(BaseModel):
     nombre: str | None = None
@@ -18,8 +21,9 @@ class ProgramaUpdate(BaseModel):
     nivel: NivelPrograma | None = None
     tipo: TipoPrograma | None = None
 
+
 class ProgramaOut(ProgramaBase):
     programa_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True

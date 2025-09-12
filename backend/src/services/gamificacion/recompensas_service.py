@@ -1,16 +1,12 @@
-"""
-Servicio para lógica de tienda y recompensas.
-"""
 from sqlalchemy.orm import Session
-import uuid
-
+from uuid import UUID
 from src.models.gamification.recompensa import Recompensa
 from src.models.gamification.usuario_recompensa import UsuarioRecompensa
 from src.models.gamification.usuario_puntos import UsuarioPuntos
 
 class RecompensasService:
     @staticmethod
-    def canjear_recompensa(db: Session, usuario_id: uuid.UUID, recompensa_id: uuid.UUID):
+    def canjear_recompensa(db: Session, usuario_id: UUID, recompensa_id: UUID):
         """
         Canjea una recompensa si el usuario tiene suficientes puntos.
         """
@@ -33,7 +29,7 @@ class RecompensasService:
         return usuario_recompensa
 
     @staticmethod
-    def listar_tienda(db: Session, usuario_id: uuid.UUID):
+    def listar_tienda(db: Session, usuario_id: UUID):
         """
         Lista todas las recompensas y si el usuario puede canjearlas.
         """

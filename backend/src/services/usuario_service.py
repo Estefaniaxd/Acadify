@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from src.models.usuario import Usuario
-from src.schemas.usuario import UsuarioCreate
+from src.models.users.usuario import Usuario
+from src.schemas.users.usuario import UsuarioCreate
 from src.utils.security import pwd_context
 import uuid
 

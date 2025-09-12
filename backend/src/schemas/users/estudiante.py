@@ -1,24 +1,23 @@
 from pydantic import BaseModel
-import uuid
+from uuid import UUID
 from datetime import date
-from typing import Optional
 from src.enums.users.estudiante_enums import EtapaFormativaEstudiante
 
 
 class EstudianteBase(BaseModel):
-    programa_id: uuid.UUID
+    programa_id: UUID
     fecha_ingreso: date
     creditos_aprobados: int | None = None
-    etapa_formativa: Optional[EtapaFormativaEstudiante] = None
+    etapa_formativa: EtapaFormativaEstudiante | None = None
     promedio_acumulado: float | None = None
 
 
 class EstudianteCreate(EstudianteBase):
-    estudiante_id: uuid.UUID
+    estudiante_id: UUID
 
 
 class EstudianteUpdate(BaseModel):
-    programa_id: uuid.UUID | None = None
+    programa_id: UUID | None = None
     fecha_ingreso: date | None = None
     creditos_aprobados: int | None = None
     etapa_formativa: EtapaFormativaEstudiante | None = None
@@ -26,7 +25,7 @@ class EstudianteUpdate(BaseModel):
 
 
 class EstudianteOut(EstudianteBase):
-    estudiante_id: uuid.UUID
+    estudiante_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True

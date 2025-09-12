@@ -1,9 +1,9 @@
-import uuid
+from uuid import UUID
 from pydantic import BaseModel
 
 
 class AdministradorSistemaBase(BaseModel):
-    administrador_id: uuid.UUID
+    administrador_id: UUID
 
 
 class AdministradorSistemaCreate(AdministradorSistemaBase):

@@ -2,7 +2,6 @@
 from pydantic import BaseModel
 from uuid import UUID
 from src.enums.academic import TipoIntegracionPlataforma
-from typing import Optional
 
 
 class PlataformaBase(BaseModel):
@@ -10,25 +9,28 @@ class PlataformaBase(BaseModel):
     url_base: str
     tipo_integracion: TipoIntegracionPlataforma
     requiere_cuenta: bool
-    es_gratuita: Optional[bool] = None
+    es_gratuita: bool | None = None
 
 
 class PlataformaCreate(PlataformaBase):
     """Schema para crear plataforma"""
+
     pass
 
 
 class PlataformaUpdate(BaseModel):
     """Schema para actualizar plataforma"""
-    nombre: Optional[str] = None
-    url_base: Optional[str] = None
-    tipo_integracion: Optional[TipoIntegracionPlataforma] = None
-    requiere_cuenta: Optional[bool] = None
-    es_gratuita: Optional[bool] = None
+
+    nombre: str | None = None
+    url_base: str | None = None
+    tipo_integracion: TipoIntegracionPlataforma | None = None
+    requiere_cuenta: bool | None = None
+    es_gratuita: bool | None = None
 
 
 class PlataformaRead(PlataformaBase):
     """Schema de lectura de plataforma"""
+
     plataforma_id: UUID
 
     class Config:

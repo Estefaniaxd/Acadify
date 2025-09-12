@@ -1,11 +1,10 @@
-from sqlalchemy.dialects.postgresql import UUID
+from uuid import UUID
 from datetime import date
 from pydantic import BaseModel
-from typing import Optional
 
 
 class CoordinadorBase(BaseModel):
-    horario_atencion: Optional[str] = None
+    horario_atencion: str | None = None
     fecha_inicio_carrera: date
 
 

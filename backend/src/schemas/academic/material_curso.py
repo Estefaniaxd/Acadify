@@ -1,11 +1,10 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import Optional
 
 
 class MaterialCursoBase(BaseModel):
     material_curso_id: UUID
-    curso_id: Optional[UUID] = None
+    curso_id: UUID | None = None
 
 
 class MaterialCursoCreate(MaterialCursoBase):
@@ -13,9 +12,9 @@ class MaterialCursoCreate(MaterialCursoBase):
 
 
 class MaterialCursoUpdate(BaseModel):
-    curso_id: Optional[UUID] = None
+    curso_id: UUID | None = None
 
 
 class MaterialCursoResponse(MaterialCursoBase):
     class Config:
-        orm_mode = True
+        from_attributes = True

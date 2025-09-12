@@ -1,15 +1,12 @@
-# src/schemas/users/usuario.py
-
 from pydantic import BaseModel, EmailStr, field_validator
-from typing import Optional
 from src.enums.users.usuario_enums import RolUsuario
 
 # -----------------------------
 # Base para los usuarios
 # -----------------------------
 class UsuarioBase(BaseModel):
-    correo_institucional: Optional[EmailStr] = None
-    username: Optional[str] = None
+    correo_institucional: EmailStr | None = None
+    username: str | None = None
     rol: RolUsuario
 
 # -----------------------------
@@ -32,13 +29,13 @@ class UsuarioRead(UsuarioBase):
 # Esquema para actualización de usuario
 # -----------------------------
 class UsuarioUpdate(BaseModel):
-    correo_institucional: Optional[EmailStr] = None
-    username: Optional[str] = None
-    nombres: Optional[str] = None
-    apellidos: Optional[str] = None
-    telefono: Optional[str] = None
-    descripcion: Optional[str] = None
-    rol: Optional[RolUsuario] = None
+    correo_institucional: EmailStr | None = None
+    username: str | None = None
+    nombres: str | None = None
+    apellidos: str | None = None
+    telefono: str | None = None
+    descripcion: str | None = None
+    rol: RolUsuario | None = None
 
     @field_validator("username", mode="before")
     def validar_admin(cls, v, info):
