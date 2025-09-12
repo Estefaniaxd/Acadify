@@ -61,7 +61,7 @@ export default function HomePage() {
         <div className="mt-10 flex flex-col md:flex-row items-center justify-center gap-8">
          
         <img
-            src="/images/rutiliolike.png"
+            src="images/rutiliolike.png"
             className="w-40 h-40 rounded-full shadow-lg"
           />
           <div className="max-w-md text-left">

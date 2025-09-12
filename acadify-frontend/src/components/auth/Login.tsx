@@ -5,14 +5,18 @@ export default function LoginPage() {
         {/* Encabezado */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-indigo-900">Bienvenido de nuevo</h1>
-          <p className="text-gray-600 mt-2">Inicia sesión en <span className="text-green-500 font-semibold">Acadify</span> 🎓</p>
+          <p className="text-gray-600 mt-2">
+            Inicia sesión en <span className="text-green-500 font-semibold">Acadify</span> ☆
+          </p>
         </div>
 
         {/* Formulario */}
         <form className="space-y-5">
           {/* Correo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Correo electrónico</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Correo electrónico
+            </label>
             <input
               type="email"
               placeholder="tucorreo@email.com"
@@ -22,7 +26,9 @@ export default function LoginPage() {
 
           {/* Contraseña */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Contraseña
+            </label>
             <input
               type="password"
               placeholder="••••••••"
@@ -39,7 +45,7 @@ export default function LoginPage() {
             </a>
           </div>
 
-          {/* Botón */}
+          {/* Botón principal */}
           <button
             type="submit"
             className="w-full py-3 bg-indigo-900 text-white font-semibold rounded-xl hover:bg-green-400 transition"
@@ -47,6 +53,25 @@ export default function LoginPage() {
             Iniciar sesión
           </button>
         </form>
+
+        {/* Separador */}
+        <div className="flex items-center gap-2">
+          <hr className="flex-grow border-gray-300" />
+          <span className="text-sm text-gray-500">o continúa con</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
+
+        {/* Botones sociales */}
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-xl hover:border-indigo-900 transition"
+          >
+            <img src="src/components/images/icons/icon-gmail.png" alt="Google" className="w-10 h-5" />
+            <span className="text-gray-700 font-medium">Iniciar con Gmail</span>
+          </button>
+
+        </div>
 
         {/* Enlace para registrarse */}
         <p className="text-center text-sm text-gray-600">
