@@ -27,21 +27,21 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-center text-violet-900">¿Cómo mejora tu aprendizaje?</h2>
         <div className="grid md:grid-cols-3 gap-8 mt-10 max-w-6xl mx-auto">
           <div className="p-6 bg-white shadow-lg rounded-2xl hover:scale-105 transition">
-            <h3 className="text-xl font-semibold text-violet-900"> ✩ Gamificación</h3>
+            <h3 className="text-xl font-semibold text-violet-900"> *ੈ✩‧₊˚ Gamificación</h3>
             <p className="mt-3 text-gray-600">
               Aprende jugando: recompensas, insignias y retos diarios que aumentan tu motivación
               y hacen que el aprendizaje sea más entretenido.
             </p>
           </div>
           <div className="p-6 bg-white shadow-lg rounded-2xl hover:scale-105 transition">
-            <h3 className="text-xl font-semibold text-red-900">☻Personalización</h3>
+            <h3 className="text-xl font-semibold text-red-900">˚ ༘♡ ⋆｡˚ ❀Personalización</h3>
             <p className="mt-3 text-gray-600">
               Cada estudiante tiene un recorrido único. Nuestro sistema adapta el contenido 
               a tu estilo de aprendizaje y nivel de progreso.
             </p>
           </div>
           <div className="p-6 bg-white shadow-lg rounded-2xl hover:scale-105 transition">
-            <h3 className="text-xl font-semibold text-green-500">➣Chatbot inteligente</h3>
+            <h3 className="text-xl font-semibold text-green-500">.˚ ᵎ┊͙◟̆◞̆Chatbot inteligente</h3>
             <p className="mt-3 text-gray-600">
               Un asistente virtual disponible 24/7 para responder preguntas, dar apoyo en tareas 
               y guiar tu experiencia en la plataforma.

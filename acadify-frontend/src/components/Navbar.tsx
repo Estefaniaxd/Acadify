@@ -1,5 +1,5 @@
 import fondo from "./images/fondo.png"; 
-import logo from "./images/rutiliopensar.png";
+import logo from "./images/icon.png";
 
 export default function Navbar() {
   return (
@@ -12,7 +12,7 @@ export default function Navbar() {
       {/* Logo + Texto */}
       <div className="flex items-center gap-2">
   <div className="bg-white p-2 rounded-full shadow-md">
-    <img src={logo} alt="Logo Acadify" className="h-12 w-12" />
+    <img src={logo} alt="Logo Acadify" className="h-10 w-10" />
   </div>
   <span className="text-xl font-bold text-indigo-950 ">Acadify</span>
 </div>
