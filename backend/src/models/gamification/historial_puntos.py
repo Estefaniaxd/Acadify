@@ -10,7 +10,7 @@ class HistorialPuntos(Base):
     __table_args__ = (CheckConstraint("cambio <> 0"),)
 
     historial_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
     )
     usuario_id = Column(
         UUID(as_uuid=True), ForeignKey("Usuario.usuario_id", ondelete="CASCADE")

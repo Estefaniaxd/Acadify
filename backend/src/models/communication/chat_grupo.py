@@ -8,7 +8,7 @@ class ChatGrupo(Base):
     __tablename__ = "ChatGrupo"
 
     chat_grupo_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
     )
     grupo_id = Column(
         UUID(as_uuid=True),
@@ -20,7 +20,7 @@ class ChatGrupo(Base):
     )
     descripcion = Column(TEXT)
     foto_perfil = Column(TEXT)
-    permite_archivos = Column(BOOLEAN, nullable=False, server_default=True)
+    permite_archivos = Column(BOOLEAN, nullable=False, server_default=text("true"))
     capacidad_almacenamiento = Column(
         INTEGER(), nullable=False, server_default=text("52428800")
     )

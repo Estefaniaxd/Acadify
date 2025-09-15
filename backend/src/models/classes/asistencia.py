@@ -7,8 +7,8 @@ class Asistencia(Base):
     __tablename__ = "Asistencia"
 
     asistencia_id = Column(
-        UUID(as_uuid=True), primary_key=True,
-        server_default=text("gen_random_uuid()")
+    UUID(as_uuid=True), primary_key=True,
+    server_default=text('gen_random_uuid()')
     )
 
     clase_id = Column(

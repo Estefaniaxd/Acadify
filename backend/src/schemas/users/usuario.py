@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional
+from uuid import UUID
 from src.enums.users.usuario_enums import RolUsuario
 
 # -----------------------------
@@ -13,13 +15,19 @@ class UsuarioBase(BaseModel):
 # Esquema para creación de usuario
 # -----------------------------
 class UsuarioCreate(UsuarioBase):
+    nombres: str
+    apellidos: str
+    tipo_documento: str
+    numero_documento: str
+    telefono: str | None = None
+    descripcion: str | None = None
     password: str
 
 # -----------------------------
 # Esquema para lectura de usuario
 # -----------------------------
 class UsuarioRead(UsuarioBase):
-    usuario_id: str
+    usuario_id: UUID
 
     model_config = {
         "from_attributes": True  # Permite leer atributos de SQLAlchemy

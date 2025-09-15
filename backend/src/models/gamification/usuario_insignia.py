@@ -27,5 +27,15 @@ class UsuarioInsignia(Base):
         TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
     )
 
-    usuario = relationship("Usuario", back_populates="usuario_insignias", passive_deletes=True)
+    usuario = relationship(
+        "Usuario",
+        back_populates="usuario_insignias",
+        foreign_keys=[usuario_id],
+        passive_deletes=True
+    )
+    otorgante = relationship(
+        "Usuario",
+        foreign_keys=[otorgada_por],
+        passive_deletes=True
+    )
     insignia = relationship("Insignia", back_populates="usuario_insignias")

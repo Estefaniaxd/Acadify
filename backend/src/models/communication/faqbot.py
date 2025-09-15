@@ -8,7 +8,7 @@ class FAQBot(Base):
     __tablename__ = "FAQBot"
 
     faq_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
     )
     pregunta = Column(TEXT, nullable=False)
     respuesta = Column(TEXT, nullable=False)

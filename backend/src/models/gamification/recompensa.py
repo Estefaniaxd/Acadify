@@ -13,7 +13,7 @@ class Recompensa(Base):
     )
 
     recompensa_id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
     )
     nombre = Column(String(100), nullable=False)
     descripcion = Column(TEXT)

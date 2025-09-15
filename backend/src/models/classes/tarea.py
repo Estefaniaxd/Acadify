@@ -28,4 +28,9 @@ class Tarea(Base):
     archivo_adjunto = Column(TEXT)
     permite_entregas_tardias = Column(BOOLEAN, nullable=False)
     
+<<<<<<< HEAD
     entrega_tareas = relationship("EntregaTarea", backref="tarea", passive_deletes=True)
+=======
+    entrega_tareas = relationship("EntregarTarea", backref="tarea", passive_deletes=True)
+    
+>>>>>>> origin/develop

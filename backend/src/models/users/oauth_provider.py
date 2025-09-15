@@ -14,7 +14,7 @@ class OAuthProvider(Base):
     oauth_provider_id = Column(
         UUID(as_uuid=True), 
         primary_key=True, 
-        server_default=text("gen_random_uuid()")
+    server_default=text('gen_random_uuid()')
     )
     
     usuario_id = Column(
@@ -34,4 +34,4 @@ class OAuthProvider(Base):
     )
     
     # Relationship
-    usuario = relationship("Usuario", backref="oauth_providers")
+    usuario = relationship("Usuario", back_populates="oauth_providers")
