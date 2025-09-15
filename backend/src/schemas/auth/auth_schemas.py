@@ -1,43 +1,61 @@
+# Constante global para ejemplos
+EXAMPLE_EMAIL = "usuario@universidad.edu.co"
+# src/schemas/auth/auth_schemas.py
 
-from pydantic import BaseModel, EmailStr, Field, validator
-from typing import Optional
-import uuid
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
+from typing import Optional, Literal
 from datetime import datetime
+import uuid
 
-# Constante para ejemplo de correo institucional
-EXAMPLE_CORREO = "usuario@universidad.edu.co"
-
+# ===============================
+# Authentication Schemas
+# ===============================
 
 class LoginRequest(BaseModel):
-    """Schema para solicitud de login"""
-    correo_institucional: EmailStr = Field(..., description="Email institucional del usuario")
-    password: str = Field(..., min_length=8, description="Contraseña del usuario")
-    otp_code: Optional[str] = Field(None, description="Código TOTP para 2FA (si está habilitado)")
+    """Schema para solicitud de login unificado"""
+    identifier: str = Field(..., description="Email institucional o username")
+    password: str = Field(..., min_length=1, description="Contraseña del usuario")
+    otp_code: Optional[str] = Field(None, min_length=6, max_length=6, description="Código OTP para 2FA (solo si se requiere)")
     
-    class Config:
-        json_schema_extra = {
+    @field_validator('otp_code')
+    @classmethod
+    def validate_otp_format(cls, v):
+        if v and not v.isdigit():
+            raise ValueError('El código OTP debe contener solo números')
+        return v
+    
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
-                "correo_institucional": EXAMPLE_CORREO,
-                "password": "MiContraseña123!",
-                "otp_code": "123456"
+                "identifier": "estebanAdmin",
+                "password": "Juanito243019@"
             }
         }
+    )
 
 
 class TokenResponse(BaseModel):
-    """Schema para respuesta de tokens"""
+    """Schema para respuesta de tokens JWT"""
     access_token: str = Field(..., description="JWT access token")
+    refresh_token: str = Field(..., description="JWT refresh token")
     token_type: str = Field(default="Bearer", description="Tipo de token")
-    expires_in: int = Field(..., description="Tiempo de expiración en segundos")
+    expires_in: int = Field(..., description="Tiempo de expiración access token en segundos")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
                 "token_type": "Bearer",
-                "expires_in": 600
+                "expires_in": 900
             }
         }
+    )
+
+
+class RefreshTokenRequest(BaseModel):
+    """Schema para solicitud de refresh token"""
+    refresh_token: str = Field(..., description="Refresh token JWT")
 
 
 class RefreshResponse(BaseModel):
@@ -47,26 +65,45 @@ class RefreshResponse(BaseModel):
     expires_in: int = Field(..., description="Tiempo de expiración en segundos")
 
 
+class LogoutResponse(BaseModel):
+    """Schema para respuesta de logout"""
+    message: str = Field(default="Logout exitoso", description="Mensaje de confirmación")
+
+
+# ===============================
+# Password Reset Schemas
+# ===============================
+
 class PasswordResetRequest(BaseModel):
     """Schema para solicitar reset de contraseña"""
     correo_institucional: EmailStr = Field(..., description="Email del usuario")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
-                "correo_institucional": EXAMPLE_CORREO
+                "correo_institucional": EXAMPLE_EMAIL
             }
         }
+    )
+
+
+class PasswordResetResponse(BaseModel):
+    """Schema para respuesta de solicitud reset"""
+    message: str = Field(
+        default="Si el email existe, se envió un código de recuperación",
+        description="Mensaje genérico por seguridad"
+    )
 
 
 class PasswordResetConfirm(BaseModel):
     """Schema para confirmar reset de contraseña"""
-    token: str = Field(..., description="Token de reset recibido por email")
+    correo_institucional: EmailStr = Field(..., description="Email del usuario")
+    reset_code: str = Field(..., min_length=6, max_length=8, description="Código de reset recibido por email")
     new_password: str = Field(..., min_length=10, description="Nueva contraseña")
     
-    @validator('new_password')
+    @field_validator('new_password')
+    @classmethod
     def validate_password_strength(cls, v):
-        """Validar fortaleza de la contraseña"""
         if len(v) < 10:
             raise ValueError('La contraseña debe tener al menos 10 caracteres')
         
@@ -83,61 +120,22 @@ class PasswordResetConfirm(BaseModel):
         
         return v
     
-    class Config:
-        json_schema_extra = {
+    @field_validator('reset_code')
+    @classmethod
+    def validate_reset_code_format(cls, v):
+        if not v.isalnum():
+            raise ValueError('El código debe contener solo números y letras')
+        return v
+    
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
-                "token": "abc123def456",
+                "correo_institucional": EXAMPLE_EMAIL,
+                "reset_code": "ABC123",
                 "new_password": "NuevaContraseña123!"
             }
         }
-
-
-class TwoFASetupResponse(BaseModel):
-    """Schema para respuesta de configuración 2FA"""
-    secret: str = Field(..., description="Secret para configurar en la app 2FA")
-    qr_code_url: str = Field(..., description="URL para generar código QR")
-    backup_codes: list[str] = Field(..., description="Códigos de respaldo")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "secret": "JBSWY3DPEHPK3PXP",
-                "qr_code_url": "otpauth://totp/Acadify:usuario@universidad.edu.co?secret=JBSWY3DPEHPK3PXP&issuer=Acadify",
-                "backup_codes": ["12345678", "87654321", "11223344"]
-            }
-        }
-
-
-class TwoFAVerifyRequest(BaseModel):
-    """Schema para verificar código 2FA"""
-    otp_code: str = Field(..., min_length=6, max_length=6, description="Código TOTP de 6 dígitos")
-    
-    @validator('otp_code')
-    def validate_otp_format(cls, v):
-        if not v.isdigit():
-            raise ValueError('El código debe contener solo números')
-        return v
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "otp_code": "123456"
-            }
-        }
-
-
-class OAuthStateResponse(BaseModel):
-    """Schema para respuesta de estado OAuth"""
-    authorization_url: str = Field(..., description="URL para autorización OAuth")
-    state: str = Field(..., description="Estado para validación CSRF")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "authorization_url": "https://accounts.google.com/oauth/authorize?...",
-                "state": "abc123def456"
-            }
-        }
+    )
 
 
 class PasswordChangeRequest(BaseModel):
@@ -145,11 +143,99 @@ class PasswordChangeRequest(BaseModel):
     current_password: str = Field(..., description="Contraseña actual")
     new_password: str = Field(..., min_length=10, description="Nueva contraseña")
     
-    @validator('new_password')
+    @field_validator('new_password')
+    @classmethod
     def validate_password_strength(cls, v):
-        """Reutilizar validación de PasswordResetConfirm"""
+        # Reutilizar la misma validación
         return PasswordResetConfirm.validate_password_strength(v)
 
+
+# ===============================
+# Two-Factor Authentication Schemas
+# ===============================
+
+class TwoFASetupRequest(BaseModel):
+    """Schema para solicitar configuración 2FA"""
+    method: Literal["email", "totp"] = Field(..., description="Método de 2FA")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "method": "email"
+            }
+        }
+    )
+
+
+class TwoFASetupResponse(BaseModel):
+    """Schema para respuesta de configuración 2FA"""
+    method: str = Field(..., description="Método configurado")
+    message: str = Field(..., description="Instrucciones para el usuario")
+    # Solo para TOTP
+    secret: Optional[str] = Field(None, description="Secret para configurar en app 2FA")
+    qr_code_url: Optional[str] = Field(None, description="URL para generar código QR")
+    backup_codes: Optional[list[str]] = Field(None, description="Códigos de respaldo")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "method": "email",
+                    "message": "Se envió un código de verificación al correo para activar 2FA"
+                },
+                {
+                    "method": "totp",
+                    "message": "Escanea el código QR con tu app de autenticación y confirma con un código",
+                    "secret": "JBSWY3DPEHPK3PXP",
+                    "qr_code_url": f"otpauth://totp/Acadify:{EXAMPLE_EMAIL}?secret=JBSWY3DPEHPK3PXP&issuer=Acadify",
+                    "backup_codes": ["12345678", "87654321", "11223344"]
+                }
+            ]
+        }
+    )
+
+
+class TwoFAVerifyRequest(BaseModel):
+    """Schema para verificar código 2FA en setup"""
+    verification_code: str = Field(..., min_length=6, max_length=6, description="Código de verificación")
+    
+    @field_validator('verification_code')
+    @classmethod
+    def validate_code_format(cls, v):
+        if not v.isdigit():
+            raise ValueError('El código debe contener solo números')
+        return v
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "verification_code": "123456"
+            }
+        }
+    )
+
+
+class TwoFAVerifyResponse(BaseModel):
+    """Schema para respuesta de verificación 2FA"""
+    success: bool = Field(..., description="Si la verificación fue exitosa")
+    message: str = Field(..., description="Mensaje de resultado")
+    twofa_enabled: bool = Field(..., description="Estado de 2FA tras verificación")
+
+
+class TwoFADisableRequest(BaseModel):
+    """Schema para desactivar 2FA"""
+    current_password: str = Field(..., description="Contraseña actual para confirmación")
+
+
+class TwoFAStatusResponse(BaseModel):
+    """Schema para estado de 2FA del usuario"""
+    twofa_enabled: bool = Field(..., description="Si 2FA está activado")
+    twofa_method: Optional[str] = Field(None, description="Método de 2FA configurado")
+
+
+# ===============================
+# User Profile Schemas
+# ===============================
 
 class UserCurrentResponse(BaseModel):
     """Schema para respuesta de usuario actual (/auth/me)"""
@@ -158,39 +244,83 @@ class UserCurrentResponse(BaseModel):
     username: Optional[str] = None
     nombres: str
     apellidos: str
+    tipo_documento: str
+    numero_documento: str
     rol: str
+    estado_cuenta: str
     email_verified: bool
     twofa_enabled: bool
+    twofa_method: Optional[str] = None
+    telefono: Optional[str] = None
+    descripcion: Optional[str] = None
     fecha_creacion: datetime
     ultimo_acceso: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "usuario_id": "123e4567-e89b-12d3-a456-426614174000",
-                "correo_institucional": EXAMPLE_CORREO,
+                "correo_institucional": EXAMPLE_EMAIL,
                 "username": None,
                 "nombres": "Juan Carlos",
                 "apellidos": "Pérez González",
+                "tipo_documento": "cc",
+                "numero_documento": "12345678",
                 "rol": "estudiante",
+                "estado_cuenta": "activo",
                 "email_verified": True,
                 "twofa_enabled": False,
+                "twofa_method": None,
+                "telefono": "+57 300 123 4567",
+                "descripcion": "Estudiante de Ingeniería",
                 "fecha_creacion": "2024-01-15T10:30:00Z",
                 "ultimo_acceso": "2024-01-20T14:45:00Z"
             }
         }
+    )
+
+
+class UserProfileUpdate(BaseModel):
+    """Schema para actualización de perfil de usuario"""
+    nombres: Optional[str] = Field(None, min_length=2, max_length=100)
+    apellidos: Optional[str] = Field(None, min_length=2, max_length=100)
+    telefono: Optional[str] = Field(None, max_length=20)
+    descripcion: Optional[str] = None
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "nombres": "María José",
+                "apellidos": "García López",
+                "telefono": "+57 300 123 4567",
+                "descripcion": "Estudiante de Ingeniería de Sistemas - Semestre 8"
+            }
+        }
+    )
+
+
+# ===============================
+# Login Response Schemas (intermedios)
+# ===============================
+
+class LoginStepResponse(BaseModel):
+    """Schema para respuestas intermedias de login (2FA requerido)"""
+    status: Literal["otp_required", "success"] = Field(..., description="Estado del login")
+    message: str = Field(..., description="Mensaje descriptivo")
+    requires_otp: bool = Field(default=False, description="Si requiere código OTP")
+    otp_method: Optional[str] = Field(None, description="Método de OTP utilizado")
 
 
 class LoginAttemptResponse(BaseModel):
     """Schema para respuesta de intento de login bloqueado"""
     locked: bool = Field(..., description="Si la cuenta está bloqueada")
     attempts_remaining: int = Field(..., description="Intentos restantes antes del bloqueo")
-    lockout_ends_at: Optional[datetime] = Field(None, description="Cuando termina el bloqueo")
+    lockout_ends_at: Optional[datetime] = Field(None, description="Cuándo termina el bloqueo")
     message: str = Field(..., description="Mensaje descriptivo")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "locked": True,
                 "attempts_remaining": 0,
@@ -198,3 +328,36 @@ class LoginAttemptResponse(BaseModel):
                 "message": "Cuenta bloqueada por múltiples intentos fallidos. Inténtelo nuevamente en 14 minutos."
             }
         }
+    )
+
+
+# ===============================
+# Generic Response Schemas
+# ===============================
+
+class MessageResponse(BaseModel):
+    """Schema genérico para respuestas con mensaje"""
+    message: str = Field(..., description="Mensaje de respuesta")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "message": "Operación completada exitosamente"
+            }
+        }
+    )
+
+
+class ErrorResponse(BaseModel):
+    """Schema para respuestas de error"""
+    detail: str = Field(..., description="Descripción del error")
+    error_code: Optional[str] = Field(None, description="Código de error interno")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "detail": "Credenciales incorrectas",
+                "error_code": "AUTH_INVALID_CREDENTIALS"
+            }
+        }
+    )
