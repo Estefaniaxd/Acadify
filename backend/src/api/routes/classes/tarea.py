@@ -9,7 +9,7 @@ from src.db.session import get_db
 from src.schemas.classes.tarea import TareaCreate, TareaUpdate, TareaRead
 from src.crud.classes.tarea import CRUDTarea
 
-router = APIRouter(prefix="/tareas", tags=["Tarea"])
+router = APIRouter()
 crud_tarea = CRUDTarea()
 
 
@@ -65,7 +65,9 @@ def get_tareas_por_rango(
     db: Session = Depends(get_db),
 ):
     """Obtener tareas asignadas en un rango de fechas"""
-    return crud_tarea.get_tasks_by_date_range(db, start_date=start_date, end_date=end_date)
+    return crud_tarea.get_tasks_by_date_range(
+        db, start_date=start_date, end_date=end_date
+    )
 
 
 @router.get("/con-entregas-tardias", response_model=List[TareaRead])

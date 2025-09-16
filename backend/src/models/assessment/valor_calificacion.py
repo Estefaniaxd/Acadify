@@ -9,7 +9,7 @@ class ValorCalificacion(Base):
     valor_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-    server_default=text('gen_random_uuid()'),
+        server_default=text("gen_random_uuid()"),
     )
 
     escala_id = Column(

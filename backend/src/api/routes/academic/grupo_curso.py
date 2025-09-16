@@ -6,7 +6,7 @@ from src.db.session import get_db
 from src.schemas.academic.grupo_curso import GrupoCurso, GrupoCursoCreate, GrupoCursoUpdate
 from src.crud.academic.crud_grupo_curso import grupo_curso_crud
 
-router = APIRouter(prefix="/grupos-cursos", tags=["GrupoCurso"])
+router = APIRouter()
 
 @router.get("/", response_model=list[GrupoCurso])
 def get_all(db: Session = Depends(get_db)):

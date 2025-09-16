@@ -6,7 +6,7 @@ from src.db.session import get_db
 from src.schemas.academic.material_clase import MaterialClase, MaterialClaseCreate, MaterialClaseUpdate
 from src.crud.academic.crud_material_clase import material_clase_crud
 
-router = APIRouter(prefix="/materiales-clases", tags=["MaterialClase"])
+router = APIRouter()
 
 @router.get("/", response_model=list[MaterialClase])
 def get_all(db: Session = Depends(get_db)):

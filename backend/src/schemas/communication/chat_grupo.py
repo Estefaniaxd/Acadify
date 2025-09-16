@@ -34,5 +34,5 @@ class ChatGrupoInDBBase(ChatGrupoBase):
         from_attributes = True
 
 
-class ChatGrupo(ChatGrupoInDBBase):
+class ChatGrupoRead(ChatGrupoInDBBase):
     pass

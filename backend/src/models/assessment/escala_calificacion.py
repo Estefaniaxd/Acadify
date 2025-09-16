@@ -9,7 +9,7 @@ class EscalaCalificacion(Base):
     __tablename__ = "EscalaCalificacion"
 
     escala_id = Column(
-    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
 
     institucion_id = Column(
@@ -28,6 +28,4 @@ class EscalaCalificacion(Base):
     min_valor = Column(NUMERIC(5, 2))
     max_valor = Column(NUMERIC(5, 2))
 
-    valores = relationship(
-        "ValorCalificacion", backref="escala_calificacion"
-    )
+    valores = relationship("ValorCalificacion", backref="escala_calificacion")

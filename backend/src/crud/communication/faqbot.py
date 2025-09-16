@@ -12,9 +12,9 @@ class CRUDFAQBot:
         """Crear nueva FAQ"""
         # Establecer timestamp de actualización si no se proporciona
         faq_data = obj_in.dict()
-        if not faq_data.get('ultima_actualizacion'):
-            faq_data['ultima_actualizacion'] = datetime.now()
-        
+        if not faq_data.get("ultima_actualizacion"):
+            faq_data["ultima_actualizacion"] = datetime.now()
+
         db_obj = FAQBot(**faq_data)
         db.add(db_obj)
         db.commit()
@@ -42,27 +42,19 @@ class CRUDFAQBot:
 
     def search_by_pregunta(self, db: Session, search_term: str) -> List[FAQBot]:
         """Buscar FAQs por pregunta"""
-        return (
-            db.query(FAQBot)
-            .filter(FAQBot.pregunta.ilike(f"%{search_term}%"))
-            .all()
-        )
+        return db.query(FAQBot).filter(FAQBot.pregunta.ilike(f"%{search_term}%")).all()
 
     def search_by_respuesta(self, db: Session, search_term: str) -> List[FAQBot]:
         """Buscar FAQs por respuesta"""
-        return (
-            db.query(FAQBot)
-            .filter(FAQBot.respuesta.ilike(f"%{search_term}%"))
-            .all()
-        )
+        return db.query(FAQBot).filter(FAQBot.respuesta.ilike(f"%{search_term}%")).all()
 
     def search_in_content(self, db: Session, search_term: str) -> List[FAQBot]:
         """Buscar FAQs en pregunta o respuesta"""
         return (
             db.query(FAQBot)
             .filter(
-                (FAQBot.pregunta.ilike(f"%{search_term}%")) |
-                (FAQBot.respuesta.ilike(f"%{search_term}%"))
+                (FAQBot.pregunta.ilike(f"%{search_term}%"))
+                | (FAQBot.respuesta.ilike(f"%{search_term}%"))
             )
             .all()
         )
@@ -104,27 +96,25 @@ class CRUDFAQBot:
     def count_by_categoria(self, db: Session) -> dict:
         """Contar FAQs por categoría"""
         from sqlalchemy import func
-        
+
         results = (
             db.query(FAQBot.categoria, func.count(FAQBot.faq_id))
             .group_by(FAQBot.categoria)
             .all()
         )
-        
+
         return {categoria: count for categoria, count in results}
 
-    def update(
-        self, db: Session, *, db_obj: FAQBot, obj_in: FAQBotUpdate
-    ) -> FAQBot:
+    def update(self, db: Session, *, db_obj: FAQBot, obj_in: FAQBotUpdate) -> FAQBot:
         """Actualizar FAQ"""
         update_data = obj_in.dict(exclude_unset=True)
-        
+
         # Actualizar timestamp de modificación
-        update_data['ultima_actualizacion'] = datetime.now()
-        
+        update_data["ultima_actualizacion"] = datetime.now()
+
         for field, value in update_data.items():
             setattr(db_obj, field, value)
-        
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -148,25 +138,27 @@ class CRUDFAQBot:
             .update(
                 {
                     FAQBot.categoria: new_categoria,
-                    FAQBot.ultima_actualizacion: datetime.now()
+                    FAQBot.ultima_actualizacion: datetime.now(),
                 }
             )
         )
         db.commit()
         return updated_count
 
-    def duplicate_faq(self, db: Session, *, faq_id: UUID, new_categoria: str = None) -> Optional[FAQBot]:
+    def duplicate_faq(
+        self, db: Session, *, faq_id: UUID, new_categoria: str = None
+    ) -> Optional[FAQBot]:
         """Duplicar FAQ existente"""
         original_faq = self.get(db, faq_id)
         if not original_faq:
             return None
-        
+
         # Crear nueva FAQ basada en la original
         new_faq_data = FAQBotCreate(
             pregunta=f"[Copia] {original_faq.pregunta}",
             respuesta=original_faq.respuesta,
             categoria=new_categoria or original_faq.categoria,
-            ultima_actualizacion=datetime.now()
+            ultima_actualizacion=datetime.now(),
         )
-        
+
         return self.create(db=db, obj_in=new_faq_data)

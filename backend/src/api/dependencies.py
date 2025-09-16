@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from typing import Optional, List
 from fastapi import Depends, HTTPException, status, Cookie, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -29,7 +28,6 @@ async def get_redis_service() -> RedisService:
     return redis_service
 
 
-
 def get_token_service() -> TokenService:
     """Dependency para obtener TokenService"""
     return token_service
@@ -50,11 +48,13 @@ async def get_current_user(
     token_service: TokenService = Depends(get_token_service),
     user_crud: UserCRUD = Depends(get_user_crud),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-    access_token_cookie: Optional[str] = Cookie(None, alias="access_token")  # Soportar cookie access_token
+    access_token_cookie: Optional[str] = Cookie(
+        None, alias="access_token"
+    ),  # Soportar cookie access_token
 ) -> Usuario:
     """
     Dependency para obtener usuario actual desde JWT token
-    
+
     Soporta Authorization header y cookies
     """
     credentials_exception = HTTPException(
@@ -62,9 +62,10 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     # Obtener token desde header Authorization o cookie access_token
     import logging
+
     logger = logging.getLogger("auth-debug")
     token = None
     if credentials and credentials.scheme.lower() == "bearer":
@@ -75,7 +76,9 @@ async def get_current_user(
         logger.info(f"Token recibido por cookie access_token: {token}")
 
     if not token:
-        logger.warning("No se recibió token en header Authorization ni en cookie 'access_token'")
+        logger.warning(
+            "No se recibió token en header Authorization ni en cookie 'access_token'"
+        )
         raise credentials_exception
 
     try:
@@ -87,7 +90,9 @@ async def get_current_user(
         roles = payload.get("roles", [])
 
         if user_id is None or token_type != "access":
-            logger.warning(f"Token inválido: user_id={user_id}, token_type={token_type}")
+            logger.warning(
+                f"Token inválido: user_id={user_id}, token_type={token_type}"
+            )
             raise credentials_exception
 
         # Obtener usuario desde DB
@@ -98,18 +103,21 @@ async def get_current_user(
 
         # Verificar que la cuenta esté activa
         if hasattr(user, "estado_cuenta") and str(user.estado_cuenta) != "activo":
-            logger.warning(f"Usuario {user_id} no está activo: estado={user.estado_cuenta}")
+            logger.warning(
+                f"Usuario {user_id} no está activo: estado={user.estado_cuenta}"
+            )
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account is not active"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Account is not active"
             )
 
         # Validar que el rol del usuario esté en el token (defensa extra)
         if roles and str(user.rol) not in [str(r) for r in roles]:
-            logger.warning(f"Rol de usuario no coincide: en token={roles}, en usuario={user.rol}")
+            logger.warning(
+                f"Rol de usuario no coincide: en token={roles}, en usuario={user.rol}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Rol de usuario no coincide con el token"
+                detail="Rol de usuario no coincide con el token",
             )
 
         logger.info(f"Usuario autenticado correctamente: {user_id}, rol={user.rol}")
@@ -123,18 +131,18 @@ async def get_current_user(
 def require_roles(*required_roles: RolUsuario):
     """
     Dependency factory para requerir roles específicos
-    
+
     Usage:
         @app.get("/admin-only", dependencies=[Depends(require_roles(RolUsuario.administrador))])
     """
+
     def check_roles(current_user: Usuario = Depends(get_current_user)):
         if current_user.rol not in required_roles:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
             )
         return current_user
-    
+
     return check_roles
 
 
@@ -150,14 +158,15 @@ def require_admin_or_coordinator():
 
 def require_verified_email():
     """Dependency para requerir email verificado"""
+
     def check_verified(current_user: Usuario = Depends(get_current_user)):
         if not current_user.email_verified:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Email verification required"
+                detail="Email verification required",
             )
         return current_user
-    
+
     return check_verified
 
 
@@ -166,11 +175,11 @@ async def rate_limit(
     endpoint: str = "general",
     max_requests: int = 60,
     window_seconds: int = 3600,
-    redis_service: RedisService = Depends(get_redis_service)
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     """
     Dependency para rate limiting
-    
+
     Args:
         identifier: Identificador único (IP, user_id, etc.)
         endpoint: Nombre del endpoint
@@ -180,11 +189,11 @@ async def rate_limit(
     if not identifier:
         # Si no se proporciona identificador, usar un placeholder
         identifier = "anonymous"
-    
+
     is_allowed, _, reset_time = await redis_service.check_rate_limit(
         identifier, endpoint, max_requests, window_seconds
     )
-    
+
     if not is_allowed:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -193,22 +202,20 @@ async def rate_limit(
                 "Retry-After": str(reset_time),
                 "X-RateLimit-Limit": str(max_requests),
                 "X-RateLimit-Remaining": "0",
-                "X-RateLimit-Reset": str(reset_time)
-            }
+                "X-RateLimit-Reset": str(reset_time),
+            },
         )
 
 
 # Rate limiting específico para login
-async def login_rate_limit(
-    redis_service: RedisService = Depends(get_redis_service)
-):
+async def login_rate_limit(redis_service: RedisService = Depends(get_redis_service)):
     """Rate limit específico para endpoint de login"""
     return await rate_limit(
         identifier="login_global",  # Se puede personalizar por IP
         endpoint="login",
         max_requests=10,  # 10 intentos de login
         window_seconds=300,  # en 5 minutos
-        redis_service=redis_service
+        redis_service=redis_service,
     )
 
 
@@ -223,23 +230,21 @@ def get_client_ip(x_forwarded_for: Optional[str] = Header(None)) -> str:
 # Validación CSRF para cookies
 def validate_csrf_token(
     csrf_token: Optional[str] = Header(None, alias="X-CSRF-Token"),
-    csrf_cookie: Optional[str] = Cookie(None, alias="csrf_token")
+    csrf_cookie: Optional[str] = Cookie(None, alias="csrf_token"),
 ):
     """
     Validar token CSRF para requests que usan cookies
-    
+
     Implementa double-submit cookie pattern
     """
     if not csrf_token or not csrf_cookie:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="CSRF token missing"
+            status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token missing"
         )
-    
+
     if csrf_token != csrf_cookie:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="CSRF token mismatch"
+            status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token mismatch"
         )
-    
+
     return csrf_token

@@ -6,7 +6,7 @@ from src.db.session import get_db
 from src.schemas.academic.programa import Programa, ProgramaCreate, ProgramaUpdate
 from src.crud.academic.crud_programa import programa_crud
 
-router = APIRouter(prefix="/programas", tags=["Programa"])
+router = APIRouter()
 
 @router.get("/", response_model=list[Programa])
 def get_all(db: Session = Depends(get_db)):

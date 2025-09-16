@@ -6,7 +6,11 @@ from src.db.session import get_db
 from src.schemas.academic.grupo import Grupo, GrupoCreate, GrupoUpdate
 from src.crud.academic.crud_grupo import grupo_crud
 
-router = APIRouter(prefix="/grupos", tags=["Grupo"])
+# src/api/routes/academic/grupo.py
+
+# ... importaciones reealizadas
+
+router = APIRouter() 
 
 @router.get("/", response_model=list[Grupo])
 def get_all(db: Session = Depends(get_db)):
@@ -18,6 +22,8 @@ def get_one(grupo_id: UUID, db: Session = Depends(get_db)):
     if not obj:
         raise HTTPException(status_code=404, detail="Grupo no encontrado")
     return obj
+
+# ... resto de código
 
 @router.post("/", response_model=Grupo)
 def create(obj_in: GrupoCreate, db: Session = Depends(get_db)):

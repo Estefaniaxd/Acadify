@@ -1,12 +1,11 @@
 import uuid
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
 
 from src.models.gamification.tema import Tema
 from src.models.gamification.tema_predefinido import TemaPredefinido
 from src.models.gamification.tema_personalizado import TemaPersonalizado
-from src.schemas.gamificacion.temas import (
+from src.schemas.gamification.tema import (
     TemaCreate,
     TemaUpdate,
     TemaPersonalizadoCreate,

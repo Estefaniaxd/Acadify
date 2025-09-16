@@ -11,8 +11,9 @@ from src.schemas.classes.plataforma import (
 )
 from src.crud.classes.plataforma import crud_plataforma
 
-router = APIRouter(prefix="/plataformas", tags=["Plataforma"])
+router = APIRouter()
 PLATAFORM_NOT_FOUND = "Plataforma no encontrada"
+
 
 @router.post("/", response_model=PlataformaRead)
 def create_plataforma(plataforma_in: PlataformaCreate, db: Session = Depends(get_db)):

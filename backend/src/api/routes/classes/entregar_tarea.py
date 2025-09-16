@@ -12,7 +12,7 @@ from src.schemas.classes.entregar_tarea import (
 )
 from src.crud.classes.entregar_tarea import CRUDEntregarTarea
 
-router = APIRouter(prefix="/entregas", tags=["EntregarTarea"])
+router = APIRouter()
 crud_entregar_tarea = CRUDEntregarTarea()
 
 
@@ -49,7 +49,9 @@ def get_entregas_by_estudiante(estudiante_id: UUID, db: Session = Depends(get_db
     return crud_entregar_tarea.get_by_estudiante(db, estudiante_id=estudiante_id)
 
 
-@router.get("/tarea/{tarea_id}/estudiante/{estudiante_id}", response_model=EntregarTareaRead)
+@router.get(
+    "/tarea/{tarea_id}/estudiante/{estudiante_id}", response_model=EntregarTareaRead
+)
 def get_entrega_by_tarea_and_estudiante(
     tarea_id: UUID, estudiante_id: UUID, db: Session = Depends(get_db)
 ):

@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, and_, or_
+from sqlalchemy import func, desc, and_
 from src.models.communication.mensaje import Mensaje
 from src.schemas.communication.mensaje import MensajeCreate, MensajeUpdate
 from src.enums.communication.mensaje_enums import TipoMensaje

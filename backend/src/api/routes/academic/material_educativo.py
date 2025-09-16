@@ -6,7 +6,7 @@ from src.db.session import get_db
 from src.schemas.academic.material_educativo import MaterialEducativo, MaterialEducativoCreate, MaterialEducativoUpdate
 from src.crud.academic.crud_material_educativo import material_educativo_crud
 
-router = APIRouter(prefix="/materiales-educativos", tags=["MaterialEducativo"])
+router = APIRouter()
 
 @router.get("/", response_model=list[MaterialEducativo])
 def get_all(db: Session = Depends(get_db)):
