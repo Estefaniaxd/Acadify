@@ -1,11 +1,31 @@
-# Constante global para ejemplos
-EXAMPLE_EMAIL = "usuario@universidad.edu.co"
-# src/schemas/auth/auth_schemas.py
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Optional, Literal
 from datetime import datetime
 import uuid
+
+# ===============================
+# Email Verification Schemas
+# ===============================
+class EmailVerificationRequest(BaseModel):
+    usuario_id: str = Field(..., description="ID del usuario a verificar")
+    verification_code: str = Field(..., description="Código de verificación enviado por email")
+    
+    @field_validator('usuario_id')
+    @classmethod
+    def validate_uuid(cls, v):
+        try:
+            uuid.UUID(str(v))
+            return str(v)
+        except ValueError:
+            raise ValueError('usuario_id debe ser un UUID válido')
+
+class EmailVerificationResponse(BaseModel):
+    message: str = Field(default="Correo verificado exitosamente", description="Mensaje de confirmación")
+
+# Constante global para ejemplos
+EXAMPLE_EMAIL = "usuario@universidad.edu.co"
+# src/schemas/auth/auth_schemas.py
 
 # ===============================
 # Authentication Schemas
@@ -343,6 +363,77 @@ class MessageResponse(BaseModel):
         json_schema_extra={
             "example": {
                 "message": "Operación completada exitosamente"
+            }
+        }
+    )
+
+# ===============================
+# Account Deletion Schemas
+# ===============================
+
+class AccountDeletionRequest(BaseModel):
+    """Schema para solicitar eliminación de cuenta (paso 1 - solo contraseña)"""
+    password: str = Field(..., min_length=1, description="Contraseña actual para confirmar identidad")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "password": "MiContraseña123!"
+            }
+        }
+    )
+
+class AccountDeletionFinalRequest(BaseModel):
+    """Schema para eliminación final de cuenta con confirmación completa"""
+    current_password: str = Field(..., min_length=1, description="Contraseña actual para confirmar eliminación")
+    confirmation_text: str = Field(..., description="Texto de confirmación: 'ELIMINAR MI CUENTA'")
+    reason: Optional[str] = Field(None, max_length=500, description="Motivo opcional para eliminar la cuenta")
+    
+    @field_validator('confirmation_text')
+    @classmethod
+    def validate_confirmation(cls, v):
+        if v.upper().strip() != "ELIMINAR MI CUENTA":
+            raise ValueError('Debe escribir exactamente "ELIMINAR MI CUENTA" para confirmar')
+        return v
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "current_password": "MiContraseña123!",
+                "confirmation_text": "ELIMINAR MI CUENTA",
+                "reason": "Ya no necesito la plataforma"
+            }
+        }
+    )
+
+class AccountDeletionResponse(BaseModel):
+    """Schema para respuesta de eliminación de cuenta"""
+    message: str = Field(..., description="Mensaje de confirmación")
+    grace_period_days: int = Field(..., description="Días del período de gracia")
+    deletion_date: datetime = Field(..., description="Fecha límite para eliminación permanente")
+    restoration_token: str = Field(..., description="Token para restaurar la cuenta")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "message": "Cuenta marcada para eliminación. Tienes 30 días para restaurarla.",
+                "grace_period_days": 30,
+                "deletion_date": "2025-10-17T14:30:00Z",
+                "restoration_token": "rest_abc123def456"
+            }
+        }
+    )
+
+class AccountRestorationRequest(BaseModel):
+    """Schema para restaurar cuenta eliminada"""
+    restoration_token: str = Field(..., description="Token de restauración recibido por email")
+    current_password: str = Field(..., min_length=1, description="Contraseña actual para confirmar restauración")
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "restoration_token": "rest_abc123def456",
+                "current_password": "MiContraseña123!"
             }
         }
     )

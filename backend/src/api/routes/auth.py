@@ -1,3 +1,26 @@
+from src.schemas.auth.auth_schemas import EmailVerificationRequest, EmailVerificationResponse
+# ===============================
+# Authentication Endpoints
+# ===============================
+
+# Endpoint para verificar email
+@router.post("/verify-email", response_model=EmailVerificationResponse)
+async def verify_email(
+    *,
+    db: Session = Depends(get_db),
+    redis_client: redis.Redis = Depends(get_redis_client),
+    data: EmailVerificationRequest
+) -> Any:
+    """
+    Verificar correo electrónico con código recibido por email.
+    """
+    auth_service = AuthService(redis_client)
+    try:
+        result = await auth_service.verify_email(db, data)
+        return EmailVerificationResponse(message=result["message"])
+    except Exception as e:
+        logger.error(f"Error en verificación de email: {e}")
+        raise HTTPException(status_code=400, detail="No se pudo verificar el correo")
 # src/api/routers/auth.py
 
 from typing import Any, Dict

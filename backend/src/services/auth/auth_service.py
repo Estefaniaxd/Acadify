@@ -25,6 +25,7 @@ from src.core.config import get_settings
 from src.enums.users.usuario_enums import RolUsuario, EstadoCuentaUsuario
 
 
+
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
@@ -37,13 +38,57 @@ USER_NOT_FOUND = "Usuario no encontrado"
 
 class AuthService:
     """Servicio principal de autenticación"""
-    
     def __init__(self, redis_client: redis.Redis):
         self.redis = redis_client
         self.token_blacklist = get_token_blacklist(redis_client)
         self.login_attempts = get_login_attempt_manager(redis_client)
         self.email_service = get_email_service()
-    
+
+    async def verify_email(self, db: Session, data) -> dict:
+        """Verificar correo electrónico con código"""
+        try:
+            usuario_id = str(data.usuario_id).strip()
+            code = str(data.verification_code).strip()
+            verification_key = f"verify_email:{usuario_id}"
+            
+            print(f"DEBUG: Buscando clave: {verification_key}")
+            print(f"DEBUG: Código recibido: '{code}'")
+            
+            stored_code = await self.redis.get(verification_key)
+            if stored_code is None:
+                print(f"DEBUG: No se encontró código en Redis para {verification_key}")
+                # Verificar todas las claves que empiecen con verify_email
+                all_keys = await self.redis.keys("verify_email:*")
+                print(f"DEBUG: Todas las claves verify_email en Redis: {all_keys}")
+                raise HTTPException(status_code=400, detail="Código de verificación inválido o expirado")
+            
+            # El código puede venir como bytes o como string dependiendo de la configuración de Redis
+            if isinstance(stored_code, bytes):
+                stored_code_str = stored_code.decode().strip()
+            else:
+                stored_code_str = str(stored_code).strip()
+                
+            print(f"DEBUG: Código almacenado: '{stored_code_str}'")
+            print(f"DEBUG: ¿Son iguales? {stored_code_str == code}")
+            print(f"DEBUG: Longitud recibido: {len(code)}, longitud almacenado: {len(stored_code_str)}")
+            
+            logger.info(f"Comparando código recibido='{code}' vs almacenado='{stored_code_str}' para usuario_id={usuario_id}")
+            
+            if stored_code_str != code:
+                raise HTTPException(status_code=400, detail="Código de verificación inválido o expirado")
+            
+            user = usuario_crud.get(db, id=usuario_id)
+            if not user:
+                raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            if getattr(user, "email_verified", False):
+                return {"message": "El correo ya estaba verificado"}
+            usuario_crud.verify_email(db, user_id=usuario_id)
+            await self.redis.delete(verification_key)
+            return {"message": "Correo verificado exitosamente"}
+        except Exception as e:
+            print(f"DEBUG: Error en verify_email: {e}")
+            raise
+
     # ===============================
     # User Registration
     # ===============================
@@ -56,30 +101,23 @@ class AuthService:
             hashed_password = security_manager.get_password_hash(user_data.password)
             user_dict = user_data.model_dump(exclude={'password'})
             user_dict['password_hash'] = hashed_password
-            if user_data.rol == RolUsuario.administrador:
-                user_dict['correo_institucional'] = None
-            else:
-                user_dict['username'] = None
+            # Ya no sobrescribimos username ni correo, ambos se guardan siempre
+            # Dejar usuario como no verificado
+            user_dict['email_verified'] = False
             new_user = usuario_crud.create(db=db, obj_in=user_dict)
-            await self._send_welcome_email_if_needed(new_user)
+            await self._send_verification_email(new_user)
             return new_user
         except IntegrityError as e:
             db.rollback()
             self._handle_integrity_error(e)
 
     def _validate_user_registration(self, user_data: UsuarioCreate) -> None:
-        if user_data.rol == RolUsuario.administrador:
-            if not user_data.username or user_data.correo_institucional:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Administrador debe tener username y NO debe tener correo_institucional"
-                )
-        else:
-            if not user_data.correo_institucional or user_data.username:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Usuario no-administrador debe tener correo_institucional y NO debe tener username"
-                )
+        # Todos los usuarios deben tener username y correo
+        if not user_data.username or not user_data.correo_institucional:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Todos los usuarios deben tener username y correo_institucional"
+            )
 
     def _validate_password_strength(self, password: str) -> None:
         is_strong, message = is_strong_password(password)
@@ -89,20 +127,63 @@ class AuthService:
                 detail=message
             )
 
-    async def _send_welcome_email_if_needed(self, user: Usuario) -> None:
+    async def _send_verification_email(self, user: Usuario) -> None:
+        """Enviar email de verificación con código"""
+        if not user.correo_institucional:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Usuario no tiene correo institucional registrado"
+            )
+        
+        try:
+            # Generar código de verificación (6 dígitos)
+            verification_code = security_manager.generate_otp_code()
+            verification_key = f"verify_email:{user.usuario_id}"
+            await self.redis.setex(verification_key, 3600, verification_code)  # 1 hora
+            logger.info(f"Código de verificación generado: '{verification_code}' para usuario {user.usuario_id}")
+            
+            enlace = f"https://acadify.com/verify-email?uid={user.usuario_id}&code={verification_code}"
+            await self.email_service.send_template_email(
+                to_email=user.correo_institucional,
+                subject="Verifica tu correo - Acadify",
+                template_name="verify_email.html",
+                context={
+                    "nombre": f"{user.nombres} {user.apellidos}",
+                    "codigo": verification_code,
+                    "enlace_verificacion": enlace,
+                    "valido_hasta": "1 hora"
+                }
+            )
+            logger.info(f"Email de verificación enviado exitosamente a {user.correo_institucional}")
+            
+        except Exception as e:
+            logger.error(f"Error enviando email de verificación: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error enviando código de verificación por email"
+            )
+
+    async def _send_login_notification(self, user: Usuario, login_data, method: str) -> None:
+        """Enviar notificación de login exitoso por email"""
         if user.correo_institucional:
             try:
                 await self.email_service.send_template_email(
                     to_email=user.correo_institucional,
-                    subject="Bienvenido a Acadify",
-                    template_name="welcome.html",
+                    subject="Nuevo inicio de sesión - Acadify",
+                    template_name="login_notification.html",
                     context={
                         "nombre": f"{user.nombres} {user.apellidos}",
-                        "rol": user.rol.value
+                        "fecha_hora": datetime.now().strftime("%d/%m/%Y a las %H:%M"),
+                        "ip_address": "127.0.0.1",  # En producción, obtener IP real
+                        "dispositivo": "Navegador web",  # En producción, parsear user-agent
+                        "navegador": "Chrome/Firefox",  # En producción, parsear user-agent
+                        "ubicacion": "Ubicación aproximada",  # En producción, usar geolocalización
+                        "enlace_seguridad": "https://acadify.com/seguridad",
+                        "enlace_reporte": "https://acadify.com/reportar-actividad"
                     }
                 )
             except Exception as e:
-                logger.error(f"Error enviando email de bienvenida: {e}")
+                logger.error(f"Error enviando notificación de login: {e}")
 
     def _handle_integrity_error(self, e: IntegrityError) -> None:
         msg = str(e)
@@ -222,6 +303,10 @@ class AuthService:
         # 8. Login exitoso sin 2FA
         logger.info(f"Usuario {user.usuario_id} inicia sesión SIN 2FA")
         await self.login_attempts.clear_attempts(identifier)
+        
+        # Enviar notificación de login exitoso
+        await self._send_login_notification(user, login_data, "Sin 2FA")
+        
         return self._complete_login(db, user)
     
     async def _handle_2fa_login(
@@ -295,6 +380,10 @@ class AuthService:
             # OTP válido, limpiar y completar login
             await self.redis.delete(otp_key)
             await self.login_attempts.clear_attempts(identifier)
+            
+            # Enviar notificación de login exitoso con 2FA
+            await self._send_login_notification(user, {"identifier": identifier}, "Email 2FA")
+            
             return self._complete_login(db, user)
     
     async def _handle_totp_2fa_login(
@@ -327,6 +416,10 @@ class AuthService:
         # TOTP válido, completar login
         identifier = user.correo_institucional or user.username
         await self.login_attempts.clear_attempts(identifier)
+        
+        # Enviar notificación de login exitoso con TOTP
+        await self._send_login_notification(user, {"identifier": identifier}, "TOTP 2FA")
+        
         return self._complete_login(db, user)
     
     def _complete_login(self, db: Session, user: Usuario) -> Dict[str, Any]:
@@ -501,7 +594,19 @@ class AuthService:
         # Verificar código de reset
         reset_key = f"reset_token:{user.usuario_id}"
         stored_code = await self.redis.get(reset_key)
-        if not stored_code or stored_code != reset_confirm.reset_code:
+        if not stored_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Código de recuperación inválido o expirado"
+            )
+        # El código puede venir como bytes o como string dependiendo de la configuración de Redis
+        if isinstance(stored_code, bytes):
+            stored_code_str = stored_code.decode().strip()
+        else:
+            stored_code_str = str(stored_code).strip()
+        reset_code_str = str(reset_confirm.reset_code).strip()
+        logger.info(f"Comparando código reset recibido='{reset_code_str}' vs almacenado='{stored_code_str}' para usuario_id={user.usuario_id}")
+        if stored_code_str != reset_code_str:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Código de recuperación inválido o expirado"
@@ -516,17 +621,22 @@ class AuthService:
             await self.email_service.send_template_email(
                 to_email=email,
                 subject="Contraseña actualizada - Acadify",
-                template_name="password_changed.html",
+                template_name="password_changed_notification.html",
                 context={
                     "nombre": f"{user.nombres} {user.apellidos}",
-                    "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    "fecha_hora": datetime.now().strftime("%d/%m/%Y a las %H:%M"),
+                    "ip_address": "127.0.0.1",  # En producción, obtener IP real
+                    "dispositivo": "Navegador web",  # En producción, parsear user-agent
+                    "metodo": "Reset por código de recuperación",
+                    "enlace_soporte": "https://acadify.com/soporte",
+                    "enlace_configuracion": "https://acadify.com/configuracion"
                 }
             )
         except Exception as e:
             logger.error(f"Error enviando confirmación de cambio: {e}")
         return {"message": "Contraseña actualizada exitosamente"}
     
-    def change_password(
+    async def change_password(
         self, 
         db: Session, 
         user_id: UUID, 
@@ -548,7 +658,218 @@ class AuthService:
         # Cambiar contraseña
         new_hash = security_manager.get_password_hash(change_request.new_password)
         usuario_crud.update_password_hash(db, user_id=user_id, new_hash=new_hash)
+        
+        # Enviar notificación de cambio de contraseña
+        try:
+            await self.email_service.send_template_email(
+                to_email=user.correo_institucional,
+                subject="Contraseña actualizada - Acadify",
+                template_name="password_changed_notification.html",
+                context={
+                    "nombre": f"{user.nombres} {user.apellidos}",
+                    "fecha_hora": datetime.now().strftime("%d/%m/%Y a las %H:%M"),
+                    "ip_address": "127.0.0.1",  # En producción, obtener IP real
+                    "dispositivo": "Navegador web",  # En producción, parsear user-agent
+                    "metodo": "Cambio por usuario autenticado",
+                    "enlace_soporte": "https://acadify.com/soporte",
+                    "enlace_configuracion": "https://acadify.com/configuracion"
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error enviando notificación de cambio: {e}")
+        
         return {"message": "Contraseña actualizada exitosamente"}
+    
+    # ===============================
+    # Email Verification Management
+    # ===============================
+    
+    async def request_email_verification(self, db: Session, user_id: UUID) -> Dict[str, str]:
+        """Solicitar nuevo código de verificación de email"""
+        logger.info(f"Solicitando verificación de email para usuario: {user_id}")
+        
+        try:
+            user = usuario_crud.get(db, id=user_id)
+            logger.info(f"Usuario encontrado: {user is not None}")
+            
+            if not user:
+                logger.error(f"Usuario no encontrado con ID: {user_id}")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=USER_NOT_FOUND
+                )
+            
+            logger.info(f"Email verified status: {getattr(user, 'email_verified', None)}")
+            
+            if getattr(user, "email_verified", False):
+                logger.info(f"Email ya verificado para usuario: {user_id}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El email ya está verificado"
+                )
+            
+            logger.info(f"Enviando email de verificación para usuario: {user_id}")
+            # Enviar nuevo código
+            await self._send_verification_email(user)
+            logger.info(f"Email de verificación enviado exitosamente para usuario: {user_id}")
+            return {"message": "Código de verificación enviado a tu correo"}
+            
+        except HTTPException:
+            # Re-lanzar HTTPExceptions sin modificar
+            raise
+        except Exception as e:
+            logger.error(f"Error inesperado en request_email_verification: {e}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error interno: {str(e)}"
+            )
+    
+    # ===============================
+    # Account Deletion (Two-Step Process)
+    # ===============================
+    
+    async def request_account_deletion(self, db: Session, user_id: UUID, password: str) -> Dict[str, str]:
+        """Paso 1: Solicitar eliminación de cuenta (envía código por email)"""
+        user = usuario_crud.get(db, id=user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=USER_NOT_FOUND
+            )
+        
+        # Verificar contraseña
+        if not security_manager.verify_password(password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Contraseña incorrecta"
+            )
+        
+        # Generar código de confirmación
+        deletion_code = security_manager.generate_otp_code()
+        deletion_key = f"delete_account:{user_id}"
+        
+        # Guardar en Redis con TTL de 15 minutos
+        await self.redis.setex(deletion_key, 900, deletion_code)
+        
+        # Enviar email de confirmación
+        try:
+            await self.email_service.send_template_email(
+                to_email=user.correo_institucional,
+                subject="Confirmar eliminación de cuenta - Acadify",
+                template_name="verify_email.html",  # Reutilizamos plantilla
+                context={
+                    "nombre": f"{user.nombres} {user.apellidos}",
+                    "codigo": deletion_code,
+                    "enlace_verificacion": f"https://acadify.com/confirm-deletion?uid={user_id}&code={deletion_code}",
+                    "valido_hasta": "15 minutos"
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error enviando email de eliminación: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error enviando código de confirmación"
+            )
+        
+        return {"message": "Se envió un código de confirmación a tu correo. Tienes 15 minutos para confirmar la eliminación."}
+    
+    async def confirm_account_deletion(self, db: Session, user_id: UUID, deletion_code: str) -> Dict[str, str]:
+        """Paso 2: Confirmar eliminación de cuenta con código"""
+        logger.info(f"Confirmando eliminación de cuenta para usuario: {user_id}")
+        logger.info(f"Código recibido: '{deletion_code}'")
+        
+        user = usuario_crud.get(db, id=user_id)
+        if not user:
+            logger.error(f"Usuario no encontrado: {user_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=USER_NOT_FOUND
+            )
+        
+        # Verificar código
+        deletion_key = f"delete_account:{user_id}"
+        logger.info(f"Buscando código en Redis con clave: {deletion_key}")
+        stored_code = await self.redis.get(deletion_key)
+        
+        if not stored_code:
+            logger.error(f"No se encontró código en Redis para clave: {deletion_key}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Código de eliminación inválido o expirado"
+            )
+        
+        # El código puede venir como bytes o como string
+        if isinstance(stored_code, bytes):
+            stored_code_str = stored_code.decode().strip()
+        else:
+            stored_code_str = str(stored_code).strip()
+        
+        logger.info(f"Código almacenado: '{stored_code_str}'")
+        logger.info(f"Código recibido (limpio): '{deletion_code.strip()}'")
+        
+        if stored_code_str != deletion_code.strip():
+            logger.error(f"Códigos no coinciden. Almacenado: '{stored_code_str}', Recibido: '{deletion_code.strip()}'")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Código de eliminación incorrecto"
+            )
+        
+        # Código válido, proceder con eliminación
+        # Calcular fecha de eliminación (30 días de gracia)
+        grace_period_days = 30
+        deletion_date = datetime.now() + timedelta(days=grace_period_days)
+        
+        # Generar token de restauración
+        restoration_token = f"rest_{security_manager.generate_otp_code(32)}"
+        
+        # Guardar en Redis con TTL de 30 días
+        restore_key = f"restore_account:{user_id}"
+        await self.redis.setex(restore_key, grace_period_days * 24 * 3600, restoration_token)
+        
+        # Marcar para eliminación
+        deletion_info = {
+            "user_id": str(user_id),
+            "deletion_date": deletion_date.isoformat(),
+            "restoration_token": restoration_token,
+            "confirmed_at": datetime.now().isoformat()
+        }
+        
+        pending_deletion_key = f"pending_deletion:{user_id}"
+        await self.redis.setex(pending_deletion_key, grace_period_days * 24 * 3600, str(deletion_info))
+        
+        # Limpiar código de confirmación
+        await self.redis.delete(deletion_key)
+        
+        # Enviar email final
+        try:
+            await self.email_service.send_template_email(
+                to_email=user.correo_institucional,
+                subject="Eliminación de cuenta confirmada - Acadify",
+                template_name="account_deletion_notification.html",
+                context={
+                    "nombre": f"{user.nombres} {user.apellidos}",
+                    "dias_restantes": grace_period_days,
+                    "fecha_eliminacion_final": deletion_date.strftime("%d/%m/%Y a las %H:%M"),
+                    "fecha_solicitud": datetime.now().strftime("%d/%m/%Y a las %H:%M"),
+                    "ip_address": "127.0.0.1",
+                    "dispositivo": "Navegador web",
+                    "email_cuenta": user.correo_institucional,
+                    "usuario_id": str(user_id),
+                    "enlace_restaurar": f"https://acadify.com/restore-account?token={restoration_token}",
+                    "enlace_soporte": "https://acadify.com/soporte"
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error enviando email final de eliminación: {e}")
+        
+        return {
+            "message": f"Cuenta confirmada para eliminación. Será eliminada permanentemente el {deletion_date.strftime('%d/%m/%Y')}.",
+            "grace_period_days": grace_period_days,
+            "deletion_date": deletion_date,
+            "restoration_token": restoration_token
+        }
     
     # ===============================
     # Two-Factor Authentication

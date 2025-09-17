@@ -14,12 +14,14 @@ organizadas por funcionalidad:
 - auth_health: Health check del sistema de autenticación
 """
 
+
 from .auth_core import router as core_router
 from .auth_password import router as password_router
 from .auth_2fa import router as twofa_router
 from .auth_users import router as users_router
 from .auth_account import router as account_router
 from .auth_health import router as health_router
+from .auth_verify import router as verify_router
 
 __all__ = [
     "core_router",
@@ -27,5 +29,6 @@ __all__ = [
     "twofa_router",
     "users_router",
     "account_router",
-    "health_router"
+    "health_router",
+    "verify_router"
 ]

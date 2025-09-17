@@ -15,7 +15,8 @@ from src.api.routes.auth import (
     twofa_router,
     users_router,
     account_router,
-    health_router
+    health_router,
+    verify_router
 )
 
 # Router principal que combina todos los sub-routers
@@ -28,3 +29,4 @@ router.include_router(twofa_router)         # /auth/2fa/setup, /auth/2fa/verify,
 router.include_router(users_router)        # /auth/users (CRUD - solo admins)
 router.include_router(account_router)      # /auth/users/{id}/activate, /auth/users/{id}/deactivate, /auth/users/{id}/unlock
 router.include_router(health_router)       # /auth/health
+router.include_router(verify_router)       # /auth/verify-email
