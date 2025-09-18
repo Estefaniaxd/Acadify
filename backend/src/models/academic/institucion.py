@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID, ENUM, BOOLEAN
-from src.enums.academic.institucion_enums import (
+from ...enums.academic.institucion_enums import (
     TipoInstitucion,
     NivelEducativoInstitucion,
     SectorInstitucion,

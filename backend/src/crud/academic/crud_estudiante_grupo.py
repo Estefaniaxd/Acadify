@@ -1,15 +1,15 @@
 from sqlalchemy.orm import Session
+from ..base import CRUDBase
 from uuid import UUID
-from datetime import date
 
-from src.models.academic.estudiante_grupo import EstudianteGrupo
-from src.schemas.academic.estudiante_grupo import (
+from ...models.academic.estudiante_grupo import EstudianteGrupo
+from ...schemas.academic.estudiante_grupo import (
     EstudianteGrupoCreate,
     EstudianteGrupoUpdate,
 )
 
 
-class CRUDEstudianteGrupo:
+class CRUDEstudianteGrupo(CRUDBase[EstudianteGrupo, EstudianteGrupoCreate, EstudianteGrupoUpdate]):
     def get(self, db: Session, grupo_id: UUID, estudiante_id: UUID):
         return (
             db.query(EstudianteGrupo)
@@ -50,7 +50,9 @@ class CRUDEstudianteGrupo:
         return obj
 
     def get_by_grupo(self, db: Session, grupo_id: UUID):
-        return db.query(EstudianteGrupo).filter(EstudianteGrupo.grupo_id == grupo_id).all()
+        return (
+            db.query(EstudianteGrupo).filter(EstudianteGrupo.grupo_id == grupo_id).all()
+        )
 
     def get_by_estudiante(self, db: Session, estudiante_id: UUID):
         return (
@@ -60,4 +62,4 @@ class CRUDEstudianteGrupo:
         )
 
 
-estudiante_grupo_crud = CRUDEstudianteGrupo()
+estudiante_grupo = CRUDEstudianteGrupo(EstudianteGrupo)

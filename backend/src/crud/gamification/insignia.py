@@ -3,10 +3,10 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, desc
 
-from src.models.gamification.insignia import Insignia
-from src.models.gamification.usuario_insignia import UsuarioInsignia
-from src.models.users.usuario import Usuario
-from src.schemas.gamification.insignia import (
+from ...models.gamification.insignia import Insignia
+from ...models.gamification.usuario_insignia import UsuarioInsignia
+from ...models.users.usuario import Usuario
+from ...schemas.gamification.insignia import (
     InsigniaCreate,
     InsigniaUpdate,
     OtorgarInsigniaRequest,

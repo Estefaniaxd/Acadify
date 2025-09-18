@@ -13,7 +13,9 @@ class ValorCalificacionCreate(ValorCalificacionBase):
 
 
 class ValorCalificacionUpdate(ValorCalificacionBase):
-    pass
+    valor: str | None = None
+    descripcion: str | None = None
+    orden: int | None = None
 
 
 class ValorCalificacionInDBBase(ValorCalificacionBase):
@@ -25,8 +27,4 @@ class ValorCalificacionInDBBase(ValorCalificacionBase):
 
 
 class ValorCalificacion(ValorCalificacionInDBBase):
-    pass
-
-
-class ValorCalificacionInDB(ValorCalificacionInDBBase):
     pass

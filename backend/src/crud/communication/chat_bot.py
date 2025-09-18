@@ -1,16 +1,17 @@
 # crud/chatbot.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from datetime import date
 from sqlalchemy.orm import Session
-from src.models.communication.chat_bot import ChatBot
-from src.schemas.communication.chat_bot import ChatBotCreate, ChatBotUpdate
+from ...models.communication.chat_bot import ChatBot
+from ...schemas.communication.chat_bot import ChatBotCreate, ChatBotUpdate
 
 
-class CRUDChatBot:
+class CRUDChatBot(CRUDBase[ChatBot, ChatBotCreate, ChatBotUpdate]):
     def create(self, db: Session, *, obj_in: ChatBotCreate) -> ChatBot:
         """Crear nuevo chatbot"""
-        db_obj = ChatBot(**obj_in.dict())
+        db_obj = ChatBot(**obj_in.model_dump())
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -67,7 +68,7 @@ class CRUDChatBot:
 
     def update(self, db: Session, *, db_obj: ChatBot, obj_in: ChatBotUpdate) -> ChatBot:
         """Actualizar chatbot"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
 
@@ -101,3 +102,5 @@ class CRUDChatBot:
             db.delete(obj)
             db.commit()
         return obj
+
+chat_bot = CRUDChatBot(ChatBot)

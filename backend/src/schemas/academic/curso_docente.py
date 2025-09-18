@@ -4,19 +4,23 @@ from datetime import date
 
 
 class CursoDocenteBase(BaseModel):
-    curso_id: UUID
-    docente_id: UUID
     fecha_asignada: date | None = None
 
 
 class CursoDocenteCreate(CursoDocenteBase):
-    pass
-
+    curso_id: UUID
+    docente_id: UUID
 
 class CursoDocenteUpdate(BaseModel):
-    fecha_asignada: date | None = None
+    fecha_asignacion: date | None = None
 
 
-class CursoDocenteResponse(CursoDocenteBase):
+class CursoDocenteInDBBase(CursoDocenteBase):
+    curso_id: UUID
+    docente_id: UUID
+    
     class Config:
         from_attributes = True
+
+class CursoDocente(CursoDocenteInDBBase):
+    pass

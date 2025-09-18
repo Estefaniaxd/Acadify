@@ -1,12 +1,18 @@
 # src/crud/crud_escala_calificacion.py
-from .     import base
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from sqlalchemy.orm import Session
-from src.models.assessment.escala_calificacion import EscalaCalificacion
+from ...models.assessment.escala_calificacion import EscalaCalificacion
+from ...schemas.assessment.escala_calificacion import (
+    EscalaCalificacionCreate,
+    EscalaCalificacionUpdate,
+)
 
 
-class CRUDEscalaCalificacion:
+class CRUDEscalaCalificacion(
+    CRUDBase[EscalaCalificacion, EscalaCalificacionCreate, EscalaCalificacionUpdate]
+):
     def get_by_institucion(
         self, db: Session, *, institucion_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[EscalaCalificacion]:
@@ -30,7 +36,7 @@ class CRUDEscalaCalificacion:
                 EscalaCalificacion.institucion_id == institucion_id,
             )
             .first()
-        )   
+        )
 
     def get_by_tipo_and_institucion(
         self,
@@ -54,4 +60,4 @@ class CRUDEscalaCalificacion:
         )
 
 
-escala_calificacion = CRUDEscalaCalificacion(EscalaCalificacion)  
+escala_calificacion = CRUDEscalaCalificacion(EscalaCalificacion)

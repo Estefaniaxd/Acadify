@@ -1,12 +1,12 @@
 import uuid
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, func, text
+from sqlalchemy import desc, func
 
-from src.models.gamification.usuario_puntos import UsuarioPuntos
-from src.models.gamification.historial_puntos import HistorialPuntos
-from src.models.users.usuario import Usuario
-from src.schemas.gamification.historial_puntos import (
+from ...models.gamification.usuario_puntos import UsuarioPuntos
+from ...models.gamification.historial_puntos import HistorialPuntos
+from ...models.users.usuario import Usuario
+from ...schemas.gamification.historial_puntos import (
     AsignarPuntosRequest,
     DescontarPuntosRequest,
 )

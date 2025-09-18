@@ -1,23 +1,21 @@
 from pydantic import BaseModel, field_validator
 from uuid import UUID
 from datetime import datetime
-from src.enums.communication.mensaje_enums import TipoMensaje
+from ...enums.communication.mensaje_enums import TipoMensaje
 
 
 class MensajeBase(BaseModel):
-    chat_grupo_id: UUID
-    emisor_id: UUID | None = None
-    fecha_hora: datetime | None = None
     tipo: TipoMensaje
     contenido: str
 
 
 class MensajeCreate(MensajeBase):
-    pass
+    chat_grupo_id: UUID
+    emisor_id: UUID | None = None
 
 
 class MensajeUpdate(BaseModel):
-    fecha_hora: datetime | None = None
+    tipo: TipoMensaje | None = None
     contenido: str | None = None
 
     @field_validator("contenido")
@@ -29,10 +27,13 @@ class MensajeUpdate(BaseModel):
 
 class MensajeInDBBase(MensajeBase):
     mensaje_id: UUID
+    chat_grupo_id: UUID
+    emisor_id: UUID | None = None
+    fecha_hora: datetime
 
     class Config:
         from_attributes = True
 
 
-class MensajeRead(MensajeInDBBase):
+class Mensaje(MensajeInDBBase):
     pass

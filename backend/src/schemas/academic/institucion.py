@@ -1,6 +1,6 @@
-import uuid
 from pydantic import BaseModel, EmailStr
-from src.enums.academic.institucion_enums import (
+from uuid import UUID
+from ...enums.academic.institucion_enums import (
     TipoInstitucion,
     NivelEducativoInstitucion,
     SectorInstitucion,
@@ -24,12 +24,32 @@ class InstitucionBase(BaseModel):
 
 
 class InstitucionCreate(InstitucionBase):
-    administrador_id: uuid.UUID | None = None
+    administrador_id_creador: UUID | None = None
 
 
-class InstitucionRead(InstitucionBase):
-    institucion_id: uuid.UUID
-    administrador_id: uuid.UUID | None = None
+class InstitucionUpdate(BaseModel):
+    nombre: str | None = None
+    sigla: str | None = None
+    lema: str | None = None
+    tipo_institucion: TipoInstitucion | None = None
+    usa_programas: bool | None = None
+    nivel_educativo: NivelEducativoInstitucion | None = None
+    sector: SectorInstitucion | None = None
+    direccion: str | None = None
+    ciudad: str | None = None
+    pais: str | None = None
+    correo_institucional: EmailStr | None = None
+    telefono: str | None = None
+    nit: str | None = None
+
+
+class InstitucionInDBBase(InstitucionBase):
+    institucion_id: UUID
+    administrador_id_creador: UUID | None = None
 
     class Config:
         from_attributes = True
+
+
+class Institucion(InstitucionInDBBase):
+    pass

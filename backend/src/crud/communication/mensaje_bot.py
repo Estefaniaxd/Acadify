@@ -1,18 +1,19 @@
 from typing import List, Optional
+from ..base import CRUDMensajeBot
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, and_, or_
-from src.models.communication.mensaje_bot import MensajeBot
-from src.schemas.communication.mensaje_bot import MensajeBotCreate, MensajeBotUpdate
-from src.enums.communication.mensaje_bots_enum import ContextoMensaje
+from ...models.communication.mensaje_bot import MensajeBot
+from ...schemas.communication.mensaje_bot import MensajeBotCreate, MensajeBotUpdate
+from ...enums.communication.mensaje_bots_enum import ContextoMensaje
 
 
-class CRUDMensajeBot:
+class CRUDMensajeBot(CRUDMensajeBot[MensajeBot, MensajeBotCreate, MensajeBotUpdate]):
     def create(self, db: Session, *, obj_in: MensajeBotCreate) -> MensajeBot:
         """Crear nuevo mensaje de bot"""
         # Asegurar que fecha_hora se establezca si no se proporciona
-        mensaje_data = obj_in.dict()
+        mensaje_data = obj_in.model_dump()
         if not mensaje_data.get('fecha_hora'):
             mensaje_data['fecha_hora'] = datetime.now()
             
@@ -183,7 +184,7 @@ class CRUDMensajeBot:
         self, db: Session, *, db_obj: MensajeBot, obj_in: MensajeBotUpdate
     ) -> MensajeBot:
         """Actualizar mensaje bot"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         
@@ -220,3 +221,5 @@ class CRUDMensajeBot:
         )
         db.commit()
         return deleted_count
+    
+mensaje_bot = CRUDMensajeBot(MensajeBot)

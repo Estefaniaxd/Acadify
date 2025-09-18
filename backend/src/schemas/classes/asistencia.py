@@ -1,16 +1,15 @@
 from pydantic import BaseModel
 from uuid import UUID
-from src.enums.classes.asistencia_enums import EstadoAsistencia
+from ...enums.classes.asistencia_enums import EstadoAsistencia
 
 
 class AsistenciaBase(BaseModel):
-    clase_id: UUID
-    estudiante_id: UUID
     estado: EstadoAsistencia
 
 
 class AsistenciaCreate(AsistenciaBase):
-    pass
+    clase_id: UUID
+    estudiante_id: UUID
 
 
 class AsistenciaUpdate(BaseModel):
@@ -19,6 +18,8 @@ class AsistenciaUpdate(BaseModel):
 
 class AsistenciaInDBBase(AsistenciaBase):
     asistencia_id: UUID
+    clase_id: UUID
+    estudiante_id: UUID
 
     class Config:
         from_attributes = True

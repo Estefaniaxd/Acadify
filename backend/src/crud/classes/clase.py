@@ -1,16 +1,17 @@
 # crud/clase.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
-from src.models.classes.clase import Clase
-from src.schemas.classes.clase import ClaseCreate, ClaseUpdate
+from ...models.classes.clase import Clase
+from ...schemas.classes.clase import ClaseCreate, ClaseUpdate
 
 
-class CRUDClase:
+class CRUDClase(CRUDBase[Clase, ClaseCreate, ClaseUpdate]):
     def create(self, db: Session, *, obj_in: ClaseCreate) -> Clase:
         """Crear nueva clase"""
-        db_obj = Clase(**obj_in.dict())
+        db_obj = Clase(**obj_in.model_dump())
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -20,9 +21,7 @@ class CRUDClase:
         """Obtener clase por ID"""
         return db.query(Clase).filter(Clase.clase_id == clase_id).first()
 
-    def get_multi(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[Clase]:
+    def get_multi(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[Clase]:
         """Obtener múltiples clases con paginación"""
         return db.query(Clase).offset(skip).limit(limit).all()
 
@@ -58,14 +57,12 @@ class CRUDClase:
             .all()
         )
 
-    def update(
-        self, db: Session, *, db_obj: Clase, obj_in: ClaseUpdate
-    ) -> Clase:
+    def update(self, db: Session, *, db_obj: Clase, obj_in: ClaseUpdate) -> Clase:
         """Actualizar clase"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
-        
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -78,3 +75,6 @@ class CRUDClase:
             db.delete(obj)
             db.commit()
         return obj
+
+
+clase = CRUDClase(Clase)

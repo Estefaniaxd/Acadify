@@ -1,21 +1,19 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
+from ...enums.communication.chat_grupo_enums import EstadoChatGrupo
 
 
 class ChatGrupoBase(BaseModel):
-    grupo_id: UUID
-    fecha_creacion: datetime
     descripcion: str | None = None
     foto_perfil: str | None = None
-    permite_archivos: bool
-    capacidad_almacenamiento: int
-    estado_chat: EstadoChatGrupo | None = None
+    permite_archivos: bool = True
+    capacidad_almacenamiento: int = 52428800
+    estado_chat: EstadoChatGrupo = EstadoChatGrupo.activo
 
 
 class ChatGrupoCreate(ChatGrupoBase):
-    pass
+    grupo_id: UUID
 
 
 class ChatGrupoUpdate(BaseModel):
@@ -23,7 +21,7 @@ class ChatGrupoUpdate(BaseModel):
     foto_perfil: str | None = None
     permite_archivos: bool | None = None
     capacidad_almacenamiento: int | None = None
-    estado_chat: EstadoChatGrupo = None
+    estado_chat: EstadoChatGrupo | None = None
 
 
 class ChatGrupoInDBBase(ChatGrupoBase):
@@ -34,5 +32,5 @@ class ChatGrupoInDBBase(ChatGrupoBase):
         from_attributes = True
 
 
-class ChatGrupoRead(ChatGrupoInDBBase):
+class ChatGrupo(ChatGrupoInDBBase):
     pass

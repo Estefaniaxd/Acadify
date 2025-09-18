@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ENUM, TEXT, BOOLEAN, INTEGER
-from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
+from ...enums.communication.chat_grupo_enums import EstadoChatGrupo
 from sqlalchemy.orm import relationship
 
 class ChatGrupo(Base):

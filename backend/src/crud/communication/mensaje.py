@@ -1,18 +1,19 @@
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, and_
-from src.models.communication.mensaje import Mensaje
-from src.schemas.communication.mensaje import MensajeCreate, MensajeUpdate
-from src.enums.communication.mensaje_enums import TipoMensaje
+from ...models.communication.mensaje import Mensaje
+from ...schemas.communication.mensaje import MensajeCreate, MensajeUpdate
+from ...enums.communication.mensaje_enums import TipoMensaje
 
 
-class CRUDMensaje:
+class CRUDMensaje(CRUDBase[Mensaje, MensajeCreate, MensajeUpdate]):
     def create(self, db: Session, *, obj_in: MensajeCreate) -> Mensaje:
         """Crear nuevo mensaje"""
         # Generar UUID si no se proporciona
-        mensaje_data = obj_in.dict()
+        mensaje_data = obj_in.model_dump()
         if not mensaje_data.get('mensaje_id'):
             import uuid
             mensaje_data['mensaje_id'] = uuid.uuid4()
@@ -216,7 +217,7 @@ class CRUDMensaje:
         self, db: Session, *, db_obj: Mensaje, obj_in: MensajeUpdate
     ) -> Mensaje:
         """Actualizar mensaje"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         
@@ -273,3 +274,4 @@ class CRUDMensaje:
         )
         db.commit()
         return deleted_count
+mensaje = CRUDMensaje(Mensaje)

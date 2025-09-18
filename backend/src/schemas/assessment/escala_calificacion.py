@@ -1,21 +1,60 @@
 from uuid import UUID
-from pydantic import BaseModel
-from src.enums.assessment.escala_calificacion_eunms import TipoEscalafonEnum
+from pydantic import BaseModel, Field
+from typing import Annotated
+from decimal import Decimal
+from ...enums.assessment.escala_calificacion_eunms import TipoEscalafonEnum
 
 
 class EscalaCalificacionBase(BaseModel):
     nombre: str
     tipo: TipoEscalafonEnum
-    min_valor: float | None = None
-    max_valor: float | None = None
+    min_valor: Annotated[
+        Decimal,
+        Field(
+            max_digits=5,
+            decimal_places=2,
+            description="Valor mínimo con hasta 5 dígitos y 2 decimales",
+        ),
+    ]
+    max_valor: Annotated[
+        Decimal,
+        Field(
+            max_digits=5,
+            decimal_places=2,
+            description="Valor máximo con hasta 5 dígitos y 2 decimales",
+        ),
+    ]
 
 
 class EscalaCalificacionCreate(EscalaCalificacionBase):
     institucion_id: UUID
 
 
-class EscalaCalificacionUpdate(EscalaCalificacionBase):
-    pass
+class EscalaCalificacionUpdate(BaseModel):
+    nombre: str | None = None
+    tipo: TipoEscalafonEnum | None = None
+    min_valor: (
+        Annotated[
+            Decimal,
+            Field(
+                max_digits=5,
+                decimal_places=2,
+                description="Valor mínimo con hasta 5 dígitos y 2 decimales",
+            ),
+        ]
+        | None
+    ) = None
+    max_valor: (
+        Annotated[
+            Decimal,
+            Field(
+                max_digits=5,
+                decimal_places=2,
+                description="Valor máximo con hasta 5 dígitos y 2 decimales",
+            ),
+        ]
+        | None
+    ) = None
 
 
 class EscalaCalificacionInDBBase(EscalaCalificacionBase):
@@ -27,8 +66,4 @@ class EscalaCalificacionInDBBase(EscalaCalificacionBase):
 
 
 class EscalaCalificacion(EscalaCalificacionInDBBase):
-    pass
-
-
-class EscalaCalificacionInDB(EscalaCalificacionInDBBase):
     pass

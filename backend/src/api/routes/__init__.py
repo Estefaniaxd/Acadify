@@ -27,7 +27,7 @@ from .communication import (
     archivo_chat,
     chat_bot,
     chat_grupo,
-    faqbot,
+    faq_bot,
     mensaje_bot,
     mensaje,
 )
@@ -69,7 +69,7 @@ routers = [
     (archivo_chat.router, "/archivos-chats", ["ArchivoChat"]),
     (chat_bot.router, "/chat-bot", ["ChatBot"]),
     (chat_grupo.router, "/chats-grupos", ["ChatGrupo"]),
-    (faqbot.router, "/faq-bot", ["FaqBot"]),
+    (faq_bot.router, "/faq-bot", ["FaqBot"]),
     (mensaje_bot.router, "/mensajes-bot", ["MensajeBot"]),
     (mensaje.router, "/mensajes", ["Mensaje"]),
     # Gamification

@@ -1,12 +1,17 @@
 # src/crud/crud_valor_calificacion.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import asc
-from src.models.assessment.valor_calificacion import ValorCalificacion
+from ...models.assessment.valor_calificacion import ValorCalificacion
+from ...schemas.assessment.valor_calificacion import (
+    ValorCalificacionCreate,
+    ValorCalificacionUpdate,
+)
 
 
-class CRUDValorCalificacion:
+class CRUDValorCalificacion(CRUDBase[ValorCalificacion, ValorCalificacionCreate, ValorCalificacionUpdate]):
     def get_by_escala(
         self, db: Session, *, escala_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[ValorCalificacion]:

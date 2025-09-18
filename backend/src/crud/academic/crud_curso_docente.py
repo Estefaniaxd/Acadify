@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
-from src.models.academic.curso_docente import CursoDocente
-from src.schemas.academic.curso_docente import CursoDocenteCreate, CursoDocenteUpdate
+from ..base import CRUDBase
+from ...models.academic.curso_docente import CursoDocente
+from ...schemas.academic.curso_docente import CursoDocenteCreate, CursoDocenteUpdate
 from uuid import UUID
 
-class CRUDCursoDocente:
+class CRUDCursoDocente(CRUDBase[CursoDocente, CursoDocenteCreate, CursoDocenteUpdate]):
     def get(self, db: Session, curso_id: UUID, docente_id: UUID):
         return db.query(CursoDocente).filter(
             CursoDocente.curso_id == curso_id,
@@ -36,4 +37,4 @@ class CRUDCursoDocente:
             db.commit()
         return obj
 
-curso_docente_crud = CRUDCursoDocente()
+curso_docente = CRUDCursoDocente(CursoDocente)

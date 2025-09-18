@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, ENUM, DATE, TEXT
-from src.enums.academic.curso_enums import ModalidadCurso
+from ...enums.academic.curso_enums import ModalidadCurso
 from sqlalchemy.orm import relationship
 
 class Curso(Base):

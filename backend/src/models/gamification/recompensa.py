@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, String, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID, TEXT, INTEGER, ENUM
-from src.enums.gamification.recompensa_enums import TipoRecompensa
+from ...enums.gamification.recompensa_enums import TipoRecompensa
 from sqlalchemy.orm import relationship
 
 

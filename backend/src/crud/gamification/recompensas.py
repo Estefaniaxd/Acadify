@@ -3,10 +3,10 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, desc
 
-from src.models.gamification.recompensa import Recompensa
-from src.models.gamification.usuario_recompensa import UsuarioRecompensa
-from src.models.gamification.usuario_puntos import UsuarioPuntos
-from src.schemas.gamification.recompensa import (
+from ...models.gamification.recompensa import Recompensa
+from ...models.gamification.usuario_recompensa import UsuarioRecompensa
+from ...models.gamification.usuario_puntos import UsuarioPuntos
+from ...schemas.gamification.recompensa import (
     RecompensaCreate,
     RecompensaUpdate,
     CanjearRecompensaRequest,

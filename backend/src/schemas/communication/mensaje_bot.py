@@ -1,42 +1,43 @@
 from pydantic import BaseModel, field_validator
 from uuid import UUID
 from datetime import datetime
+from ...enums.communication.mensaje_bots_enum import ContextoMensaje
 
 
 class MensajeBotBase(BaseModel):
-    usuario_id: UUID | None = None
-    chat_grupo_id: UUID
-    referencia_material_id: UUID | None = None
     contenido: str
     respuesta: str
-    contexto: str
-    fecha_hora: datetime
+    contexto: ContextoMensaje
 
 
 class MensajeBotCreate(MensajeBotBase):
-    pass
+    usuario_id: UUID | None = None
+    chat_grupo_id: UUID
+    referencia_material_id: UUID | None = None
 
 
 class MensajeBotUpdate(BaseModel):
-    referencia_material_id: UUID | None = None
     contenido: str | None = None
     respuesta: str | None = None
-    contexto: str | None = None
-    fecha_hora: datetime | None = None
+    contexto: ContextoMensaje | None = None
 
     @field_validator("contenido")
-    def contenido_no_vacio(cls, v):
-        if not v or not v.strip():
+    def contenido_no_vacio(cls, value):
+        if not value or not value.strip():
             raise ValueError("El contenido no puede estar vacío")
-        return v
+        return value
 
 
 class MensajeBotInDBBase(MensajeBotBase):
     mensaje_bot_id: UUID
+    usuario_id: UUID | None = None
+    chat_grupo_id: UUID
+    referencia_material_id: UUID | None = None
+    fecha_hora: datetime
 
     class Config:
         from_attributes: True
 
 
-class MensajeBotRead(MensajeBotInDBBase):
+class MensajeBot(MensajeBotInDBBase):
     pass

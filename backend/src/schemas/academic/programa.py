@@ -1,10 +1,9 @@
 from pydantic import BaseModel
 from uuid import UUID
-from src.enums.academic.programa_enums import NivelPrograma, TipoPrograma
+from ...enums.academic.programa_enums import NivelPrograma, TipoPrograma
 
 
 class ProgramaBase(BaseModel):
-    institucion_id: UUID
     nombre: str
     descripcion: str | None = None
     nivel: NivelPrograma
@@ -12,7 +11,7 @@ class ProgramaBase(BaseModel):
 
 
 class ProgramaCreate(ProgramaBase):
-    pass
+    institucion_id: UUID
 
 
 class ProgramaUpdate(BaseModel):
@@ -22,8 +21,13 @@ class ProgramaUpdate(BaseModel):
     tipo: TipoPrograma | None = None
 
 
-class ProgramaOut(ProgramaBase):
+class ProgramaInDBBase(ProgramaBase):
     programa_id: UUID
+    institucion_id: UUID
 
     class Config:
         from_attributes = True
+
+
+class Programa(ProgramaInDBBase):
+    pass

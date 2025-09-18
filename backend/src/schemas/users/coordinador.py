@@ -9,25 +9,20 @@ class CoordinadorBase(BaseModel):
 
 
 class CoordinadorCreate(CoordinadorBase):
-    coordinador_id: UUID
-    institucion_id: UUID
+    pass
 
 
 class CoordinadorUpdate(CoordinadorBase):
-    pass
+    horario_atencion: str | None = None
+    fecha_inicio_carrera: date | None = None
 
 
 class CoordinadorInDBBase(CoordinadorBase):
     coordinador_id: UUID
-    institucion_id: UUID
 
     class Config:
         from_attributes = True
 
 
 class Coordinador(CoordinadorInDBBase):
-    pass
-
-
-class CoordinadorInDB(CoordinadorInDBBase):
     pass

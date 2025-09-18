@@ -1,16 +1,17 @@
 # crud/tarea.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
-from src.models.classes.tarea import Tarea
-from src.schemas.classes.tarea import TareaCreate, TareaUpdate
+from ...models.classes.tarea import Tarea
+from ...schemas.classes.tarea import TareaCreate, TareaUpdate
 
 
-class CRUDTarea:
+class CRUDTarea(CRUDBase[Tarea, TareaCreate, TareaUpdate]):
     def create(self, db: Session, *, obj_in: TareaCreate) -> Tarea:
         """Crear nueva tarea"""
-        db_obj = Tarea(**obj_in.dict())
+        db_obj = Tarea(**obj_in.model_dump())
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -84,7 +85,7 @@ class CRUDTarea:
         self, db: Session, *, db_obj: Tarea, obj_in: TareaUpdate
     ) -> Tarea:
         """Actualizar tarea"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         
@@ -100,3 +101,5 @@ class CRUDTarea:
             db.delete(obj)
             db.commit()
         return obj
+
+tarea = CRUDTarea(Tarea)

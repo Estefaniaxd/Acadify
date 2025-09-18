@@ -1,13 +1,14 @@
 from typing import Optional
+from ..base import CRUDBase
 from sqlalchemy.orm import Session
-from src.models.communication.archivo_chat import ArchivoChat
-from src.schemas.communication.archivo_chat import (
+from ...models.communication.archivo_chat import ArchivoChat
+from ...schemas.communication.archivo_chat import (
     ArchivoChatCreate,
     ArchivoChatUpdate,
 )
 
 
-class CRUDArchivoChat:
+class CRUDArchivoChat(CRUDBase[ArchivoChat, ArchivoChatCreate, ArchivoChatUpdate]):
     def get_by_nombre(
         self, db: Session, *, nombre_archivo: str
     ) -> Optional[ArchivoChat]:

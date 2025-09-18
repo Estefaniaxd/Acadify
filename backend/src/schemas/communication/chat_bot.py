@@ -8,18 +8,13 @@ class ChatBotBase(BaseModel):
     descripcion: str
     foto_perfil_url: str
     activo: bool | None = None
-    fecha_registro: date | None = None
 
 
 class ChatBotCreate(ChatBotBase):
-    """Schema para crear chat bot"""
-
     pass
 
 
 class ChatBotUpdate(BaseModel):
-    """Schema para actualizar chat bot"""
-
     nombre: str | None = None
     descripcion: str | None = None
     foto_perfil_url: str | None = None
@@ -28,12 +23,11 @@ class ChatBotUpdate(BaseModel):
 
 class ChatBotInDBBase(ChatBotBase):
     chat_bot_id: UUID
+    fecha_registro: date | None = None
 
     class Config:
         from_attributes = True
 
 
 class ChatBotRead(ChatBotInDBBase):
-    """Schema de lectura de chat bot"""
-
     pass

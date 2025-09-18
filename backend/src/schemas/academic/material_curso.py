@@ -3,18 +3,24 @@ from uuid import UUID
 
 
 class MaterialCursoBase(BaseModel):
-    material_curso_id: UUID
-    curso_id: UUID | None = None
-
-
-class MaterialCursoCreate(MaterialCursoBase):
     pass
 
 
-class MaterialCursoUpdate(BaseModel):
+class MaterialCursoCreate(MaterialCursoBase):
     curso_id: UUID | None = None
 
 
-class MaterialCursoResponse(MaterialCursoBase):
+class MaterialCursoUpdate(BaseModel):
+    pass
+
+
+class MaterialCursoInDBBase(MaterialCursoBase):
+    material_curso_id: UUID
+    curso_id: UUID | None = None
+
     class Config:
         from_attributes = True
+
+
+class MaterialCurso(MaterialCursoInDBBase):
+    pass

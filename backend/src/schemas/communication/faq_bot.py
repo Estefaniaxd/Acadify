@@ -28,5 +28,5 @@ class FAQBotInDBBase(FAQBotBase):
         from_attributes = True
 
 
-class FAQBotRead(FAQBotInDBBase):
+class FAQBot(FAQBotInDBBase):
     pass

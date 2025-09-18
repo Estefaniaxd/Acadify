@@ -1,13 +1,10 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import date
-from src.enums.academic.curso_enums import ModalidadCurso
+from ...enums.academic.curso_enums import ModalidadCurso
 
 
 class CursoBase(BaseModel):
-    institucion_id: UUID
-    coordinador_id: UUID | None = None
-    programa_id: UUID
     nombre: str
     descripcion: str | None = None
     modalidad: ModalidadCurso
@@ -16,7 +13,9 @@ class CursoBase(BaseModel):
 
 
 class CursoCreate(CursoBase):
-    pass
+    institucion_id: UUID
+    coordinador_id: UUID | None = None
+    programa_id: UUID
 
 
 class CursoUpdate(BaseModel):
@@ -27,8 +26,15 @@ class CursoUpdate(BaseModel):
     fecha_fin: date | None = None
 
 
-class CursoResponse(CursoBase):
+class CursoInDBBase(CursoBase):
     curso_id: UUID
+    institucion_id: UUID
+    coordinador_id: UUID | None = None
+    programa_id: UUID
 
     class Config:
         from_attributes = True
+
+
+class Curso(CursoInDBBase):
+    pass

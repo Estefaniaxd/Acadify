@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 # Importar dependencias de base de datos
 from src.db.session import get_db
 
-from src.crud.communication.faqbot import CRUDFAQBot
+from backend.src.crud.communication.faq_bot import CRUDFAQBot
 
-from backend.src.schemas.communication.faqbot import (
+from backend.src.schemas.communication.faq_bot import (
     FAQBotCreate,
     FAQBotUpdate,
     FAQBot,

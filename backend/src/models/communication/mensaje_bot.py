@@ -1,8 +1,8 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, Enum
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT
 from sqlalchemy.sql import func
-from src.enums.communication.mensaje_bots_enum import ContextoMensaje
+from ...enums.communication.mensaje_bots_enum import ContextoMensaje
 
 
 class MensajeBot(Base):

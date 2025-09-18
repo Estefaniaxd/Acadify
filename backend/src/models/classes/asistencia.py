@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, ENUM
-from src.enums.classes.asistencia_enums import EstadoAsistencia
+from ...enums.classes.asistencia_enums import EstadoAsistencia
 
 class Asistencia(Base):
     __tablename__ = "Asistencia"

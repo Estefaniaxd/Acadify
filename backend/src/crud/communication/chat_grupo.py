@@ -1,17 +1,18 @@
 # crud/chat_grupo.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
-from src.models.communication.chat_grupo import ChatGrupo
-from src.schemas.communication.chat_grupo import ChatGrupoCreate, ChatGrupoUpdate
-from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
+from ...models.communication.chat_grupo import ChatGrupo
+from ...schemas.communication.chat_grupo import ChatGrupoCreate, ChatGrupoUpdate
+from ...enums.communication.chat_grupo_enums import EstadoChatGrupo
 
 
-class CRUDChatGrupo:
+class CRUDChatGrupo(CRUDBase[ChatGrupo, ChatGrupoCreate, ChatGrupoUpdate]):
     def create(self, db: Session, *, obj_in: ChatGrupoCreate) -> ChatGrupo:
         """Crear nuevo chat de grupo"""
-        db_obj = ChatGrupo(**obj_in.dict())
+        db_obj = ChatGrupo(**obj_in.model_dump())
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -95,7 +96,7 @@ class CRUDChatGrupo:
         self, db: Session, *, db_obj: ChatGrupo, obj_in: ChatGrupoUpdate
     ) -> ChatGrupo:
         """Actualizar chat de grupo"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
 
@@ -153,3 +154,5 @@ class CRUDChatGrupo:
             db.delete(obj)
             db.commit()
         return obj
+
+chat_grupo = CRUDChatGrupo(ChatGrupo) 

@@ -1,19 +1,30 @@
 from pydantic import BaseModel, EmailStr, field_validator
-from typing import Optional
 from uuid import UUID
-from src.enums.users.usuario_enums import RolUsuario
+from ...enums.users.usuario_enums import (
+    TipoDocumentoUsuario,
+    RolUsuario,
+    EstadoCuentaUsuario,
+)
+from datetime import datetime
 
-# -----------------------------
-# Base para los usuarios
-# -----------------------------
+
 class UsuarioBase(BaseModel):
     correo_institucional: EmailStr | None = None
     username: str | None = None
+    nombres: str
+    apellidos: str
+    tipo_documento: TipoDocumentoUsuario
+    numero_documento: str
     rol: RolUsuario
+    password_hash: str
+    estado_cuenta: EstadoCuentaUsuario = EstadoCuentaUsuario.activo
+    ultimo_acceso: datetime
+    perfil_url: str | None = None
+    portada_url: str | None = None
+    telefono: str | None = None
+    descripcion: str | None = None
 
-# -----------------------------
-# Esquema para creación de usuario
-# -----------------------------
+
 class UsuarioCreate(UsuarioBase):
     nombres: str
     apellidos: str
@@ -23,27 +34,22 @@ class UsuarioCreate(UsuarioBase):
     descripcion: str | None = None
     password: str
 
-# -----------------------------
-# Esquema para lectura de usuario
-# -----------------------------
-class UsuarioRead(UsuarioBase):
-    usuario_id: UUID
 
-    model_config = {
-        "from_attributes": True  # Permite leer atributos de SQLAlchemy
-    }
-
-# -----------------------------
-# Esquema para actualización de usuario
-# -----------------------------
 class UsuarioUpdate(BaseModel):
     correo_institucional: EmailStr | None = None
     username: str | None = None
     nombres: str | None = None
     apellidos: str | None = None
+    tipo_documento: TipoDocumentoUsuario | None = None
+    numero_documento: str | None = None
+    rol: RolUsuario | None = None
+    password_hash: str | None = None
+    estado_cuenta: EstadoCuentaUsuario | None = None
+    ultimo_acceso: datetime | None = None
+    perfil_url: str | None = None
+    portada_url: str | None = None
     telefono: str | None = None
     descripcion: str | None = None
-    rol: RolUsuario | None = None
 
     @field_validator("username", mode="before")
     def validar_admin(cls, v, info):
@@ -68,3 +74,14 @@ class UsuarioUpdate(BaseModel):
             if v:
                 raise ValueError("El administrador no debe tener correo institucional")
         return v
+
+
+class UsuarioInDBBase(UsuarioBase):
+    usuario_id: UUID
+
+    class Config:
+        from_attributes = True
+
+
+class Usuario(UsuarioInDBBase):
+    pass

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from uuid import UUID
-from src.enums.academic.material_educativo_enums import TipoMaterialEducativo
+from ...enums.academic.material_educativo_enums import TipoMaterialEducativo
 
 
 class MaterialEducativoBase(BaseModel):
@@ -23,8 +23,12 @@ class MaterialEducativoUpdate(BaseModel):
     formato_archivo: str | None = None
 
 
-class MaterialEducativoResponse(MaterialEducativoBase):
+class MaterialEducativoInDBBase(MaterialEducativoBase):
     material_id: UUID
 
     class Config:
         from_attributes = True
+
+
+class MaterialEducativo(MaterialEducativoInDBBase):
+    pass

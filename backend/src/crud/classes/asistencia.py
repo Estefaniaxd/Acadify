@@ -1,16 +1,17 @@
 # crud/asistencia.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from sqlalchemy.orm import Session
-from src.models import Asistencia
-from src.schemas.classes.asistencia import AsistenciaCreate, AsistenciaUpdate
-from src.enums.classes.asistencia_enums import EstadoAsistencia
+from ...models import Asistencia
+from ...schemas.classes.asistencia import AsistenciaCreate, AsistenciaUpdate
+from ...enums.classes.asistencia_enums import EstadoAsistencia
 
 
-class CRUDAsistencia:
+class CRUDAsistencia(CRUDBase[Asistencia, AsistenciaCreate, AsistenciaUpdate]):
     def create(self, db: Session, *, obj_in: AsistenciaCreate) -> Asistencia:
         """Crear nueva asistencia"""
-        db_obj = Asistencia(**obj_in.dict())
+        db_obj = Asistencia(**obj_in.model_dump())
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -55,7 +56,7 @@ class CRUDAsistencia:
         self, db: Session, *, db_obj: Asistencia, obj_in: AsistenciaUpdate
     ) -> Asistencia:
         """Actualizar asistencia"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         
@@ -71,3 +72,5 @@ class CRUDAsistencia:
             db.delete(obj)
             db.commit()
         return obj
+
+asistencia = CRUDAsistencia(Asistencia)

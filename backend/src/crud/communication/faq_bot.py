@@ -1,17 +1,18 @@
 # crud/faq_bot.py
 from typing import List, Optional
+from ..base import CRUDBase
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session
-from src.models.communication.faqbot import FAQBot
-from src.schemas.communication.faqbot import FAQBotCreate, FAQBotUpdate
+from ...models.communication.faq_bot import FAQBot
+from ...schemas.communication.faq_bot import FAQBotCreate, FAQBotUpdate
 
 
-class CRUDFAQBot:
+class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
     def create(self, db: Session, *, obj_in: FAQBotCreate) -> FAQBot:
         """Crear nueva FAQ"""
         # Establecer timestamp de actualización si no se proporciona
-        faq_data = obj_in.dict()
+        faq_data = obj_in.model_dump()
         if not faq_data.get("ultima_actualizacion"):
             faq_data["ultima_actualizacion"] = datetime.now()
 
@@ -107,7 +108,7 @@ class CRUDFAQBot:
 
     def update(self, db: Session, *, db_obj: FAQBot, obj_in: FAQBotUpdate) -> FAQBot:
         """Actualizar FAQ"""
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
 
         # Actualizar timestamp de modificación
         update_data["ultima_actualizacion"] = datetime.now()
@@ -162,3 +163,5 @@ class CRUDFAQBot:
         )
 
         return self.create(db=db, obj_in=new_faq_data)
+
+faq_bot = CRUDFAQBot(FAQBot)
