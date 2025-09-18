@@ -1,4 +1,4 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, BOOLEAN
 from sqlalchemy.sql import func
@@ -29,4 +29,3 @@ class Tarea(Base):
     permite_entregas_tardias = Column(BOOLEAN, nullable=False)
     
     entrega_tareas = relationship("EntregarTarea", backref="tarea", passive_deletes=True)
-    

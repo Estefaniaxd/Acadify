@@ -1,0 +1,432 @@
+<!-- src/templates/emails/base.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Acadify{% endblock %}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px;
+        }
+        .content h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 24px;
+        }
+        .content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #5a6fd8;
+        }
+        .code-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #667eea;
+            padding: 20px;
+            text-align: center;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        .verification-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 5px 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-muted {
+            color: #6c757d;
+        }
+        .small {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{% block header_title %}Acadify{% endblock %}</h1>
+        </div>
+        
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <div class="footer">
+            <p><strong>Acadify</strong> - Sistema de Gestión Académica</p>
+            <p class="text-muted small">
+                Este es un correo automático, por favor no responda a esta dirección.
+            </p>
+            <p class="text-muted small">
+                © {{ "now"|date("Y") }} Acadify. Todos los derechos reservados.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+
+<!-- src/templates/emails/welcome.html -->
+{% extends "base.html" %}
+
+{% block title %}Bienvenido a Acadify{% endblock %}
+
+{% block header_title %}¡Bienvenido a Acadify!{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<p>Te damos la bienvenida a <strong>Acadify</strong>, la plataforma educativa que transformará tu experiencia académica.</p>
+
+<p>Tu cuenta ha sido creada exitosamente con el rol de <strong>{{ rol }}</strong>. Ya puedes comenzar a explorar todas las funcionalidades que tenemos para ti.</p>
+
+<div class="alert alert-info">
+    <strong>¿Qué puedes hacer ahora?</strong>
+    <ul style="margin: 10px 0;">
+        <li>Completar tu perfil personal</li>
+        <li>Explorar los cursos disponibles</li>
+        <li>Conectar con otros estudiantes y profesores</li>
+        <li>Configurar notificaciones</li>
+    </ul>
+</div>
+
+<div class="text-center">
+    <a href="https://acadify.com/login" class="button">Iniciar Sesión</a>
+</div>
+
+<p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar a nuestro equipo de soporte.</p>
+
+<p>¡Esperamos que disfrutes tu experiencia en Acadify!</p>
+
+<p>Saludos cordiales,<br>
+<strong>El equipo de Acadify</strong></p>
+{% endblock %}
+
+<!-- src/templates/emails/reset_password.html -->
+{% extends "base.html" %}
+
+{% block title %}Recuperar Contraseña - Acadify{% endblock %}
+
+{% block header_title %}Recuperar Contraseña{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Acadify.</p>
+
+<p>Para continuar con el proceso de recuperación, utiliza el siguiente código de verificación:</p>
+
+<div class="code-box">
+    <div class="verification-code">{{ codigo }}</div>
+    <p class="text-muted">Este código es válido por {{ valido_hasta }}</p>
+</div>
+
+<div class="alert alert-warning">
+    <strong>Importante:</strong>
+    <ul style="margin: 10px 0;">
+        <li>Este código expirará en {{ valido_hasta }}</li>
+        <li>Solo puedes usarlo una vez</li>
+        <li>Si no solicitaste este cambio, ignora este correo</li>
+    </ul>
+</div>
+
+<p>Ingresa este código en la página de recuperación de contraseña junto con tu nueva contraseña.</p>
+
+<div class="text-center">
+    <a href="https://acadify.com/reset-password" class="button">Restablecer Contraseña</a>
+</div>
+
+<p>Si no solicitaste este cambio de contraseña, puedes ignorar este correo de forma segura. Tu cuenta permanecerá protegida.</p>
+
+<p>Para mayor seguridad, asegúrate de elegir una contraseña que:</p>
+<ul>
+    <li>Tenga al menos 10 caracteres</li>
+    <li>Incluya mayúsculas y minúsculas</li>
+    <li>Contenga números y símbolos</li>
+    <li>Sea única y no la uses en otros sitios</li>
+</ul>
+
+<p>Saludos,<br>
+<strong>El equipo de Acadify</strong></p>
+{% endblock %}
+
+<!-- src/templates/emails/login_otp.html -->
+{% extends "base.html" %}
+
+{% block title %}Código de Verificación - Acadify{% endblock %}
+
+{% block header_title %}Código de Verificación{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<p>Hemos detectado un intento de inicio de sesión en tu cuenta de Acadify. Como tienes activada la autenticación de dos factores, necesitas verificar tu identidad.</p>
+
+<p>Utiliza el siguiente código para completar tu inicio de sesión:</p>
+
+<div class="code-box">
+    <div class="verification-code">{{ codigo }}</div>
+    <p class="text-muted">Este código es válido por {{ valido_hasta }}</p>
+</div>
+
+<div class="alert alert-info">
+    <strong>Instrucciones:</strong>
+    <ol style="margin: 10px 0;">
+        <li>Vuelve a la página de inicio de sesión</li>
+        <li>Ingresa tus credenciales normales</li>
+        <li>Cuando se te solicite, introduce este código</li>
+        <li>Completa tu inicio de sesión</li>
+    </ol>
+</div>
+
+<div class="alert alert-warning">
+    <strong>Seguridad:</strong>
+    <ul style="margin: 10px 0;">
+        <li>Este código expira en {{ valido_hasta }}</li>
+        <li>Solo es válido para una sesión</li>
+        <li>Si no fuiste tú, cambia tu contraseña inmediatamente</li>
+    </ul>
+</div>
+
+<p>Si no iniciaste sesión o sospechas actividad no autorizada en tu cuenta, te recomendamos:</p>
+<ul>
+    <li>Cambiar tu contraseña inmediatamente</li>
+    <li>Revisar tus dispositivos conectados</li>
+    <li>Contactar a soporte si es necesario</li>
+</ul>
+
+<p>Gracias por mantener tu cuenta segura.</p>
+
+<p>Saludos,<br>
+<strong>El equipo de Acadify</strong></p>
+{% endblock %}
+
+<!-- src/templates/emails/2fa_setup.html -->
+{% extends "base.html" %}
+
+{% block title %}Configurar Autenticación de Dos Factores - Acadify{% endblock %}
+
+{% block header_title %}Configurar 2FA{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<p>Estás configurando la autenticación de dos factores para tu cuenta de Acadify. ¡Excelente decisión para mantener tu cuenta más segura!</p>
+
+<p>Para completar la configuración de 2FA por <strong>{{ metodo }}</strong>, verifica tu identidad con el siguiente código:</p>
+
+<div class="code-box">
+    <div class="verification-code">{{ codigo }}</div>
+    <p class="text-muted">Código de verificación</p>
+</div>
+
+<div class="alert alert-info">
+    <strong>¿Qué sigue?</strong>
+    <ol style="margin: 10px 0;">
+        <li>Ingresa este código en la página de configuración</li>
+        <li>Confirma la activación de 2FA</li>
+        <li>¡Tu cuenta estará más protegida!</li>
+    </ol>
+</div>
+
+<p><strong>¿Qué es 2FA?</strong><br>
+La autenticación de dos factores añade una capa extra de seguridad a tu cuenta. Cada vez que inicies sesión, además de tu contraseña, necesitarás un código que se enviará a tu correo.</p>
+
+<div class="alert alert-warning">
+    <strong>Importante:</strong>
+    <ul style="margin: 10px 0;">
+        <li>Guarda este correo hasta completar la configuración</li>
+        <li>El código expirará en 10 minutos</li>
+        <li>Una vez activado, necesitarás códigos para iniciar sesión</li>
+    </ul>
+</div>
+
+<p>Una vez configurado, cada inicio de sesión requerirá:</p>
+<ol>
+    <li>Tu email y contraseña habituales</li>
+    <li>Un código de verificación que recibirás por correo</li>
+</ol>
+
+<p>Si no solicitaste esta configuración, ignora este correo y tu cuenta permanecerá sin cambios.</p>
+
+<p>Saludos,<br>
+<strong>El equipo de Acadify</strong></p>
+{% endblock %}
+
+<!-- src/templates/emails/password_changed.html -->
+{% extends "base.html" %}
+
+{% block title %}Contraseña Actualizada - Acadify{% endblock %}
+
+{% block header_title %}Contraseña Actualizada{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<p>Te confirmamos que la contraseña de tu cuenta de Acadify ha sido actualizada exitosamente.</p>
+
+<div class="alert alert-info">
+    <strong>Detalles del cambio:</strong>
+    <ul style="margin: 10px 0;">
+        <li><strong>Fecha:</strong> {{ fecha }}</li>
+        <li><strong>Cuenta:</strong> {{ email }}</li>
+        <li><strong>Acción:</strong> Contraseña actualizada</li>
+    </ul>
+</div>
+
+<p>Si fuiste tú quien realizó este cambio, puedes ignorar este correo. Tu cuenta está segura y puedes continuar usando Acadify con normalidad.</p>
+
+<div class="alert alert-warning">
+    <strong>¿No fuiste tú?</strong><br>
+    Si no cambiaste tu contraseña, tu cuenta podría estar comprometida. Toma estas medidas inmediatamente:
+    <ol style="margin: 10px 0;">
+        <li>Intenta recuperar tu cuenta usando "Olvidé mi contraseña"</li>
+        <li>Contacta a soporte inmediatamente</li>
+        <li>Revisa tus otros dispositivos y sesiones</li>
+        <li>Considera habilitar 2FA para mayor seguridad</li>
+    </ol>
+</div>
+
+<div class="text-center">
+    <a href="https://acadify.com/support" class="button">Contactar Soporte</a>
+</div>
+
+<p><strong>Consejos de seguridad:</strong></p>
+<ul>
+    <li>Nunca compartas tu contraseña con nadie</li>
+    <li>Usa contraseñas únicas para cada servicio</li>
+    <li>Habilita la autenticación de dos factores</li>
+    <li>Mantén tus dispositivos actualizados</li>
+</ul>
+
+<p>Gracias por mantener tu cuenta segura.</p>
+
+<p>Saludos,<br>
+<strong>El equipo de Acadify</strong></p>
+{% endblock %}
+
+<!-- src/templates/emails/account_locked.html -->
+{% extends "base.html" %}
+
+{% block title %}Cuenta Bloqueada - Acadify{% endblock %}
+
+{% block header_title %}Cuenta Bloqueada Temporalmente{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<p>Tu cuenta de Acadify ha sido bloqueada temporalmente debido a múltiples intentos de inicio de sesión fallidos.</p>
+
+<div class="alert alert-warning">
+    <strong>Detalles del bloqueo:</strong>
+    <ul style="margin: 10px 0;">
+        <li><strong>Fecha del bloqueo:</strong> {{ fecha_bloqueo }}</li>
+        <li><strong>Bloqueo hasta:</strong> {{ bloqueo_hasta }}</li>
+        <li><strong>Motivo:</strong> {{ motivo }}</li>
+    </ul>
+</div>
+
+<p>Esta medida de seguridad protege tu cuenta contra accesos no autorizados. El bloqueo se levantará automáticamente después del tiempo especificado.</p>
+
+<div class="alert alert-info">
+    <strong>¿Qué puedes hacer?</strong>
+    <ol style="margin: 10px 0;">
+        <li>Espera hasta que expire el bloqueo</li>
+        <li>Verifica que recuerdas tu contraseña correcta</li>
+        <li>Si olvidaste tu contraseña, úsala opción de recuperación</li>
+        <li>Contacta a soporte si necesitas ayuda</li>
+    </ol>
+</div>
+
+<p>Una vez que expire el bloqueo, podrás intentar iniciar sesión nuevamente. Te recomendamos:</p>
+<ul>
+    <li>Asegurarte de usar la contraseña correcta</li>
+    <li>Verificar que no hay problemas de mayúsculas/minúsculas</li>
+    <li>Considerar resetear tu contraseña si no la recuerdas</li>
+</ul>
+
+<div class="text-center">
+    <a href="https://acadify.com/reset-password" class="button">Recuperar Contraseña</a>
+</div>
+
+<p>Si no fuiste tú quien intentó acceder a la cuenta, es posible que alguien esté tratando de ingresar. En este caso:</p>
+<ul>
+    <li>Cambia tu contraseña tan pronto como puedas acceder</li>
+    <li>Habilita la autenticación de dos factores</li>
+    <li>Revisa tus dispositivos conectados</li>
+    <li>Contacta a soporte para mayor asistencia</li>
+</ul>
+
+<p>Lamentamos las molestias que esto pueda causar, pero la seguridad de tu cuenta es nuestra prioridad.</p>
+
+<p>Saludos,<br>
+<strong>El equipo de Acadify</strong></p>
+{% endblock %}

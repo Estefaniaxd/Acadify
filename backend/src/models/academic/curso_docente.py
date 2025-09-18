@@ -19,7 +19,7 @@ class CursoDocente(Base):
         primary_key=True,
         nullable=False,
     )
-    fecha_asignada = Column(DATE)
+    fecha_asignacion = Column(DATE)
     
     curso = relationship("Curso", back_populates="curso_docentes")
     docente = relationship("Docente", back_populates="curso_docentes")

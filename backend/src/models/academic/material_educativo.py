@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, String, text
 from sqlalchemy.dialects.postgresql import UUID, TEXT, ENUM
-from src.enums.academic.material_educativo_enums import TipoMaterialEducativo
+from ...enums.academic.material_educativo_enums import TipoMaterialEducativo
 from sqlalchemy.orm import relationship
 
 class MaterialEducativo(Base):

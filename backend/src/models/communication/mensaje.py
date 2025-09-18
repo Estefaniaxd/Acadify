@@ -1,8 +1,8 @@
-from src.db.base_class import Base
-from sqlalchemy import Column, String, ForeignKey
+from ...db.base_class import Base
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ENUM, TEXT
 from sqlalchemy.sql import func
-from src.enums.communication.mensaje_enums import TipoMensaje
+from ...enums.communication.mensaje_enums import TipoMensaje
 
 
 class Mensaje(Base):

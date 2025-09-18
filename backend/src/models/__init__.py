@@ -20,7 +20,7 @@ from src.models.academic.programa import Programa
 from src.models.communication.archivo_chat import ArchivoChat
 from src.models.communication.chat_bot import ChatBot
 from src.models.communication.chat_grupo import ChatGrupo
-from src.models.communication.faqbot_id import FAQBot
+from backend.src.models.communication.faq_bot import FAQBot
 from src.models.communication.mensaje import Mensaje
 
 from src.models.gamification.historial_puntos import HistorialPuntos
@@ -41,4 +41,4 @@ from src.models.classes.clase import Clase
 from src.models.classes.entregar_tarea import EntregarTarea
 from src.models.classes.tarea import Tarea
 
-from src.models.plataforma import Plataforma
+from src.models.classes.plataforma import Plataforma

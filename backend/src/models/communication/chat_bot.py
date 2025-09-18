@@ -1,4 +1,4 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, String
 from sqlalchemy.dialects.postgresql import UUID, TEXT, BOOLEAN, DATE
 from sqlalchemy.sql import func

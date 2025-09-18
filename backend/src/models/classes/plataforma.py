@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, String
 from sqlalchemy.dialects.postgresql import UUID, ENUM, TEXT, BOOLEAN
-from src.enums.academic.plataforma_enums import TipoIntegracionPlataforma
+from ...enums.academic.plataforma_enums import TipoIntegracionPlataforma
 
 class Plataforma(Base):
     __tablename__ = "Plataforma"

@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, ENUM, TEXT
-from src.enums.academic.programa_enums import NivelPrograma, TipoPrograma
+from ...enums.academic.programa_enums import NivelPrograma, TipoPrograma
 from sqlalchemy.orm import relationship
 
 

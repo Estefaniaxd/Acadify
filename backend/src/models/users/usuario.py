@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, String, CheckConstraint, BOOLEAN, SMALLINT, text
 from sqlalchemy.dialects.postgresql import UUID, ENUM, TIMESTAMP, TEXT
-from src.enums.users.usuario_enums import (
+from ...enums.users.usuario_enums import (
     RolUsuario,
     TipoDocumentoUsuario,
     EstadoCuentaUsuario,
@@ -25,7 +25,7 @@ class Usuario(Base):
         UUID(as_uuid=True),
         primary_key=True,
         index=True,
-    server_default=text('gen_random_uuid()'),
+        server_default=text("gen_random_uuid()"),
     )
     correo_institucional = Column(String(100), unique=True, index=True)
     username = Column(String(50), unique=True, index=True)
@@ -44,7 +44,8 @@ class Usuario(Base):
     estado_cuenta = Column(
         ENUM(EstadoCuentaUsuario, name="estado_cuenta_usuario", create_type=False),
         nullable=False,
-        server_default=EstadoCuentaUsuario.activo.name,
+        default=EstadoCuentaUsuario.activo,
+        server_default=text("'activo'"),
     )
     fecha_creacion = Column(TIMESTAMP(timezone=True), server_default=func.now())
     ultimo_acceso = Column(TIMESTAMP(timezone=True), server_default=func.now())
@@ -71,14 +72,22 @@ class Usuario(Base):
         "UsuarioInsignia",
         back_populates="usuario",
         foreign_keys="UsuarioInsignia.usuario_id",
-        passive_deletes=True
+        passive_deletes=True,
     )
 
-    usuario_recompensas = relationship("UsuarioRecompensa", back_populates="usuario", passive_deletes=True)
+    usuario_recompensas = relationship(
+        "UsuarioRecompensa", back_populates="usuario", passive_deletes=True
+    )
 
     puntos = relationship("UsuarioPuntos", backref="usuario")
 
-    historial_puntos = relationship("HistorialPuntos", backref="usuario", passive_deletes=True)
+    historial_puntos = relationship(
+        "HistorialPuntos", backref="usuario", passive_deletes=True
+    )
 
-    temas_personalizados = relationship("TemaPersonalizado", backref="usuario", passive_deletes=True)
-    oauth_providers = relationship("OAuthProvider", back_populates="usuario", passive_deletes=True)
+    temas_personalizados = relationship(
+        "TemaPersonalizado", backref="usuario", passive_deletes=True
+    )
+    oauth_providers = relationship(
+        "OAuthProvider", back_populates="usuario", passive_deletes=True
+    )

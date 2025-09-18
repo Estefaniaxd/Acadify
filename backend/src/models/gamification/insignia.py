@@ -1,7 +1,7 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, String
 from sqlalchemy.dialects.postgresql import UUID, TEXT, ENUM, BOOLEAN
-from src.enums.gamification.insignia_enums import TipoInsignia
+from ...enums.gamification.insignia_enums import TipoInsignia
 from sqlalchemy.orm import relationship
 
 
@@ -17,6 +17,7 @@ class Insignia(Base):
     tipo = Column(
         ENUM(TipoInsignia, name="tipo_insignia", create_type=False),
         nullable=False,
+        default=TipoInsignia.manual,
         server_default=text("'manual'"),
     )
     es_unica = Column(BOOLEAN, nullable=False)

@@ -1,31 +1,36 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from uuid import UUID
 from datetime import date
-import uuid
-from src.enums.users.estudiante_enums import EtapaFormativaEstudiante
+from ...enums.users.estudiante_enums import EtapaFormativaEstudiante
+from typing import Annotated
+from decimal import Decimal
 
 
 class EstudianteBase(BaseModel):
-    programa_id: uuid.UUID
     fecha_ingreso: date
     creditos_aprobados: int | None = None
     etapa_formativa: EtapaFormativaEstudiante = EtapaFormativaEstudiante.i
-    promedio_acumulado: float | None = None
+    promedio_acumulado: Annotated[Decimal, Field(ge=0, le=9.99)] | None = None
 
 
 class EstudianteCreate(EstudianteBase):
-    estudiante_id: uuid.UUID
+    programa_id: UUID | None = None
 
 
 class EstudianteUpdate(BaseModel):
-    programa_id: uuid.UUID | None = None
     fecha_ingreso: date | None = None
     creditos_aprobados: int | None = None
     etapa_formativa: EtapaFormativaEstudiante | None = None
-    promedio_acumulado: float | None = None
+    promedio_acumulado: Annotated[Decimal, Field(ge=0, le=9.99)] | None = None
 
 
-class EstudianteOut(EstudianteBase):
-    estudiante_id: uuid.UUID
+class EstudianteInDBBase(EstudianteBase):
+    estudiante_id: UUID
+    programa_id: UUID | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class Estudiante(EstudianteInDBBase):
+    pass

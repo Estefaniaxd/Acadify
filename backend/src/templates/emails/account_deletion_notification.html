@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta eliminada - Acadify</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px;
+        }
+        .deletion-box {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .deletion-box h3 {
+            color: #721c24;
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+        .deletion-box p {
+            color: #721c24;
+            margin: 0;
+            font-size: 16px;
+        }
+        .grace-period {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .grace-period h3 {
+            color: #856404;
+            margin: 0 0 15px 0;
+            font-size: 22px;
+        }
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc3545;
+            margin: 10px 0;
+        }
+        .deletion-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .detail-value {
+            color: #6c757d;
+        }
+        .action-buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn-restore {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-support {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .data-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .data-info h4 {
+            color: #0c5460;
+            margin: 0 0 10px 0;
+        }
+        .data-info ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .data-info li {
+            color: #0c5460;
+            margin: 5px 0;
+        }
+        .warning-note {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning-note p {
+            color: #721c24;
+            margin: 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗑️ Acadify - Eliminación de Cuenta</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Hola {{ nombre }},</h2>
+            
+            <div class="deletion-box">
+                <h3>🚨 Solicitud de eliminación procesada</h3>
+                <p>Hemos recibido y procesado tu solicitud para eliminar tu cuenta de Acadify.</p>
+            </div>
+            
+            <div class="grace-period">
+                <h3>⏰ Período de Gracia Activo</h3>
+                <p>Tu cuenta será eliminada permanentemente en:</p>
+                <div class="countdown">{{ dias_restantes }} días</div>
+                <p><strong>Fecha límite:</strong> {{ fecha_eliminacion_final }}</p>
+                <p>Hasta esa fecha, puedes restaurar tu cuenta si cambias de opinión.</p>
+            </div>
+            
+            <div class="deletion-details">
+                <h3>📋 Detalles de la eliminación:</h3>
+                <div class="detail-item">
+                    <span class="detail-label">📅 Fecha de solicitud:</span>
+                    <span class="detail-value">{{ fecha_solicitud }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🌍 Dirección IP:</span>
+                    <span class="detail-value">{{ ip_address }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">💻 Dispositivo:</span>
+                    <span class="detail-value">{{ dispositivo }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">📧 Email de la cuenta:</span>
+                    <span class="detail-value">{{ email_cuenta }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🆔 ID de usuario:</span>
+                    <span class="detail-value">{{ usuario_id }}</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{{ enlace_restaurar }}" class="btn-restore">♻️ Restaurar mi cuenta</a>
+                <a href="{{ enlace_soporte }}" class="btn-support">💬 Contactar Soporte</a>
+            </div>
+            
+            <div class="data-info">
+                <h4>📊 ¿Qué sucederá con tus datos?</h4>
+                <ul>
+                    <li><strong>Datos del perfil:</strong> Eliminados permanentemente</li>
+                    <li><strong>Archivos y documentos:</strong> Eliminados permanentemente</li>
+                    <li><strong>Historial académico:</strong> Anonimizado según políticas</li>
+                    <li><strong>Mensajes y comunicaciones:</strong> Eliminados</li>
+                    <li><strong>Configuraciones:</strong> Eliminadas</li>
+                    <li><strong>Datos de respaldo:</strong> Eliminados después de 90 días</li>
+                </ul>
+            </div>
+            
+            <div class="warning-note">
+                <p>⚠️ <strong>Importante:</strong> Esta acción NO se puede deshacer después del período de gracia. Asegúrate de haber descargado toda la información importante.</p>
+            </div>
+            
+            <h3>¿Has cambiado de opinión?</h3>
+            <p>Si eliminaste tu cuenta por error o has cambiado de opinión, puedes restaurarla haciendo clic en el botón "Restaurar mi cuenta" arriba. Solo necesitarás tu contraseña para confirmar.</p>
+            
+            <h3>¿Necesitas ayuda?</h3>
+            <p>Si tienes preguntas sobre la eliminación de tu cuenta o necesitas asistencia, nuestro equipo de soporte está aquí para ayudarte.</p>
+            
+            <p>Lamentamos verte partir,<br>
+            <strong>El equipo de Acadify</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Este es un mensaje automático sobre la eliminación de cuenta.</p>
+            <p>Si tienes preguntas, contacta nuestro soporte: <strong>soporte@acadify.com</strong></p>
+            <p>&copy; 2025 Acadify. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

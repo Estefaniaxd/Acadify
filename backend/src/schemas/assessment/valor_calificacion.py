@@ -1,33 +1,30 @@
-import uuid
+from uuid import UUID
 from pydantic import BaseModel
-from typing import Optional
 
 
 class ValorCalificacionBase(BaseModel):
     valor: str
-    descripcion: Optional[str] = None
-    orden: Optional[int] = None
+    descripcion: str | None = None
+    orden: int | None = None
 
 
 class ValorCalificacionCreate(ValorCalificacionBase):
-    escala_id: uuid.UUID
+    escala_id: UUID
 
 
 class ValorCalificacionUpdate(ValorCalificacionBase):
-    pass
+    valor: str | None = None
+    descripcion: str | None = None
+    orden: int | None = None
 
 
 class ValorCalificacionInDBBase(ValorCalificacionBase):
-    valor_id: uuid.UUID
-    escala_id: uuid.UUID
+    valor_id: UUID
+    escala_id: UUID
 
     class Config:
         from_attributes = True
 
 
 class ValorCalificacion(ValorCalificacionInDBBase):
-    pass
-
-
-class ValorCalificacionInDB(ValorCalificacionInDBBase):
     pass

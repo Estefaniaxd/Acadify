@@ -1,23 +1,31 @@
 from pydantic import BaseModel
+from uuid import UUID
 from datetime import date
-import uuid
-from src.enums.users.coordinador_enums import EstadoCoordinador
+from ...enums.users.coordinador_enums import EstadoCoordinador
+
 
 class InstitucionCoordinadorBase(BaseModel):
-    institucion_id: uuid.UUID
-    coordinador_id: uuid.UUID
     fecha_asignacion: date
     estado: EstadoCoordinador = EstadoCoordinador.activo
 
+
 class InstitucionCoordinadorCreate(InstitucionCoordinadorBase):
-    pass
+    institucion_id: UUID
+    coordinador_id: UUID
+
 
 class InstitucionCoordinadorUpdate(BaseModel):
     fecha_asignacion: date | None = None
     estado: EstadoCoordinador | None = None
 
-class InstitucionCoordinadorOut(InstitucionCoordinadorBase):
-    institucion_coordinador_id: uuid.UUID
+
+class InstitucionCoordinadorInDBBase(InstitucionCoordinadorBase):
+    institucion_id: UUID
+    coordinador_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class InstitucionCoordinador(InstitucionCoordinadorInDBBase):
+    pass

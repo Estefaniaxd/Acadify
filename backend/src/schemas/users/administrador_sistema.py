@@ -1,15 +1,24 @@
-import uuid
+from uuid import UUID
 from pydantic import BaseModel
 
 
 class AdministradorSistemaBase(BaseModel):
-    administrador_id: uuid.UUID
-
+    pass
 
 class AdministradorSistemaCreate(AdministradorSistemaBase):
     pass
 
 
-class AdministradorSistemaRead(AdministradorSistemaBase):
+class AdministradorSistemaUpdate(BaseModel):
+    pass
+
+
+class AdministradorSistemaInDBBase(AdministradorSistemaBase):
+    administrador_id: UUID
+
     class Config:
         from_attributes = True
+
+
+class AdministradorSistema(AdministradorSistemaInDBBase):
+    pass

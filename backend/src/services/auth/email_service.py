@@ -1,8 +1,8 @@
+<<<<<<< HEAD
 import smtplib
 import secrets
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Optional
 from src.core.config import settings
 
 
@@ -190,3 +190,5 @@ class EmailService:
         except Exception as e:
             print(f"Error enviando email: {e}")
             return False
+=======
+>>>>>>> origin/fix-auth

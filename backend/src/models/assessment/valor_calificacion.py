@@ -1,4 +1,4 @@
-from src.db.base_class import Base
+from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID, SMALLINT
 
@@ -9,7 +9,7 @@ class ValorCalificacion(Base):
     valor_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-    server_default=text('gen_random_uuid()'),
+        server_default=text("gen_random_uuid()"),
     )
 
     escala_id = Column(
