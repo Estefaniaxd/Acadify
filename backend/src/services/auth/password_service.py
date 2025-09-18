@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from src.core.config import settings
 import re
 from passlib.context import CryptContext
@@ -102,3 +103,5 @@ class PasswordService:
 
         return min(100, score)
 
+=======
+>>>>>>> origin/fix-auth

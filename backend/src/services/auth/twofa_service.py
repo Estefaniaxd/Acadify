@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import pyotp
 import qrcode
 import io
@@ -99,3 +100,5 @@ class TwoFAService:
             bool: True si el código es válido
         """
         return code.upper() in [c.upper() for c in stored_codes]
+=======
+>>>>>>> origin/fix-auth

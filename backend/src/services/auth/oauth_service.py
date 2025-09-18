@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import secrets
 import httpx
 from typing import Dict, Any, Optional
@@ -101,3 +102,5 @@ class OAuthService:
             "picture": user_info.get("picture", ""),
             "locale": user_info.get("locale", ""),
         }
+=======
+>>>>>>> origin/fix-auth

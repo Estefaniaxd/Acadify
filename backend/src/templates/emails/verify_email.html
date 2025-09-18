@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Verifica tu correo - Acadify</title>
+  <style>
+    body {
+      background: #fff;
+      color: #222;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 480px;
+      margin: 40px auto;
+      background: #f8f8fa;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(80, 0, 120, 0.08);
+      padding: 32px 28px;
+      border: 2px solid #7c3aed;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .logo {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #7c3aed;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #10b981;
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
+    .code-box {
+      background: #222;
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      padding: 14px 0;
+      border-radius: 8px;
+      text-align: center;
+      margin: 24px 0 16px 0;
+      border: 2px solid #10b981;
+    }
+    .footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.95rem;
+      margin-top: 32px;
+    }
+    a {
+      color: #7c3aed;
+      text-decoration: none;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      background: linear-gradient(90deg, #7c3aed 60%, #10b981 100%);
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+      padding: 14px 0;
+      border-radius: 8px;
+      text-decoration: none;
+      margin: 24px 0 0 0;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">Acadify</div>
+      <div class="subtitle">Verifica tu correo electrónico</div>
+    </div>
+    <p>Hola <b>{{ nombre }}</b>,</p>
+    <p>¡Gracias por registrarte en Acadify! Para activar tu cuenta, haz clic en el siguiente botón o usa el código de verificación:</p>
+    <a class="btn" href="{{ enlace_verificacion }}">Verificar mi correo</a>
+    <div class="code-box">{{ codigo }}</div>
+    <p>Este enlace/código es válido por <b>{{ valido_hasta }}</b>.</p>
+    <p style="margin-top: 24px;">Si no creaste esta cuenta, puedes ignorar este correo.</p>
+    <div class="footer">
+      &copy; {{ year or '2025' }} <a href="https://acadify.com">Acadify</a> &mdash; Todos los derechos reservados.
+    </div>
+  </div>
+</body>
+</html>

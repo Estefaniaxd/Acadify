@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import jwt
 import uuid
 from datetime import timedelta
@@ -149,3 +150,5 @@ class TokenService:
             return settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
         else:
             return 3600
+=======
+>>>>>>> origin/fix-auth

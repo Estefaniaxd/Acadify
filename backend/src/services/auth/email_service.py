@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import smtplib
 import secrets
 from email.mime.text import MIMEText
@@ -189,3 +190,5 @@ class EmailService:
         except Exception as e:
             print(f"Error enviando email: {e}")
             return False
+=======
+>>>>>>> origin/fix-auth

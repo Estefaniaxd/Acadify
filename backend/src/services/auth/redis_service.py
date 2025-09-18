@@ -1,13 +1,9 @@
-import asyncio
-import json
-from datetime import timedelta, datetime
-from src.services.auth.datetime_utils import utcnow_aware
-from typing import Optional, Dict, Any
-import redis.asyncio as aioredis
+
+import redis.asyncio as redis_async
 from src.core.config import settings
 
-
 class RedisService:
+<<<<<<< HEAD
     """Servicio async para operaciones con Redis"""
 
     def __init__(self):
@@ -240,3 +236,16 @@ class RedisService:
             return json.loads(data_str)
         except json.JSONDecodeError:
             return None
+=======
+	def __init__(self):
+		self.redis_url = settings.REDIS_URL
+		self.client = None
+
+	async def connect(self):
+		self.client = await redis_async.from_url(self.redis_url, decode_responses=True)
+
+	async def disconnect(self):
+		if self.client:
+			await self.client.close()
+			self.client = None
+>>>>>>> origin/fix-auth

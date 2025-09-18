@@ -3,9 +3,8 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from src.db.base_class import Base
 
-ModelType = TypeVar("ModelType", bound=Base)
+ModelType = TypeVar("ModelType")
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
@@ -14,7 +13,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType], id_field: str = "id"):
         """
         Objeto CRUD con métodos por defecto para Create, Read, Update, Delete (CRUD).
-        
+
         **Parámetros**
         * `model`: Clase del modelo SQLAlchemy
         """
@@ -23,7 +22,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
         """Obtener un registro por ID"""
-        return db.query(self.model).filter(getattr(self.model, self.id_field) == id).first()
+        return (
+            db.query(self.model)
+            .filter(getattr(self.model, self.id_field) == id)
+            .first()
+        )
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
@@ -63,7 +66,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def remove(self, db: Session, *, id: Any) -> Optional[ModelType]:
         """Eliminar un registro por ID"""
-        
+
         obj = self.get(db, id)
         if obj:
             db.delete(obj)
