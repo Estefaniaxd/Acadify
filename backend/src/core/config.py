@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     )
     
     # ===============================
+    DATABASE_URL: str
     # API Configuration
     # ===============================
     
@@ -114,15 +115,13 @@ class Settings(BaseSettings):
     @field_validator("SMTP_USER")
     @classmethod
     def validate_smtp_user(cls, v: str) -> str:
-        if not v:
-            raise ValueError("SMTP_USER is required for email functionality")
+        # Allow empty SMTP_USER in development/testing
         return v
     
     @field_validator("SMTP_PASS")
     @classmethod
     def validate_smtp_pass(cls, v: str) -> str:
-        if not v:
-            raise ValueError("SMTP_PASS is required for email functionality")
+        # Allow empty SMTP_PASS in development/testing
         return v
     
     # ===============================

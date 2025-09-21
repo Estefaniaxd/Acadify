@@ -2,7 +2,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Optional, Literal
 from datetime import datetime
-from uuid import uuid, UUID
+from uuid import UUID, uuid4
 
 # ===============================
 # Email Verification Schemas
@@ -15,7 +15,7 @@ class EmailVerificationRequest(BaseModel):
     @classmethod
     def validate_uuid(cls, v):
         try:
-            uuid.UUID(str(v))
+            UUID(str(v))
             return str(v)
         except ValueError:
             raise ValueError('usuario_id debe ser un UUID válido')

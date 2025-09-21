@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import jwt
 import uuid
 from datetime import timedelta
@@ -14,8 +13,8 @@ class TokenService:
 
     def __init__(self, redis_service: RedisService):
         self.redis_service = redis_service
-        self.algorithm = settings.JWT_ALGORITHM
-        self.secret_key = settings.JWT_SECRET
+        self.algorithm = settings.ALGORITHM
+        self.secret_key = settings.SECRET_KEY
 
     def create_access_token(
         self, user_id: str, roles: list[str], expires_delta: Optional[timedelta] = None
@@ -150,5 +149,3 @@ class TokenService:
             return settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
         else:
             return 3600
-=======
->>>>>>> origin/fix-auth

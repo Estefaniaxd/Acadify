@@ -58,9 +58,6 @@ class Usuario(Base):
     locked_until = Column(TIMESTAMP(timezone=True), nullable=True)
     twofa_enabled = Column(BOOLEAN, nullable=False, server_default=text("false"))
     twofa_secret = Column(String(32), nullable=True)
-    administrador = relationship(
-        "AdministradorSistema", backref="usuario", uselist=False
-    )
     coordinador = relationship("Coordinador", backref="usuario", uselist=False)
     estudiante = relationship("Estudiante", backref="usuario", uselist=False)
 

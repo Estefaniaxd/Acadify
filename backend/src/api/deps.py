@@ -8,7 +8,7 @@ from uuid import UUID
 import redis.asyncio as redis
 import logging
 
-from src.db.base_session import SessionLocal
+from src.db.session import SessionLocal
 from src.models.users.usuario import Usuario
 from src.crud.user.usuario import usuario_crud
 from src.utils.security import security_manager, get_token_blacklist
@@ -69,7 +69,7 @@ def _validate_token_format(token: str) -> None:
         logger.warning("Empty or missing token")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token requerido",
+            detail="Token requerido - El encabezado de autorización está vacío",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -77,9 +77,10 @@ def _validate_token_format(token: str) -> None:
     token_parts = token.split('.')
     if len(token_parts) != 3:
         logger.warning(f"Token inválido: Not enough segments. Token parts: {len(token_parts)}")
+        logger.warning(f"Token recibido: {token[:10]}..." if token else "Token vacío")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido: formato incorrecto",
+            detail="Token inválido: formato incorrecto - Un token JWT debe tener 3 partes separadas por puntos",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -128,11 +129,21 @@ async def get_current_user_from_token(
     
     Validates token, checks blacklist, and retrieves user from database.
     """
+    # Comprobación de credenciales nulas
+    if not credentials:
+        logger.error("No se proporcionaron credenciales de autorización")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No se proporcionaron credenciales de autorización",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     token = credentials.credentials
     
-    # Log token info for debugging (safely)
+    # Registro más detallado para debugging
     logger.debug(f"Validating token with length: {len(token) if token else 0}")
     logger.debug(f"Token starts with: {token[:10] if token and len(token) >= 10 else 'N/A'}...")
+    logger.debug(f"Token scheme: {credentials.scheme}")
     
     # Basic token format validation
     _validate_token_format(token)
@@ -174,15 +185,30 @@ async def get_current_user_from_token(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Token inválido: {str(e)}")
-        # Provide more specific error message if possible
+        # Log detallado del error para depuración
+        error_str = str(e)
+        logger.error(f"Token inválido: {error_str}")
+        logger.error(f"Tipo de excepción: {type(e).__name__}")
+        
+        # Proporcionar mensaje de error más específico y útil
         error_detail = "Token inválido o expirado"
-        if "signature" in str(e).lower():
-            error_detail = "Token con firma inválida"
-        elif "expired" in str(e).lower():
-            error_detail = "Token expirado"
-        elif "not enough segments" in str(e).lower():
-            error_detail = "Token malformado"
+        
+        if "signature" in error_str.lower():
+            error_detail = "Token con firma inválida - Verifica que estés usando el token correcto"
+        elif "expired" in error_str.lower():
+            error_detail = "Token expirado - La sesión ha caducado, vuelve a iniciar sesión"
+        elif "not enough segments" in error_str.lower():
+            error_detail = "Token malformado - No tiene el formato correcto (debe tener 3 partes separadas por puntos)"
+        elif "invalid audience" in error_str.lower():
+            error_detail = "Token con audiencia incorrecta"
+        elif "invalid_token_type" in error_str.lower():
+            error_detail = "Tipo de token incorrecto - Debe ser un token de acceso"
+        elif "token has been revoked" in error_str.lower():
+            error_detail = "Token revocado - Este token ya no es válido"
+        elif "invalid token" in error_str.lower():
+            error_detail = "Token inválido - El formato o contenido no es válido"
+        
+        logger.error(f"Mensaje detallado para el cliente: {error_detail}")
         
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

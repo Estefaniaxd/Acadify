@@ -3,8 +3,12 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
 from src.crud.classes import asistencia
-from src.db.session import get_db
-from src.schemas.classes.asistencia import asistencia as schemas
+from src.api.deps import get_db
+from src.schemas.classes.asistencia import (
+    Asistencia,
+    AsistenciaCreate,
+    AsistenciaUpdate
+)
 from src.enums.classes.asistencia_enums import EstadoAsistencia
 
 router = APIRouter()
@@ -13,11 +17,11 @@ ASISTENCIA_NOT_FOUND = "Asistencia no encontrada"
 
 
 # Crear asistencia
-@router.post("/", response_model=schemas.Asistencia, status_code=201)
+@router.post("/", response_model=Asistencia, status_code=201)
 def create_asistencia(
     *,
     db: Session = Depends(get_db),
-    asistencia_in: schemas.AsistenciaCreate,
+    asistencia_in: AsistenciaCreate,
 ):
     """
     Crear una nueva asistencia.
@@ -38,7 +42,7 @@ def create_asistencia(
 
 
 # Obtener asistencia específica
-@router.get("/{asistencia_id}", response_model=schemas.Asistencia)
+@router.get("/{asistencia_id}", response_model=Asistencia)
 def read_asistencia(
     asistencia_id: UUID,
     db: Session = Depends(get_db),
@@ -53,7 +57,7 @@ def read_asistencia(
 
 
 # Obtener múltiples asistencias con paginación
-@router.get("/", response_model=List[schemas.Asistencia])
+@router.get("/", response_model=List[Asistencia])
 def read_asistencias(
     skip: int = Query(0, ge=0, description="Número de registros a omitir"),
     limit: int = Query(
@@ -69,7 +73,7 @@ def read_asistencias(
 
 
 # Obtener asistencias por clase
-@router.get("/clase/{clase_id}", response_model=List[schemas.Asistencia])
+@router.get("/clase/{clase_id}", response_model=List[Asistencia])
 def read_asistencias_by_clase(
     clase_id: UUID,
     db: Session = Depends(get_db),
@@ -82,7 +86,7 @@ def read_asistencias_by_clase(
 
 
 # Obtener asistencias por estudiante
-@router.get("/estudiante/{estudiante_id}", response_model=List[schemas.Asistencia])
+@router.get("/estudiante/{estudiante_id}", response_model=List[Asistencia])
 def read_asistencias_by_estudiante(
     estudiante_id: UUID,
     db: Session = Depends(get_db),
@@ -95,7 +99,7 @@ def read_asistencias_by_estudiante(
 
 
 # Obtener asistencias por estado
-@router.get("/estado/{estado}", response_model=List[schemas.Asistencia])
+@router.get("/estado/{estado}", response_model=List[Asistencia])
 def read_asistencias_by_estado(
     estado: EstadoAsistencia,
     db: Session = Depends(get_db),
@@ -109,7 +113,7 @@ def read_asistencias_by_estado(
 
 # Obtener asistencia específica de estudiante en clase
 @router.get(
-    "/clase/{clase_id}/estudiante/{estudiante_id}", response_model=schemas.Asistencia
+    "/clase/{clase_id}/estudiante/{estudiante_id}", response_model=Asistencia
 )
 def read_asistencia_by_clase_and_estudiante(
     clase_id: UUID,
@@ -131,10 +135,10 @@ def read_asistencia_by_clase_and_estudiante(
 
 
 # Actualizar asistencia
-@router.put("/{asistencia_id}", response_model=schemas.Asistencia)
+@router.put("/{asistencia_id}", response_model=Asistencia)
 def update_asistencia(
     asistencia_id: UUID,
-    asistencia_in: schemas.AsistenciaUpdate,
+    asistencia_in: AsistenciaUpdate,
     db: Session = Depends(get_db),
 ):
     """
@@ -148,7 +152,7 @@ def update_asistencia(
 
 
 # Actualizar estado de asistencia (endpoint específico)
-@router.patch("/{asistencia_id}/estado", response_model=schemas.Asistencia)
+@router.patch("/{asistencia_id}/estado", response_model=Asistencia)
 def update_estado_asistencia(
     asistencia_id: UUID,
     estado: EstadoAsistencia,
@@ -161,7 +165,7 @@ def update_estado_asistencia(
     if not db_asistencia:
         raise HTTPException(status_code=404, detail=ASISTENCIA_NOT_FOUND)
 
-    asistencia_update = schemas.AsistenciaUpdate(estado=estado)
+    asistencia_update = AsistenciaUpdate(estado=estado)
     return asistencia.update(db=db, db_obj=db_asistencia, obj_in=asistencia_update)
 
 
@@ -180,7 +184,7 @@ def delete_asistencia(
 
 
 # Endpoint para registrar asistencia masiva (útil para tomar asistencia de toda una clase)
-@router.post("/clase/{clase_id}/masiva", response_model=List[schemas.Asistencia])
+@router.post("/clase/{clase_id}/masiva", response_model=List[Asistencia])
 def create_asistencia_masiva(
     clase_id: UUID,
     asistencias_data: List[
@@ -203,14 +207,14 @@ def create_asistencia_masiva(
 
             if existing:
                 # Actualizar si ya existe
-                asistencia_update = schemas.AsistenciaUpdate(estado=item["estado"])
+                asistencia_update = AsistenciaUpdate(estado=item["estado"])
                 updated = asistencia.update(
                     db=db, db_obj=existing, obj_in=asistencia_update
                 )
                 created_asistencias.append(updated)
             else:
                 # Crear nuevo si no existe
-                asistencia_create = schemas.AsistenciaCreate(
+                asistencia_create = AsistenciaCreate(
                     clase_id=clase_id,
                     estudiante_id=UUID(item["estudiante_id"]),
                     estado=EstadoAsistencia(item["estado"]),

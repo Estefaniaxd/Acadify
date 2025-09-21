@@ -6,23 +6,20 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 # Importar dependencias de base de datos
-from src.db.session import get_db
+from src.api.deps import get_db
 
 # Importar CRUDs
-from src.crud.communication.chat_bot import CRUDChatBot
-from src.crud.communication.mensaje import CRUDMensaje
+import src.crud.communication.chat_bot as crud_chat_bot
+import src.crud.communication.mensaje as crud_mensaje
 
 # Importar schemas
 from src.schemas.communication.chat_bot import (
-    ChatBot,
+    ChatBotRead,
     ChatBotCreate,
     ChatBotUpdate,
 )
 
 from src.enums.communication.mensaje_enums import TipoMensaje
-
-# Crear instancias de los CRUDs
-crud_chatbot = CRUDChatBot()
 
 # Crear router principal
 router = APIRouter()
@@ -33,7 +30,7 @@ CHAT_BOT_NOT_FOUND = "Chat Bot no encontrado"
 # ENDPOINTS PARA CHATBOT
 # ============================================================================
 
-@router.post("/chatbots/", response_model=ChatBot, status_code=status.HTTP_201_CREATED)
+@router.post("/chatbots/", response_model=ChatBotRead, status_code=status.HTTP_201_CREATED)
 def create_chatbot(
     *,
     db: Session = Depends(get_db),
@@ -43,17 +40,17 @@ def create_chatbot(
     Crear nuevo chatbot.
     """
     # Verificar si ya existe un chatbot con el mismo nombre
-    existing = crud_chatbot.get_by_nombre(db, nombre=chatbot_in.nombre)
+    existing = chat_bot.get_by_nombre(db, nombre=chatbot_in.nombre)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Ya existe un chatbot con el nombre '{chatbot_in.nombre}'"
         )
     
-    chatbot = crud_chatbot.create(db=db, obj_in=chatbot_in)
+    chatbot = chat_bot.create(db=db, obj_in=chatbot_in)
     return chatbot
 
-@router.get("/chatbots/", response_model=List[ChatBot])
+@router.get("/chatbots/", response_model=List[ChatBotRead])
 def read_chatbots(
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0),
@@ -62,10 +59,10 @@ def read_chatbots(
     """
     Obtener lista de chatbots con paginación.
     """
-    chatbots = crud_chatbot.get_multi(db, skip=skip, limit=limit)
+    chatbots = chat_bot.get_multi(db, skip=skip, limit=limit)
     return chatbots
 
-@router.get("/chatbots/{chat_bot_id}", response_model=ChatBot)
+@router.get("/chatbots/{chat_bot_id}", response_model=ChatBotRead)
 def read_chatbot(
     *,
     db: Session = Depends(get_db),
@@ -74,7 +71,7 @@ def read_chatbot(
     """
     Obtener chatbot por ID.
     """
-    chatbot = crud_chatbot.get(db=db, chat_bot_id=chat_bot_id)
+    chatbot = chat_bot.get(db=db, chat_bot_id=chat_bot_id)
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -82,7 +79,7 @@ def read_chatbot(
         )
     return chatbot
 
-@router.get("/chatbots/nombre/{nombre}", response_model=ChatBot)
+@router.get("/chatbots/nombre/{nombre}", response_model=ChatBotRead)
 def read_chatbot_by_name(
     *,
     db: Session = Depends(get_db),
@@ -91,7 +88,7 @@ def read_chatbot_by_name(
     """
     Obtener chatbot por nombre.
     """
-    chatbot = crud_chatbot.get_by_nombre(db=db, nombre=nombre)
+    chatbot = chat_bot.get_by_nombre(db=db, nombre=nombre)
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -99,25 +96,25 @@ def read_chatbot_by_name(
         )
     return chatbot
 
-@router.get("/chatbots/estado/activos", response_model=List[ChatBot])
+@router.get("/chatbots/estado/activos", response_model=List[ChatBotRead])
 def read_active_chatbots(
     db: Session = Depends(get_db)
 ) -> Any:
     """
     Obtener todos los chatbots activos.
     """
-    return crud_chatbot.get_active_bots(db)
+    return chat_bot.get_active_bots(db)
 
-@router.get("/chatbots/estado/inactivos", response_model=List[ChatBot])
+@router.get("/chatbots/estado/inactivos", response_model=List[ChatBotRead])
 def read_inactive_chatbots(
     db: Session = Depends(get_db)
 ) -> Any:
     """
     Obtener todos los chatbots inactivos.
     """
-    return crud_chatbot.get_inactive_bots(db)
+    return chat_bot.get_inactive_bots(db)
 
-@router.get("/chatbots/buscar/{search_term}", response_model=List[ChatBot])
+@router.get("/chatbots/buscar/{search_term}", response_model=List[ChatBotRead])
 def search_chatbots(
     *,
     db: Session = Depends(get_db),
@@ -126,9 +123,9 @@ def search_chatbots(
     """
     Buscar chatbots por nombre o descripción.
     """
-    return crud_chatbot.search_by_name_or_description(db, search_term=search_term)
+    return chat_bot.search_by_name_or_description(db, search_term=search_term)
 
-@router.get("/chatbots/fecha/rango", response_model=List[ChatBot])
+@router.get("/chatbots/fecha/rango", response_model=List[ChatBotRead])
 def read_chatbots_by_date_range(
     *,
     db: Session = Depends(get_db),
@@ -138,9 +135,9 @@ def read_chatbots_by_date_range(
     """
     Obtener chatbots registrados en un rango de fechas.
     """
-    return crud_chatbot.get_by_date_range(db, start_date=start_date, end_date=end_date)
+    return chat_bot.get_by_date_range(db, start_date=start_date, end_date=end_date)
 
-@router.put("/chatbots/{chat_bot_id}", response_model=ChatBot)
+@router.put("/chatbots/{chat_bot_id}", response_model=ChatBotRead)
 def update_chatbot(
     *,
     db: Session = Depends(get_db),
@@ -150,17 +147,17 @@ def update_chatbot(
     """
     Actualizar chatbot.
     """
-    chatbot = crud_chatbot.get(db=db, chat_bot_id=chat_bot_id)
+    chatbot = chat_bot.get(db=db, chat_bot_id=chat_bot_id)
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=CHAT_BOT_NOT_FOUND
         )
     
-    chatbot = crud_chatbot.update(db=db, db_obj=chatbot, obj_in=chatbot_in)
+    chatbot = chat_bot.update(db=db, db_obj=chatbot, obj_in=chatbot_in)
     return chatbot
 
-@router.patch("/chatbots/{chat_bot_id}/activar", response_model=ChatBot)
+@router.patch("/chatbots/{chat_bot_id}/activar", response_model=ChatBotRead)
 def activate_chatbot(
     *,
     db: Session = Depends(get_db),
@@ -169,7 +166,7 @@ def activate_chatbot(
     """
     Activar chatbot.
     """
-    chatbot = crud_chatbot.activate(db=db, chat_bot_id=chat_bot_id)
+    chatbot = chat_bot.activate(db=db, chat_bot_id=chat_bot_id)
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -177,7 +174,7 @@ def activate_chatbot(
         )
     return chatbot
 
-@router.patch("/chatbots/{chat_bot_id}/desactivar", response_model=ChatBot)
+@router.patch("/chatbots/{chat_bot_id}/desactivar", response_model=ChatBotRead)
 def deactivate_chatbot(
     *,
     db: Session = Depends(get_db),
@@ -186,7 +183,7 @@ def deactivate_chatbot(
     """
     Desactivar chatbot.
     """
-    chatbot = crud_chatbot.deactivate(db=db, chat_bot_id=chat_bot_id)
+    chatbot = chat_bot.deactivate(db=db, chat_bot_id=chat_bot_id)
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -194,7 +191,7 @@ def deactivate_chatbot(
         )
     return chatbot
 
-@router.delete("/chatbots/{chat_bot_id}", response_model=ChatBot)
+@router.delete("/chatbots/{chat_bot_id}", response_model=ChatBotRead)
 def delete_chatbot(
     *,
     db: Session = Depends(get_db),
@@ -203,7 +200,7 @@ def delete_chatbot(
     """
     Eliminar chatbot.
     """
-    chatbot = crud_chatbot.remove(db=db, chat_bot_id=chat_bot_id)
+    chatbot = chat_bot.remove(db=db, chat_bot_id=chat_bot_id)
     if not chatbot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

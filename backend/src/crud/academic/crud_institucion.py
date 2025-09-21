@@ -40,4 +40,4 @@ class CRUDInstitucion(CRUDBase[Institucion, InstitucionCreate, InstitucionUpdate
         return obj
 
 
-institucion = CRUDInstitucion(Institucion)
+institucion_crud = CRUDInstitucion(Institucion, id_field="institucion_id")

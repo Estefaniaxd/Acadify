@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Invitación a Coordinador Acadify</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f6f6f6; margin: 0; padding: 0; }
+        .container { background: #fff; max-width: 480px; margin: 40px auto; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px 24px; }
+        .logo { text-align: center; margin-bottom: 24px; }
+        .code { font-size: 2.2em; letter-spacing: 8px; color: #2d7be5; font-weight: bold; background: #f0f4fa; padding: 12px 0; border-radius: 6px; margin: 24px 0; text-align: center; }
+        .btn { display: inline-block; background: #2d7be5; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: bold; margin: 24px 0; }
+        .footer { color: #888; font-size: 0.95em; text-align: center; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://acadify.app/logo.png" alt="Acadify" width="120"/>
+        </div>
+        <h2>¡Has sido invitado como Coordinador!</h2>
+        <p>Hola,<br>
+        Has sido invitado para ser el coordinador principal de la institución <b>{{ institucion_nombre }}</b> en Acadify.</p>
+        <p>Para completar tu registro, utiliza el siguiente código de invitación:</p>
+        <div class="code">{{ codigo }}</div>
+        <p>Este código es válido hasta <b>{{ fecha_expiracion }}</b>.<br>
+        Si no reconoces esta invitación, puedes ignorar este mensaje.</p>
+        <div style="text-align:center;">
+            <a class="btn" href="{{ url_registro }}">Completar registro</a>
+        </div>
+        <div class="footer">
+            <p>Este es un mensaje automático de Acadify.<br>¿Necesitas ayuda? <a href="mailto:soporte@acadify.app">Contáctanos</a></p>
+        </div>
+    </div>
+</body>
+</html>

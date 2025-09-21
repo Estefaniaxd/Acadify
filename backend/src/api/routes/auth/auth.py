@@ -1,31 +1,3 @@
-from src.schemas.auth.auth_schemas import EmailVerificationRequest, EmailVerificationResponse
-
-from fastapi import APIRouter, Depends, HTTPException
-# ===============================
-# Authentication Endpoints
-# ===============================
-
-# Endpoint para verificar email
-
-router = APIRouter()
-
-@router.post("/verify-email", response_model=EmailVerificationResponse)
-async def verify_email(
-    *,
-    db: Session = Depends(get_db),
-    redis_client: redis.Redis = Depends(get_redis_client),
-    data: EmailVerificationRequest
-) -> Any:
-    """
-    Verificar correo electrónico con código recibido por email.
-    """
-    auth_service = AuthService(redis_client)
-    try:
-        result = await auth_service.verify_email(db, data)
-        return EmailVerificationResponse(message=result["message"])
-    except Exception as e:
-        logger.error(f"Error en verificación de email: {e}")
-        raise HTTPException(status_code=400, detail="No se pudo verificar el correo")
 # src/api/routers/auth.py
 
 from typing import Any, Dict
@@ -34,6 +6,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from uuid import UUID
 import logging
+import redis.asyncio as redis
 
 from src.api.deps import get_db, get_redis_client, get_current_user, get_current_active_user
 from src.services.auth.auth_service import AuthService
@@ -43,13 +16,56 @@ from src.schemas.auth.auth_schemas import (
     PasswordChangeRequest, TwoFASetupRequest, TwoFASetupResponse,
     TwoFAVerifyRequest, TwoFAVerifyResponse, TwoFADisableRequest,
     TwoFAStatusResponse, UserCurrentResponse, UserProfileUpdate,
-    LoginStepResponse, LogoutResponse, MessageResponse
+    LoginStepResponse, LogoutResponse, MessageResponse,
+    EmailVerificationRequest, EmailVerificationResponse
 )
 from src.schemas.users.usuario import UsuarioCreate
 from src.models.users.usuario import Usuario
 from src.utils.security import security_manager
-import redis.asyncio as redis
 
+logger = logging.getLogger(__name__)
+
+# ===============================
+# Authentication Endpoints
+# ===============================
+# Authentication Endpoints
+# ===============================
+
+# Router de autenticación principal
+router = APIRouter(prefix="/auth", tags=["Autenticación"])
+security = HTTPBearer()
+
+# Endpoint para verificar email
+@router.post("/verify-email", response_model=EmailVerificationResponse)
+async def verify_email(
+    *,
+    db: Session = Depends(get_db),
+    redis_client: redis.Redis = Depends(get_redis_client),
+    data: EmailVerificationRequest
+) -> Any:
+    """
+    Verificar correo electrónico con código recibido por email.
+    
+    **Payload requerido:**
+    ```json
+    {
+        "usuario_id": "uuid-del-usuario",
+        "verification_code": "123456"
+    }
+    ```
+    
+    **Respuestas:**
+    - 200: Email verificado exitosamente
+    - 400: Código inválido o expirado
+    - 404: Usuario no encontrado
+    """
+    auth_service = AuthService(redis_client)
+    try:
+        result = await auth_service.verify_email(db, data)
+        return EmailVerificationResponse(message=result["message"])
+    except Exception as e:
+        logger.error(f"Error en verificación de email: {e}")
+        raise HTTPException(status_code=400, detail="No se pudo verificar el correo")
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +73,8 @@ logger = logging.getLogger(__name__)
 ERROR_INTERNO_SERVIDOR = "Error interno del servidor"
 USUARIO_NO_ENCONTRADO = "Usuario no encontrado"
 
-
-# Router de autenticación
-router = APIRouter(prefix="/auth", tags=["Autenticación"])
-security = HTTPBearer()
-
 # ===============================
-# Authentication Endpoints
+# User Registration and Login
 # ===============================
 
 @router.post("/register", response_model=UserCurrentResponse, status_code=status.HTTP_201_CREATED)

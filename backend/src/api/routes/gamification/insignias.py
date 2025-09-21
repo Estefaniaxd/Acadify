@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from src.crud.gamification import insignias as crud_insignias
-from src.schemas.gamification import insignias as schemas_insignias
-from src.db.session import get_db
+import src.crud.gamification.insignia as crud_insignias
+from src.schemas.gamification.insignia import (
+    InsigniaResponse, InsigniaCreate, InsigniaUpdate,
+    UsuarioInsigniasResponse
+)
+from src.api.deps import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario
 
@@ -12,7 +15,7 @@ router = APIRouter()
 # Obtener insignias del usuario autenticado
 @router.get(
     "/me",
-    response_model=schemas_insignias.UsuarioInsigniasResponse,
+    response_model=UsuarioInsigniasResponse,
     summary="Obtener mis insignias",
     tags=["Insignias"],
 )
@@ -41,7 +44,7 @@ def get_my_insignias(
 # CRUD Insignias
 @router.get(
     "/",
-    response_model=list[schemas_insignias.InsigniaResponse],
+    response_model=list[InsigniaResponse],
     summary="Listar todas las insignias",
     tags=["Insignias"],
 )
@@ -51,26 +54,26 @@ def list_insignias(db: Session = Depends(get_db)):
 
 @router.post(
     "/",
-    response_model=schemas_insignias.InsigniaResponse,
+    response_model=InsigniaResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear una insignia",
     tags=["Insignias"],
 )
 def create_insignia(
-    insignia: schemas_insignias.InsigniaCreate, db: Session = Depends(get_db)
+    insignia: InsigniaCreate, db: Session = Depends(get_db)
 ):
     return crud_insignias.create_insignia(db, insignia)
 
 
 @router.put(
     "/{insignia_id}",
-    response_model=schemas_insignias.InsigniaResponse,
+    response_model=InsigniaResponse,
     summary="Actualizar una insignia",
     tags=["Insignias"],
 )
 def update_insignia(
     insignia_id: str,
-    insignia_update: schemas_insignias.InsigniaUpdate,
+    insignia_update: InsigniaUpdate,
     db: Session = Depends(get_db),
 ):
     insignia = crud_insignias.update_insignia(db, insignia_id, insignia_update)

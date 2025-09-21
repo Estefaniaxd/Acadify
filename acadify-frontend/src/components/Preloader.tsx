@@ -1,30 +1,28 @@
-import { useEffect } from "react";
-import loaderVideo from "./images/icons/loader.mp4"; // asegúrate de que el path es correcto
+import React, { useEffect } from 'react';
 
-export default function Preloader({ onFinish }: { onFinish: () => void }) {
+interface PreloaderProps {
+  onFinish: () => void;
+}
+
+const Preloader: React.FC<PreloaderProps> = ({ onFinish }) => {
   useEffect(() => {
-    const id = setTimeout(() => onFinish(), 1500); // Ajusta el tiempo si quieres
-    return () => clearTimeout(id);
+    const timer = setTimeout(onFinish, 2000);
+    return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
-      <div className="flex flex-col items-center gap-4 animate-fade-in">
-        {/* Video loader */}
-        <video
-          src={loaderVideo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-28 h-28 rounded-full"
-        />
-
-        {/* Texto de carga */}
-        <div className="text-sm text-gray-600">
-          .·:*¨¨*Cargando Acadify*¨¨*:·.
+    <div className="fixed inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center z-50">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-white mb-4">Acadify</h1>
+        <p className="text-xl text-indigo-200 mb-8">Cargando...</p>
+        <div className="flex justify-center space-x-2">
+          <div className="w-3 h-3 bg-white rounded-full animate-bounce"></div>
+          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Preloader;

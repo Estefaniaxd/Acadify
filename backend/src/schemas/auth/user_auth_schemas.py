@@ -45,7 +45,7 @@ class UserRegisterRequest(BaseModel):
 
         return v
 
-    @field_validator("username", pre=True, always=True)
+    @field_validator("username")
     def validate_admin_username(cls, v, values):
         """Validar que solo admin tenga username"""
         rol = values.get("rol")
@@ -57,7 +57,7 @@ class UserRegisterRequest(BaseModel):
                 raise ValueError("Solo el administrador puede tener username")
         return v
 
-    @field_validator("correo_institucional", pre=True, always=True)
+    @field_validator("correo_institucional")
     def validate_non_admin_email(cls, v, values):
         """Validar que roles no admin tengan email institucional"""
         rol = values.get("rol")

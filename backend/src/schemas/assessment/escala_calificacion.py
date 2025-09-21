@@ -2,7 +2,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 from typing import Annotated
 from decimal import Decimal
-from ...enums.assessment.escala_calificacion_eunms import TipoEscalafonEnum
+from ...enums.assessment.escala_calificacion_enums import TipoEscalafonEnum
 
 
 class EscalaCalificacionBase(BaseModel):

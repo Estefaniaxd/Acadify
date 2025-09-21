@@ -4,7 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
 from sqlalchemy.orm import Session
 
-from src.db.session import get_db
+from src.api.deps import get_db
 from src.models.users.usuario import Usuario
 from src.services.auth.token_service import TokenService
 from src.services.auth.redis_service import RedisService

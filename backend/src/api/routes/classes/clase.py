@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime, date
 from typing import List, Optional
 from src.crud.classes import clase
-from src.db.session import get_db
+from src.api.deps import get_db
 from src.schemas.classes.clase import ClaseCreate, ClaseUpdate, Clase as ClaseSchema
 
 router = APIRouter()

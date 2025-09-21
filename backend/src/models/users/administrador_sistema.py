@@ -13,6 +13,3 @@ class AdministradorSistema(Base):
         primary_key=True,
     )
 
-    instituciones = relationship(
-        "Institucion", backref="administrador_sistema"
-    )

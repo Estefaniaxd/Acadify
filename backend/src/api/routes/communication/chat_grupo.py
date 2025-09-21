@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 # Importar dependencias de base de datos
-from src.db.session import get_db
+from src.api.deps import get_db
 
-from src.crud.communication.chat_grupo import CRUDChatGrupo
+# Importar CRUD
+import src.crud.communication.chat_grupo as crud_chat_grupo
 
 from src.schemas.communication.chat_grupo import (
     ChatGrupo,
@@ -16,11 +17,6 @@ from src.schemas.communication.chat_grupo import (
 )
 
 from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
-
-# Importar enums
-from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
-
-crud_chat_grupo = CRUDChatGrupo()
 
 # Crear router principal
 router = APIRouter()

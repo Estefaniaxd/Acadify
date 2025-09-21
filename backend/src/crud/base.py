@@ -51,13 +51,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
         """Actualizar un registro existente"""
-        obj_data = obj_in.model_dump(exclude_unset=True)
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
             update_data = obj_in.model_dump(exclude_unset=True)
-        for field in obj_data:
-            if field in update_data:
+        
+        for field in update_data:
+            if hasattr(db_obj, field):
                 setattr(db_obj, field, update_data[field])
         db.add(db_obj)
         db.commit()
@@ -66,9 +66,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def remove(self, db: Session, *, id: Any) -> Optional[ModelType]:
         """Eliminar un registro por ID"""
-
         obj = self.get(db, id)
         if obj:
             db.delete(obj)
             db.commit()
         return obj
+
+
+# Stub para evitar error de importación circular
+class CRUDMensajeBot(CRUDBase[ModelType, CreateSchemaType, UpdateSchemaType]):
+    pass

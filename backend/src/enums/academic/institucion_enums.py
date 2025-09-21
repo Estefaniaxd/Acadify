@@ -24,3 +24,10 @@ class NivelEducativoInstitucion(str, enum.Enum):
 class SectorInstitucion(str, enum.Enum):
     publico = "publico"
     privado = "privado"
+
+
+class EstadoInstitucion(str, enum.Enum):
+    pendiente = "pendiente"
+    activa = "activa"
+    suspendida = "suspendida"
+    inactiva = "inactiva"

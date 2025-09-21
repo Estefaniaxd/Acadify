@@ -3,9 +3,9 @@ from typing import List
 from sqlalchemy.orm import Session
 import uuid
 
-from src.schemas.users.usuario import UsuarioRead, UsuarioUpdate
+from src.schemas.users.usuario import Usuario, UsuarioUpdate
 from src.crud.auth.user_crud import UserCRUD
-from src.db.session import get_db
+from src.api.deps import get_db
 from src.api.dependencies import (
     get_current_user,
     get_user_crud,
@@ -20,7 +20,7 @@ USUARIO_NO_ENCONTRADO = "Usuario no encontrado"
 
 @router.get(
     "/",
-    response_model=List[UsuarioRead],
+    response_model=List[Usuario],
     summary="Listar usuarios",
     description="Retorna una lista de todos los usuarios.",
 )
@@ -35,7 +35,7 @@ async def get_all_usuarios(
 
 @router.get(
     "/{usuario_id}",
-    response_model=UsuarioRead,
+    response_model=Usuario,
     summary="Obtener un usuario por ID",
     description="Retorna los detalles de un usuario específico.",
 )
@@ -55,7 +55,7 @@ async def get_usuario(
 
 @router.put(
     "/{usuario_id}",
-    response_model=UsuarioRead,
+    response_model=Usuario,
     summary="Actualizar un usuario",
     description="Actualiza los datos de un usuario por su ID.",
 )

@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from src.crud.gamification import recompensas as crud_recompensas
-from backend.src.schemas.gamification import recompensa as schemas_recompensas
-from src.db.session import get_db
+import src.crud.gamification.recompensas as crud_recompensas
+from src.schemas.gamification.recompensa import (
+    RecompensaResponse, RecompensaCreate, RecompensaUpdate,
+    RecompensasDisponiblesResponse, UsuarioRecompensaResponse, 
+    CanjearRecompensaRequest, HistorialCanjesUsuarioResponse
+)
+from src.api.deps import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario
 
@@ -13,7 +17,7 @@ router = APIRouter()
 # CRUD Recompensas
 @router.get(
     "/",
-    response_model=List[schemas_recompensas.RecompensaResponse],
+    response_model=List[RecompensaResponse],
     summary="Listar todas las recompensas",
     tags=["Recompensas"],
 )
@@ -23,26 +27,26 @@ def list_recompensas(db: Session = Depends(get_db)):
 
 @router.post(
     "/",
-    response_model=schemas_recompensas.RecompensaResponse,
+    response_model=RecompensaResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear una recompensa",
     tags=["Recompensas"],
 )
 def create_recompensa(
-    recompensa: schemas_recompensas.RecompensaCreate, db: Session = Depends(get_db)
+    recompensa: RecompensaCreate, db: Session = Depends(get_db)
 ):
     return crud_recompensas.create_recompensa(db, recompensa)
 
 
 @router.put(
     "/{recompensa_id}",
-    response_model=schemas_recompensas.RecompensaResponse,
+    response_model=RecompensaResponse,
     summary="Actualizar una recompensa",
     tags=["Recompensas"],
 )
 def update_recompensa(
     recompensa_id: str,
-    recompensa_update: schemas_recompensas.RecompensaUpdate,
+    recompensa_update: RecompensaUpdate,
     db: Session = Depends(get_db),
 ):
     recompensa = crud_recompensas.update_recompensa(
@@ -69,7 +73,7 @@ def delete_recompensa(recompensa_id: str, db: Session = Depends(get_db)):
 # Endpoints de tienda y canje
 @router.get(
     "/tienda/recompensas",
-    response_model=List[schemas_recompensas.RecompensasDisponiblesResponse],
+    response_model=List[RecompensasDisponiblesResponse],
     summary="Ver recompensas disponibles en la tienda",
     tags=["Recompensas"],
 )
@@ -83,12 +87,12 @@ def get_available_rewards(
 
 @router.post(
     "/tienda/recompensas/canjear",
-    response_model=schemas_recompensas.UsuarioRecompensaResponse,
+    response_model=UsuarioRecompensaResponse,
     summary="Canjear una recompensa por puntos",
     tags=["Recompensas"],
 )
 def redeem_reward(
-    request: schemas_recompensas.CanjearRecompensaRequest,
+    request: CanjearRecompensaRequest,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user),
 ):
@@ -106,7 +110,7 @@ def redeem_reward(
 
 @router.get(
     "/tienda/historial",
-    response_model=schemas_recompensas.HistorialCanjesUsuarioResponse,
+    response_model=HistorialCanjesUsuarioResponse,
     summary="Ver mi historial de canjes",
     tags=["Recompensas"],
 )

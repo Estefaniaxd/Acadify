@@ -1,53 +1,86 @@
-from .academic import (
-    curso_docente,
-    curso,
-    estudiante_grupo,
-    grupo_curso,
-    grupo,
-    institucion,
-    material_clase,
-    material_curso,
-    material_educativo,
-    programa,
-)
+# Importar las rutas correctamente
+try:
+    from .academic import (
+        curso_docente,
+        curso,
+        estudiante_grupo,
+        grupo_curso,
+        grupo,
+        institucion,
+        material_clase,
+        material_curso,
+        material_educativo,
+        programa,
+    )
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos académicos: {e}")
 
-from .assessment import escala_calificacion, valor_calificacion
+try:
+    from .assessment import escala_calificacion, valor_calificacion
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos de evaluación: {e}")
 
-from .auth import auth
+try:
+    from .auth_main import router as auth_router
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos de autenticación: {e}")
 
-from .classes import (
-    asistencia,
-    clase,
-    entregar_tarea,
-    plataforma,
-    tarea,
-)
+try:
+    from .classes import (
+        asistencia,
+        clase,
+        entregar_tarea,
+        plataforma,
+        tarea,
+    )
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos de clases: {e}")
 
-from .communication import (
-    archivo_chat,
-    chat_bot,
-    chat_grupo,
-    faq_bot,
-    mensaje_bot,
-    mensaje,
-)
+try:
+    from .communication import (
+        archivo_chat,
+        chat_bot,
+        chat_grupo,
+        faq_bot,
+        mensaje_bot,
+        mensaje,
+    )
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos de comunicación: {e}")
 
-from .gamification import (
-    gamificacion,
-    insignias,
-    puntos,
-    recompensas,
-    temas,
-)
+try:
+    from .gamification import (
+        gamificacion,
+        insignias,
+        puntos,
+        recompensas,
+        temas,
+    )
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos de gamificación: {e}")
 
-from .users import usuario
+try:
+    from .users import usuario
+    from .admin_institucion import router as admin_institucion_router
+    from .coordinador_invitacion import router as coordinador_invitacion_router
+    from .debug import router as debug_router
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar módulos de usuarios: {e}")
 
+# Lista de rutas disponibles
 routers = [
     # Academic
     (curso_docente.router, "/cursos-docentes", ["CursoDocente"]),
     (curso.router, "/cursos", ["Curso"]),
     (estudiante_grupo.router, "/estudiantes-grupos", ["EstudianteGrupo"]),
-    (grupo_curso.router, "/grupos-cursos", ["GupoCurso"]),
+    (grupo_curso.router, "/grupos-cursos", ["GrupoCurso"]),
     (grupo.router, "/grupos", ["Grupo"]),
     (institucion.router, "/instituciones", ["Institucion"]),
     (material_clase.router, "/materiales-clases", ["MaterialClase"]),
@@ -58,7 +91,7 @@ routers = [
     (escala_calificacion.router, "/escalas-calificacion", ["EscalaCalificacion"]),
     (valor_calificacion.router, "/valores-calificacion", ["ValorCalificacion"]),
     # Auth
-    (auth.router, "/auths", ["Auth"]),
+    (auth_router, "/auth", ["Autenticación"]),
     # Classes
     (asistencia.router, "/asistencias", ["Asistencia"]),
     (clase.router, "/clases", ["Clase"]),
@@ -80,4 +113,9 @@ routers = [
     (temas.router, "/temas", ["Tema"]),
     # Users
     (usuario.router, "/usuarios", ["Usuario"]),
+    # Admin - Instituciones y Coordinadores
+    (admin_institucion_router, "/admin", ["Administrador"]),
+    (coordinador_invitacion_router, "/coordinador", ["Coordinador"]),
+    # Debug
+    (debug_router, "/debug", ["Depuración"]),
 ]

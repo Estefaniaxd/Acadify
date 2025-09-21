@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from src.db.session import get_db
+from src.api.deps import get_db
 from src.schemas.academic.material_clase import MaterialClase, MaterialClaseCreate, MaterialClaseUpdate
-from src.crud.academic.crud_material_clase import material_clase_crud
+import src.crud.academic.crud_material_clase as crud_material_clase_crud
 
 router = APIRouter()
 

@@ -98,15 +98,76 @@ class SecurityManager:
     def decode_token(self, token: str) -> Dict[str, Any]:
         """Decodificar y validar token JWT"""
         try:
+            # Log para depuración
+            logger.debug(f"Intentando decodificar token: {token[:10] if token else 'None'}...")
+            
+            if not token or len(token.strip()) == 0:
+                logger.warning("Token vacío o nulo")
+                raise JWTError("Token vacío o nulo")
+                
+            # Verificar formato básico (3 partes separadas por puntos)
+            parts = token.split('.')
+            if len(parts) != 3:
+                logger.warning(f"Token con formato incorrecto: {len(parts)} partes")
+                raise JWTError(f"Not enough segments")
+                
             payload = jwt.decode(
                 token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
             )
+            
+            logger.debug(f"Token decodificado correctamente: {payload.get('sub')}")
             return payload
         except JWTError as e:
+            # Para operaciones críticas (login, refresh token, etc.) no mostrar detalles específicos
+            # Esto previene la filtración de información sensible
             logger.warning(f"Token inválido: {e}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token inválido o expirado",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        """Decodificar y validar token JWT"""
+        try:
+            # Log para depuración
+            logger.debug(f"Intentando decodificar token: {token[:10]}...")
+            
+            if not token or len(token.strip()) == 0:
+                logger.warning("Token vacío o nulo")
+                raise JWTError("Token vacío o nulo")
+                
+            # Verificar formato básico (3 partes separadas por puntos)
+            parts = token.split('.')
+            if len(parts) != 3:
+                logger.warning(f"Token con formato incorrecto: {len(parts)} partes")
+                raise JWTError(f"Not enough segments")
+                
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
+            
+            # Verificar campos requeridos en el token
+            if "sub" not in payload:
+                logger.warning("Token sin campo 'sub' (subject)")
+                raise JWTError("Token sin subject")
+                
+            if "exp" not in payload:
+                logger.warning("Token sin campo 'exp' (expiration)")
+                raise JWTError("Token sin expiración")
+            
+            # Más información sobre el token para depuración
+            logger.debug(f"Token decodificado correctamente:")
+            logger.debug(f"- Subject: {payload.get('sub')}")
+            logger.debug(f"- Type: {payload.get('type')}")
+            logger.debug(f"- Roles: {payload.get('roles', 'No hay roles')}")
+            logger.debug(f"- Expires: {payload.get('exp')}")
+            
+            return payload
+            
+        except JWTError as e:
+            logger.warning(f"Token inválido: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Token inválido o expirado: {str(e)}",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 

@@ -36,4 +36,4 @@ class CRUDPrograma(CRUDBase[Programa, ProgramaCreate, ProgramaUpdate]):
         return obj
 
 
-programa = CRUDPrograma(Programa)
+programa_crud = CRUDPrograma(Programa, id_field="programa_id")

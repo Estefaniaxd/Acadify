@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from datetime import datetime 
 
 # Importar dependencias de base de datos
-from src.db.session import get_db
+from src.api.deps import get_db
 
-from src.crud.communication.mensaje_bot import CRUDMensajeBot
+import src.crud.communication.mensaje_bot as crud_mensaje_bot
 
 from src.enums.communication.mensaje_bots_enum import ContextoMensaje
 
@@ -17,10 +17,6 @@ from src.schemas.communication.mensaje_bot import (
     MensajeBotCreate,
     MensajeBotUpdate,
 )
-
-from src.enums.communication.mensaje_bots_enum import ContextoMensaje
-
-crud_mensaje_bot = CRUDMensajeBot()
 
 # Crear router principal
 router = APIRouter()
@@ -125,7 +121,7 @@ def search_mensaje_bots(
     """
     Buscar mensajes bot por contenido o respuesta.
     """
-    return crud_mensaje_bot.search_by_content(db, search_term=search_term)
+    return mensaje_bot.search_by_content(db, search_term=search_term)
 
 @router.get("/mensaje-bots/conversacion/historial", response_model=List[MensajeBot])
 def read_conversation_history(
@@ -171,7 +167,7 @@ def read_mensaje_bot_count_by_contexto(
     """
     Contar mensajes bot por contexto.
     """
-    return crud_mensaje_bot.count_messages_by_context(db)
+    return mensaje_bot.count_messages_by_context(db)
 
 @router.get("/mensaje-bots/estadisticas/usuarios-activos", response_model=Dict[str, int])
 def read_active_users_mensaje_bot(
@@ -181,7 +177,7 @@ def read_active_users_mensaje_bot(
     """
     Obtener usuarios más activos en mensajes bot.
     """
-    return crud_mensaje_bot.count_messages_by_user(db, limit=limit)
+    return mensaje_bot.count_messages_by_user(db, limit=limit)
 
 @router.put("/mensaje-bots/{mensaje_bot_id}", response_model=MensajeBot)
 def update_mensaje_bot(

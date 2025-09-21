@@ -5,22 +5,17 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 # Importar dependencias de base de datos
-from src.db.session import get_db
+from src.api.deps import get_db
 
-from backend.src.crud.communication.faq_bot import CRUDFAQBot
+import src.crud.communication.faq_bot as crud_faq_bot
 
-from backend.src.schemas.communication.faq_bot import (
+from src.schemas.communication.faq_bot import (
     FAQBotCreate,
     FAQBotUpdate,
     FAQBot,
 )
 
 from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
-
-# Importar enums
-from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
-
-crud_faqbot = CRUDFAQBot()
 
 
 # Crear router principal
@@ -42,7 +37,7 @@ def create_faq_bot(
     """
     Crear nueva FAQ.
     """
-    faq_bot = crud_faqbot.create(db=db, obj_in=faq_bot_in)
+    faq_bot = faq_bot.create(db=db, obj_in=faq_bot_in)
     return faq_bot
 
 @router.get("/faq-bots/", response_model=List[FAQBot])
@@ -54,7 +49,7 @@ def read_faq_bots(
     """
     Obtener lista de FAQs con paginación.
     """
-    faq_bots = crud_faqbot.get_multi(db, skip=skip, limit=limit)
+    faq_bots = faq_bot.get_multi(db, skip=skip, limit=limit)
     return faq_bots
 
 @router.get("/faq-bots/{faq_id}", response_model=FAQBot)
@@ -66,7 +61,7 @@ def read_faq_bot(
     """
     Obtener FAQ por ID.
     """
-    faq_bot = crud_faqbot.get(db=db, faq_id=faq_id)
+    faq_bot = faq_bot.get(db=db, faq_id=faq_id)
     if not faq_bot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -83,7 +78,7 @@ def read_faq_bots_by_categoria(
     """
     Obtener FAQs por categoría.
     """
-    return crud_faqbot.get_by_categoria(db, categoria=categoria)
+    return faq_bot.get_by_categoria(db, categoria=categoria)
 
 @router.get("/faq-bots/categorias/todas", response_model=List[str])
 def read_all_categorias(
@@ -92,7 +87,7 @@ def read_all_categorias(
     """
     Obtener todas las categorías únicas.
     """
-    return crud_faqbot.get_all_categorias(db)
+    return faq_bot.get_all_categorias(db)
 
 @router.get("/faq-bots/buscar/pregunta/{search_term}", response_model=List[FAQBot])
 def search_faq_bots_by_pregunta(
@@ -103,7 +98,7 @@ def search_faq_bots_by_pregunta(
     """
     Buscar FAQs por pregunta.
     """
-    return crud_faqbot.search_by_pregunta(db, search_term=search_term)
+    return faq_bot.search_by_pregunta(db, search_term=search_term)
 
 @router.get("/faq-bots/buscar/respuesta/{search_term}", response_model=List[FAQBot])
 def search_faq_bots_by_respuesta(
@@ -114,7 +109,7 @@ def search_faq_bots_by_respuesta(
     """
     Buscar FAQs por respuesta.
     """
-    return crud_faqbot.search_by_respuesta(db, search_term=search_term)
+    return faq_bot.search_by_respuesta(db, search_term=search_term)
 
 @router.get("/faq-bots/buscar/contenido/{search_term}", response_model=List[FAQBot])
 def search_faq_bots_in_content(
@@ -125,7 +120,7 @@ def search_faq_bots_in_content(
     """
     Buscar FAQs en pregunta o respuesta.
     """
-    return crud_faqbot.search_in_content(db, search_term=search_term)
+    return faq_bot.search_in_content(db, search_term=search_term)
 
 @router.get("/faq-bots/recientes/", response_model=List[FAQBot])
 def read_recent_faq_updates(
@@ -135,7 +130,7 @@ def read_recent_faq_updates(
     """
     Obtener FAQs actualizadas recientemente.
     """
-    return crud_faqbot.get_recent_updates(db, limit=limit)
+    return faq_bot.get_recent_updates(db, limit=limit)
 
 @router.get("/faq-bots/agrupadas/categoria", response_model=Dict[str, List[FAQBot]])
 def read_faqs_grouped_by_categoria(
@@ -144,7 +139,7 @@ def read_faqs_grouped_by_categoria(
     """
     Obtener FAQs agrupadas por categoría.
     """
-    return crud_faqbot.get_faqs_grouped_by_categoria(db)
+    return faq_bot.get_faqs_grouped_by_categoria(db)
 
 @router.get("/faq-bots/estadisticas/categoria", response_model=Dict[str, int])
 def read_faq_count_by_categoria(
@@ -153,7 +148,7 @@ def read_faq_count_by_categoria(
     """
     Contar FAQs por categoría.
     """
-    return crud_faqbot.count_by_categoria(db)
+    return faq_bot.count_by_categoria(db)
 
 @router.put("/faq-bots/{faq_id}", response_model=FAQBot)
 def update_faq_bot(
@@ -165,14 +160,14 @@ def update_faq_bot(
     """
     Actualizar FAQ.
     """
-    faq_bot = crud_faqbot.get(db=db, faq_id=faq_id)
+    faq_bot = faq_bot.get(db=db, faq_id=faq_id)
     if not faq_bot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=FAQ_NOT_FOUND
         )
     
-    faq_bot = crud_faqbot.update(db=db, db_obj=faq_bot, obj_in=faq_bot_in)
+    faq_bot = faq_bot.update(db=db, db_obj=faq_bot, obj_in=faq_bot_in)
     return faq_bot
 
 @router.patch("/faq-bots/categoria/actualizar", response_model=Dict[str, Any])
@@ -185,7 +180,7 @@ def bulk_update_categoria(
     """
     Actualizar categoría en lote.
     """
-    updated_count = crud_faqbot.bulk_update_categoria(
+    updated_count = faq_bot.bulk_update_categoria(
         db=db,
         old_categoria=old_categoria,
         new_categoria=new_categoria
@@ -207,7 +202,7 @@ def duplicate_faq(
     """
     Duplicar FAQ existente.
     """
-    new_faq = crud_faqbot.duplicate_faq(
+    new_faq = faq_bot.duplicate_faq(
         db=db,
         faq_id=faq_id,
         new_categoria=new_categoria
@@ -228,7 +223,7 @@ def delete_faq_bot(
     """
     Eliminar FAQ.
     """
-    faq_bot = crud_faqbot.remove(db=db, faq_id=faq_id)
+    faq_bot = faq_bot.remove(db=db, faq_id=faq_id)
     if not faq_bot:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

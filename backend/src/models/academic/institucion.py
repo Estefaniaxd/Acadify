@@ -1,12 +1,13 @@
 from ...db.base_class import Base
 from sqlalchemy import Column, text, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID, ENUM, BOOLEAN
+from sqlalchemy.dialects.postgresql import UUID, ENUM, BOOLEAN, TIMESTAMP
 from ...enums.academic.institucion_enums import (
     TipoInstitucion,
     NivelEducativoInstitucion,
     SectorInstitucion,
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class Institucion(Base):
@@ -17,7 +18,7 @@ class Institucion(Base):
     )
     administrador_id_creador = Column(
         UUID(as_uuid=True),
-        ForeignKey("AdministradorSistema.administrador_id", ondelete="SET NULL"),
+        ForeignKey("Usuario.usuario_id", ondelete="SET NULL"),
     )
 
     nombre = Column(String(150), unique=True, nullable=False)
@@ -47,8 +48,23 @@ class Institucion(Base):
     pais = Column(String(100), nullable=False)
 
     correo_institucional = Column(String(100), unique=True, nullable=False)
-    telefono = Column(String(25 - 30), nullable=False)
+    telefono = Column(String(30), nullable=False)
     nit = Column(String(20), unique=True)
+
+    # Campos de estado y fechas
+    estado = Column(
+        ENUM(
+            "pendiente",
+            "activa", 
+            "suspendida", 
+            "inactiva", 
+            name="estado_institucion"
+        ),
+        nullable=False,
+        server_default="pendiente"
+    )
+    fecha_creacion = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    fecha_activacion = Column(TIMESTAMP(timezone=True), nullable=True)
 
     escalas = relationship(
         "EscalaCalificacion", backref="institucion", passive_deletes=True

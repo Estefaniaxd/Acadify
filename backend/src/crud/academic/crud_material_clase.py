@@ -42,4 +42,4 @@ class CRUDMaterialClase(
         return obj
 
 
-material_clase = CRUDMaterialClase(MaterialClase)
+material_clase_crud = CRUDMaterialClase(MaterialClase, id_field="material_id")

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from src.db.session import get_db
+from src.api.deps import get_db
 from src.schemas.academic.institucion import Institucion, InstitucionCreate, InstitucionUpdate
-from src.crud.academic.crud_institucion import institucion_crud
+import src.crud.academic.crud_institucion as crud_institucion_crud
 
 router = APIRouter()
 

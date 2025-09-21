@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from backend.src.crud.gamification import historial_puntos as crud_puntos
-from src.schemas.gamification import puntos as schemas_puntos
-from src.db.session import get_db
+import src.crud.gamification.historial_puntos as crud_puntos
+from src.schemas.gamification.historial_puntos import (
+    UsuarioPuntosResponse, HistorialPuntosResponse, AsignarPuntosRequest,
+    RankingUsuarioResponse
+)
+from src.api.deps import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario
 
@@ -13,7 +16,7 @@ router = APIRouter()
 # Obtener puntos del usuario autenticado
 @router.get(
     "/me",
-    response_model=schemas_puntos.UsuarioPuntosResponse,
+    response_model=UsuarioPuntosResponse,
     summary="Obtener mis puntos acumulados",
     tags=["Puntos"],
 )
@@ -32,7 +35,7 @@ def get_my_points(
 # CRUD Puntos (solo para pruebas/admin, normalmente no se expone crear/eliminar puntos directos)
 @router.post(
     "/",
-    response_model=schemas_puntos.UsuarioPuntosResponse,
+    response_model=UsuarioPuntosResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear registro de puntos para usuario",
     tags=["Puntos"],
@@ -59,12 +62,12 @@ def delete_usuario_puntos(usuario_id: str, db: Session = Depends(get_db)):
 # Asignar y descontar puntos
 @router.post(
     "/asignar",
-    response_model=schemas_puntos.UsuarioPuntosResponse,
+    response_model=UsuarioPuntosResponse,
     summary="Asignar puntos a un usuario",
     tags=["Puntos"],
 )
 def asignar_puntos(
-    request: schemas_puntos.AsignarPuntosRequest, db: Session = Depends(get_db)
+    request: AsignarPuntosRequest, db: Session = Depends(get_db)
 ):
     return crud_puntos.asignar_puntos(db, request)
 
@@ -72,7 +75,7 @@ def asignar_puntos(
 # Historial y ranking
 @router.get(
     "/historial",
-    response_model=List[schemas_puntos.HistorialPuntosResponse],
+    response_model=List[HistorialPuntosResponse],
     summary="Obtener mi historial de puntos",
     tags=["Puntos"],
 )
@@ -89,7 +92,7 @@ def get_my_point_history(
 
 @router.get(
     "/ranking",
-    response_model=List[schemas_puntos.RankingUsuarioResponse],
+    response_model=List[RankingUsuarioResponse],
     summary="Obtener el ranking de usuarios",
     tags=["Puntos"],
 )

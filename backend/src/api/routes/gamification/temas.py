@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.src.crud.gamification import tema as crud_temas
-from backend.src.schemas.gamification import tema as schemas_temas
-from src.db.session import get_db
+import src.crud.gamification.tema as crud_temas
+from src.schemas.gamification.tema import (
+    TemaCreate, TemaUpdate, TemaResponse, TemasUsuarioResponse
+)
+from src.api.deps import get_db
 from src.api.dependencies import get_current_user
 from src.models.users.usuario import Usuario
 
@@ -11,7 +13,7 @@ router = APIRouter()
 
 @router.get(
     "/me",
-    response_model=schemas_temas.TemasUsuarioResponse,
+    response_model=TemasUsuarioResponse,
     summary="Obtener mis temas disponibles",
     tags=["Temas"],
 )
@@ -27,7 +29,7 @@ def get_my_themes(
 # CRUD Temas
 @router.get(
     "/",
-    response_model=list[schemas_temas.TemaResponse],
+    response_model=list[TemaResponse],
     summary="Listar todos los temas",
     tags=["Temas"],
 )
@@ -37,23 +39,23 @@ def list_temas(db: Session = Depends(get_db)):
 
 @router.post(
     "/",
-    response_model=schemas_temas.TemaResponse,
+    response_model=TemaResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear un tema",
     tags=["Temas"],
 )
-def create_tema(tema: schemas_temas.TemaCreate, db: Session = Depends(get_db)):
+def create_tema(tema: TemaCreate, db: Session = Depends(get_db)):
     return crud_temas.create_tema(db, tema)
 
 
 @router.put(
     "/{tema_id}",
-    response_model=schemas_temas.TemaResponse,
+    response_model=TemaResponse,
     summary="Actualizar un tema",
     tags=["Temas"],
 )
 def update_tema(
-    tema_id: str, tema_update: schemas_temas.TemaUpdate, db: Session = Depends(get_db)
+    tema_id: str, tema_update: TemaUpdate, db: Session = Depends(get_db)
 ):
     tema = crud_temas.update_tema(db, tema_id, tema_update)
     if not tema:

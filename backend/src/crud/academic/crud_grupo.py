@@ -36,4 +36,4 @@ class CRUDGrupo(CRUDBase[Grupo, GrupoCreate, GrupoUpdate]):
         return obj
 
 
-grupo = CRUDGrupo(Grupo)
+grupo_crud = CRUDGrupo(Grupo)

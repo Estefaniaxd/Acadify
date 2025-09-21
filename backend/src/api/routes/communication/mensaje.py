@@ -6,21 +6,20 @@ from datetime import datetime
 
 # Importar dependencias de base de datos
 
-from src.db.session import get_db
+from src.api.deps import get_db
 
-from src.crud.communication.mensaje import CRUDMensaje
+# Importar CRUD
+import src.crud.communication.mensaje as crud_mensaje
 
 from src.enums.communication.mensaje_enums import TipoMensaje
 
-from src.schemas.communication.mensaje import MensajeCreate, MensajeUpdate, MensajeRead
-
-crud_mensaje = CRUDMensaje
+from src.schemas.communication.mensaje import MensajeCreate, MensajeUpdate, Mensaje
 
 router = APIRouter()
 
 
 @router.post(
-    "/mensajes/", response_model=MensajeRead, status_code=status.HTTP_201_CREATED
+    "/mensajes/", response_model=Mensaje, status_code=status.HTTP_201_CREATED
 )
 def create_mensaje(*, db: Session = Depends(get_db), mensaje_in: MensajeCreate) -> Any:
     """
@@ -30,7 +29,7 @@ def create_mensaje(*, db: Session = Depends(get_db), mensaje_in: MensajeCreate) 
     return mensaje
 
 
-@router.get("/mensajes/", response_model=List[MensajeRead])
+@router.get("/mensajes/", response_model=List[Mensaje])
 def read_mensajes(
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0),
@@ -43,7 +42,7 @@ def read_mensajes(
     return mensajes
 
 
-@router.get("/mensajes/{mensaje_id}", response_model=MensajeRead)
+@router.get("/mensajes/{mensaje_id}", response_model=Mensaje)
 def read_mensaje(*, db: Session = Depends(get_db), mensaje_id: UUID) -> Any:
     """
     Obtener mensaje por ID.
@@ -56,7 +55,7 @@ def read_mensaje(*, db: Session = Depends(get_db), mensaje_id: UUID) -> Any:
     return mensaje
 
 
-@router.get("/mensajes/chat-grupo/{chat_grupo_id}", response_model=List[MensajeRead])
+@router.get("/mensajes/chat-grupo/{chat_grupo_id}", response_model=List[Mensaje])
 def read_mensajes_by_chat_grupo(
     *,
     db: Session = Depends(get_db),
@@ -72,7 +71,7 @@ def read_mensajes_by_chat_grupo(
     )
 
 
-@router.get("/mensajes/emisor/{emisor_id}", response_model=List[MensajeRead])
+@router.get("/mensajes/emisor/{emisor_id}", response_model=List[Mensaje])
 def read_mensajes_by_emisor(*, db: Session = Depends(get_db), emisor_id: UUID) -> Any:
     """
     Obtener mensajes por emisor.
@@ -80,7 +79,7 @@ def read_mensajes_by_emisor(*, db: Session = Depends(get_db), emisor_id: UUID) -
     return crud_mensaje.get_by_emisor(db, emisor_id=emisor_id)
 
 
-@router.get("/mensajes/tipo/{tipo}", response_model=List[MensajeRead])
+@router.get("/mensajes/tipo/{tipo}", response_model=List[Mensaje])
 def read_mensajes_by_tipo(*, db: Session = Depends(get_db), tipo: TipoMensaje) -> Any:
     """
     Obtener mensajes por tipo.
@@ -88,7 +87,7 @@ def read_mensajes_by_tipo(*, db: Session = Depends(get_db), tipo: TipoMensaje) -
     return crud_mensaje.get_by_tipo(db, tipo=tipo)
 
 
-@router.get("/mensajes/fecha/rango", response_model=List[MensajeRead])
+@router.get("/mensajes/fecha/rango", response_model=List[Mensaje])
 def read_mensajes_by_date_range(
     *,
     db: Session = Depends(get_db),
@@ -102,7 +101,7 @@ def read_mensajes_by_date_range(
 
 
 @router.get(
-    "/mensajes/chat-grupo/{chat_grupo_id}/recientes", response_model=List[MensajeRead]
+    "/mensajes/chat-grupo/{chat_grupo_id}/recientes", response_model=List[Mensaje]
 )
 def read_recent_messages_in_chat(
     *,
@@ -118,7 +117,7 @@ def read_recent_messages_in_chat(
     )
 
 
-@router.get("/mensajes/buscar/{search_term}", response_model=List[MensajeRead])
+@router.get("/mensajes/buscar/{search_term}", response_model=List[Mensaje])
 def search_mensajes(*, db: Session = Depends(get_db), search_term: str) -> Any:
     """
     Buscar mensajes por contenido.
@@ -126,7 +125,7 @@ def search_mensajes(*, db: Session = Depends(get_db), search_term: str) -> Any:
     return crud_mensaje.search_by_content(db, search_term=search_term)
 
 
-@router.get("/mensajes/usuario-chat/", response_model=List[MensajeRead])
+@router.get("/mensajes/usuario-chat/", response_model=List[Mensaje])
 def read_messages_by_user_in_chat(
     *,
     db: Session = Depends(get_db),
@@ -141,7 +140,7 @@ def read_messages_by_user_in_chat(
     )
 
 
-@router.get("/mensajes/tipo-chat/", response_model=List[MensajeRead])
+@router.get("/mensajes/tipo-chat/", response_model=List[Mensaje])
 def read_messages_by_type_in_chat(
     *,
     db: Session = Depends(get_db),
@@ -184,7 +183,7 @@ def read_most_active_chats(
     return crud_mensaje.get_most_active_chats(db, limit=limit)
 
 
-@router.get("/mensajes/anonimos/", response_model=List[MensajeRead])
+@router.get("/mensajes/anonimos/", response_model=List[Mensaje])
 def read_anonymous_messages(db: Session = Depends(get_db)) -> Any:
     """
     Obtener mensajes sin emisor (anónimos).
@@ -192,7 +191,7 @@ def read_anonymous_messages(db: Session = Depends(get_db)) -> Any:
     return crud_mensaje.get_anonymous_messages(db)
 
 
-@router.put("/mensajes/{mensaje_id}", response_model=MensajeRead)
+@router.put("/mensajes/{mensaje_id}", response_model=Mensaje)
 def update_mensaje(
     *, db: Session = Depends(get_db), mensaje_id: UUID, mensaje_in: MensajeUpdate
 ) -> Any:
@@ -209,7 +208,7 @@ def update_mensaje(
     return mensaje
 
 
-@router.patch("/mensajes/{mensaje_id}/contenido", response_model=MensajeRead)
+@router.patch("/mensajes/{mensaje_id}/contenido", response_model=Mensaje)
 def update_mensaje_content(
     *,
     db: Session = Depends(get_db),
@@ -229,7 +228,7 @@ def update_mensaje_content(
     return mensaje
 
 
-@router.delete("/mensajes/{mensaje_id}", response_model=MensajeRead)
+@router.delete("/mensajes/{mensaje_id}", response_model=Mensaje)
 def delete_mensaje(*, db: Session = Depends(get_db), mensaje_id: UUID) -> Any:
     """
     Eliminar mensaje.

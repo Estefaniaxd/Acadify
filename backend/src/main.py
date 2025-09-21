@@ -1,5 +1,28 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+import sys
+
+# Configuración de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("api_debug.log")
+    ]
+)
+
+# Reducir logs de bibliotecas externas para una consola más limpia
+logging.getLogger("passlib").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.ERROR)  # Solo errores críticos
+logging.getLogger("sqlalchemy.pool").setLevel(logging.ERROR)
+logging.getLogger("sqlalchemy.orm").setLevel(logging.ERROR)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
+
+# Crear logger específico para la aplicación
+logger = logging.getLogger("acadify-api")
 
 # Importa los routers
 from src.api.routes import auth_main, usuario
@@ -26,34 +49,44 @@ app.add_middleware(
 )
 
 # Importar rutas
-
 from src.api import routes
-
-for router, prefix, tags in routes.routers:
-    app.include_router(router, prefix=prefix, tags=tags)
 
 # Servicio Redis
 redis_service = RedisService()
 
+# Incluir todos los routers desde el archivo de configuración
+for router, prefix, tags in routes.routers:
+    app.include_router(router, prefix=prefix, tags=tags)
 
 # Eventos de inicio y cierre
 @app.on_event("startup")
 async def startup_event():
-    await redis_service.connect()
-    print("🚀 Acadify API iniciada exitosamente")
-    print("📚 Documentación disponible en: http://127.0.0.1:8000/docs")
-    print("🔐 Endpoints de autenticación reorganizados y optimizados")
+    try:
+        redis_service.connect()
+        logger.info("🚀 Acadify API iniciada exitosamente")
+        logger.info("📚 Documentación disponible en: http://127.0.0.1:8000/docs")
+        logger.info("🔐 Endpoints de autenticación reorganizados y optimizados")
+        
+        # Información del sistema
+        import platform
+        import sys
+        logger.debug(f"Python: {sys.version}")
+        logger.debug(f"Platform: {platform.platform()}")
+        logger.debug(f"Redis host: {settings.REDIS_HOST}")
+        logger.debug(f"Redis port: {settings.REDIS_PORT}")
+        logger.debug(f"CORS origins: {settings.BACKEND_CORS_ORIGINS}")
+        logger.debug(f"JWT Algorithm: {settings.ALGORITHM}")
+        logger.debug(f"Access token expire minutes: {settings.ACCESS_TOKEN_EXPIRE_MINUTES}")
+        
+    except Exception as e:
+        logger.error(f"Error en startup: {e}")
+        raise e
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await redis_service.disconnect()
+    redis_service.disconnect()
     print("👋 Acadify API desconectada")
-
-
-# Incluir routers organizados
-app.include_router(auth_main.router)  # Nuevo router organizado por funcionalidad
-app.include_router(usuario.router)
 
 
 # Ruta raíz con información del sistema

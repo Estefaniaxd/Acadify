@@ -3,55 +3,59 @@ from typing import Any, List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from src import crud, schemas
-from src.api import deps
+import src.crud.assessment.valor_calificacion as crud_valor_calificacion
+import src.crud.assessment.escala_calificacion as crud_escala_calificacion
+from src.schemas.assessment.valor_calificacion import (
+    ValorCalificacion, ValorCalificacionCreate, ValorCalificacionUpdate
+)
+from src.api.deps import get_db
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.ValorCalificacion])
+@router.get("/", response_model=List[ValorCalificacion])
 def read_valores_calificacion(
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
     """Obtener todos los valores de calificación."""
-    valores = crud.valor_calificacion.get_multi(db, skip=skip, limit=limit)
+    valores = crud_valor_calificacion.get_multi(db, skip=skip, limit=limit)
     return valores
 
 
-@router.get("/escala/{escala_id}", response_model=List[schemas.ValorCalificacion])
+@router.get("/escala/{escala_id}", response_model=List[ValorCalificacion])
 def read_valores_by_escala(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(get_db),
     escala_id: UUID,
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
     """Obtener valores de calificación por escala (ordenados por orden)."""
     # Verificar que la escala existe
-    escala = crud.escala_calificacion.get(db, id=escala_id)
+    escala = crud_escala_calificacion.get(db, id=escala_id)
     if not escala:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Escala de calificación no encontrada.",
         )
 
-    valores = crud.valor_calificacion.get_by_escala(
+    valores = crud_valor_calificacion.get_by_escala(
         db, escala_id=escala_id, skip=skip, limit=limit
     )
     return valores
 
 
-@router.post("/", response_model=schemas.ValorCalificacion)
+@router.post("/", response_model=ValorCalificacion)
 def create_valor_calificacion(
     *,
-    db: Session = Depends(deps.get_db),
-    valor_in: schemas.ValorCalificacionCreate,
+    db: Session = Depends(get_db),
+    valor_in: ValorCalificacionCreate,
 ) -> Any:
     """Crear nuevo valor de calificación."""
     # Verificar que la escala existe
-    escala = crud.escala_calificacion.get(db, id=valor_in.escala_id)
+    escala = crud_escala_calificacion.get(db, id=valor_in.escala_id)
     if not escala:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -59,7 +63,7 @@ def create_valor_calificacion(
         )
 
     # Verificar si ya existe un valor con el mismo valor en la escala
-    valor_existente = crud.valor_calificacion.get_by_valor_and_escala(
+    valor_existente = crud_valor_calificacion.get_by_valor_and_escala(
         db, valor=valor_in.valor, escala_id=valor_in.escala_id
     )
     if valor_existente:
@@ -70,7 +74,7 @@ def create_valor_calificacion(
 
     # Verificar si ya existe un valor con el mismo orden en la escala (si se proporciona)
     if valor_in.orden is not None:
-        orden_existente = crud.valor_calificacion.get_by_orden_and_escala(
+        orden_existente = crud_valor_calificacion.get_by_orden_and_escala(
             db, orden=valor_in.orden, escala_id=valor_in.escala_id
         )
         if orden_existente:
@@ -80,24 +84,24 @@ def create_valor_calificacion(
             )
     else:
         # Si no se proporciona orden, asignar el siguiente disponible
-        max_orden = crud.valor_calificacion.get_max_orden_by_escala(
+        max_orden = crud_valor_calificacion.get_max_orden_by_escala(
             db, escala_id=valor_in.escala_id
         )
         valor_in.orden = max_orden + 1
 
-    valor = crud.valor_calificacion.create(db, obj_in=valor_in)
+    valor = crud_valor_calificacion.create(db, obj_in=valor_in)
     return valor
 
 
-@router.put("/{valor_id}", response_model=schemas.ValorCalificacion)
+@router.put("/{valor_id}", response_model=ValorCalificacion)
 def update_valor_calificacion(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(get_db),
     valor_id: UUID,
-    valor_in: schemas.ValorCalificacionUpdate,
+    valor_in: ValorCalificacionUpdate,
 ) -> Any:
     """Actualizar valor de calificación."""
-    valor = crud.valor_calificacion.get(db, id=valor_id)
+    valor = crud_valor_calificacion.get(db, id=valor_id)
     if not valor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -106,7 +110,7 @@ def update_valor_calificacion(
 
     # Si se está actualizando el valor, verificar que no exista otro con el mismo valor en la escala
     if hasattr(valor_in, "valor") and valor_in.valor and valor_in.valor != valor.valor:
-        valor_existente = crud.valor_calificacion.get_by_valor_and_escala(
+        valor_existente = crud_valor_calificacion.get_by_valor_and_escala(
             db, valor=valor_in.valor, escala_id=valor.escala_id
         )
         if valor_existente and valor_existente.valor_id != valor_id:
@@ -121,7 +125,7 @@ def update_valor_calificacion(
         and valor_in.orden is not None
         and valor_in.orden != valor.orden
     ):
-        orden_existente = crud.valor_calificacion.get_by_orden_and_escala(
+        orden_existente = crud_valor_calificacion.get_by_orden_and_escala(
             db, orden=valor_in.orden, escala_id=valor.escala_id
         )
         if orden_existente and orden_existente.valor_id != valor_id:
@@ -130,18 +134,18 @@ def update_valor_calificacion(
                 detail="Ya existe un valor con este orden en la escala de calificación.",
             )
 
-    valor = crud.valor_calificacion.update(db, db_obj=valor, obj_in=valor_in)
+    valor = crud_valor_calificacion.update(db, db_obj=valor, obj_in=valor_in)
     return valor
 
 
-@router.get("/{valor_id}", response_model=schemas.ValorCalificacion)
+@router.get("/{valor_id}", response_model=ValorCalificacion)
 def read_valor_calificacion(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(get_db),
     valor_id: UUID,
 ) -> Any:
     """Obtener valor de calificación por ID."""
-    valor = crud.valor_calificacion.get(db, id=valor_id)
+    valor = crud_valor_calificacion.get(db, id=valor_id)
     if not valor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -150,19 +154,19 @@ def read_valor_calificacion(
     return valor
 
 
-@router.delete("/{valor_id}", response_model=schemas.ValorCalificacion)
+@router.delete("/{valor_id}", response_model=ValorCalificacion)
 def delete_valor_calificacion(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(get_db),
     valor_id: UUID,
 ) -> Any:
     """Eliminar valor de calificación."""
-    valor = crud.valor_calificacion.get(db, id=valor_id)
+    valor = crud_valor_calificacion.get(db, id=valor_id)
     if not valor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Valor de calificación no encontrado.",
         )
 
-    valor = crud.valor_calificacion.remove(db, id=valor_id)
+    valor = crud_valor_calificacion.remove(db, id=valor_id)
     return valor
