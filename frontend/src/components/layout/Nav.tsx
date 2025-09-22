@@ -2,49 +2,55 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import { 
+  FiHome, FiBook, FiTrendingUp, FiInfo, FiMenu, FiX,
+  FiSettings, FiUsers, FiBarChart, FiUserCheck,
+  FiPlus, FiShoppingBag, FiAward, FiUser
+} from 'react-icons/fi';
+import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 
 const getLinksByRole = (role?: string) => {
   if (role === 'admin') {
     return [
-      { label: 'Panel Admin', href: '/admin' },
-      { label: 'Instituciones', href: '/admin/instituciones' },
-      { label: 'Usuarios', href: '/admin/usuarios' },
-      { label: 'Estadísticas', href: '/admin/estadisticas' },
+      { label: 'Panel Admin', href: '/admin', icon: FiSettings },
+      { label: 'Instituciones', href: '/admin/instituciones', icon: HiOutlineOfficeBuilding },
+      { label: 'Usuarios', href: '/admin/usuarios', icon: FiUsers },
+      { label: 'Estadísticas', href: '/admin/estadisticas', icon: FiBarChart },
     ];
   }
   if (role === 'coordinador') {
     return [
-      { label: 'Panel Coordinador', href: '/coordinador' },
-      { label: 'Mi institución', href: '/coordinador/institucion' },
-      { label: 'Profesores', href: '/coordinador/profesores' },
-      { label: 'Clases', href: '/coordinador/clases' },
-      { label: 'Estadísticas', href: '/coordinador/estadisticas' },
+      { label: 'Panel Coordinador', href: '/coordinador', icon: FiSettings },
+      { label: 'Mi institución', href: '/coordinador/institucion', icon: HiOutlineOfficeBuilding },
+      { label: 'Profesores', href: '/coordinador/profesores', icon: FiUserCheck },
+      { label: 'Clases', href: '/coordinador/clases', icon: FiBook },
+      { label: 'Estadísticas', href: '/coordinador/estadisticas', icon: FiBarChart },
     ];
   }
   if (role === 'profesor') {
     return [
-      { label: 'Panel Profesor', href: '/profesor' },
-      { label: 'Mis clases', href: '/mis-clases' },
-      { label: 'Tareas', href: '/profesor/tareas' },
-      { label: 'Materiales', href: '/profesor/materiales' },
-      { label: 'Progreso', href: '/profesor/progreso' },
+      { label: 'Panel Profesor', href: '/profesor', icon: FiSettings },
+      { label: 'Mis clases', href: '/mis-clases', icon: FiBook },
+      { label: 'Tareas', href: '/profesor/tareas', icon: FiUserCheck },
+      { label: 'Materiales', href: '/profesor/materiales', icon: HiOutlineOfficeBuilding },
+      { label: 'Progreso', href: '/profesor/progreso', icon: FiTrendingUp },
     ];
   }
   if (role === 'estudiante') {
     return [
-      { label: 'Mis clases', href: '/mis-clases' },
-      { label: 'Unirse a clase', href: '/unirse-clase' },
-      { label: 'Tienda', href: '/tienda' },
-      { label: 'Logros', href: '/logros' },
-      { label: 'Avatar', href: '/avatar' },
+      { label: 'Mis clases', href: '/mis-clases', icon: FiBook },
+      { label: 'Unirse a clase', href: '/unirse-clase', icon: FiPlus },
+      { label: 'Tienda', href: '/tienda', icon: FiShoppingBag },
+      { label: 'Logros', href: '/logros', icon: FiAward },
+      { label: 'Avatar', href: '/avatar', icon: FiUser },
     ];
   }
   // No autenticado o rol desconocido
   return [
-    { label: 'Inicio', href: '/' },
-    { label: 'Cursos', href: '/courses' },
-    { label: 'Gamificación', href: '/gamification' },
-    { label: 'Acerca', href: '/about' }
+    { label: 'Inicio', href: '/', icon: FiHome },
+    { label: 'Cursos', href: '/courses', icon: FiBook },
+    { label: 'Gamificación', href: '/gamification', icon: FiTrendingUp },
+    { label: 'Acerca', href: '/about', icon: FiInfo }
   ];
 };
 
@@ -73,52 +79,215 @@ export default function Nav() {
 
   return (
     <motion.header
-      initial={{ y: -20, opacity: 0 }}
+      initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed left-0 right-0 top-0 z-50 transition-all duration-300"
+      transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+      className="fixed left-0 right-0 top-0 z-50 transition-all duration-500"
       style={{
         background: scrolled
-          ? 'linear-gradient(180deg, rgba(8,8,20,0.95) 0%, rgba(15,8,25,0.90) 100%)'
-          : 'linear-gradient(180deg, rgba(8,8,20,0.80) 0%, rgba(15,8,25,0.70) 100%)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: scrolled ? '1px solid rgba(120,80,200,0.15)' : '1px solid rgba(255,255,255,0.05)'
+          ? 'rgba(255, 255, 255, 0.85)'
+          : 'rgba(255, 255, 255, 0.65)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: scrolled 
+          ? '1px solid rgba(139, 92, 246, 0.2)' 
+          : '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: scrolled 
+          ? '0 8px 32px rgba(139, 92, 246, 0.12)' 
+          : '0 4px 20px rgba(0, 0, 0, 0.05)',
       }}
     >
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16 w-full">
-          {/* Navegación principal en una sola línea, centrada */}
-          <nav className="flex-1 flex items-center justify-center gap-2">
-            <Link to="/" className="flex items-center gap-2 group mr-6">
-              <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary via-purple-500 to-purple-700 flex items-center justify-center shadow-lg border border-white/10 text-white text-lg font-bold">A</span>
-              <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">Acadify</span>
+      <div 
+        className="mx-auto px-4 lg:px-8"
+        style={{
+          background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.03) 0%, rgba(124, 58, 237, 0.06) 50%, rgba(139, 92, 246, 0.03) 100%)',
+        }}
+      >
+        <div className="flex items-center justify-between h-20">
+          {/* Logo con efecto 3D y animaciones */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center group"
+          >
+            <Link to="/" className="flex items-center gap-3 relative">
+              <motion.div 
+                className="relative"
+                whileHover={{ rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-purple-700 flex items-center justify-center shadow-lg border border-white/20 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <span className="text-white text-xl font-black relative z-10">A</span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-violet-400/30 to-purple-400/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    animate={{
+                      background: [
+                        'linear-gradient(45deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.3))',
+                        'linear-gradient(225deg, rgba(124, 58, 237, 0.3), rgba(139, 92, 246, 0.3))',
+                        'linear-gradient(45deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.3))'
+                      ]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-purple-700 tracking-tight">
+                  Acadify
+                </span>
+                <motion.div 
+                  className="h-0.5 bg-gradient-to-r from-violet-600 to-purple-600 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ delay: 0.8, duration: 0.8 }}
+                />
+              </motion.div>
             </Link>
+          </motion.div>
+
+          {/* Navegación principal - Desktop */}
+          <nav className="hidden lg:flex items-center gap-2">
             {LINKS.slice(0, 5).map((link, index) => {
               const active = location.pathname === link.href;
+              const Icon = link.icon;
               return (
-                <Link
+                <motion.div
                   key={link.label}
-                  to={link.href}
-                  className={`relative flex items-center justify-center px-3 py-2 rounded-lg transition-all duration-300 group text-sm font-medium ${
-                    active 
-                      ? 'bg-gradient-to-br from-primary/40 to-purple-600/40 text-primary shadow-md' 
-                      : 'hover:bg-white/5 text-gray-400 hover:text-primary'
-                  }`}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index, duration: 0.5 }}
                 >
-                  {link.label}
-                </Link>
+                  <Link
+                    to={link.href}
+                    className={`relative group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm ${
+                      active 
+                        ? 'text-white shadow-lg' 
+                        : 'text-gray-700 hover:text-purple-700 dark:text-gray-300 dark:hover:text-purple-400'
+                    }`}
+                    style={{
+                      background: active 
+                        ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' 
+                        : 'transparent'
+                    }}
+                  >
+                    {/* Efecto hover de fondo */}
+                    <motion.div
+                      className="absolute inset-0 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/10 dark:to-purple-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      whileHover={{ scale: 1.02 }}
+                    />
+                    
+                    {/* Indicador activo */}
+                    {active && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute inset-0 rounded-2xl"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%)',
+                          border: '1px solid rgba(139, 92, 246, 0.3)'
+                        }}
+                        transition={{ type: "spring", duration: 0.6 }}
+                      />
+                    )}
+                    
+                    <motion.div
+                      className="relative z-10 flex items-center gap-2"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-current'}`} />
+                      <span>{link.label}</span>
+                    </motion.div>
+                    
+                    {/* Efecto de brillo */}
+                    <motion.div
+                      className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
+                      animate={{
+                        x: ['-100%', '100%'],
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        repeatDelay: 3,
+                      }}
+                      style={{
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
+                      }}
+                    />
+                  </Link>
+                </motion.div>
               );
             })}
           </nav>
+
+          {/* Botones de acción */}
+          <div className="hidden lg:flex items-center gap-3">
+            {!isAuthenticated ? (
+              <motion.div 
+                className="flex items-center gap-3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Link to="/login">
+                  <motion.button 
+                    className="px-6 py-2.5 rounded-xl border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 bg-white/80 dark:bg-black/20 font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-300 backdrop-blur-sm"
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Iniciar sesión
+                  </motion.button>
+                </Link>
+                <Link to="/register">
+                  <motion.button 
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl relative overflow-hidden"
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="relative z-10">Crear cuenta</span>
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-500 opacity-0 hover:opacity-100 transition-opacity duration-300"
+                    />
+                  </motion.button>
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg"
+              >
+                <FiUser className="w-5 h-5" />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Botón hamburguesa móvil */}
+          <motion.button
+            className="lg:hidden p-2 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-sm border border-purple-200 dark:border-purple-700"
+            onClick={() => setOpen(!open)}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              animate={{ rotate: open ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {open ? <FiX className="w-6 h-6 text-purple-700" /> : <FiMenu className="w-6 h-6 text-purple-700" />}
+            </motion.div>
+          </motion.button>
         </div>
       </div>
-      {/* Menú móvil elegante */}
+
+      {/* Menú móvil con glassmorphism */}
       <AnimatePresence>
         {open && (
           <>
             <motion.div 
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" 
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden" 
               onClick={() => setOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -126,56 +295,75 @@ export default function Nav() {
               transition={{ duration: 0.3 }}
             />
             <motion.nav
-              initial={{ opacity: 0, y: -30, scale: 0.9 }}
+              initial={{ opacity: 0, y: -50, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30, scale: 0.9 }}
+              exit={{ opacity: 0, y: -50, scale: 0.95 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="lg:hidden fixed left-4 right-4 top-20 bg-gradient-to-br from-gray-900/98 via-gray-800/98 to-gray-900/98 backdrop-blur-xl rounded-2xl shadow-2xl p-6 z-50 border border-gray-700/50"
+              className="lg:hidden fixed left-4 right-4 top-24 z-50 rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
+              style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(25px)',
+                WebkitBackdropFilter: 'blur(25px)',
+              }}
             >
-              <div className="flex flex-col gap-2">
-                {LINKS.map((link, index) => (
-                  <motion.div
-                    key={link.label}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index, duration: 0.3 }}
-                  >
-                    <Link 
-                      to={link.href} 
-                      onClick={() => setOpen(false)} 
-                      className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-gray-100 text-base font-medium transition-all duration-300 group border border-transparent hover:border-gray-600/50"
+              <div className="p-6">
+                <div className="grid gap-2">
+                  {LINKS.map((link, index) => {
+                    const Icon = link.icon;
+                    return (
+                      <motion.div
+                        key={link.label}
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * index, duration: 0.3 }}
+                      >
+                        <Link 
+                          to={link.href} 
+                          onClick={() => setOpen(false)} 
+                          className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 text-gray-700 font-medium transition-all duration-300 group border border-transparent hover:border-purple-200"
+                        >
+                          <motion.div
+                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center group-hover:from-violet-200 group-hover:to-purple-200 transition-all duration-300"
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                          >
+                            <Icon className="w-5 h-5 text-purple-600" />
+                          </motion.div>
+                          <span className="group-hover:translate-x-1 transition-transform duration-300 text-lg">
+                            {link.label}
+                          </span>
+                        </Link>
+                      </motion.div>
+                    )
+                  })}
+                  
+                  {!isAuthenticated && (
+                    <motion.div 
+                      className="pt-4 mt-4 border-t border-purple-100 space-y-3"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
                     >
-                      <span className="group-hover:translate-x-1 transition-transform duration-300">{link.label}</span>
-                    </Link>
-                  </motion.div>
-                ))}
-                {!isAuthenticated ? (
-                  <motion.div 
-                    className="pt-4 mt-4 border-t border-gray-700/50 space-y-3"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <Link to="/login" onClick={() => setOpen(false)}>
-                      <motion.button 
-                        className="w-full px-4 py-3 rounded-xl border border-gray-600/50 text-gray-100 hover:bg-white/5 hover:border-gray-500/50 transition-all duration-300"
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                      >
-                        Iniciar sesión
-                      </motion.button>
-                    </Link>
-                    <Link to="/register" onClick={() => setOpen(false)}>
-                      <motion.button 
-                        className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-primary to-purple-600 text-white font-semibold shadow-lg"
-                        whileHover={{ scale: 1.01, boxShadow: "0 8px 25px rgba(139,92,246,0.3)" }}
-                        whileTap={{ scale: 0.99 }}
-                      >
-                        Crear cuenta
-                      </motion.button>
-                    </Link>
-                  </motion.div>
-                ) : null}
+                      <Link to="/login" onClick={() => setOpen(false)}>
+                        <motion.button 
+                          className="w-full px-5 py-4 rounded-2xl border border-purple-200 text-purple-700 bg-white font-medium hover:bg-purple-50 transition-all duration-300"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          Iniciar sesión
+                        </motion.button>
+                      </Link>
+                      <Link to="/register" onClick={() => setOpen(false)}>
+                        <motion.button 
+                          className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold shadow-lg"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          Crear cuenta
+                        </motion.button>
+                      </Link>
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </motion.nav>
           </>

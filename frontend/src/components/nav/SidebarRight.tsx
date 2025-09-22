@@ -1,24 +1,34 @@
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { 
+  FiUser, FiSettings, FiUsers, FiBarChart, FiBook,
+  FiUserCheck, FiShoppingBag, FiAward, FiPlus, FiX, FiSun,
+  FiMoon, FiLogOut, FiEdit3, FiStar, FiTrendingUp, FiChevronRight,
+  FiZap, FiTarget, FiGift
+} from 'react-icons/fi';
+import { HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { RiStarLine } from 'react-icons/ri';
 
 const mockUser = {
   avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=acadify',
+  name: 'Alex Estudiante',
+  email: 'alex@acadify.com',
   estado: 'activo',
   diasActividad: 27,
   diasCharla: 12,
+  nivel: 8,
   logros: [
-    { id: 1, name: 'Primer curso', img: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' },
-    { id: 2, name: 'Participante', img: 'https://cdn-icons-png.flaticon.com/512/3135/3135789.png' },
-    { id: 3, name: 'Comunidad', img: 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png' },
+    { id: 1, name: 'Primer curso', icon: FiBook, color: 'from-blue-500 to-indigo-600' },
+    { id: 2, name: 'Participante', icon: FiUsers, color: 'from-emerald-500 to-teal-600' },
+    { id: 3, name: 'Comunidad', icon: FiStar, color: 'from-yellow-500 to-orange-600' },
   ],
 };
 
 type SidebarRightProps = { open: boolean; onClose: () => void; role?: string };
 
 export default function SidebarRight({ open, onClose, role = 'estudiante' }: SidebarRightProps) {
-  // ...existing code...
   // Estado de tema local para el botón
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
@@ -28,6 +38,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
       return 'light';
     }
   });
+
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
@@ -40,182 +51,421 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
     } catch {}
   }, [theme]);
 
-  // Menú por rol (solo iconos SVG)
+  // Menú por rol con iconos React Icons
   const menu = useMemo(() => {
-    const icons = {
-      perfil: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>,
-      admin: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
-      inst: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/></svg>,
-      users: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-      stats: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>,
-      ajustes: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-      clases: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,
-      join: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14m7-7H5"/></svg>,
-      shop: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
-      logros: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>,
-      avatar: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>,
-      tareas: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15l-2-2 2-2"/></svg>,
-      materiales: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>,
-      progreso: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 17v-6a9 9 0 0 1 18 0v6"/><path d="M17 21v-2a4 4 0 0 0-4-4H11a4 4 0 0 0-4 4v2"/></svg>,
-    };
     if (role === 'admin') {
       return [
-        { label: 'Perfil', icon: icons.perfil, path: '/perfil' },
-        { label: 'Panel Admin', icon: icons.admin, path: '/admin' },
-        { label: 'Instituciones', icon: icons.inst, path: '/admin/instituciones' },
-        { label: 'Usuarios', icon: icons.users, path: '/admin/usuarios' },
-        { label: 'Estadísticas', icon: icons.stats, path: '/admin/estadisticas' },
-        { label: 'Ajustes', icon: icons.ajustes, path: '/ajustes' },
+        { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+        { label: 'Panel Admin', icon: FiSettings, path: '/admin', color: 'from-red-500 to-pink-600' },
+        { label: 'Instituciones', icon: HiOutlineOfficeBuilding, path: '/admin/instituciones', color: 'from-blue-500 to-indigo-600' },
+        { label: 'Usuarios', icon: FiUsers, path: '/admin/usuarios', color: 'from-emerald-500 to-teal-600' },
+        { label: 'Estadísticas', icon: FiBarChart, path: '/admin/estadisticas', color: 'from-orange-500 to-red-600' },
+        { label: 'Ajustes', icon: FiSettings, path: '/ajustes', color: 'from-gray-500 to-gray-600' },
       ];
     }
     if (role === 'coordinador') {
       return [
-        { label: 'Perfil', icon: icons.perfil, path: '/perfil' },
-        { label: 'Panel Coordinador', icon: icons.admin, path: '/coordinador' },
-        { label: 'Mi institución', icon: icons.inst, path: '/coordinador/institucion' },
-        { label: 'Profesores', icon: icons.users, path: '/coordinador/profesores' },
-        { label: 'Clases', icon: icons.clases, path: '/coordinador/clases' },
-        { label: 'Estadísticas', icon: icons.stats, path: '/coordinador/estadisticas' },
-        { label: 'Ajustes', icon: icons.ajustes, path: '/ajustes' },
+        { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+        { label: 'Panel Coordinador', icon: FiSettings, path: '/coordinador', color: 'from-blue-500 to-indigo-600' },
+        { label: 'Mi institución', icon: HiOutlineOfficeBuilding, path: '/coordinador/institucion', color: 'from-emerald-500 to-teal-600' },
+        { label: 'Profesores', icon: FiUserCheck, path: '/coordinador/profesores', color: 'from-orange-500 to-red-600' },
+        { label: 'Clases', icon: FiBook, path: '/coordinador/clases', color: 'from-purple-500 to-pink-600' },
+        { label: 'Estadísticas', icon: FiBarChart, path: '/coordinador/estadisticas', color: 'from-yellow-500 to-orange-600' },
+        { label: 'Ajustes', icon: FiSettings, path: '/ajustes', color: 'from-gray-500 to-gray-600' },
       ];
     }
     if (role === 'profesor') {
       return [
-        { label: 'Perfil', icon: icons.perfil, path: '/perfil' },
-        { label: 'Panel Profesor', icon: icons.admin, path: '/profesor' },
-        { label: 'Mis clases', icon: icons.clases, path: '/mis-clases' },
-        { label: 'Tareas', icon: icons.tareas, path: '/profesor/tareas' },
-        { label: 'Materiales', icon: icons.materiales, path: '/profesor/materiales' },
-        { label: 'Progreso', icon: icons.progreso, path: '/profesor/progreso' },
-        { label: 'Ajustes', icon: icons.ajustes, path: '/ajustes' },
+        { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+        { label: 'Panel Profesor', icon: FiSettings, path: '/profesor', color: 'from-blue-500 to-indigo-600' },
+        { label: 'Mis clases', icon: FiBook, path: '/mis-clases', color: 'from-emerald-500 to-teal-600' },
+        { label: 'Tareas', icon: FiUserCheck, path: '/profesor/tareas', color: 'from-orange-500 to-red-600' },
+        { label: 'Materiales', icon: FiBook, path: '/profesor/materiales', color: 'from-purple-500 to-pink-600' },
+        { label: 'Progreso', icon: FiTrendingUp, path: '/profesor/progreso', color: 'from-yellow-500 to-orange-600' },
+        { label: 'Ajustes', icon: FiSettings, path: '/ajustes', color: 'from-gray-500 to-gray-600' },
       ];
     }
     // estudiante o default
     return [
-      { label: 'Perfil', icon: icons.perfil, path: '/perfil' },
-      { label: 'Mis clases', icon: icons.clases, path: '/mis-clases' },
-      { label: 'Unirse a clase', icon: icons.join, path: '/unirse-clase' },
-      { label: 'Tienda', icon: icons.shop, path: '/tienda' },
-      { label: 'Logros', icon: icons.logros, path: '/logros' },
-      { label: 'Avatar', icon: icons.avatar, path: '/avatar' },
-      { label: 'Ajustes', icon: icons.ajustes, path: '/ajustes' },
+      { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+      { label: 'Mis clases', icon: FiBook, path: '/mis-clases', color: 'from-blue-500 to-indigo-600' },
+      { label: 'Unirse a clase', icon: FiPlus, path: '/unirse-clase', color: 'from-emerald-500 to-teal-600' },
+      { label: 'Tienda', icon: FiShoppingBag, path: '/tienda', color: 'from-orange-500 to-red-600' },
+      { label: 'Logros', icon: FiAward, path: '/logros', color: 'from-yellow-500 to-orange-600' },
+      { label: 'Avatar', icon: FiUser, path: '/avatar', color: 'from-purple-500 to-pink-600' },
+      { label: 'Ajustes', icon: FiSettings, path: '/ajustes', color: 'from-gray-500 to-gray-600' },
     ];
   }, [role]);
 
-  // Creatividad extra: sección de insignias y progreso
+  // Insignias premium
   const badges = [
-    { id: 1, name: 'Colaborador', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
-    { id: 2, name: 'Explorador', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> },
-    { id: 3, name: 'Maestro', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg> },
+    { id: 1, name: 'Colaborador', icon: FiUsers, color: 'from-blue-500 to-indigo-600' },
+    { id: 2, name: 'Explorador', icon: FiTarget, color: 'from-emerald-500 to-teal-600' },
+    { id: 3, name: 'Maestro', icon: RiStarLine, color: 'from-yellow-500 to-orange-600' },
+    { id: 4, name: 'Innovador', icon: FiZap, color: 'from-purple-500 to-pink-600' },
   ];
+
   const progreso = 75; // %
   const navigate = useNavigate();
   const { logout } = useAuth();
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ x: 320, opacity: 0 }}
+          initial={{ x: 420, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 320, opacity: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="fixed top-0 right-0 h-full z-40 w-96 max-w-[420px] bg-white dark:bg-[#18181b] shadow-lg border-l border-gray-200 dark:border-gray-800"
+          exit={{ x: 420, opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          className="fixed top-0 right-0 h-full z-40 w-96 max-w-[420px] shadow-2xl border-l border-white/10 overflow-hidden"
+          style={{
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
+            backdropFilter: 'blur(25px)',
+            WebkitBackdropFilter: 'blur(25px)',
+          }}
           tabIndex={-1}
           aria-modal="true"
           role="dialog"
         >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-            <span className="text-xl font-bold text-primary">Tu perfil</span>
-            <button onClick={onClose} className="text-2xl text-gray-500 hover:text-primary">×</button>
-          </div>
-          <div className="px-6 py-4 overflow-y-auto h-[calc(100vh-64px)] flex flex-col gap-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center gap-2">
-              <img src={mockUser.avatar} alt="avatar" className="w-20 h-20 rounded-full border-4 border-primary shadow" />
-              <button className="text-xs text-primary hover:underline mt-1" onClick={() => navigate('/avatar')}>Personalizar avatar</button>
-              <div className="flex items-center gap-2 mt-2">
-                <span className={`w-3 h-3 rounded-full ${mockUser.estado === 'activo' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
-                <span className="text-sm text-gray-600 dark:text-gray-300">{mockUser.estado === 'activo' ? 'Cuenta activa' : 'Cuenta inactiva'}</span>
-              </div>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="flex flex-col items-center gap-2">
-              <div className="flex gap-6">
-                <div className="flex flex-col items-center">
-                  <span className="text-lg font-bold text-primary">{mockUser.diasActividad}</span>
-                  <span className="text-xs text-gray-500">Días de actividad</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-lg font-bold text-primary">{mockUser.diasCharla}</span>
-                  <span className="text-xs text-gray-500">Días de charla</span>
-                </div>
-              </div>
-            </motion.div>
-            {/* Progreso de nivel */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-green-600">Progreso de nivel</span>
-                <span className="text-xs text-gray-500">{progreso}%</span>
-              </div>
-              <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <motion.div className="h-3 bg-gradient-to-r from-green-400 to-primary" style={{ width: progreso + '%' }} initial={{ width: 0 }} animate={{ width: progreso + '%' }} transition={{ delay: 0.3, duration: 0.8 }} />
-              </div>
-            </motion.div>
-            {/* Insignias */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-yellow-600">Insignias</span>
-                <button className="text-xs text-primary hover:underline flex items-center gap-1" onClick={() => navigate('/insignias')}>Ver todas <span>→</span></button>
-              </div>
-              <div className="flex gap-2">
-                {badges.map((b) => (
-                  <span key={b.id} title={b.name} className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center border border-yellow-400 dark:border-yellow-700 text-primary">
-                    {b.icon}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-            {/* Logros previos (fotos) */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-500">Logros</span>
-                <button className="text-xs text-primary hover:underline flex items-center gap-1" onClick={() => navigate('/logros')}>Ver todas <span>→</span></button>
-              </div>
-              <div className="flex gap-2">
-                {mockUser.logros.map(l => (
-                  <img key={l.id} src={l.img} alt={l.name} title={l.name} className="w-8 h-8 rounded-full border border-primary" />
-                ))}
-              </div>
-            </motion.div>
-            {/* Menú y tema */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="flex flex-col gap-2 border-t border-gray-200 dark:border-gray-700 pt-4">
-              <button
-                className="flex items-center gap-3 px-3 py-2 rounded hover:bg-primary/10 text-base text-gray-700 dark:text-gray-200"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          {/* Header premium con efecto holográfico */}
+          <div className="relative overflow-hidden">
+            <div 
+              className="flex items-center justify-between px-6 py-5 relative z-10"
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.15) 100%)',
+                borderBottom: '1px solid rgba(139, 92, 246, 0.2)'
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-3"
               >
-                <span className="text-lg">
-                  {theme === 'dark'
-                    ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95 7.07l-1.41-1.41M6.34 6.34L4.93 4.93m12.02 0l-1.41 1.41M6.34 17.66l-1.41 1.41"/></svg>
-                    : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-                  }
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg">
+                  <FiUser className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-700">
+                  Tu perfil
                 </span>
-                Modo {theme === 'dark' ? 'claro' : 'oscuro'}
-              </button>
-              {menu.map((item) => (
-                <button
-                  key={item.label}
-                  className="flex items-center gap-3 px-3 py-2 rounded hover:bg-primary/10 text-base text-gray-700 dark:text-gray-200 transition-colors"
-                  onClick={() => item.path && navigate(item.path)}
-                >
-                  <span className="text-lg">{item.icon}</span> {item.label}
-                </button>
-              ))}
-              {/* Botón de cerrar sesión moved here from top nav */}
-              <button
-                onClick={() => { logout(); onClose(); navigate('/'); }}
-                className="flex items-center gap-3 px-3 py-2 rounded bg-gradient-to-r from-primary to-purple-600 text-white font-semibold shadow-md hover:from-purple-600 hover:to-primary transition-colors"
+              </motion.div>
+              <motion.button 
+                onClick={onClose} 
+                className="p-2 rounded-xl hover:bg-white/50 text-gray-600 hover:text-violet-600 transition-all duration-300"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-90"><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/><path d="M13 5v-1a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-1"/></svg>
-                Cerrar sesión
-              </button>
+                <FiX className="w-5 h-5" />
+              </motion.button>
+            </div>
+            {/* Efecto de ondas de fondo */}
+            <motion.div
+              className="absolute inset-0 opacity-30"
+              animate={{
+                background: [
+                  'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
+                  'radial-gradient(circle at 80% 50%, rgba(124, 58, 237, 0.3) 0%, transparent 50%)',
+                  'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
+                ]
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+            />
+          </div>
+
+          <div className="px-6 py-6 overflow-y-auto h-[calc(100vh-80px)] flex flex-col gap-6">
+            {/* Perfil de usuario con avatar 3D */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.1 }} 
+              className="flex flex-col items-center gap-4 relative"
+            >
+              <motion.div 
+                className="relative"
+                whileHover={{ scale: 1.05, rotateY: 15 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 relative">
+                  <img src={mockUser.avatar} alt="avatar" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-violet-600/20 to-transparent" />
+                </div>
+                {/* Indicador de estado en vivo */}
+                <motion.div 
+                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <div className="w-2 h-2 bg-white rounded-full" />
+                </motion.div>
+              </motion.div>
+              
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-gray-800">{mockUser.name}</h3>
+                <p className="text-sm text-gray-500">{mockUser.email}</p>
+                <motion.button 
+                  className="text-xs text-violet-600 hover:text-violet-700 font-medium flex items-center gap-1 mt-2 mx-auto"
+                  onClick={() => navigate('/avatar')}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <FiEdit3 className="w-3 h-3" />
+                  Personalizar avatar
+                </motion.button>
+              </div>
+
+              {/* Estadísticas de actividad */}
+              <div className="flex gap-6 mt-2">
+                <motion.div 
+                  className="flex flex-col items-center"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600">
+                    {mockUser.diasActividad}
+                  </span>
+                  <span className="text-xs text-gray-500">Días activo</span>
+                </motion.div>
+                <motion.div 
+                  className="flex flex-col items-center"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {mockUser.diasCharla}
+                  </span>
+                  <span className="text-xs text-gray-500">Días social</span>
+                </motion.div>
+                <motion.div 
+                  className="flex flex-col items-center"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600">
+                    {mockUser.nivel}
+                  </span>
+                  <span className="text-xs text-gray-500">Nivel</span>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Progreso de nivel con animaciones */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.2 }}
+              className="relative"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center gap-2">
+                  <FiTrendingUp className="w-4 h-4 text-emerald-500" />
+                  Progreso de nivel
+                </h4>
+                <span className="text-sm text-gray-500 font-medium">{progreso}%</span>
+              </div>
+              <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                <motion.div 
+                  className="h-4 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600 relative rounded-full shadow-lg"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progreso}%` }}
+                  transition={{ delay: 0.4, duration: 1.2, ease: "easeOut" }}
+                >
+                  {/* Efecto de brillo animado */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    animate={{
+                      x: ['-100%', '100%'],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                    }}
+                  />
+                </motion.div>
+              </div>
+              <p className="text-xs text-gray-400 mt-2 text-center">
+                ¡{100 - progreso}% más para alcanzar el nivel {mockUser.nivel + 1}!
+              </p>
+            </motion.div>
+
+            {/* Insignias premium */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.25 }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center gap-2">
+                  <FiAward className="w-4 h-4 text-yellow-500" />
+                  Insignias
+                </h4>
+                <motion.button 
+                  className="text-sm text-violet-600 hover:text-violet-700 font-medium flex items-center gap-1"
+                  onClick={() => navigate('/insignias')}
+                  whileHover={{ x: 2 }}
+                >
+                  Ver todas <FiChevronRight className="w-3 h-3" />
+                </motion.button>
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {badges.map((badge, idx) => {
+                  const Icon = badge.icon;
+                  return (
+                    <motion.div
+                      key={badge.id}
+                      className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center shadow-lg border border-white/20 relative overflow-hidden`}
+                      title={badge.name}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.1 * idx, type: "spring", stiffness: 300 }}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                    >
+                      <Icon className="w-5 h-5 text-white" />
+                      {/* Efecto de brillo */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 hover:opacity-100"
+                        animate={{
+                          x: ['-100%', '100%'],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          repeatDelay: 3,
+                        }}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* Logros recientes */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-lg font-bold text-gray-700 flex items-center gap-2">
+                  <FiGift className="w-4 h-4 text-purple-500" />
+                  Logros recientes
+                </h4>
+                <motion.button 
+                  className="text-sm text-violet-600 hover:text-violet-700 font-medium flex items-center gap-1"
+                  onClick={() => navigate('/logros')}
+                  whileHover={{ x: 2 }}
+                >
+                  Ver todos <FiChevronRight className="w-3 h-3" />
+                </motion.button>
+              </div>
+              <div className="grid gap-2">
+                {mockUser.logros.map((logro, idx) => {
+                  const Icon = logro.icon;
+                  return (
+                    <motion.div
+                      key={logro.id}
+                      className="flex items-center gap-3 p-3 rounded-2xl shadow-sm border border-purple-100 hover:border-purple-200 transition-all duration-300"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)'
+                      }}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * idx }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <motion.div
+                        className={`w-10 h-10 rounded-xl bg-gradient-to-br ${logro.color} flex items-center justify-center shadow-md`}
+                        whileHover={{ rotate: 10, scale: 1.1 }}
+                      >
+                        <Icon className="w-4 h-4 text-white" />
+                      </motion.div>
+                      <div>
+                        <h5 className="font-semibold text-gray-800 text-sm">{logro.name}</h5>
+                        <p className="text-xs text-gray-500">Desbloqueado recientemente</p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* Menú de acciones */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.35 }} 
+              className="border-t border-gray-200 pt-4"
+            >
+              {/* Botón de tema */}
+              <motion.button
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition-all duration-300 mb-2"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div
+                  className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"
+                  animate={{ rotate: theme === 'dark' ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {theme === 'dark' ? (
+                    <FiSun className="w-5 h-5 text-yellow-500" />
+                  ) : (
+                    <FiMoon className="w-5 h-5 text-purple-600" />
+                  )}
+                </motion.div>
+                <span className="font-medium text-gray-700">
+                  Modo {theme === 'dark' ? 'claro' : 'oscuro'}
+                </span>
+              </motion.button>
+
+              {/* Menú principal */}
+              {menu.slice(0, -1).map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <motion.button
+                    key={item.label}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition-all duration-300 mb-2 group"
+                    onClick={() => item.path && navigate(item.path)}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.05 * idx }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <motion.div
+                      className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-md`}
+                      whileHover={{ rotate: 5, scale: 1.1 }}
+                    >
+                      <Icon className="w-5 h-5 text-white" />
+                    </motion.div>
+                    <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300">
+                      {item.label}
+                    </span>
+                  </motion.button>
+                );
+              })}
+
+              {/* Botón de cerrar sesión premium */}
+              <motion.button
+                onClick={() => { logout(); onClose(); navigate('/'); }}
+                className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mt-4 relative overflow-hidden"
+                whileHover={{ scale: 1.02, y: -1 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <FiLogOut className="w-5 h-5" />
+                </div>
+                <span>Cerrar sesión</span>
+                {/* Efecto de brillo */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 hover:opacity-100"
+                  animate={{
+                    x: ['-100%', '100%'],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                  }}
+                />
+              </motion.button>
             </motion.div>
           </div>
         </motion.div>

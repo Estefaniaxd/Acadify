@@ -43,3 +43,15 @@ a {
   backdrop-filter: blur(6px);
 }
 
+/* Clases para asegurar espaciado correcto */
+.main-content {
+  padding-top: 2rem; /* 32px */
+  padding-bottom: 2rem; /* 32px */
+  min-height: calc(100vh - 8rem); /* Ajuste para nav y footer */
+}
+
+.form-container {
+  margin-top: 1rem; /* 16px adicional */
+  margin-bottom: 1rem; /* 16px adicional */
+}
+

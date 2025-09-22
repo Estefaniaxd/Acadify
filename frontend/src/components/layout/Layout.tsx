@@ -64,7 +64,7 @@ export default function Layout({ children }: Props) {
       )}
       {/* Cuando SidebarLeft está abierta, empuja el contenido a la derecha. Ajuste para que nunca se superponga a Nav. */}
       <div
-        className={`transition-all pt-24 ${sidebarOpen ? 'md:ml-80 ml-64' : ''} ${sidebarOpen || sidebarRightOpen ? 'blur-sm pointer-events-none select-none' : ''}`}
+        className={`transition-all pt-24 pb-8 main-content ${sidebarOpen ? 'md:ml-80 ml-64' : ''} ${sidebarOpen || sidebarRightOpen ? 'blur-sm pointer-events-none select-none' : ''}`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         {children}
