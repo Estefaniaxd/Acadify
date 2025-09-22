@@ -12,7 +12,6 @@ class DeletionCodeRequest(BaseModel):
     deletion_code: str
 
 router = APIRouter(
-    prefix="/auth",
     tags=["🔐 Autenticación - Verificación Email"],
     responses={
         400: {"description": "Código inválido o expirado"},

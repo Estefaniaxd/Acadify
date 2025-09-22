@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 
 # Router de autenticación básica
 router = APIRouter(
-    prefix="/auth", 
     tags=["🔐 Autenticación - Core"],
     responses={
         401: {"description": "Token inválido o credenciales incorrectas"},

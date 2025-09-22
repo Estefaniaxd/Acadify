@@ -25,11 +25,16 @@ class UsuarioBase(BaseModel):
     descripcion: str | None = None
 
 
-class UsuarioCreate(UsuarioBase):
+
+# Solo los campos que el usuario debe enviar al registrarse
+class UsuarioCreate(BaseModel):
+    correo_institucional: EmailStr
+    username: str
     nombres: str
     apellidos: str
     tipo_documento: str
     numero_documento: str
+    rol: RolUsuario
     telefono: str | None = None
     descripcion: str | None = None
     password: str

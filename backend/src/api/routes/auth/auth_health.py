@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 # Router de health check
 router = APIRouter(
-    prefix="/auth", 
     tags=["💊 Autenticación - Health Check"],
     responses={
         200: {"description": "Estado del sistema de autenticación"}

@@ -25,7 +25,7 @@ logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
 logger = logging.getLogger("acadify-api")
 
 # Importa los routers
-from src.api.routes import auth_main, usuario
+from src.api.routes import routers
 from src.services.auth.redis_service import RedisService
 from src.core.config import settings
 
@@ -48,14 +48,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Importar rutas
-from src.api import routes
-
 # Servicio Redis
 redis_service = RedisService()
 
 # Incluir todos los routers desde el archivo de configuración
-for router, prefix, tags in routes.routers:
+for router, prefix, tags in routers:
     app.include_router(router, prefix=prefix, tags=tags)
 
 # Eventos de inicio y cierre

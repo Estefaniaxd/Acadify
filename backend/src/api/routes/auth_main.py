@@ -9,15 +9,13 @@ Esta es la nueva estructura organizada que reemplaza el archivo auth.py monolít
 from fastapi import APIRouter
 
 # Importar todos los sub-routers
-from src.api.routes.auth import (
-    core_router,
-    password_router,
-    twofa_router,
-    users_router,
-    account_router,
-    health_router,
-    verify_router
-)
+from src.api.routes.auth.auth_core import router as core_router
+from src.api.routes.auth.auth_password import router as password_router
+from src.api.routes.auth.auth_2fa import router as twofa_router
+from src.api.routes.auth.auth_users import router as users_router
+from src.api.routes.auth.auth_account import router as account_router
+from src.api.routes.auth.auth_health import router as health_router
+from src.api.routes.auth.auth_verify import router as verify_router
 
 # Router principal que combina todos los sub-routers
 router = APIRouter()

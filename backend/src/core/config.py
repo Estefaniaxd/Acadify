@@ -19,7 +19,6 @@ class Settings(BaseSettings):
     )
     
     # ===============================
-    DATABASE_URL: str
     # API Configuration
     # ===============================
     

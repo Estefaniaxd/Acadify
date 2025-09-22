@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 # Router de gestión de contraseñas
 router = APIRouter(
-    prefix="/auth", 
     tags=["🔑 Autenticación - Contraseñas"],
     responses={
         401: {"description": "Token inválido o usuario no autenticado"},
