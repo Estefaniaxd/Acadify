@@ -42,6 +42,8 @@ import GuardadoPage from './pages/GuardadoPage';
 import HistoriaPage from './pages/HistoriaPage';
 import TiendaPage from './pages/TiendaPage';
 import { ToastProvider } from './context/ToastContext';
+import TratamientoDatos from './pages/legal/TratamientoDatos';
+import Consentimiento from './pages/legal/Consentimiento';
 
 export default function App() {
   const location = useLocation()
@@ -107,6 +109,8 @@ export default function App() {
       <Route path="/mis-niveles" element={<NivelesUsuario />} />
       <Route path="/ayuda" element={<AyudaFaqPage />} />
       <Route path="/actividad-gamificada" element={<ActividadGamificadaPage />} />
+      <Route path="/legal/TratamientoDatos" element={<TratamientoDatos />} />
+      <Route path="/legal/Consentimiento" element={<Consentimiento />} />
     </Routes>
   )
 

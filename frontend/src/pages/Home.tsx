@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import HeroSection from '../components/layout/HeroSection';
+import VideoSection from '../components/layout/VideoSection';
 import Preloader from '../components/layout/Preloader';
 import FeaturesSection from '../components/layout/FeaturesSection';
 import HowItWorksSection from '../components/layout/HowItWorksSection';
@@ -9,6 +10,7 @@ import TestimonialsSection from '../components/layout/TestimonialsSection';
 import InstitutionRegisterSection from '../components/layout/InstitutionRegisterSection';
 import RoadmapSection from '../components/layout/RoadmapSection';
 import FinalCTASection from '../components/layout/FinalCTASection';
+
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,7 @@ export default function Home() {
       {!loading && (
         <>
           <HeroSection />
+          <VideoSection />
           <FeaturesSection />
           <HowItWorksSection />
           <OpenSourceSection />

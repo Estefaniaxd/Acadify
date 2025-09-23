@@ -79,7 +79,7 @@ export default function Register() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-10 bg-white dark:bg-[#0b0b0b] rounded-2xl shadow-lg w-full max-w-2xl mx-auto border border-gray-200 dark:border-gray-800">
+    <form onSubmit={handleSubmit} className="min-h-screen flex flex-col justify-center p-10 bg-white dark:bg-[#0b0b0b] rounded-2xl shadow-lg w-full max-w-2xl mx-auto border border-gray-200 dark:border-gray-800">
       <h2 className="text-3xl font-bold text-primary mb-8 text-center">Registro</h2>
       {success ? (
         <div className="text-green-600 text-base mb-6 text-center">Registro exitoso. Redirigiendo al login...</div>

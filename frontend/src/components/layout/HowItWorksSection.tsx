@@ -42,34 +42,18 @@ const steps = [
 
 export default function HowItWorksSection() {
   return (
-    <section className="relative w-full py-24 bg-gradient-to-b from-gray-50 via-white to-violet-50/30 overflow-hidden">
+  <section className="relative w-full py-24 bg-gradient-to-b from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-900/40 dark:to-violet-900/30 overflow-hidden">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0">
         <motion.div
-          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-violet-200/20 to-purple-300/20 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-violet-200/20 to-purple-300/20 dark:from-violet-900/20 dark:to-purple-900/20 blur-3xl"
+          animate={{ scale: [1, 1.3, 1], x: [0, 50, 0], y: [0, -30, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-indigo-300/20 blur-3xl"
-          animate={{
-            scale: [1.3, 1, 1.3],
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-indigo-300/20 dark:from-blue-900/20 dark:to-indigo-900/20 blur-3xl"
+          animate={{ scale: [1.3, 1, 1.3], x: [0, -40, 0], y: [0, 40, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
@@ -93,7 +77,7 @@ export default function HowItWorksSection() {
             Proceso simple y efectivo
           </motion.div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6">
             ¿Cómo funciona{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600">
               Acadify
@@ -101,7 +85,7 @@ export default function HowItWorksSection() {
             ?
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Únete a miles de estudiantes que ya han transformado su manera de aprender 
             con nuestro revolucionario sistema en solo 4 pasos.
           </p>
@@ -142,13 +126,13 @@ export default function HowItWorksSection() {
 
                 {/* Tarjeta principal */}
                 <motion.div
-                  className="relative h-full pt-8 p-8 rounded-3xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-xl transition-all duration-500 group-hover:shadow-2xl overflow-hidden"
+                  className="relative h-full pt-8 p-8 rounded-3xl bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border border-white/50 dark:border-gray-800/60 shadow-xl transition-all duration-500 group-hover:shadow-2xl overflow-hidden"
                   whileHover={{ y: -10, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   {/* Patrón de fondo animado */}
                   <motion.div
-                    className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+                    className={`absolute inset-0 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500`}
                     style={{
                       background: `radial-gradient(circle at 30% 30%, ${step.color.includes('emerald') ? '#10b981' : step.color.includes('blue') ? '#3b82f6' : step.color.includes('violet') ? '#8b5cf6' : '#f59e0b'} 0%, transparent 50%)`
                     }}
@@ -165,28 +149,15 @@ export default function HowItWorksSection() {
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     <Icon className="w-8 h-8 text-white relative z-10" />
-                    
-                    {/* Efecto de brillo */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12"
-                      animate={{
-                        x: ['-100%', '200%'],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatDelay: 3,
-                        ease: "easeInOut"
-                      }}
-                    />
+                    {/* Efecto de brillo eliminado por feedback */}
                   </motion.div>
 
                   {/* Contenido */}
                   <div className="relative z-10 text-center">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-violet-700 transition-colors duration-300">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors duration-300">
                       {step.title}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-violet-200 transition-colors duration-300">
                       {step.description}
                     </p>
                   </div>
@@ -198,12 +169,12 @@ export default function HowItWorksSection() {
                     whileHover={{ y: 0 }}
                   >
                     <FiCheckCircle className="w-4 h-4 text-emerald-500" />
-                    <span className="text-xs font-medium text-emerald-600">Completado</span>
+                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Completado</span>
                   </motion.div>
 
                   {/* Elementos decorativos */}
-                  <div className="absolute top-6 right-6 w-2 h-2 bg-violet-400 rounded-full opacity-60"></div>
-                  <div className="absolute bottom-6 left-6 w-1 h-1 bg-purple-400 rounded-full opacity-40"></div>
+                  <div className="absolute top-6 right-6 w-2 h-2 bg-violet-400 dark:bg-violet-700 rounded-full opacity-60"></div>
+                  <div className="absolute bottom-6 left-6 w-1 h-1 bg-purple-400 dark:bg-purple-700 rounded-full opacity-40"></div>
                 </motion.div>
 
                 {/* Flecha de conexión (solo en desktop) */}
@@ -234,7 +205,7 @@ export default function HowItWorksSection() {
           className="text-center mt-20"
         >
           <motion.div
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-400 dark:focus:ring-violet-700"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >

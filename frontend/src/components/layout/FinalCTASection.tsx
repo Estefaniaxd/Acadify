@@ -1,3 +1,5 @@
+  {/* Separador visual inferior */}
+  <div className="h-12 md:h-20" />
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiStar, FiArrowRight, FiZap, FiHeart, FiPlay } from 'react-icons/fi';
@@ -5,7 +7,7 @@ import { RiRocketLine } from 'react-icons/ri';
 
 export default function FinalCTASection() {
   return (
-    <section className="relative w-full py-32 overflow-hidden bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900">
+  <section className="relative w-full py-32 overflow-hidden bg-gradient-to-br from-violet-100 via-white to-purple-100 dark:from-violet-900 dark:via-purple-900 dark:to-indigo-900">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0">
         <motion.div
@@ -62,6 +64,8 @@ export default function FinalCTASection() {
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-8">
+        {/* Separador visual para evitar confusión con el footer */}
+  <div className="h-8 md:h-12" />
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 50 }}
@@ -83,29 +87,29 @@ export default function FinalCTASection() {
 
           {/* Título principal */}
           <motion.h2
-            className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-tight"
+            className="text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 dark:text-white mb-8 leading-tight"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             Tu futuro comienza{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 dark:from-yellow-300 dark:via-pink-400 dark:to-purple-400">
               aquí
             </span>
           </motion.h2>
 
           {/* Descripción */}
           <motion.p
-            className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed"
+            className="text-xl md:text-2xl text-gray-700 dark:text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4, duration: 0.7 }}
           >
-            Más de <strong className="text-yellow-400">50,000 estudiantes</strong> ya han transformado 
+            Más de <strong className="text-yellow-400 dark:text-yellow-300">50,000 estudiantes</strong> ya han transformado 
             su manera de aprender. Únete a la comunidad educativa más innovadora y 
-            <strong className="text-pink-400"> gamificada</strong> del mundo.
+            <strong className="text-pink-400 dark:text-pink-300"> gamificada</strong> del mundo.
           </motion.p>
 
           {/* Grid de estadísticas */}
@@ -150,10 +154,10 @@ export default function FinalCTASection() {
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-3xl md:text-4xl font-black text-white mb-2">
+                  <div className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-2">
                     {stat.number}
                   </div>
-                  <div className="text-white/80 font-medium">
+                  <div className="text-gray-700 dark:text-white/80 font-medium">
                     {stat.label}
                   </div>
                 </motion.div>
@@ -171,7 +175,7 @@ export default function FinalCTASection() {
           >
             <motion.a
               href="/register"
-              className="group relative inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 text-black font-black text-xl shadow-2xl transition-all duration-300 overflow-hidden"
+              className="group relative inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 text-black dark:text-white font-black text-xl shadow-2xl transition-all duration-300 overflow-hidden"
               whileHover={{ 
                 scale: 1.05, 
                 boxShadow: "0 25px 50px -12px rgba(245, 158, 11, 0.5)" 
@@ -199,7 +203,7 @@ export default function FinalCTASection() {
 
             <motion.a
               href="/demo"
-              className="inline-flex items-center gap-2 px-8 py-5 rounded-2xl border-2 border-white/30 text-white font-bold text-lg hover:bg-white/10 transition-all duration-300"
+              className="inline-flex items-center gap-2 px-8 py-5 rounded-2xl border-2 border-white/30 text-gray-900 dark:text-white font-bold text-lg hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-300"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -209,7 +213,7 @@ export default function FinalCTASection() {
 
           {/* Texto adicional */}
           <motion.p
-            className="text-white/70 text-sm mt-8"
+            className="text-gray-500 dark:text-white/70 text-sm mt-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -217,6 +221,7 @@ export default function FinalCTASection() {
           >
             ✨ Registro gratuito • Sin tarjeta de crédito • Comienza en segundos
           </motion.p>
+  {/* Separador visual inferior */}
         </motion.div>
       </div>
     </section>

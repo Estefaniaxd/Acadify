@@ -47,32 +47,18 @@ const roadmap = [
 
 export default function RoadmapSection() {
   return (
-    <section className="relative w-full py-24 bg-gradient-to-b from-white via-gray-50 to-violet-50/30 overflow-hidden">
+  <section className="relative w-full py-24 bg-gradient-to-b from-white via-gray-50 to-violet-50/30 dark:bg-gradient-to-b dark:from-gray-900 dark:via-violet-950/60 dark:to-gray-900 overflow-hidden">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0">
         <motion.div
-          className="absolute top-20 right-20 w-72 h-72 rounded-full bg-gradient-to-br from-violet-200/30 to-purple-300/30 blur-3xl"
-          animate={{
-            scale: [1, 1.4, 1],
-            rotate: [0, 120, 240, 360],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+          className="absolute top-20 right-20 w-72 h-72 rounded-full bg-gradient-to-br from-violet-200/30 to-purple-300/30 dark:from-violet-900/30 dark:to-purple-900/30 blur-3xl"
+          animate={{ scale: [1, 1.4, 1], rotate: [0, 120, 240, 360] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-32 left-20 w-64 h-64 rounded-full bg-gradient-to-br from-blue-200/30 to-indigo-300/30 blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [360, 240, 120, 0],
-          }}
-          transition={{
-            duration: 35,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+          className="absolute bottom-32 left-20 w-64 h-64 rounded-full bg-gradient-to-br from-blue-200/30 to-indigo-300/30 dark:from-blue-900/30 dark:to-indigo-900/30 blur-3xl"
+          animate={{ scale: [1.2, 1, 1.2], rotate: [360, 240, 120, 0] }}
+          transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -90,20 +76,20 @@ export default function RoadmapSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 text-violet-700 font-medium text-sm mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-200 font-medium text-sm mb-6"
           >
             <FiCalendar className="w-4 h-4" />
             Hoja de ruta 2025-2026
           </motion.div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6">
             El futuro de{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600">
               Acadify
             </span>
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Esto es solo el comienzo de una revolución educativa. Conoce nuestros planes ambiciosos 
             y únete a nosotros para construir el futuro de la educación.
           </p>
@@ -131,19 +117,17 @@ export default function RoadmapSection() {
                   {/* Contenido de la tarjeta */}
                   <div className={`w-full lg:w-5/12 ${isEven ? 'lg:pr-12' : 'lg:pl-12'}`}>
                     <motion.div
-                      className="relative p-8 rounded-3xl bg-white/90 backdrop-blur-sm border border-white/50 shadow-xl transition-all duration-500 hover:shadow-2xl overflow-hidden group"
+                      className="relative p-8 rounded-3xl bg-white/90 dark:bg-gradient-to-br dark:from-gray-900 dark:via-violet-950/60 dark:to-gray-900 backdrop-blur-sm border border-white/50 dark:border-gray-800/60 shadow-xl transition-all duration-500 hover:shadow-2xl overflow-hidden group"
                       whileHover={{ y: -8, scale: 1.02 }}
                     >
                       {/* Fondo gradiente sutil */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${item.color.replace('from-', 'from-').replace(' to-', '/10 to-')}/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                      
+                      <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500`} />
                       {/* Badge de estado */}
                       <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold ${
-                        item.status === 'próximo' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+                        item.status === 'próximo' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-200' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200'
                       }`}>
                         {item.status === 'próximo' ? 'Próximo' : 'Planificado'}
                       </div>
-
                       {/* Contenido */}
                       <div className="relative z-10">
                         <div className="flex items-start gap-4 mb-4">
@@ -151,26 +135,24 @@ export default function RoadmapSection() {
                             <Icon className="w-8 h-8 text-white" />
                           </div>
                           <div className="flex-1">
-                            <div className="text-sm font-bold text-violet-600 mb-1">{item.date}</div>
-                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-violet-700 transition-colors duration-300">
+                            <div className="text-sm font-bold text-violet-600 dark:text-violet-300 mb-1">{item.date}</div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors duration-300">
                               {item.title}
                             </h3>
                           </div>
                         </div>
-                        
-                        <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-white transition-colors duration-300">
                           {item.description}
                         </p>
                       </div>
-
                       {/* Elementos decorativos */}
-                      <div className="absolute bottom-4 left-4 w-2 h-2 bg-violet-400 rounded-full opacity-40"></div>
-                      <div className="absolute top-4 left-4 w-1 h-1 bg-purple-400 rounded-full opacity-60"></div>
+                      <div className="absolute bottom-4 left-4 w-2 h-2 bg-violet-400 dark:bg-violet-700 rounded-full opacity-40"></div>
+                      <div className="absolute top-4 left-4 w-1 h-1 bg-purple-400 dark:bg-purple-700 rounded-full opacity-60"></div>
                     </motion.div>
                   </div>
 
                   {/* Nodo central en la línea temporal */}
-                  <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-white border-4 border-violet-400 rounded-full shadow-lg z-10" />
+                  <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-white dark:bg-gray-900 border-4 border-violet-400 dark:border-violet-700 rounded-full shadow-lg z-10" />
                 </motion.div>
               );
             })}
@@ -185,7 +167,7 @@ export default function RoadmapSection() {
           transition={{ delay: 1, duration: 0.8 }}
           className="mt-24 text-center"
         >
-          <div className="relative p-12 rounded-3xl bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900 text-white overflow-hidden">
+          <div className="relative p-12 rounded-3xl bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900 text-white overflow-hidden dark:bg-gradient-to-br dark:from-gray-900 dark:via-violet-950/60 dark:to-purple-900">
             {/* Elementos decorativos */}
             <div className="absolute top-8 right-8 w-32 h-32 rounded-full bg-gradient-to-br from-violet-400/20 to-purple-500/20 blur-2xl" />
             <div className="absolute bottom-8 left-8 w-24 h-24 rounded-full bg-gradient-to-br from-pink-400/20 to-rose-500/20 blur-2xl" />
@@ -236,10 +218,10 @@ export default function RoadmapSection() {
                     viewport={{ once: true }}
                     transition={{ delay: 1.2 + (idx * 0.1), duration: 0.6 }}
                   >
-                    <div className="text-3xl md:text-4xl font-black text-yellow-400 mb-2">
+                    <div className="text-3xl md:text-4xl font-black text-yellow-400 dark:text-yellow-300 mb-2">
                       {stat.number}
                     </div>
-                    <div className="text-white/80 font-medium">
+                    <div className="text-white/80 dark:text-gray-200 font-medium">
                       {stat.label}
                     </div>
                   </motion.div>

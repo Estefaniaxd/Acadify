@@ -113,7 +113,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -177,7 +177,7 @@ export default function Login() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 w-full max-w-md mx-auto px-6"
+        className="relative z-10 w-full max-w-md mx-auto px-6 flex-1 flex items-center justify-center"
       >
         {/* Logo / Título flotante */}
         <motion.div
@@ -221,7 +221,7 @@ export default function Login() {
         <motion.form
           onSubmit={handleSubmit}
           variants={itemVariants}
-          className="relative"
+          className="relative w-full"
         >
           {/* Contenedor del formulario con glassmorphism */}
           <div className="relative p-8 rounded-3xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/50 dark:border-gray-700/50 shadow-2xl overflow-hidden">

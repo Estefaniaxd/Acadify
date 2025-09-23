@@ -43,32 +43,18 @@ export default function InstitutionRegisterSection() {
   };
 
   return (
-    <section className="relative w-full py-24 bg-gradient-to-b from-violet-50 via-white to-gray-50 overflow-hidden">
+  <section className="relative w-full py-24 bg-gradient-to-b from-violet-50 via-white to-gray-50 dark:from-gray-900 dark:via-violet-900/40 dark:to-gray-900 overflow-hidden">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0">
         <motion.div
-          className="absolute top-32 left-20 w-64 h-64 rounded-full bg-gradient-to-br from-violet-200/30 to-purple-300/30 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            rotate: [0, 180, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+          className="absolute top-32 left-20 w-64 h-64 rounded-full bg-gradient-to-br from-violet-200/30 to-purple-300/30 dark:from-violet-900/30 dark:to-purple-900/30 blur-3xl"
+          animate={{ scale: [1, 1.3, 1], rotate: [0, 180, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-32 right-20 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/30 to-indigo-300/30 blur-3xl"
-          animate={{
-            scale: [1.3, 1, 1.3],
-            rotate: [180, 360, 180],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+          className="absolute bottom-32 right-20 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/30 to-indigo-300/30 dark:from-blue-900/30 dark:to-indigo-900/30 blur-3xl"
+          animate={{ scale: [1.3, 1, 1.3], rotate: [180, 360, 180] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -86,20 +72,20 @@ export default function InstitutionRegisterSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 text-violet-700 font-medium text-sm mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-200 font-medium text-sm mb-6"
           >
             <HiOutlineOfficeBuilding className="w-4 h-4" />
             Para instituciones educativas
           </motion.div>
           
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6">
             Transforma tu{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600">
               institución
             </span>
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Únete a las instituciones educativas líderes que ya están revolucionando 
             la educación con Acadify. Solicita acceso institucional y descubre el poder 
             de la gamificación educativa.
@@ -115,7 +101,7 @@ export default function InstitutionRegisterSection() {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="space-y-8"
           >
-            <h3 className="text-3xl font-bold text-gray-900 mb-8">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
               Beneficios institucionales
             </h3>
             
@@ -153,8 +139,8 @@ export default function InstitutionRegisterSection() {
                   <FiCheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900 mb-2">{benefit.title}</h4>
-                  <p className="text-gray-600">{benefit.description}</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-2">{benefit.title}</h4>
+                  <p className="text-gray-600 dark:text-gray-300">{benefit.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -167,12 +153,12 @@ export default function InstitutionRegisterSection() {
             viewport={{ once: true }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            <div className="relative p-8 rounded-3xl bg-white/80 backdrop-blur-sm border border-white/50 shadow-2xl overflow-hidden">
+            <div className="relative p-8 rounded-3xl bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border border-white/50 dark:border-gray-800/60 shadow-2xl overflow-hidden">
               {/* Fondo gradiente sutil */}
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-50/50 to-purple-50/50" />
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-900/30 dark:to-purple-900/30" />
               
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
                   Solicita acceso institucional
                 </h3>
                 
@@ -189,7 +175,7 @@ export default function InstitutionRegisterSection() {
                           onChange={handleChange}
                           required
                           placeholder="Nombre de la institución *"
-                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.nombre ? 'border-red-400' : 'border-gray-200'}`}
+                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 dark:bg-gray-900/80 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.nombre ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
                         />
                       </div>
                       {errores.nombre && <span className="text-red-500 text-xs mt-1 block">{errores.nombre}</span>}
@@ -205,7 +191,7 @@ export default function InstitutionRegisterSection() {
                           onChange={handleChange}
                           required
                           placeholder="Correo de contacto *"
-                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.email ? 'border-red-400' : 'border-gray-200'}`}
+                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 dark:bg-gray-900/80 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.email ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
                         />
                       </div>
                       {errores.email && <span className="text-red-500 text-xs mt-1 block">{errores.email}</span>}
@@ -224,7 +210,7 @@ export default function InstitutionRegisterSection() {
                           onChange={handleChange}
                           required
                           placeholder="Teléfono de contacto *"
-                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.telefono ? 'border-red-400' : 'border-gray-200'}`}
+                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 dark:bg-gray-900/80 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.telefono ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
                         />
                       </div>
                       {errores.telefono && <span className="text-red-500 text-xs mt-1 block">{errores.telefono}</span>}
@@ -239,7 +225,7 @@ export default function InstitutionRegisterSection() {
                           value={form.web}
                           onChange={handleChange}
                           placeholder="Sitio web institucional"
-                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.web ? 'border-red-400' : 'border-gray-200'}`}
+                          className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 bg-white/90 dark:bg-gray-900/80 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 ${errores.web ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
                         />
                       </div>
                       {errores.web && <span className="text-red-500 text-xs mt-1 block">{errores.web}</span>}
@@ -254,7 +240,7 @@ export default function InstitutionRegisterSection() {
                       onChange={handleChange}
                       rows={4}
                       placeholder="Cuéntanos sobre tu institución y cómo planeas usar Acadify..."
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 resize-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/80 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300 resize-none"
                     />
                   </div>
 
@@ -282,7 +268,7 @@ export default function InstitutionRegisterSection() {
 
                 {enviado && (
                   <motion.div
-                    className="mt-6 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 text-emerald-700 text-center"
+                    className="mt-6 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-200 text-center"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}

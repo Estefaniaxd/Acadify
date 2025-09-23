@@ -48,9 +48,13 @@ const getLinksByRole = (role?: string) => {
   // No autenticado o rol desconocido
   return [
     { label: 'Inicio', href: '/', icon: FiHome },
-    { label: 'Cursos', href: '/courses', icon: FiBook },
-    { label: 'Gamificación', href: '/gamification', icon: FiTrendingUp },
-    { label: 'Acerca', href: '/about', icon: FiInfo }
+    { label: 'Características', href: '/#features', icon: FiBook },
+    { label: 'Cómo funciona', href: '/#how', icon: FiTrendingUp },
+    { label: 'Open Source', href: '/#opensource', icon: FiInfo },
+    { label: 'Testimonios', href: '/#testimonials', icon: FiUserCheck },
+    { label: 'Instituciones', href: '/#institutions', icon: HiOutlineOfficeBuilding },
+    { label: 'Roadmap', href: '/#roadmap', icon: FiBarChart },
+    { label: 'Contacto', href: '/#cta', icon: FiAward }
   ];
 };
 
@@ -77,6 +81,22 @@ export default function Nav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Detectar modo oscuro
+  const isDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const darkBg = scrolled
+    ? 'rgba(24, 16, 48, 0.92)'
+    : 'rgba(24, 16, 48, 0.80)';
+  const lightBg = scrolled
+    ? 'rgba(255, 255, 255, 0.85)'
+    : 'rgba(255, 255, 255, 0.65)';
+  const headerBg = isDark ? darkBg : lightBg;
+  const borderColor = isDark
+    ? (scrolled ? '1px solid rgba(139, 92, 246, 0.35)' : '1px solid rgba(40, 20, 80, 0.25)')
+    : (scrolled ? '1px solid rgba(139, 92, 246, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)');
+  const boxShadow = isDark
+    ? (scrolled ? '0 8px 32px rgba(139, 92, 246, 0.18)' : '0 4px 20px rgba(40, 20, 80, 0.10)')
+    : (scrolled ? '0 8px 32px rgba(139, 92, 246, 0.12)' : '0 4px 20px rgba(0, 0, 0, 0.05)');
+
   return (
     <motion.header
       initial={{ y: -100, opacity: 0 }}
@@ -84,23 +104,19 @@ export default function Nav() {
       transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
       className="fixed left-0 right-0 top-0 z-50 transition-all duration-500"
       style={{
-        background: scrolled
-          ? 'rgba(255, 255, 255, 0.85)'
-          : 'rgba(255, 255, 255, 0.65)',
+        background: headerBg,
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: scrolled 
-          ? '1px solid rgba(139, 92, 246, 0.2)' 
-          : '1px solid rgba(255, 255, 255, 0.1)',
-        boxShadow: scrolled 
-          ? '0 8px 32px rgba(139, 92, 246, 0.12)' 
-          : '0 4px 20px rgba(0, 0, 0, 0.05)',
+        borderBottom: borderColor,
+        boxShadow: boxShadow,
       }}
     >
       <div 
         className="mx-auto px-4 lg:px-8"
         style={{
-          background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.03) 0%, rgba(124, 58, 237, 0.06) 50%, rgba(139, 92, 246, 0.03) 100%)',
+          background: isDark
+            ? 'linear-gradient(90deg, rgba(40, 20, 80, 0.10) 0%, rgba(139, 92, 246, 0.10) 50%, rgba(40, 20, 80, 0.10) 100%)'
+            : 'linear-gradient(90deg, rgba(139, 92, 246, 0.03) 0%, rgba(124, 58, 237, 0.06) 50%, rgba(139, 92, 246, 0.03) 100%)',
         }}
       >
         <div className="flex items-center justify-between h-20">
@@ -167,7 +183,7 @@ export default function Nav() {
                     className={`relative group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm ${
                       active 
                         ? 'text-white shadow-lg' 
-                        : 'text-gray-700 hover:text-purple-700 dark:text-gray-300 dark:hover:text-purple-400'
+                        : 'text-neutral-800 hover:text-purple-700 dark:text-neutral-200 dark:hover:text-purple-300'
                     }`}
                     style={{
                       background: active 
@@ -203,21 +219,7 @@ export default function Nav() {
                       <span>{link.label}</span>
                     </motion.div>
                     
-                    {/* Efecto de brillo */}
-                    <motion.div
-                      className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
-                      animate={{
-                        x: ['-100%', '100%'],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        repeatDelay: 3,
-                      }}
-                      style={{
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
-                      }}
-                    />
+                    {/* Efecto de brillo eliminado por feedback */}
                   </Link>
                 </motion.div>
               );
@@ -320,7 +322,7 @@ export default function Nav() {
                         <Link 
                           to={link.href} 
                           onClick={() => setOpen(false)} 
-                          className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 text-gray-700 font-medium transition-all duration-300 group border border-transparent hover:border-purple-200"
+                          className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 text-neutral-800 dark:text-neutral-200 font-medium transition-all duration-300 group border border-transparent hover:border-purple-200 dark:hover:text-purple-300"
                         >
                           <motion.div
                             className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center group-hover:from-violet-200 group-hover:to-purple-200 transition-all duration-300"

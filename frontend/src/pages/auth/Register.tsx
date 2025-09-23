@@ -319,7 +319,7 @@ export default function Register() {
   )
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 dark:from-gray-900 dark:via-emerald-900/20 dark:to-teal-900/20">
+  <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 dark:from-gray-900 dark:via-emerald-900/20 dark:to-teal-900/20 pt-16 pb-16 md:pt-24 md:pb-24">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
