@@ -8,6 +8,7 @@ import {
   FiPlus, FiShoppingBag, FiAward, FiUser
 } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { avatarAPI } from '../avatar/avatarAPI';
 
 const getLinksByRole = (role?: string) => {
   if (role === 'admin') {
@@ -64,6 +65,8 @@ export default function Nav() {
   const LINKS = getLinksByRole(role);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
+  const [loadingAvatar, setLoadingAvatar] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
@@ -79,6 +82,64 @@ export default function Nav() {
     onScroll();
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Cargar avatar del usuario
+  useEffect(() => {
+    const loadUserAvatar = async () => {
+      if (!user || !isAuthenticated) {
+        console.log('🔍 Nav: No user or not authenticated');
+        setLoadingAvatar(false);
+        return;
+      }
+
+      console.log('🔍 Nav: Loading avatar for user:', user.username);
+
+      // Verificar si hay token de autenticación
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.log('🔍 Nav: No auth token found, skipping avatar load');
+        setLoadingAvatar(false);
+        return;
+      }
+
+      try {
+        const avatars = await avatarAPI.getMyAvatars();
+        console.log('🔍 Nav: Avatars response:', avatars);
+        
+        const activeAvatar = avatars.avatars.find(avatar => avatar.is_active);
+        console.log('🔍 Nav: Active avatar:', activeAvatar);
+        
+        if (activeAvatar && activeAvatar.image_url) {
+          console.log('🔍 Nav: Setting avatar URL:', activeAvatar.image_url);
+          setUserAvatarUrl(activeAvatar.image_url);
+        }
+      } catch (error) {
+        console.error('🔍 Nav: Error loading user avatar:', error);
+      } finally {
+        setLoadingAvatar(false);
+      }
+    };
+
+    loadUserAvatar();
+  }, [user, isAuthenticated]);
+
+  // Escuchar actualizaciones de avatar
+  useEffect(() => {
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      console.log('🔍 Nav: Avatar update event received:', event.detail);
+      const avatarData = event.detail;
+      if (avatarData && avatarData.image_url) {
+        console.log('🔍 Nav: Updating avatar URL from event:', avatarData.image_url);
+        setUserAvatarUrl(avatarData.image_url);
+      }
+    };
+
+    window.addEventListener('avatar-updated', handleAvatarUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('avatar-updated', handleAvatarUpdate as EventListener);
+    };
   }, []);
 
   // Detectar modo oscuro
@@ -261,9 +322,23 @@ export default function Nav() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg"
+                className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg border-2 border-white/20"
               >
-                <FiUser className="w-5 h-5" />
+                {loadingAvatar ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : userAvatarUrl ? (
+                  <img 
+                    src={userAvatarUrl} 
+                    alt="avatar" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback a avatar educativo si falla
+                      e.currentTarget.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`;
+                    }}
+                  />
+                ) : (
+                  <FiUser className="w-5 h-5" />
+                )}
               </motion.div>
             )}
           </div>

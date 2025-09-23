@@ -70,9 +70,20 @@ try:
     from .admin_institucion import router as admin_institucion_router
     from .coordinador_invitacion import router as coordinador_invitacion_router
     from .debug import router as debug_router
+    # from .avatar import router as avatar_router
 except ImportError as e:
     import logging
     logging.error(f"Error al importar módulos de usuarios: {e}")
+
+# Importar avatar por separado para debugging
+try:
+    from .avatar import router as avatar_router
+    avatar_available = True
+except ImportError as e:
+    import logging
+    logging.error(f"Error al importar avatar router: {e}")
+    avatar_router = None
+    avatar_available = False
 
 # Lista de rutas disponibles
 routers = [
@@ -119,3 +130,7 @@ routers = [
     # Debug
     (debug_router, "/debug", ["Depuración"]),
 ]
+
+# Agregar avatar router si está disponible
+if avatar_available and avatar_router:
+    routers.append((avatar_router, "/avatar", ["Avatar"]))

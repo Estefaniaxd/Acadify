@@ -25,9 +25,17 @@ def upgrade() -> None:
     op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_institucion') THEN CREATE TYPE estado_institucion AS ENUM ('pendiente', 'activa', 'suspendida', 'inactiva'); END IF; END $$;")
     
     # Agregar las columnas a Institucion
-    op.add_column('Institucion', sa.Column('estado', sa.Enum('pendiente', 'activa', 'suspendida', 'inactiva', name='estado_institucion'), server_default='pendiente', nullable=False))
-    op.add_column('Institucion', sa.Column('fecha_creacion', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True))
-    op.add_column('Institucion', sa.Column('fecha_activacion', sa.TIMESTAMP(timezone=True), nullable=True))
+    # Solo agregar la columna si no existe
+    from sqlalchemy import inspect
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    columns = [col['name'] for col in inspector.get_columns('Institucion')]
+    if 'estado' not in columns:
+        op.add_column('Institucion', sa.Column('estado', sa.Enum('pendiente', 'activa', 'suspendida', 'inactiva', name='estado_institucion'), server_default='pendiente', nullable=False))
+    if 'fecha_creacion' not in columns:
+        op.add_column('Institucion', sa.Column('fecha_creacion', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=True))
+    if 'fecha_activacion' not in columns:
+        op.add_column('Institucion', sa.Column('fecha_activacion', sa.TIMESTAMP(timezone=True), nullable=True))
     # ### end Alembic commands ###
 
 

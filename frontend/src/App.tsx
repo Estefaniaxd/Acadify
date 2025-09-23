@@ -9,6 +9,7 @@ import RankingPage from './pages/RankingPage';
 import RetosTiendaPage from './pages/RetosTiendaPage';
 import ForoRecursosPage from './pages/ForoRecursosPage';
 import EditorPerfilPage from './pages/EditorPerfilPage';
+import ExplorarAvatarsPage from './pages/ExplorarAvatarsPage';
 import PanelAdmin from './modules/admin';
 import PanelCoordinador from './modules/coordinador';
 import PanelProfesor from './modules/profesor';
@@ -32,10 +33,11 @@ import ResetPassword from './pages/auth/ResetPassword'
 import DashboardPage from './pages/DashboardPage'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import AvatarCustomizerPage from './pages/avatar/AvatarCustomizerPage';
+import SimpleAvatarTest from './pages/SimpleAvatarTest';
 import LogrosPage from './pages/LogrosPage';
 import InsigniasPage from './pages/InsigniasPage';
 import AjustesPage from './pages/AjustesPage';
-import PerfilPage from './pages/PerfilPage';
+import ProfilePageAdvanced from './pages/ProfilePageAdvanced';
 import BorradoresPage from './pages/BorradoresPage';
 import UnirseComunidadPage from './pages/UnirseComunidadPage';
 import GuardadoPage from './pages/GuardadoPage';
@@ -81,10 +83,12 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/avatar" element={<AvatarCustomizerPage />} />
+      <Route path="/avatar-test" element={<SimpleAvatarTest />} />
+      <Route path="/explorar-avatares" element={<ExplorarAvatarsPage />} />
       <Route path="/logros" element={<LogrosPage />} />
       <Route path="/insignias" element={<InsigniasPage />} />
       <Route path="/ajustes" element={<AjustesPage theme={theme} setTheme={setTheme} />} />
-      <Route path="/perfil" element={<PerfilPage />} />
+      <Route path="/perfil" element={<ProfilePageAdvanced />} />
       <Route path="/borradores" element={<BorradoresPage />} />
       <Route path="/tienda-acadify" element={<TiendaPage />} />
       <Route path="/mis-clases" element={<MisClasesPage />} />

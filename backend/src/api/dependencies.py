@@ -102,7 +102,9 @@ async def get_current_user(
             raise credentials_exception
 
         # Verificar que la cuenta esté activa
-        if hasattr(user, "estado_cuenta") and str(user.estado_cuenta) != "activo":
+        from src.enums.users.usuario_enums import EstadoCuentaUsuario
+        
+        if hasattr(user, "estado_cuenta") and user.estado_cuenta != EstadoCuentaUsuario.activo:
             logger.warning(
                 f"Usuario {user_id} no está activo: estado={user.estado_cuenta}"
             )

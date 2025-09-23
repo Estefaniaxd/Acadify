@@ -42,3 +42,7 @@ from src.models.classes.entregar_tarea import EntregarTarea
 from src.models.classes.tarea import Tarea
 
 from src.models.classes.plataforma import Plataforma
+
+# Avatar models
+from src.models.avatar.avatar_asset import AvatarAsset
+from src.models.avatar.user_avatar import UserAvatar

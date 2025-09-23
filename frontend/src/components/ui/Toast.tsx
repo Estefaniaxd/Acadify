@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, forwardRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiCheckCircle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi'
 
@@ -11,14 +11,14 @@ export interface ToastProps {
   onClose: (id: string) => void
 }
 
-const Toast: React.FC<ToastProps> = ({
+const Toast = forwardRef<HTMLDivElement, ToastProps>(({
   id,
   type,
   title,
   message,
   duration = 5000,
   onClose
-}) => {
+}, ref) => {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
@@ -69,6 +69,7 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, x: 300, scale: 0.8 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: 300, scale: 0.8 }}
@@ -123,6 +124,8 @@ const Toast: React.FC<ToastProps> = ({
       )}
     </motion.div>
   )
-}
+})
+
+Toast.displayName = 'Toast'
 
 export default Toast

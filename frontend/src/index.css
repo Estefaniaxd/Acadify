@@ -10,6 +10,15 @@
   --color-accent-gradient: linear-gradient(135deg, var(--color-primary), var(--color-accent));
 }
 
+/* Utilidades adicionales */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
 .dark {
   --color-bg: #0b0b0b;
   --color-text: #f7f7f7;

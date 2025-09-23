@@ -167,6 +167,17 @@ class AuthService:
         """Enviar notificación de login exitoso por email"""
         if user.correo_institucional:
             try:
+                # URLs para botones de seguridad
+                if settings.is_development():
+                    base_url = "http://localhost:8000"
+                    enlace_seguridad = f"{base_url}/dev-email/confirm-login/{user.usuario_id}"
+                    enlace_reporte = f"{base_url}/dev-email/report-login/{user.usuario_id}"
+                else:
+                    # URLs de producción
+                    base_url = "https://acadify.com"
+                    enlace_seguridad = f"{base_url}/account/confirm-login?uid={user.usuario_id}"
+                    enlace_reporte = f"{base_url}/security/report-suspicious?uid={user.usuario_id}"
+                
                 await self.email_service.send_template_email(
                     to_email=user.correo_institucional,
                     subject="Nuevo inicio de sesión - Acadify",
@@ -178,8 +189,8 @@ class AuthService:
                         "dispositivo": "Navegador web",  # En producción, parsear user-agent
                         "navegador": "Chrome/Firefox",  # En producción, parsear user-agent
                         "ubicacion": "Ubicación aproximada",  # En producción, usar geolocalización
-                        "enlace_seguridad": "https://acadify.com/seguridad",
-                        "enlace_reporte": "https://acadify.com/reportar-actividad"
+                        "enlace_seguridad": enlace_seguridad,
+                        "enlace_reporte": enlace_reporte
                     }
                 )
             except Exception as e:

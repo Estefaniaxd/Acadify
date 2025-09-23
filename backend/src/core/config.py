@@ -6,6 +6,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # Permitir que DATABASE_URL se lea directamente del .env si está presente
+    DATABASE_URL: Optional[str] = None
     """
     Application configuration settings.
     
@@ -71,7 +73,10 @@ class Settings(BaseSettings):
     
     # Database URL (constructed from components)
     @property
-    def DATABASE_URL(self) -> str:
+    def database_url(self) -> str:
+        # Prioridad: variable directa del .env, si no, construirla
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
         return (
             f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
@@ -155,6 +160,32 @@ class Settings(BaseSettings):
     # Profile images
     PROFILE_IMAGE_DIR: str = "uploads/profiles"
     MAX_PROFILE_IMAGE_SIZE: int = 2 * 1024 * 1024  # 2 MB
+    
+    # ===============================
+    # Avatar Configuration
+    # ===============================
+    
+    # Avatar Storage
+    AVATAR_STORAGE_TYPE: str = "local"  # local or s3
+    AVATAR_STORAGE_PATH: str = "static"
+    AVATAR_ASSETS_PATH: str = "static/assets"
+    AVATAR_ASSETS_BASE_URL: str = "/static/assets"
+    
+    # Avatar Processing
+    AVATAR_MAX_FILE_SIZE: int = 1024 * 1024 * 1.5  # 1.5 MB
+    AVATAR_STANDARD_RESOLUTION: List[int] = [512, 512]
+    AVATAR_ALLOWED_FORMATS: List[str] = ["PNG"]
+    
+    # Avatar Cache (Redis)
+    AVATAR_PREVIEW_CACHE_TTL: int = 3600  # 1 hour
+    AVATAR_COMPOSITION_CACHE_TTL: int = 7 * 24 * 3600  # 7 days
+    AVATAR_MANIFEST_CACHE_TTL: int = 24 * 3600  # 24 hours
+    
+    # AWS S3 (for future use)
+    AWS_S3_BUCKET: Optional[str] = None
+    AWS_REGION: str = "us-east-1"
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
     
     # ===============================
     # Third-party Service Configuration

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { avatarAPI } from '../avatar/avatarAPI';
 import { 
   FiUser, FiSettings, FiUsers, FiBarChart, FiBook,
   FiUserCheck, FiShoppingBag, FiAward, FiPlus, FiX, FiSun,
@@ -12,7 +13,7 @@ import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import { RiStarLine } from 'react-icons/ri';
 
 const mockUser = {
-  avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=acadify',
+  avatar: null, // Será cargado dinámicamente
   name: 'Alex Estudiante',
   email: 'alex@acadify.com',
   estado: 'activo',
@@ -39,6 +40,11 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
     }
   });
 
+  // Estado para el avatar del usuario
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
+  const [loadingAvatar, setLoadingAvatar] = useState(true);
+  const { user } = useAuth();
+
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
@@ -50,6 +56,106 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
       localStorage.setItem('theme', theme);
     } catch {}
   }, [theme]);
+
+  // Cargar avatar del usuario
+  useEffect(() => {
+    const loadUserAvatar = async () => {
+      if (!user) {
+        console.log('🔍 SidebarRight: No user found');
+        setLoadingAvatar(false);
+        return;
+      }
+
+      // Verificar si hay token de autenticación
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.log('🔍 SidebarRight: No auth token found, using fallback avatar');
+        setUserAvatarUrl(`https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`);
+        setLoadingAvatar(false);
+        return;
+      }
+
+      console.log('🔍 SidebarRight: Loading avatar for user:', user.username);
+
+      try {
+        const avatars = await avatarAPI.getMyAvatars();
+        console.log('🔍 SidebarRight: Avatars response:', avatars);
+        
+        const activeAvatar = avatars.avatars.find(avatar => avatar.is_active);
+        console.log('🔍 SidebarRight: Active avatar:', activeAvatar);
+        
+        if (activeAvatar && activeAvatar.image_url) {
+          console.log('🔍 SidebarRight: Setting avatar URL:', activeAvatar.image_url);
+          setUserAvatarUrl(activeAvatar.image_url);
+        } else {
+          console.log('🔍 SidebarRight: No active avatar, using fallback');
+          // Fallback a un avatar educativo más apropiado para Acadify
+          setUserAvatarUrl(`https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`);
+        }
+      } catch (error) {
+        console.error('🔍 SidebarRight: Error loading user avatar:', error);
+        // Fallback a avatar educativo en caso de error
+        setUserAvatarUrl(`https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`);
+      } finally {
+        setLoadingAvatar(false);
+      }
+    };
+
+    loadUserAvatar();
+  }, [user]);
+
+  // Escuchar actualizaciones de avatar
+  useEffect(() => {
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      const avatarData = event.detail;
+      if (avatarData && avatarData.image_url) {
+        const urlWithTimestamp = `${avatarData.image_url}?t=${Date.now()}`;
+        setUserAvatarUrl(urlWithTimestamp);
+      }
+    };
+
+    const handleAvatarRefresh = (event: CustomEvent) => {
+      console.log('🔄 SidebarRight: Avatar refresh triggered, reloading...');
+      // Recargar avatar del usuario
+      if (user) {
+        loadUserAvatar();
+      }
+    };
+
+    // Función para recargar avatar (extraída para reutilizar)
+    const loadUserAvatar = async () => {
+      if (!user) return;
+      
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        setUserAvatarUrl(`https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`);
+        return;
+      }
+
+      try {
+        const avatars = await avatarAPI.getMyAvatars();
+        const activeAvatar = avatars.avatars.find(avatar => avatar.is_active);
+        
+        if (activeAvatar && activeAvatar.image_url) {
+          const urlWithTimestamp = `${activeAvatar.image_url}?t=${Date.now()}`;
+          setUserAvatarUrl(urlWithTimestamp);
+        } else {
+          setUserAvatarUrl(`https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`);
+        }
+      } catch (error) {
+        console.error('🔍 SidebarRight: Error reloading avatar:', error);
+        setUserAvatarUrl(`https://api.dicebear.com/7.x/adventurer/svg?seed=${user.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`);
+      }
+    };
+
+    window.addEventListener('avatar-updated', handleAvatarUpdate as EventListener);
+    window.addEventListener('avatar-refresh', handleAvatarRefresh as EventListener);
+    
+    return () => {
+      window.removeEventListener('avatar-updated', handleAvatarUpdate as EventListener);
+      window.removeEventListener('avatar-refresh', handleAvatarRefresh as EventListener);
+    };
+  }, []);
 
   // Menú por rol con iconos React Icons
   const menu = useMemo(() => {
@@ -93,6 +199,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
       { label: 'Tienda', icon: FiShoppingBag, path: '/tienda', color: 'from-orange-500 to-red-600' },
       { label: 'Logros', icon: FiAward, path: '/logros', color: 'from-yellow-500 to-orange-600' },
       { label: 'Avatar', icon: FiUser, path: '/avatar', color: 'from-purple-500 to-pink-600' },
+      { label: 'Explorar Avatares', icon: FiUsers, path: '/explorar-avatares', color: 'from-indigo-500 to-purple-600' },
       { label: 'Ajustes', icon: FiSettings, path: '/ajustes', color: 'from-gray-500 to-gray-600' },
     ];
   }, [role]);
@@ -186,8 +293,24 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 relative">
-                  <img src={mockUser.avatar} alt="avatar" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-violet-600/20 to-transparent" />
+                  {loadingAvatar ? (
+                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <img 
+                        src={userAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9`} 
+                        alt="avatar" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback final a adventurer (educativo)
+                          e.currentTarget.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-violet-600/20 to-transparent" />
+                    </>
+                  )}
                 </div>
                 {/* Indicador de estado en vivo */}
                 <motion.div 
@@ -200,8 +323,10 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
               </motion.div>
               
               <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-800">{mockUser.name}</h3>
-                <p className="text-sm text-gray-500">{mockUser.email}</p>
+                <h3 className="text-xl font-bold text-gray-800">
+                  {user?.username || 'Usuario'}
+                </h3>
+                <p className="text-sm text-gray-500">{user?.email || 'usuario@acadify.com'}</p>
                 <motion.button 
                   className="text-xs text-violet-600 hover:text-violet-700 font-medium flex items-center gap-1 mt-2 mx-auto"
                   onClick={() => navigate('/avatar')}

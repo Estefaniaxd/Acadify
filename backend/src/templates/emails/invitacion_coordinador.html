@@ -1,35 +1,76 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Invitación a Coordinador Acadify</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f6f6f6; margin: 0; padding: 0; }
-        .container { background: #fff; max-width: 480px; margin: 40px auto; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px 24px; }
-        .logo { text-align: center; margin-bottom: 24px; }
-        .code { font-size: 2.2em; letter-spacing: 8px; color: #2d7be5; font-weight: bold; background: #f0f4fa; padding: 12px 0; border-radius: 6px; margin: 24px 0; text-align: center; }
-        .btn { display: inline-block; background: #2d7be5; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: bold; margin: 24px 0; }
-        .footer { color: #888; font-size: 0.95em; text-align: center; margin-top: 32px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">
-            <img src="https://acadify.app/logo.png" alt="Acadify" width="120"/>
-        </div>
-        <h2>¡Has sido invitado como Coordinador!</h2>
-        <p>Hola,<br>
-        Has sido invitado para ser el coordinador principal de la institución <b>{{ institucion_nombre }}</b> en Acadify.</p>
-        <p>Para completar tu registro, utiliza el siguiente código de invitación:</p>
-        <div class="code">{{ codigo }}</div>
-        <p>Este código es válido hasta <b>{{ fecha_expiracion }}</b>.<br>
-        Si no reconoces esta invitación, puedes ignorar este mensaje.</p>
-        <div style="text-align:center;">
-            <a class="btn" href="{{ url_registro }}">Completar registro</a>
-        </div>
-        <div class="footer">
-            <p>Este es un mensaje automático de Acadify.<br>¿Necesitas ayuda? <a href="mailto:soporte@acadify.app">Contáctanos</a></p>
-        </div>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Invitación a Coordinador - Acadify{% endblock %}
+
+{% block header_title %}🎯 Invitación Especial{% endblock %}
+
+{% block content %}
+<h2>¡Has sido invitado como Coordinador! 🎉</h2>
+
+<p>¡Hola! <span class="sparkle">👋</span><br>
+Tienes una invitación muy especial esperándote. Has sido seleccionado para ser el <strong>coordinador principal</strong> de la institución <strong>{{ institucion_nombre }}</strong> en Acadify.</p>
+
+<div class="alert alert-success">
+    <strong>🏛️ Institución:</strong> {{ institucion_nombre }}<br>
+    <strong>🎯 Rol:</strong> Coordinador Principal<br>
+    <strong>📧 Invitación enviada por:</strong> {{ invitador_nombre }}
+</div>
+
+<p><strong>¿Qué significa ser coordinador?</strong> <span class="sparkle">🌟</span><br>
+Como coordinador tendrás acceso completo para gestionar tu institución:</p>
+
+<ul>
+    <li>👥 Administrar profesores y estudiantes</li>
+    <li>📚 Crear y gestionar clases</li>
+    <li>📊 Ver estadísticas y reportes</li>
+    <li>⚙️ Configurar la institución</li>
+    <li>🏆 Gestionar el sistema de gamificación</li>
+    <li>💬 Supervisar comunicaciones</li>
+</ul>
+
+<p>Para completar tu registro, utiliza el siguiente código de invitación mágico:</p>
+
+<div class="code-box">
+    <div class="verification-code">{{ codigo }}</div>
+    <p class="text-muted">Válido hasta {{ fecha_expiracion }}</p>
+</div>
+
+<div class="alert alert-warning">
+    <strong>⏰ Importante:</strong>
+    <ul style="margin: 10px 0;">
+        <li>Este código es válido hasta <strong>{{ fecha_expiracion }}</strong></li>
+        <li>Solo puedes usarlo una vez</li>
+        <li>Es tu llave de acceso al sistema de coordinación</li>
+        <li>Si no reconoces esta invitación, puedes ignorar este mensaje</li>
+    </ul>
+</div>
+
+<div class="text-center">
+    <a href="{{ url_registro }}" class="button">🚀 Completar mi registro 🚀</a>
+</div>
+
+<div class="alert alert-info">
+    <strong>🎁 ¿Qué viene después del registro?</strong>
+    <ol style="margin: 10px 0;">
+        <li>📝 Completa tu perfil de coordinador</li>
+        <li>🏛️ Configura los datos de tu institución</li>
+        <li>👥 Invita a tus primeros profesores</li>
+        <li>📚 Crea tus primeras clases</li>
+        <li>🎯 ¡Comienza la aventura educativa!</li>
+    </ol>
+</div>
+
+<p><strong>¿Necesitas ayuda?</strong> <span class="sparkle">💬</span><br>
+Nuestro equipo de soporte está disponible 24/7 para ayudarte en tu proceso de configuración. No dudes en contactarnos si tienes alguna pregunta.</p>
+
+<p>¡Estamos emocionados de tenerte como parte del equipo de coordinadores de Acadify! <span class="sparkle">✨</span></p>
+
+<p>Con emoción,<br>
+<strong>El equipo de Acadify</strong> <span class="sparkle">🚀</span></p>
+
+<div style="margin-top: 30px; padding: 20px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; text-align: center;">
+    <p style="margin: 0; color: #1e40af; font-weight: 600;">
+        💡 <strong>Consejo:</strong> Guarda este correo hasta completar tu registro
+    </p>
+</div>
+{% endblock %}

@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
+import { avatarAPI } from '../components/avatar/avatarAPI'
 import { useNavigate } from 'react-router-dom'
 import {
   FiEdit3,
@@ -74,12 +75,13 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
-  const toast = useToast()
   const navigate = useNavigate()
+  const toast = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const [activeTab, setActiveTab] = useState<'profile' | 'achievements' | 'stats' | 'settings'>('profile')
   const [isEditing, setIsEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState('personal')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [loadingAvatar, setLoadingAvatar] = useState(true)
   const [profile, setProfile] = useState<UserProfile>({
     username: user?.username || 'usuario',
     email: user?.email || 'email@ejemplo.com',
@@ -92,7 +94,7 @@ export default function ProfilePage() {
     birthDate: '1995-06-15',
     role: user?.role || 'estudiante',
     joinDate: '2024-01-15',
-    avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || 'user'}`,
+    avatar: avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`,
     socialLinks: {
       github: 'https://github.com/usuario',
       linkedin: 'https://linkedin.com/in/usuario',
@@ -153,6 +155,79 @@ export default function ProfilePage() {
     setIsEditing(false)
     toast.success('¡Perfil actualizado!', 'Tus cambios han sido guardados correctamente.')
   }
+
+  // Cargar avatar del usuario
+  useEffect(() => {
+    const loadUserAvatar = async () => {
+      if (!user) {
+        console.log('🔍 Profile: No user found');
+        setLoadingAvatar(false);
+        return;
+      }
+
+      // Verificar si hay token de autenticación
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.log('🔍 Profile: No auth token found, cannot load avatar');
+        setLoadingAvatar(false);
+        return;
+      }
+
+      console.log('🔍 Profile: Loading avatar for user:', user.username);
+
+      try {
+        const avatars = await avatarAPI.getMyAvatars();
+        console.log('🔍 Profile: Avatars response:', avatars);
+        
+        const activeAvatar = avatars.avatars.find(avatar => avatar.is_active);
+        console.log('🔍 Profile: Active avatar:', activeAvatar);
+        
+        if (activeAvatar && activeAvatar.image_url) {
+          console.log('🔍 Profile: Setting avatar URL:', activeAvatar.image_url);
+          setAvatarUrl(activeAvatar.image_url);
+          // Actualizar también el perfil inmediatamente
+          setProfile(prev => ({
+            ...prev,
+            avatar: activeAvatar.image_url
+          }));
+        }
+      } catch (error) {
+        console.error('🔍 Profile: Error loading user avatar:', error);
+        // Si es error 401, mostrar mensaje de relogin
+        if (error instanceof Error && error.message.includes('401')) {
+          console.log('🔍 Profile: Auth error, user needs to login again');
+        }
+      } finally {
+        setLoadingAvatar(false);
+      }
+    };
+
+    loadUserAvatar();
+  }, [user]);
+
+  // Escuchar actualizaciones de avatar
+  useEffect(() => {
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      console.log('🔍 Profile: Avatar update event received:', event.detail);
+      const avatarData = event.detail;
+      if (avatarData && avatarData.image_url) {
+        console.log('🔍 Profile: Updating avatar URL from event:', avatarData.image_url);
+        setAvatarUrl(avatarData.image_url);
+        // Actualizar también el perfil
+        setProfile(prev => ({
+          ...prev,
+          avatar: avatarData.image_url
+        }));
+        toast.success('¡Avatar actualizado!', 'Tu nuevo avatar se ve genial.');
+      }
+    };
+
+    window.addEventListener('avatar-updated', handleAvatarUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('avatar-updated', handleAvatarUpdate as EventListener);
+    };
+  }, []);
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -240,11 +315,21 @@ export default function ProfilePage() {
               <div className="text-center mb-6">
                 <div className="relative inline-block">
                   <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl bg-gradient-to-r from-blue-500 to-purple-600 p-1">
-                    <img
-                      src={profile.avatar}
-                      alt="Avatar"
-                      className="w-full h-full rounded-full object-cover bg-white"
-                    />
+                    {loadingAvatar ? (
+                      <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <img
+                        src={profile.avatar}
+                        alt="Avatar"
+                        className="w-full h-full rounded-full object-cover bg-white"
+                        onError={(e) => {
+                          // Fallback a dicebear en caso de error
+                          e.currentTarget.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || 'user'}`;
+                        }}
+                      />
+                    )}
                   </div>
                   {isEditing && (
                     <button
@@ -329,7 +414,7 @@ export default function ProfilePage() {
               {/* Quick Actions */}
               <div className="space-y-2">
                 <button 
-                  onClick={() => navigate('/avatar-customizer')}
+                  onClick={() => navigate('/avatar')}
                   className="w-full flex items-center space-x-2 p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
                 >
                   <HiSparkles className="w-5 h-5 text-purple-500" />

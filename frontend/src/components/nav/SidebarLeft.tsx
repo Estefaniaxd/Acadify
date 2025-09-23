@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiHome, FiBook, FiUsers, FiBarChart, FiUserCheck,
   FiPlus, FiShoppingBag, FiTarget, FiSettings, FiX,
-  FiChevronRight, FiTrendingUp, FiClock
+  FiChevronRight, FiTrendingUp, FiClock, FiUser
 } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 
@@ -128,25 +128,26 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
       case 'admin':
         return [
           ...baseItems,
-          { label: 'Instituciones', icon: HiOutlineOfficeBuilding, href: '/admin/instituciones' },
-          { label: 'Usuarios', icon: FiUsers, href: '/admin/usuarios' },
-          { label: 'Estadísticas', icon: FiBarChart, href: '/admin/estadisticas' },
+          { label: 'Panel Admin', icon: FiSettings, href: '/admin' },
+          { label: 'Usuarios', icon: FiUsers, href: '/admin' },
+          { label: 'Instituciones', icon: HiOutlineOfficeBuilding, href: '/admin' },
+          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
         ];
       case 'coordinador':
         return [
           ...baseItems,
-          { label: 'Mi Institución', icon: HiOutlineOfficeBuilding, href: '/coordinador/institucion' },
-          { label: 'Profesores', icon: FiUserCheck, href: '/coordinador/profesores' },
-          { label: 'Clases', icon: FiBook, href: '/coordinador/clases' },
-          { label: 'Estadísticas', icon: FiBarChart, href: '/coordinador/estadisticas' },
+          { label: 'Panel Coordinador', icon: FiSettings, href: '/coordinador' },
+          { label: 'Profesores', icon: FiUserCheck, href: '/coordinador' },
+          { label: 'Clases', icon: FiBook, href: '/coordinador' },
+          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
         ];
       case 'profesor':
         return [
           ...baseItems,
+          { label: 'Panel Profesor', icon: FiSettings, href: '/profesor' },
           { label: 'Mis clases', icon: FiBook, href: '/mis-clases' },
-          { label: 'Tareas', icon: FiTarget, href: '/profesor/tareas' },
-          { label: 'Materiales', icon: FiShoppingBag, href: '/profesor/materiales' },
-          { label: 'Progreso', icon: FiTrendingUp, href: '/profesor/progreso' },
+          { label: 'Crear clase', icon: FiPlus, href: '/crear-clase' },
+          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
         ];
       case 'estudiante':
       default:
@@ -154,22 +155,10 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
           ...baseItems,
           { label: 'Mis clases', icon: FiBook, href: '/mis-clases' },
           { label: 'Unirse a clase', icon: FiPlus, href: '/unirse-clase' },
-          // Accesos directos a cada clase, chat y tareas
-          ...mockClases.map(clase => ({
-            label: `Clase: ${clase.name}`,
-            icon: FiBook,
-            href: `/clase/${clase.id}`
-          })),
-          ...mockClases.map(clase => ({
-            label: `Chat: ${clase.name}`,
-            icon: FiUsers,
-            href: `/clase/${clase.id}/chat`
-          })),
-          ...mockClases.map(clase => ({
-            label: `Tareas: ${clase.name}`,
-            icon: FiTarget,
-            href: `/clase/${clase.id}/tareas`
-          })),
+          { label: 'Logros', icon: FiTarget, href: '/logros' },
+          { label: 'Tienda', icon: FiShoppingBag, href: '/tienda' },
+          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
+          { label: 'Explorar Avatares', icon: FiUsers, href: '/explorar-avatares' },
         ];
     }
   }, [role]);
@@ -330,6 +319,38 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
               );
             })()}
           </motion.div>
+
+          {/* Para estudiantes, mostrar accesos rápidos a clases */}
+          {role === 'estudiante' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Clases Activas</h3>
+              <div className="space-y-2">
+                {mockClases.slice(0, 3).map((clase, idx) => (
+                  <motion.button
+                    key={clase.id}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-all duration-300 text-left"
+                    onClick={() => {
+                      navigate(`/clase/${clase.id}`);
+                      onClose();
+                    }}
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.05 * idx }}
+                  >
+                    <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${clase.color}`} />
+                    <span className="font-medium text-sm">{clase.name}</span>
+                    <FiChevronRight className="w-4 h-4 ml-auto" />
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
       </motion.aside>
     </AnimatePresence>
