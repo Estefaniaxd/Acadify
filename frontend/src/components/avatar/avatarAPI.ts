@@ -98,6 +98,64 @@ export class AvatarAPI {
     console.log(`📊 Response ok: ${response.ok}`);
 
     if (!response.ok) {
+      // Manejo especial para errores de autenticación
+      if (response.status === 401) {
+        // Intentar refresh automático
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          try {
+            const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refresh_token: refreshToken }),
+            });
+            if (refreshRes.ok) {
+              const refreshData = await refreshRes.json();
+              if (refreshData.access_token) {
+                localStorage.setItem('access_token', refreshData.access_token);
+                // Reintentar la petición original con el nuevo token
+                const retryOptions = {
+                  ...defaultOptions,
+                  headers: {
+                    ...defaultOptions.headers,
+                    'Authorization': `Bearer ${refreshData.access_token}`
+                  }
+                };
+                const retryResponse = await fetch(url, { ...retryOptions, ...options });
+                if (retryResponse.ok) {
+                  const retryData = await retryResponse.json();
+                  return retryData;
+                } else {
+                  // Si sigue fallando, limpiar tokens y disparar logout
+                  localStorage.removeItem('access_token');
+                  localStorage.removeItem('refresh_token');
+                  window.dispatchEvent(new CustomEvent('auth-token-expired'));
+                  throw new Error('No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.');
+                }
+              }
+            } else {
+              // Refresh falló
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('refresh_token');
+              window.dispatchEvent(new CustomEvent('auth-token-expired'));
+              throw new Error('No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.');
+            }
+          } catch (refreshErr) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.dispatchEvent(new CustomEvent('auth-token-expired'));
+            throw new Error('No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.');
+          }
+        } else {
+          // No hay refresh token, cerrar sesión
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          window.dispatchEvent(new CustomEvent('auth-token-expired'));
+          throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+        }
+      }
       const errorData = await response.json().catch(() => ({ 
         detail: `Network error: ${response.status} ${response.statusText}` 
       }));
@@ -175,6 +233,12 @@ export class AvatarAPI {
       throw new Error('Some layers are missing filename property');
     }
     
+    // Verificar token antes de proceder
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('No estás autenticado. Por favor, inicia sesión primero.');
+    }
+    
     // Forzar que solo se envíen {category, file} (nunca filename)
     // Limpiar cualquier propiedad extra: solo category y file
     const backendLayers = layers.map(layer => {
@@ -198,20 +262,15 @@ export class AvatarAPI {
     
     const url = `${this.baseURL}/save?${params.toString()}`;
     
-    // Obtener token para Authorization header
-    const token = localStorage.getItem('access_token');
     console.log('🔑 Token from localStorage:', token ? 'TOKEN_PRESENT' : 'NO_TOKEN');
     console.log('🔑 Token preview:', token ? token.substring(0, 20) + '...' : 'N/A');
     
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-      console.log('✅ Authorization header set');
-    } else {
-      console.error('❌ No token available in localStorage');
-    }
+    
+    console.log('✅ Authorization header set');
     
     const response = await fetch(url, {
       method: 'POST',
@@ -222,6 +281,14 @@ export class AvatarAPI {
     console.log(`📊 Save response status: ${response.status}`);
 
     if (!response.ok) {
+      // Manejo especial para errores de autenticación
+      if (response.status === 401) {
+        console.warn('🔐 Token expirado durante save, limpiando localStorage');
+        localStorage.removeItem('access_token');
+        window.dispatchEvent(new CustomEvent('auth-token-expired'));
+        throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      }
+      
       const errorText = await response.text().catch(() => 'Unknown error');
       console.error('❌ Save Error:', errorText);
       throw new Error(`HTTP ${response.status}: ${errorText}`);

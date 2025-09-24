@@ -18,7 +18,7 @@ export interface UseAvatarEditorReturn {
   error: string | null;
   
   // Acciones
-  setLayer: (category: string, file: string) => void;
+  setLayer: (category: string, file: string, url?: string) => void;
   removeLayer: (category: string) => void;
   clearAllLayers: () => void;
   generatePreview: () => Promise<void>;
@@ -30,19 +30,47 @@ export interface UseAvatarEditorReturn {
   clearError: () => void;
 }
 
-export function useAvatarEditor(): UseAvatarEditorReturn {
+
+export function useAvatarEditor(baseGender: 'male' | 'female' = 'male'): UseAvatarEditorReturn {
+  // Persistencia de capas por género (en memoria y localStorage)
+  const [maleLayers, setMaleLayers] = useState<LayerItem[]>(() => {
+    const saved = localStorage.getItem('avatar_male_layers');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [femaleLayers, setFemaleLayers] = useState<LayerItem[]>(() => {
+    const saved = localStorage.getItem('avatar_female_layers');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   // Estado principal
-  const [selectedLayers, setSelectedLayers] = useState<LayerItem[]>([]);
+  const [selectedLayers, setSelectedLayers] = useState<LayerItem[]>(baseGender === 'male' ? maleLayers : femaleLayers);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [manifest, setManifest] = useState<ManifestResponse | null>(null);
-  
+
   // Estados de carga
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingManifest, setIsLoadingManifest] = useState(true);
-  
+
   // Error
   const [error, setError] = useState<string | null>(null);
+
+  // Cambiar diseño al cambiar de género base
+  useEffect(() => {
+    if (baseGender === 'male') {
+      setSelectedLayers(maleLayers);
+    } else {
+      setSelectedLayers(femaleLayers);
+    }
+  }, [baseGender, maleLayers, femaleLayers]);
+
+  // Guardar en localStorage cada vez que cambian las capas de cada género
+  useEffect(() => {
+    localStorage.setItem('avatar_male_layers', JSON.stringify(maleLayers));
+  }, [maleLayers]);
+  useEffect(() => {
+    localStorage.setItem('avatar_female_layers', JSON.stringify(femaleLayers));
+  }, [femaleLayers]);
 
   // Cargar manifest al inicializar
   useEffect(() => {
@@ -71,22 +99,31 @@ export function useAvatarEditor(): UseAvatarEditorReturn {
     }
   };
 
-  const setLayer = useCallback((category: string, file: string) => {
+  const setLayer = useCallback((category: string, file: string, url?: string) => {
     setSelectedLayers(prev => {
-      // Remover capa existente de esta categoría si la hay
       const filtered = prev.filter(layer => layer.category !== category);
-      // Añadir nueva capa
-      return [...filtered, { category, file }];
+      const newLayers = [...filtered, { category, filename: file, url: url || '' }];
+      // Guardar en el estado correspondiente al género
+      if (baseGender === 'male') setMaleLayers(newLayers);
+      else setFemaleLayers(newLayers);
+      return newLayers;
     });
-  }, []);
+  }, [baseGender]);
 
   const removeLayer = useCallback((category: string) => {
-    setSelectedLayers(prev => prev.filter(layer => layer.category !== category));
-  }, []);
+    setSelectedLayers(prev => {
+      const newLayers = prev.filter(layer => layer.category !== category);
+      if (baseGender === 'male') setMaleLayers(newLayers);
+      else setFemaleLayers(newLayers);
+      return newLayers;
+    });
+  }, [baseGender]);
 
   const clearAllLayers = useCallback(() => {
     setSelectedLayers([]);
-  }, []);
+    if (baseGender === 'male') setMaleLayers([]);
+    else setFemaleLayers([]);
+  }, [baseGender]);
 
   const generatePreview = useCallback(async () => {
     if (selectedLayers.length === 0) {
@@ -97,16 +134,17 @@ export function useAvatarEditor(): UseAvatarEditorReturn {
     try {
       setIsGeneratingPreview(true);
       setError(null);
-      
-      const previewData = await avatarAPI.generatePreview(selectedLayers);
-      setPreviewUrl(previewData.preview_url);
+      // Usar generateAvatar y crear URL de objeto
+      const blob = await avatarAPI.generateAvatar(selectedLayers, baseGender);
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
     } catch (err) {
       setError(formatApiError(err));
       setPreviewUrl(null);
     } finally {
       setIsGeneratingPreview(false);
     }
-  }, [selectedLayers]);
+  }, [selectedLayers, baseGender]);
 
   const saveAvatar = useCallback(async (
     name: string, 
@@ -124,8 +162,8 @@ export function useAvatarEditor(): UseAvatarEditorReturn {
     try {
       setIsSaving(true);
       setError(null);
-      
-      const avatar = await avatarAPI.saveAvatar(name, selectedLayers, isActive, isPublic);
+      // Pasar el género como segundo argumento
+      const avatar = await avatarAPI.saveAvatar(name, baseGender, selectedLayers, isActive, isPublic);
       return avatar;
     } catch (err) {
       const errorMsg = formatApiError(err);
@@ -134,7 +172,7 @@ export function useAvatarEditor(): UseAvatarEditorReturn {
     } finally {
       setIsSaving(false);
     }
-  }, [selectedLayers]);
+  }, [selectedLayers, baseGender]);
 
   const hasLayer = useCallback((category: string): boolean => {
     return selectedLayers.some(layer => layer.category === category);

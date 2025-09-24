@@ -8,7 +8,7 @@ import MensajesPage from './pages/MensajesPage';
 import RankingPage from './pages/RankingPage';
 import RetosTiendaPage from './pages/RetosTiendaPage';
 import ForoRecursosPage from './pages/ForoRecursosPage';
-import EditorPerfilPage from './pages/EditorPerfilPage';
+import Perfil from './pages/Perfil';
 import ExplorarAvatarsPage from './pages/ExplorarAvatarsPage';
 import PanelAdmin from './modules/admin';
 import PanelCoordinador from './modules/coordinador';
@@ -22,6 +22,7 @@ import NivelesUsuario from './modules/niveles';
 import AyudaFaqPage from './pages/AyudaFaqPage';
 import ActividadGamificadaPage from './pages/ActividadGamificadaPage';
 import React, { useEffect, useState } from 'react'
+import { useToast } from './context/ToastContext';
 import Home from './pages/Home'
 import ThemeToggle from './components/ThemeToggle'
 import Layout from './components/layout/Layout'
@@ -49,6 +50,8 @@ import Consentimiento from './pages/legal/Consentimiento';
 
 export default function App() {
   const location = useLocation()
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const toast = useToast();
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const t = localStorage.getItem('theme')
@@ -69,6 +72,18 @@ export default function App() {
       localStorage.setItem('theme', theme)
     } catch {}
   }, [theme])
+
+  // Manejar evento de expiración de sesión
+  useEffect(() => {
+    const handleTokenExpired = () => {
+      setSessionExpired(true);
+      toast.error('Tu sesión ha expirado', 'Por favor, inicia sesión nuevamente.');
+    };
+    window.addEventListener('auth-token-expired', handleTokenExpired);
+    return () => {
+      window.removeEventListener('auth-token-expired', handleTokenExpired);
+    };
+  }, [toast]);
 
   // Páginas que usan AuthLayout en lugar del Layout completo
   const authPages = ['/login', '/register', '/recover', '/reset-password']
@@ -101,7 +116,7 @@ export default function App() {
       <Route path="/ranking" element={<RankingPage />} />
       <Route path="/retos-tienda" element={<RetosTiendaPage />} />
       <Route path="/foro-recursos" element={<ForoRecursosPage />} />
-      <Route path="/editor-perfil" element={<EditorPerfilPage />} />
+  <Route path="/perfil" element={<Perfil />} />
       <Route path="/admin" element={<PanelAdmin />} />
       <Route path="/coordinador" element={<PanelCoordinador />} />
       <Route path="/profesor" element={<PanelProfesor />} />
@@ -120,6 +135,20 @@ export default function App() {
 
   return (
     <ToastProvider>
+      {sessionExpired && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4 border-2 border-red-500">
+            <h2 className="text-2xl font-bold text-red-600">Tu sesión ha expirado</h2>
+            <p className="text-gray-700 dark:text-gray-200">Por seguridad, debes iniciar sesión nuevamente.</p>
+            <button
+              className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+              onClick={() => { window.location.href = '/login'; }}
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+      )}
       {isAuthPage ? (
         <AuthLayout>
           {routes}

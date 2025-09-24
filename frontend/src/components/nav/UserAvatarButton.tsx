@@ -53,18 +53,24 @@ export default function UserAvatarButton({ onClick }: UserAvatarButtonProps) {
 
   return (
     <button
-      className="fixed top-4 right-4 z-50 p-1 rounded-full border-2 border-primary bg-white dark:bg-[#18181b] shadow hover:scale-105 transition-transform"
+      className="fixed top-4 right-4 z-50 p-2 rounded-full border-2 border-primary bg-white dark:bg-[#18181b] shadow-lg hover:scale-105 transition-transform"
       aria-label="Abrir perfil"
       onClick={onClick}
       disabled={loading}
     >
       {loading ? (
-        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
+          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
       ) : (
         <img
           src={avatarUrl || fallbackUrl}
           alt="avatar"
-          className="w-10 h-10 rounded-full"
+          className="w-14 h-14 rounded-full object-cover object-top scale-150 transform origin-center"
+          style={{ 
+            objectPosition: 'center 20%', // Mostrar más la cabeza
+            clipPath: 'circle(50% at 50% 40%)', // Recortar para mostrar principalmente la cabeza
+          }}
           onError={(e) => {
             // Si falla cargar el avatar del sistema, usar fallback
             e.currentTarget.src = fallbackUrl;

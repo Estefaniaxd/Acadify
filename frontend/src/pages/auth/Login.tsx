@@ -53,26 +53,29 @@ export default function Login() {
         }
       )
       // Si login exitoso, guardar tokens y redirigir
-      if (res.data.access_token) {
-        login(res.data.access_token)
-        setError('')
-        
+      if (res.data.access_token && res.data.refresh_token) {
+        // Guardar ambos tokens en localStorage
+        localStorage.setItem('access_token', res.data.access_token);
+        localStorage.setItem('refresh_token', res.data.refresh_token);
+        login(res.data.access_token);
+        setError('');
+
         // Notificación bonita de éxito
         toast.success(
-          '¡Bienvenido de vuelta!', 
+          '¡Bienvenido de vuelta!',
           'Sesión iniciada correctamente. Te redirigiremos a tu dashboard.',
           3000
-        )
-        
+        );
+
         // Determinar a qué dashboard redirigir basado en el rol del usuario
         setTimeout(() => {
           // Si tenemos información del usuario en el token, podemos usar esa info
           // Por ahora, redirigimos a un dashboard general
-          navigate('/dashboard')
-        }, 1500)
+          navigate('/dashboard');
+        }, 1500);
       } else if (res.data.status === 'otp_required') {
-        setOtpRequired(true)
-        setOtpMessage(res.data.message || 'Se requiere código OTP')
+        setOtpRequired(true);
+        setOtpMessage(res.data.message || 'Se requiere código OTP');
       }
     } catch (err: any) {
       if (err.response) {

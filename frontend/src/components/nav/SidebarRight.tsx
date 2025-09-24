@@ -292,33 +292,60 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                 whileHover={{ scale: 1.05, rotateY: 15 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 relative">
-                  {loadingAvatar ? (
-                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <img 
-                        src={userAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9`} 
-                        alt="avatar" 
-                        className="w-full h-full object-cover"
+                {open ? (
+                  <div className="w-32 h-32 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 relative">
+                    {loadingAvatar ? (
+                      <div className="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <img
+                          src={userAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9`}
+                          alt="avatar"
+                          className="w-full h-full object-cover object-top scale-125 transform origin-center"
+                          style={{
+                            objectPosition: 'center 22%',
+                            clipPath: 'inset(0 0 20% 0)',
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-violet-600/20 to-transparent" />
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    {loadingAvatar ? (
+                      <div className="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center rounded-full">
+                        <div className="w-4 h-4 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <img
+                        src={userAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9`}
+                        alt="avatar"
+                        className="w-12 h-12 object-cover object-top scale-150 transform origin-center"
+                        style={{
+                          objectPosition: 'center 18%',
+                          clipPath: 'circle(50% at 50% 38%)',
+                          background: 'none',
+                        }}
                         onError={(e) => {
-                          // Fallback final a adventurer (educativo)
                           e.currentTarget.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'acadify'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`;
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-violet-600/20 to-transparent" />
-                    </>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
                 {/* Indicador de estado en vivo */}
                 <motion.div 
-                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center"
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <div className="w-2 h-2 bg-white rounded-full" />
+                  <div className="w-3 h-3 bg-white rounded-full" />
                 </motion.div>
               </motion.div>
               

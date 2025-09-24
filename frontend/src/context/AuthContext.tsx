@@ -10,7 +10,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (accessToken: string, refreshToken?: string) => void;
   logout: () => void;
 };
 
@@ -48,24 +48,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    const refreshToken = localStorage.getItem('refresh_token');
     if (token) {
       const u = parseUserFromToken(token);
       if (u) {
         setUser(u);
         setIsAuthenticated(true);
+      } else {
+        // Token inválido, limpiarlo
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
     }
+
+    // Escuchar eventos de token expirado
+    const handleTokenExpired = () => {
+      console.log('🔐 Token expired event received, logging out');
+      logout();
+    };
+
+    window.addEventListener('auth-token-expired', handleTokenExpired);
+
+    return () => {
+      window.removeEventListener('auth-token-expired', handleTokenExpired);
+    };
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem('access_token', token);
-    const u = parseUserFromToken(token);
+  const login = (accessToken: string, refreshToken?: string) => {
+    localStorage.setItem('access_token', accessToken);
+    if (refreshToken) {
+      localStorage.setItem('refresh_token', refreshToken);
+    }
+    const u = parseUserFromToken(accessToken);
     setUser(u);
     setIsAuthenticated(!!u);
   }
 
   const logout = () => {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     setUser(null);
     setIsAuthenticated(false);
     window.location.href = '/login';
