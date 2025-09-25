@@ -78,3 +78,8 @@ test_frontend:
     key: $CI_JOB_NAME
     paths:
       - frontend/node_modules
+
+dummy_job:
+  stage: lint
+  script:
+    - echo "Pipeline dummy job: runner y CI funcionando correctamente"
