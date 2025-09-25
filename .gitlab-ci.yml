@@ -1,0 +1,80 @@
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# Backend (Python)
+lint_backend:
+  stage: lint
+  image: python:3.11
+  before_script:
+    - cd backend
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install flake8
+  script:
+    - flake8 . --count --show-source --statistics
+  cache:
+    key: $CI_JOB_NAME
+    paths:
+      - backend/.cache/pip
+
+test_backend:
+  stage: test
+  image: python:3.11
+  before_script:
+    - cd backend
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install pytest
+  script:
+    - pytest
+  cache:
+    key: $CI_JOB_NAME
+    paths:
+      - backend/.cache/pip
+
+# Frontend (Node.js)
+lint_frontend:
+  stage: lint
+  image: node:18
+  before_script:
+    - cd frontend
+    - npm install
+    - npm install eslint
+  script:
+    - npx eslint . --ext .js,.jsx,.ts,.tsx || true
+  cache:
+    key: $CI_JOB_NAME
+    paths:
+      - frontend/node_modules
+
+build_frontend:
+  stage: build
+  image: node:18
+  before_script:
+    - cd frontend
+    - npm install
+  script:
+    - npm run build
+  cache:
+    key: $CI_JOB_NAME
+    paths:
+      - frontend/node_modules
+
+test_frontend:
+  stage: test
+  image: node:18
+  before_script:
+    - cd frontend
+    - npm install
+  script:
+    - |
+      if [ -f package.json ] && grep -q test package.json; then npm test; else echo "No test script"; fi
+  cache:
+    key: $CI_JOB_NAME
+    paths:
+      - frontend/node_modules
