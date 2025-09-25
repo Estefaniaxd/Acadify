@@ -189,25 +189,15 @@ export default function Nav() {
           >
             <Link to="/" className="flex items-center gap-3 relative">
               <motion.div 
-                className="relative"
+                className="relative ml-12"
                 whileHover={{ rotate: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-purple-700 flex items-center justify-center shadow-lg border border-white/20 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                  <span className="text-white text-xl font-black relative z-10">A</span>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-violet-400/30 to-purple-400/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    animate={{
-                      background: [
-                        'linear-gradient(45deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.3))',
-                        'linear-gradient(225deg, rgba(124, 58, 237, 0.3), rgba(139, 92, 246, 0.3))',
-                        'linear-gradient(45deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.3))'
-                      ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </div>
+                <img 
+                  src="/rutilio_read.png" 
+                  alt="Rutilio" 
+                  className="w-20 h-20 rounded-2xl object-cover shadow-lg"
+                />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}

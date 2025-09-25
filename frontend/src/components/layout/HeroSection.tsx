@@ -160,15 +160,13 @@ export default function HeroSection() {
                 transition={{ type: 'spring', stiffness: 300 }}
               >
                 <div className="text-center">
-                  <motion.div
+                  <motion.img
+                    src="/rutilio_home.png"
+                    alt="Rutilio"
+                    className="w-80 h-80 mx-auto mb-4 object-contain"
                     animate={{ y: [-5, 5, -5] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="text-6xl mb-4"
-                  >
-                    🚀
-                  </motion.div>
-                  <p className="text-gray-600 dark:text-gray-200 text-lg font-medium">Tu mascota de aprendizaje</p>
-                  <p className="text-gray-400 dark:text-gray-400 text-sm mt-2">¡Pronto tendrás tu compañero!</p>
+                  />
                 </div>
                 {[...Array(8)].map((_, i) => (
                   <motion.div

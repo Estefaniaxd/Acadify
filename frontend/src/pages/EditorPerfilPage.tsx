@@ -107,7 +107,7 @@ export default function Perfil() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <motion.div 
@@ -177,21 +177,45 @@ export default function Perfil() {
                   >
                     <div className="text-center">
                       {loading ? (
-                        <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse border-4 border-purple-500 mx-auto mb-6" />
+                        <div className="w-44 h-44 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse border-4 border-purple-500 mx-auto mb-6" />
                       ) : (
-                        <motion.img 
-                          whileHover={{ scale: 1.05 }}
-                          src={avatarUrl || fallbackUrl} 
-                          alt="avatar" 
-                          className="w-32 h-32 rounded-full border-4 border-purple-500 mx-auto mb-6 object-cover object-top shadow-2xl"
-                          style={{ 
-                            objectPosition: 'center 25%',
-                            clipPath: 'inset(0 0 20% 0)',
+                        <div
+                          style={{
+                            width: '100vw',
+                            height: '40vh',
+                            overflow: 'visible',
+                            background: '#fff',
+                            margin: '4rem auto 1.5rem auto', // margen superior para separar de la navegación
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative',
+                            // border: '4px solid #a855f7',
+                            boxShadow: '0 2px 16px rgba(0,0,0,0.18)',
                           }}
-                          onError={(e) => {
-                            e.currentTarget.src = fallbackUrl;
-                          }}
-                        />
+                        >
+                          <motion.img
+                            key={avatarUrl}
+                            src={avatarUrl || fallbackUrl}
+                            alt="Avatar"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                            style={{
+                              objectFit: 'cover',
+                              objectPosition: 'center 0%',
+                              width: '100vw',
+                              height: '40vh',
+                              transform: 'scale(3.5)',
+                              position: 'relative',
+                              // borderRadius: 0, // sin recorte
+                            }}
+                            onError={(e) => {
+                              e.currentTarget.src = fallbackUrl;
+                            }}
+                          />
+                        </div>
                       )}
                       <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
                         {user?.username || 'Usuario'}

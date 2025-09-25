@@ -81,7 +81,7 @@ redis_service = RedisService()
 # Ruta completa para avatars con composición de imágenes
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
-from avatar_service_complete import router as avatar_complete_router
+from src.api.routes.avatar_service_complete import router as avatar_complete_router
 app.include_router(avatar_complete_router, prefix="/avatar", tags=["avatars-complete"])
 
 # Incluir todos los routers desde el archivo de configuración EXCEPTO el avatar router que puede causar conflictos

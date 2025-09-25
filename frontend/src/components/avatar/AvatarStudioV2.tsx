@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiShuffle, 
@@ -31,6 +31,11 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
   const { success, error: showError, info, warning } = useToast();
   const { isAuthenticated } = useAuth();
 
+  // Refs para limpieza
+  const saveToLocalStorage = useRef<number | null>(null);
+  const hasShownInitialAvatarToast = useRef(false);
+  const lastPreviewLayers = useRef<string>('');
+
   // Estados principales
   const [selectedGender, setSelectedGender] = useState<'male' | 'female'>('male');
   const [manifest, setManifest] = useState<ManifestResponse | null>(null);
@@ -51,18 +56,28 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Sincronizar cambios con localStorage
+  // Sincronizar cambios con localStorage - optimizado con debounce
   useEffect(() => {
-    localStorage.setItem('avatar_male_layers', JSON.stringify(maleLayers));
+    if (saveToLocalStorage.current) clearTimeout(saveToLocalStorage.current);
+    saveToLocalStorage.current = setTimeout(() => {
+      localStorage.setItem('avatar_male_layers', JSON.stringify(maleLayers));
+    }, 500);
   }, [maleLayers]);
+  
   useEffect(() => {
-    localStorage.setItem('avatar_female_layers', JSON.stringify(femaleLayers));
+    if (saveToLocalStorage.current) clearTimeout(saveToLocalStorage.current);
+    saveToLocalStorage.current = setTimeout(() => {
+      localStorage.setItem('avatar_female_layers', JSON.stringify(femaleLayers));
+    }, 500);
   }, [femaleLayers]);
 
   // Estados de UI
   const [activeCategory, setActiveCategory] = useState<string>('hair');
   const [activeGenderFilter, setActiveGenderFilter] = useState<string>('all'); // all, male, female, unisex
-  const [genderChangeTimeout, setGenderChangeTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [genderChangeTimeout, setGenderChangeTimeout] = useState<number | null>(null);
+  // Ref para controlar si ya se mostró el toast inicial
+  // Estado para distinguir cambio manual de género
+  const [isManualGenderChange, setIsManualGenderChange] = useState(false);
   const [isVisualizing, setIsVisualizing] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
@@ -71,57 +86,82 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
     loadManifest();
   }, [selectedGender]);
 
-  // Actualizar selectedLayers cuando cambia el género (recuperar de memoria)
+  // Actualizar selectedLayers cuando cambia el género (recuperar de memoria) - optimizado
   useEffect(() => {
     const layersForGender = selectedGender === 'male' ? maleLayers : femaleLayers;
-    setSelectedLayers(layersForGender);
-  }, [selectedGender, maleLayers, femaleLayers]);
+    if (JSON.stringify(selectedLayers) !== JSON.stringify(layersForGender)) {
+      setSelectedLayers(layersForGender);
+    }
+    // Notificación SOLO si es cambio manual
+    if (isManualGenderChange) {
+      if (genderChangeTimeout) clearTimeout(genderChangeTimeout);
+      const genderLabel = selectedGender === 'male' ? 'Masculino' : 'Femenino';
+      const currentGenderLayers = selectedGender === 'male' ? maleLayers : femaleLayers;
+      const timeoutId = setTimeout(() => {
+        if (currentGenderLayers.length > 0) {
+          info(`Se restauraron ${currentGenderLayers.length} elementos para ${genderLabel.toLowerCase()}`);
+        } else {
+          info(`Cambiando a ${genderLabel.toLowerCase()} - Selecciona nuevos elementos`);
+        }
+      }, 400);
+      setGenderChangeTimeout(timeoutId);
+      setIsManualGenderChange(false);
+    }
+  }, [selectedGender, maleLayers, femaleLayers, isManualGenderChange]);
 
   // Cargar avatar guardado del usuario al inicializar el componente
   useEffect(() => {
     loadUserSavedAvatar();
   }, []);
 
-  // Limpiar timeouts al desmontar el componente
+  // Limpiar timeouts y URLs al desmontar el componente
   useEffect(() => {
     return () => {
+      // Limpiar todos los timeouts
       if (genderChangeTimeout) {
         clearTimeout(genderChangeTimeout);
       }
+      if (saveToLocalStorage.current) {
+        clearTimeout(saveToLocalStorage.current);
+      }
+      // Limpiar URLs de objetos
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
-  }, [genderChangeTimeout]);
+  }, []);
 
-  // Generar preview cuando cambian las capas O cuando se carga el manifest por primera vez
+  // Limpiar URLs cuando cambia el preview
   useEffect(() => {
-    if (selectedLayers.length > 0 || manifest) {
-      generatePreview();
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  // Generar preview cuando cambian las capas - optimizado para evitar ciclos
+  useEffect(() => {
+    const layersKey = JSON.stringify(selectedLayers);
+    if (selectedLayers.length > 0 && layersKey !== lastPreviewLayers.current) {
+      lastPreviewLayers.current = layersKey;
+      const timeoutId = setTimeout(() => generatePreview(), 200);
+      return () => clearTimeout(timeoutId);
     }
-  }, [selectedLayers, selectedGender, manifest]);
+  }, [selectedLayers]);
 
   const loadUserSavedAvatar = async () => {
     try {
       console.log('🔄 Loading user saved avatar...');
-      
       const avatarData = await avatarAPI.getMyAvatars();
       console.log('✅ User avatars response:', avatarData);
-      
       // Buscar el avatar activo del usuario
       const activeAvatar = avatarData.avatars.find(avatar => avatar.is_active);
       console.log('🎯 Active avatar found:', activeAvatar);
-      
       if (activeAvatar) {
-        // Cargar el avatar en el editor
-        console.log('🔄 Loading active avatar in editor:', activeAvatar);
-        
-        // Establecer el género
         setSelectedGender(activeAvatar.base_gender as 'male' | 'female');
-        
-        // Establecer el nombre
         setAvatarName(activeAvatar.name);
-        
-        // Convertir las capas al formato del editor
         const editorLayers: LayerItem[] = activeAvatar.layers.map(layer => {
-          // Las capas guardadas pueden tener estructura {category, file} o {category, filename}
           const filename = (layer as any).filename || (layer as any).file;
           return {
             category: layer.category,
@@ -129,15 +169,15 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
             url: `http://localhost:8000/static/assets/${filename}`
           };
         });
-        
-        console.log('🔄 Editor layers:', editorLayers);
         setSelectedLayers(editorLayers);
-        
-        success(`Avatar "${activeAvatar.name}" cargado en el editor`);
+        // Mostrar solo una vez la notificación al cargar el avatar inicial
+        if (!hasShownInitialAvatarToast.current) {
+          success(`Avatar "${activeAvatar.name}" cargado en el editor`);
+          hasShownInitialAvatarToast.current = true;
+        }
       } else {
         console.log('ℹ️ No active avatar found, starting with empty editor');
       }
-      
     } catch (error) {
       console.error('❌ Error loading user saved avatar:', error);
       // No mostrar error toast aquí, porque es normal no tener avatar guardado
@@ -196,6 +236,8 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
   };
 
   const generatePreview = async () => {
+    if (!manifest) return;
+    
     try {
       console.log('🖼️ Generating preview with layers:', selectedLayers);
       
@@ -224,15 +266,10 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
         }
       }
       
-      console.log('🔄 Has base after check:', layersWithBase.some(l => l.category === 'base'));
-      console.log('🔄 All layers:', layersWithBase.map(l => ({category: l.category, filename: l.filename})));
-      
       if (layersWithBase.length === 0) {
         console.log('⚠️ No layers to generate preview');
         return;
       }
-      
-      console.log('🔄 Final layers for preview:', layersWithBase);
       
       const blob = await avatarAPI.generateAvatar(layersWithBase, selectedGender);
       const url = URL.createObjectURL(blob);
@@ -321,21 +358,17 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
     if (genderChangeTimeout) {
       clearTimeout(genderChangeTimeout);
     }
-
-    // Cambiar género inmediatamente
-    setSelectedGender(newGender);
-
-    // Programar la notificación con debouncing
-    const timeoutId = setTimeout(() => {
-      const currentGenderLayers = newGender === 'male' ? maleLayers : femaleLayers;
-      if (currentGenderLayers.length > 0) {
-        info(`Se restauraron ${currentGenderLayers.length} elementos para ${genderLabel.toLowerCase()}`);
+    // Guardar las capas actuales en el género actual antes de cambiar, usando función para obtener el valor más reciente
+    setIsManualGenderChange(true);
+    setSelectedGender(prev => {
+      if (prev === newGender) return prev;
+      if (prev === 'male') {
+        setMaleLayers(layers => selectedLayers.length ? [...selectedLayers] : layers);
       } else {
-        info(`Cambiando a ${genderLabel.toLowerCase()} - Selecciona nuevos elementos`);
+        setFemaleLayers(layers => selectedLayers.length ? [...selectedLayers] : layers);
       }
-    }, 500); // Esperar 500ms antes de mostrar la notificación
-
-    setGenderChangeTimeout(timeoutId);
+      return newGender;
+    });
   };
 
   const handleVisualize = () => {
@@ -587,7 +620,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
         >
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 3, repeat: 2, ease: "linear" }}
             className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-6"
           />
           <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Preparando el estudio</h3>
@@ -674,7 +707,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
           <div className="flex items-center justify-center mb-6">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 4, repeat: 3, ease: "easeInOut" }}
               className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg"
             >
               <HiSparkles className="text-3xl text-white" />
@@ -710,8 +743,8 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                   </div>
                 </div>
                 <motion.button
-                  whileHover={{ scale: 1.1, rotate: 180 }}
-                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={loadManifest}
                   className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
@@ -789,7 +822,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                   >
                     <motion.div
                       animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      transition={{ duration: 3, repeat: 2 }}
                       className="w-20 h-20 bg-gray-200 dark:bg-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-6"
                     >
                       <FiUser className="text-4xl" />
@@ -824,39 +857,29 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                 {/* Botones de acción */}
                 <div className="grid grid-cols-3 gap-3">
                   <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleRandomize}
                     className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group"
                   >
-                    <motion.div
-                      whileHover={{ rotate: 180 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <FiShuffle className="inline mr-2" />
-                    </motion.div>
+                    <FiShuffle className="inline mr-2" />
                     <span className="text-sm">Sorprender</span>
                   </motion.button>
 
                   <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleDownload}
                     disabled={!previewUrl}
                     className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
                   >
-                    <motion.div
-                      whileHover={{ y: -2 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <FiDownload className="inline mr-2" />
-                    </motion.div>
+                    <FiDownload className="inline mr-2" />
                     <span className="text-sm">Obtener</span>
                   </motion.button>
 
                   <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleVisualize}
                     disabled={selectedLayers.length === 0 || isVisualizing}
                     className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -866,19 +889,14 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                       <div className="flex items-center justify-center">
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          transition={{ duration: 1, repeat: 2, ease: "linear" }}
                           className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
                         />
                         <span className="text-sm">Generando...</span>
                       </div>
                     ) : (
                       <>
-                        <motion.div
-                          whileHover={{ scale: 1.2 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <FiEye className="inline mr-2" />
-                        </motion.div>
+                        <FiEye className="inline mr-2" />
                         <span className="text-sm">Preview</span>
                       </>
                     )}
@@ -901,7 +919,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                     <div className="flex items-center justify-center">
                       <motion.div
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        transition={{ duration: 1, repeat: 2, ease: "linear" }}
                         className="w-6 h-6 border-2 border-white border-t-transparent rounded-full mr-3"
                       />
                       Creando tu avatar...
