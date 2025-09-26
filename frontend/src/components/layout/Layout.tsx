@@ -53,18 +53,18 @@ export default function Layout({ children }: Props) {
           {/* Botón avatar solo si sidebar derecho está cerrado y izquierdo no está abierto */}
           {!sidebarOpen && !sidebarRightOpen && <UserAvatarButton onClick={() => setSidebarRightOpen(true)} />}
           {/* Sidebar izquierdo: z-50 para estar sobre el overlay pero debajo de Nav */}
-          <div className="z-50 fixed top-16 left-0">
+          <div className="z-50 fixed top-20 left-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 5rem)' }}>
             <SidebarLeft open={sidebarOpen} onClose={() => setSidebarOpen(false)} role={user?.role || 'estudiante'} />
           </div>
           {/* Sidebar derecho: z-50 para estar sobre el overlay pero debajo de Nav */}
-          <div className="z-50 fixed top-16 right-0">
+          <div className="z-50 fixed top-16 right-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
             <SidebarRight open={sidebarRightOpen} onClose={() => setSidebarRightOpen(false)} role={user?.role || 'estudiante'} />
           </div>
         </>
       )}
       {/* Cuando SidebarLeft está abierta, empuja el contenido a la derecha. Ajuste para que nunca se superponga a Nav. */}
       <div
-        className={`transition-all pt-28 pb-8 main-content ${sidebarOpen ? 'md:ml-80 ml-64' : ''} ${sidebarOpen || sidebarRightOpen ? 'blur-sm pointer-events-none select-none' : ''}`}
+        className={`transition-all pt-28 pb-8 main-content ${sidebarOpen ? 'md:ml-80 ml-64' : ''} ${sidebarOpen || sidebarRightOpen ? 'blur-sm pointer-events-none select-none z-30' : ''}`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         {children}

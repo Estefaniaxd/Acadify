@@ -36,24 +36,20 @@ export default function VideoSection() {
           Mira este video para conocer cómo Acadify transforma el aprendizaje en una experiencia divertida, gamificada y colaborativa.
         </motion.p>
         <motion.div
-          className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-white/60 dark:border-white/10 bg-black flex items-center justify-center group relative"
+          className="w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-white/60 dark:border-white/10 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center group relative"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3, duration: 0.7 }}
         >
-          {/* Reemplaza el src por el link de tu video de YouTube si lo tienes */}
-          <iframe
-            className="w-full h-full"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-            title="Video de presentación Acadify"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-          {/* Overlay de play para personalización visual */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <FiPlayCircle className="text-white/80 dark:text-white/60 w-24 h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="text-center">
+            <FiPlayCircle className="text-gray-400 dark:text-gray-500 w-24 h-24 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">
+              Video de presentación próximamente
+            </p>
+            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
+              ¡Mantente atento para ver Acadify en acción!
+            </p>
           </div>
         </motion.div>
       </div>

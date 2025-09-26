@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiHome, FiBook, FiUsers, FiBarChart, FiUserCheck,
@@ -118,6 +118,18 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Detectar modo oscuro igual que en Nav
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const match = window.matchMedia('(prefers-color-scheme: dark)');
+      setIsDark(match.matches);
+      const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
+      match.addEventListener('change', handler);
+      return () => match.removeEventListener('change', handler);
+    }
+  }, []);
+
   // Configuración de menú por rol
   const getMenuItems = useMemo(() => {
     const baseItems = [
@@ -165,6 +177,18 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
 
   if (!open) return null;
 
+  // Fondos igual que Nav
+  const darkBg = 'rgba(24, 16, 48, 0.92)';
+  // Fondo blanco puro y sólido para modo claro
+  const lightBg = '#fff';
+  const sidebarBg = isDark ? darkBg : '#fff';
+  const borderColor = isDark
+    ? '1px solid rgba(139, 92, 246, 0.35)'
+    : '1px solid #e5e7eb';
+  const boxShadow = isDark
+    ? '8px 0 32px rgba(139, 92, 246, 0.18)'
+    : '8px 0 32px rgba(139, 92, 246, 0.04)';
+
   return (
     <AnimatePresence>
       <motion.aside
@@ -172,13 +196,13 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: '-100%', opacity: 0 }}
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-        className="h-full w-64 md:w-80 flex flex-col overflow-hidden"
+  className="h-full w-64 md:w-80 flex flex-col overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
+          background: sidebarBg,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderRight: '1px solid rgba(139, 92, 246, 0.1)',
-          boxShadow: '8px 0 32px rgba(139, 92, 246, 0.1)'
+          borderRight: borderColor,
+          boxShadow: boxShadow
         }}
       >
         {/* Header del sidebar */}
@@ -186,18 +210,18 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-between p-6 border-b border-gray-200/50"
+          className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700"
         >
-          <h2 className="text-xl font-bold text-gray-800 capitalize">
+          <h2 className={`text-xl font-bold capitalize ${isDark ? 'text-gray-200' : 'text-gray-900'}`}> 
             Panel {role}
           </h2>
           <motion.button
-            className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+            className={`p-2 rounded-xl bg-transparent transition-colors duration-200 ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
             onClick={onClose}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FiX className="w-5 h-5 text-gray-600" />
+            <FiX className="w-5 h-5" />
           </motion.button>
         </motion.div>
 
@@ -209,7 +233,7 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Navegación</h3>
+            <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>Navegación</h3>
             <div className="space-y-2">
               {getMenuItems.map((item, idx) => {
                 const active = location.pathname === item.href;
@@ -220,7 +244,9 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left ${
                       active
                         ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
-                        : 'text-gray-700 hover:bg-violet-50 hover:text-violet-700'
+                        : isDark
+                          ? 'text-gray-300 hover:bg-violet-900/50 hover:text-violet-300'
+                          : 'text-gray-800 hover:bg-violet-50 hover:text-violet-700'
                     }`}
                     onClick={() => {
                       navigate(item.href);
@@ -256,17 +282,13 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
               return (
                 <>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <FiClock className="w-5 h-5 text-violet-600" />
+                    <h3 className={`text-lg font-bold flex items-center gap-2 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                      <FiClock className="w-5 h-5 text-violet-600 dark:text-violet-400" />
                       {recentData.title}
                     </h3>
                   </div>
                   <motion.button
-                    className="group relative p-4 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden w-full"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)',
-                      border: '1px solid rgba(139, 92, 246, 0.1)'
-                    }}
+                    className={`group relative p-4 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden w-full border ${isDark ? 'bg-gray-800/90 border-gray-700' : 'bg-white border-gray-200'}`}
                     onClick={() => { navigate(`${recentData.routePrefix}/${mostRecent.id}`); onClose(); }}
                     whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -275,20 +297,20 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex-1 text-left">
-                        <h4 className="font-bold text-gray-900 text-sm group-hover:text-violet-700 transition-colors duration-300">
+                        <h4 className={`font-bold text-sm transition-colors duration-300 ${isDark ? 'text-gray-100 group-hover:text-violet-300' : 'text-gray-900 group-hover:text-violet-700'}`}> 
                           {mostRecent.name}
                         </h4>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}> 
                           {role === 'admin' ? `${(mostRecent as any).usuarios} usuarios` :
                            role === 'profesor' ? `${(mostRecent as any).pendientes} pendientes` :
                            `${(mostRecent as any).students} estudiantes`}
                         </p>
-                        <p className="text-xs text-violet-600 mt-1 font-medium">
+                        <p className={`text-xs mt-1 font-medium ${isDark ? 'text-violet-400' : 'text-violet-600'}`}> 
                           Accedido hoy
                         </p>
                         {(role === 'estudiante' || role === 'coordinador') && (mostRecent as any).progress && (
                           <>
-                            <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                            <div className={`mt-2 w-full rounded-full h-1.5 ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}> 
                               <motion.div 
                                 className={`h-1.5 bg-gradient-to-r ${mostRecent.color} rounded-full`}
                                 initial={{ width: 0 }}
@@ -296,12 +318,14 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                                 transition={{ duration: 1, delay: 0.2 }}
                               />
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">{(mostRecent as any).progress}% completado</p>
+                            <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{(mostRecent as any).progress}% completado</p>
                           </>
                         )}
                         {role === 'admin' && (mostRecent as any).estado && (
                           <p className={`text-xs mt-1 font-medium ${
-                            (mostRecent as any).estado === 'Activa' ? 'text-green-600' : 'text-yellow-600'
+                            (mostRecent as any).estado === 'Activa'
+                              ? (isDark ? 'text-green-400' : 'text-green-600')
+                              : (isDark ? 'text-yellow-400' : 'text-yellow-600')
                           }`}>
                             {(mostRecent as any).estado}
                           </p>
@@ -327,12 +351,12 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Clases Activas</h3>
+              <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>Clases Activas</h3>
               <div className="space-y-2">
                 {mockClases.slice(0, 3).map((clase, idx) => (
                   <motion.button
                     key={clase.id}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-all duration-300 text-left"
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left ${isDark ? 'text-gray-300 hover:bg-violet-900/50 hover:text-violet-300' : 'text-gray-800 hover:bg-violet-50 hover:text-violet-700'}`}
                     onClick={() => {
                       navigate(`/clase/${clase.id}`);
                       onClose();

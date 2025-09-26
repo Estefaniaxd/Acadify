@@ -309,27 +309,9 @@ export default function Nav() {
                 </Link>
               </motion.div>
             ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg border-2 border-white/20"
-              >
-                {loadingAvatar ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : userAvatarUrl ? (
-                  <img 
-                    src={userAvatarUrl} 
-                    alt="avatar" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback a avatar educativo si falla
-                      e.currentTarget.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || 'user'}&backgroundColor=b6e3f4,c0aede,d1d4f9&accessories=glasses&accessoriesProbability=30`;
-                    }}
-                  />
-                ) : (
-                  <FiUser className="w-5 h-5" />
-                )}
-              </motion.div>
+              loadingAvatar ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : <></>
             )}
           </div>
 

@@ -216,6 +216,23 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  // Fondo igual que SidebarLeft
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const match = window.matchMedia('(prefers-color-scheme: dark)');
+      setIsDark(match.matches);
+      const handler = (e) => setIsDark(e.matches);
+      match.addEventListener('change', handler);
+      return () => match.removeEventListener('change', handler);
+    }
+  }, []);
+
+  const darkBg = 'rgba(24, 16, 48, 0.92)';
+  const sidebarBg = isDark ? darkBg : '#fff';
+  const borderColor = isDark ? '1px solid rgba(139, 92, 246, 0.35)' : '1px solid #e5e7eb';
+  const boxShadow = isDark ? '8px 0 32px rgba(139, 92, 246, 0.18)' : '8px 0 32px rgba(139, 92, 246, 0.04)';
+
   return (
     <AnimatePresence>
       {open && (
@@ -224,11 +241,13 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 420, opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          className="fixed top-0 right-0 h-full z-40 w-96 max-w-[420px] shadow-2xl border-l border-white/10 overflow-hidden"
+          className="fixed top-0 right-0 h-full z-40 w-96 max-w-[420px] shadow-2xl overflow-hidden"
           style={{
-            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
+            background: sidebarBg,
             backdropFilter: 'blur(25px)',
             WebkitBackdropFilter: 'blur(25px)',
+            borderLeft: borderColor,
+            boxShadow: boxShadow
           }}
           tabIndex={-1}
           aria-modal="true"
@@ -252,7 +271,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg">
                   <FiUser className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-700">
+                <span className={`text-xl font-bold bg-clip-text ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
                   Tu perfil
                 </span>
               </motion.div>
@@ -350,10 +369,10 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
               </motion.div>
               
               <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
                   {user?.username || 'Usuario'}
                 </h3>
-                <p className="text-sm text-gray-500">{user?.email || 'usuario@acadify.com'}</p>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email || 'usuario@acadify.com'}</p>
                 <motion.button 
                   className="text-xs text-violet-600 hover:text-violet-700 font-medium flex items-center gap-1 mt-2 mx-auto"
                   onClick={() => navigate('/avatar')}
@@ -404,7 +423,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
               className="relative"
             >
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center gap-2">
+                <h4 className={`text-lg font-bold flex items-center gap-2 ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}> 
                   <FiTrendingUp className="w-4 h-4 text-emerald-500" />
                   Progreso de nivel
                 </h4>
@@ -443,7 +462,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
               transition={{ delay: 0.25 }}
             >
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center gap-2">
+                <h4 className={`text-lg font-bold flex items-center gap-2 ${isDark ? 'text-yellow-300' : 'text-yellow-600'}`}> 
                   <FiAward className="w-4 h-4 text-yellow-500" />
                   Insignias
                 </h4>
@@ -494,7 +513,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
               transition={{ delay: 0.3 }}
             >
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-bold text-gray-700 flex items-center gap-2">
+                <h4 className={`text-lg font-bold flex items-center gap-2 ${isDark ? 'text-gray-100' : 'text-gray-700'}`}> 
                   <FiGift className="w-4 h-4 text-purple-500" />
                   Logros recientes
                 </h4>
@@ -512,10 +531,10 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                   return (
                     <motion.div
                       key={logro.id}
-                      className="flex items-center gap-3 p-3 rounded-2xl shadow-sm border border-purple-100 hover:border-purple-200 transition-all duration-300"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)'
-                      }}
+                      className={`flex items-center gap-3 p-3 rounded-2xl shadow-sm border border-purple-100 hover:border-purple-200 transition-all duration-300 ${isDark ? '' : 'bg-gray-50'}`}
+                      style={isDark ? {
+                        background: 'linear-gradient(135deg, rgba(40, 20, 80, 0.10) 0%, rgba(139, 92, 246, 0.10) 100%)'
+                      } : {}}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * idx }}
@@ -528,8 +547,8 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                         <Icon className="w-4 h-4 text-white" />
                       </motion.div>
                       <div>
-                        <h5 className="font-semibold text-gray-800 text-sm">{logro.name}</h5>
-                        <p className="text-xs text-gray-500">Desbloqueado recientemente</p>
+                        <h5 className={`font-semibold text-sm ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>{logro.name}</h5>
+                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Desbloqueado recientemente</p>
                       </div>
                     </motion.div>
                   );
@@ -546,13 +565,25 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
             >
               {/* Botón de tema */}
               <motion.button
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition-all duration-300 mb-2"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-2 transition-all duration-300 group"
+                style={{
+                  background: isDark
+                    ? 'linear-gradient(135deg, rgba(40, 20, 80, 0.10) 0%, rgba(139, 92, 246, 0.10) 100%)'
+                    : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)',
+                  border: isDark ? '1px solid #312e81' : '1px solid #ede9fe',
+                }}
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <motion.div
-                  className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: isDark
+                      ? 'linear-gradient(135deg, rgba(40, 20, 80, 0.10) 0%, rgba(139, 92, 246, 0.10) 100%)'
+                      : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)',
+                    border: isDark ? '1px solid #312e81' : '1px solid #ede9fe',
+                  }}
                   animate={{ rotate: theme === 'dark' ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
                 >
@@ -562,7 +593,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                     <FiMoon className="w-5 h-5 text-purple-600" />
                   )}
                 </motion.div>
-                <span className="font-medium text-gray-700">
+                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'} group-hover:text-violet-700`}>
                   Modo {theme === 'dark' ? 'claro' : 'oscuro'}
                 </span>
               </motion.button>
@@ -573,7 +604,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                 return (
                   <motion.button
                     key={item.label}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition-all duration-300 mb-2 group"
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-2 transition-all duration-300 group ${isDark ? 'hover:bg-violet-900/30' : 'hover:bg-violet-50'}`}
                     onClick={() => item.path && navigate(item.path)}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -587,7 +618,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
                     >
                       <Icon className="w-5 h-5 text-white" />
                     </motion.div>
-                    <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300">
+                    <span className={`font-medium transition-colors duration-300 ${isDark ? 'text-gray-200 group-hover:text-violet-300' : 'text-gray-800 group-hover:text-violet-700'}`}>
                       {item.label}
                     </span>
                   </motion.button>

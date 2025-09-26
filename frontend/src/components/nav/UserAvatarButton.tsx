@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { avatarAPI } from '../avatar/avatarAPI';
@@ -14,38 +15,34 @@ export default function UserAvatarButton({ onClick }: UserAvatarButtonProps) {
   useEffect(() => {
     const loadUserAvatar = async () => {
       if (!user) {
+        setAvatarUrl(null);
         setLoading(false);
         return;
       }
-
-      // Verificar si hay token de autenticación
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        console.log('UserAvatarButton: No auth token found, using fallback avatar');
-        setAvatarUrl(`https://api.dicebear.com/7.x/bottts/svg?seed=${user.username || 'user'}`);
-        setLoading(false);
-        return;
-      }
-
       try {
-        const avatars = await avatarAPI.getMyAvatars();
-        const activeAvatar = avatars.avatars.find(avatar => avatar.is_active);
-        
-        if (activeAvatar && activeAvatar.image_url) {
-          setAvatarUrl(activeAvatar.image_url);
-        } else {
-          // Fallback a dicebear si no hay avatar activo
-          setAvatarUrl(`https://api.dicebear.com/7.x/bottts/svg?seed=${user.username || 'user'}`);
+        const res = await avatarAPI.getMyAvatars(0, 10);
+        let avatarUrl = null;
+        if (res && res.avatars && res.avatars.length > 0) {
+          // Try to find the active avatar
+          let active = res.avatars.find(a => a.is_active);
+          if (!active && res.active_avatar_id) {
+            active = res.avatars.find(a => a.id === res.active_avatar_id);
+          }
+          if (!active) {
+            // fallback to first avatar
+            active = res.avatars[0];
+          }
+          if (active && active.image_url) {
+            avatarUrl = active.image_url;
+          }
         }
-      } catch (error) {
-        console.error('Error loading user avatar:', error);
-        // Fallback a dicebear en caso de error
-        setAvatarUrl(`https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || 'user'}`);
+        setAvatarUrl(avatarUrl);
+      } catch (err) {
+        setAvatarUrl(null);
       } finally {
         setLoading(false);
       }
     };
-
     loadUserAvatar();
   }, [user]);
 
@@ -53,26 +50,37 @@ export default function UserAvatarButton({ onClick }: UserAvatarButtonProps) {
 
   return (
     <button
-      className="fixed top-4 right-4 z-50 p-2 rounded-full border-2 border-primary bg-white dark:bg-[#18181b] shadow-lg hover:scale-105 transition-transform"
+      className="fixed top-4 right-5 z-50 p-1 rounded-full border-2 border-primary bg-white dark:bg-[#18181b] shadow-lg hover:scale-105 transition-transform overflow-hidden"
       aria-label="Abrir perfil"
+      style={{
+        width: '56px',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}
       onClick={onClick}
       disabled={loading}
     >
       {loading ? (
         <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
         <img
           src={avatarUrl || fallbackUrl}
           alt="avatar"
-          className="w-14 h-14 rounded-full object-cover object-top scale-150 transform origin-center"
-          style={{ 
-            objectPosition: 'center 20%', // Mostrar más la cabeza
-            clipPath: 'circle(50% at 50% 40%)', // Recortar para mostrar principalmente la cabeza
+          className="rounded-full object-cover"
+          style={{
+            width: '130px',
+            height: '130px',
+            marginTop: '50px', // sube al máximo la imagen para mostrar solo la parte superior
+            objectPosition: 'center 100%', // enfoca la parte más alta posible
+            clipPath: 'circle(50% at 50% 40%)',
+            transition: 'width 0.2s, height 0.2s, margin 0.2s',
           }}
           onError={(e) => {
-            // Si falla cargar el avatar del sistema, usar fallback
             e.currentTarget.src = fallbackUrl;
           }}
         />
