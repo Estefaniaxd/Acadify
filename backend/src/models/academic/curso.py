@@ -30,7 +30,7 @@ class Curso(Base):
     programa_id = Column(
         UUID(as_uuid=True),
         ForeignKey("Programa.programa_id", ondelete="CASCADE"),
-        nullable=False  
+        nullable=True
     )
 
     nombre = Column(String(50), nullable=False)
