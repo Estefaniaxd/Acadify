@@ -15,7 +15,7 @@ class CursoBase(BaseModel):
 class CursoCreate(CursoBase):
     institucion_id: UUID
     coordinador_id: UUID | None = None
-    programa_id: UUID
+    programa_id: UUID | None = None
 
 
 class CursoUpdate(BaseModel):
@@ -30,7 +30,7 @@ class CursoInDBBase(CursoBase):
     curso_id: UUID
     institucion_id: UUID
     coordinador_id: UUID | None = None
-    programa_id: UUID
+    programa_id: UUID | None = None
 
     class Config:
         from_attributes = True
