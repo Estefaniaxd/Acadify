@@ -1,11 +1,11 @@
 import React from 'react'
 import Layout from '../components/layout/Layout';
-import LogrosPageAdvanced from './LogrosPageAdvanced';
+import LogrosUsuario from '../modules/logros';
 
 export default function LogrosPage() {
   return (
     <Layout>
-      <LogrosPageAdvanced />
+      <LogrosUsuario />
     </Layout>
   );
 }

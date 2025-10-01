@@ -5,8 +5,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   FiHome, FiBook, FiTrendingUp, FiInfo, FiMenu, FiX,
   FiSettings, FiUsers, FiBarChart, FiUserCheck,
-  FiPlus, FiShoppingBag, FiAward, FiUser
-} from 'react-icons/fi';
+  FiPlus, FiShoppingBag, FiAward, FiUser, FiMessageSquare
+  } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import { avatarAPI } from '../avatar/avatarAPI';
 
@@ -14,35 +14,38 @@ const getLinksByRole = (role?: string) => {
   if (role === 'admin') {
     return [
       { label: 'Panel Admin', href: '/admin', icon: FiSettings },
+      { label: 'Cursos', href: '/cursos', icon: FiBook },
+      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
+      { label: 'Comunicación', href: '/comunicacion', icon: FiUsers },
       { label: 'Instituciones', href: '/admin/instituciones', icon: HiOutlineOfficeBuilding },
-      { label: 'Usuarios', href: '/admin/usuarios', icon: FiUsers },
-      { label: 'Estadísticas', href: '/admin/estadisticas', icon: FiBarChart },
     ];
   }
   if (role === 'coordinador') {
     return [
       { label: 'Panel Coordinador', href: '/coordinador', icon: FiSettings },
-      { label: 'Mi institución', href: '/coordinador/institucion', icon: HiOutlineOfficeBuilding },
+      { label: 'Cursos', href: '/cursos', icon: FiBook },
+      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
+      { label: 'Comunicación', href: '/comunicacion', icon: FiUsers },
       { label: 'Profesores', href: '/coordinador/profesores', icon: FiUserCheck },
-      { label: 'Clases', href: '/coordinador/clases', icon: FiBook },
-      { label: 'Estadísticas', href: '/coordinador/estadisticas', icon: FiBarChart },
     ];
   }
-  if (role === 'profesor') {
+  if (role === 'profesor' || role === 'docente') {
     return [
-      { label: 'Panel Profesor', href: '/profesor', icon: FiSettings },
-      { label: 'Mis clases', href: '/mis-clases', icon: FiBook },
-      { label: 'Tareas', href: '/profesor/tareas', icon: FiUserCheck },
-      { label: 'Materiales', href: '/profesor/materiales', icon: HiOutlineOfficeBuilding },
-      { label: 'Progreso', href: '/profesor/progreso', icon: FiTrendingUp },
+      { label: 'Panel Profesor', href: '/dashboard-teacher', icon: FiSettings },
+      { label: 'Cursos', href: '/cursos', icon: FiBook },
+      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
+      { label: 'Salas', href: '/comunicacion', icon: FiUsers },
+      { label: 'Comunicación', href: '/mensajes', icon: FiMessageSquare },
+      { label: 'Mis clases', href: '/dashboard-teacher', icon: FiPlus },
     ];
   }
   if (role === 'estudiante') {
     return [
-      { label: 'Mis clases', href: '/mis-clases', icon: FiBook },
-      { label: 'Unirse a clase', href: '/unirse-clase', icon: FiPlus },
+      { label: 'Cursos', href: '/cursos', icon: FiBook },
+      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
+      { label: 'Comunicación', href: '/comunicacion', icon: FiUsers },
+      { label: 'Mis clases', href: '/mis-clases', icon: FiPlus },
       { label: 'Tienda', href: '/tienda', icon: FiShoppingBag },
-      { label: 'Logros', href: '/logros', icon: FiAward },
       { label: 'Avatar', href: '/avatar', icon: FiUser },
     ];
   }
@@ -163,7 +166,7 @@ export default function Nav() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed left-0 right-0 top-0 z-50 transition-all duration-500"
+      className="fixed left-0 right-0 top-0 z-[100] transition-all duration-500"
       style={{
         background: headerBg,
         backdropFilter: 'blur(20px)',
@@ -196,7 +199,7 @@ export default function Nav() {
                 <img 
                   src="/rutilio_read.png" 
                   alt="Rutilio" 
-                  className="w-20 h-20 rounded-2xl object-cover shadow-lg"
+                  className="w-16 h-16 rounded-2xl object-cover shadow-lg"
                 />
               </motion.div>
               <motion.div
@@ -348,7 +351,7 @@ export default function Nav() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -50, scale: 0.95 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="lg:hidden fixed left-4 right-4 top-24 z-50 rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
+              className="lg:hidden fixed left-4 right-4 top-20 z-50 rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
               style={{
                 background: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(25px)',

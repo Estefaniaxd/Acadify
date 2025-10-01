@@ -30,4 +30,4 @@ class Docente(Base):
 
     curso_docentes = relationship("CursoDocente", back_populates="docente")
     grupos = relationship("Grupo", backref="docente")
-    tareas = relationship("Tarea", backref="docente")
+    # tareas = relationship("src.models.academic.tarea.Tarea", primaryjoin="Docente.docente_id == foreign(src.models.academic.tarea.Tarea.docente_id)", backref="docente")

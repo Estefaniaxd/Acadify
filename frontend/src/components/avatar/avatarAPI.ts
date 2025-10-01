@@ -272,7 +272,7 @@ export class AvatarAPI {
     
     console.log('✅ Authorization header set');
     
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -283,12 +283,48 @@ export class AvatarAPI {
     if (!response.ok) {
       // Manejo especial para errores de autenticación
       if (response.status === 401) {
-        console.warn('🔐 Token expirado durante save, limpiando localStorage');
+        // Intentar refresh automático antes de forzar logout
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          try {
+            const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refresh_token: refreshToken }),
+            });
+            if (refreshRes.ok) {
+              const refreshData = await refreshRes.json();
+              if (refreshData.access_token) {
+                localStorage.setItem('access_token', refreshData.access_token);
+                // Reintentar la petición original con el nuevo token
+                const retryHeaders = {
+                  ...headers,
+                  'Authorization': `Bearer ${refreshData.access_token}`
+                };
+                response = await fetch(url, {
+                  method: 'POST',
+                  headers: retryHeaders,
+                  credentials: 'include',
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log('✅ Avatar saved successfully after token refresh:', data);
+                  return data;
+                }
+              }
+            }
+          } catch (refreshErr) {
+            console.error('❌ Error refreshing token during avatar save:', refreshErr);
+          }
+        }
+        // Si el refresh falla, forzar logout
         localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         window.dispatchEvent(new CustomEvent('auth-token-expired'));
         throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       }
-      
       const errorText = await response.text().catch(() => 'Unknown error');
       console.error('❌ Save Error:', errorText);
       throw new Error(`HTTP ${response.status}: ${errorText}`);
@@ -311,18 +347,20 @@ export class AvatarAPI {
   }
 
   /**
-   * Obtiene avatars de un usuario específico
+   * Obtiene avatars de un usuario específico (solo para el usuario actual)
    */
   async getUserAvatars(
     userId: string, 
     skip: number = 0, 
     limit: number = 100
   ): Promise<UserAvatarListResponse> {
+    // Para avatars, solo podemos obtener los propios
+    // Redirigir a /me independientemente del userId
     const params = new URLSearchParams({
       skip: skip.toString(),
       limit: limit.toString(),
     });
-    return this.request<UserAvatarListResponse>(`/user/${userId}?${params}`);
+    return this.request<UserAvatarListResponse>(`/me?${params}`);
   }
 
   /**

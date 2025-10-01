@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   FiShuffle, 
@@ -17,6 +17,21 @@ import {
 } from 'react-icons/fi'
 import { HiSparkles } from 'react-icons/hi'
 import { useToast } from '../../context/ToastContext'
+import { avatarAPI } from './avatarAPI'
+
+// Definir el tipo AvatarConfig
+interface AvatarConfig {
+  background: string
+  body: string
+  hair: string
+  hairColor: string
+  eyes: string
+  eyebrows: string
+  mouth: string
+  accessories: string
+  clothing: string
+  clothingColor: string
+}
 
 // Definición de assets por capas
 const avatarAssets = {
@@ -91,19 +106,6 @@ const avatarAssets = {
   clothingColors: [
     '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6B7280', '#1F2937'
   ]
-}
-
-interface AvatarConfig {
-  background: string
-  body: string
-  hair: string
-  hairColor: string
-  eyes: string
-  eyebrows: string
-  mouth: string
-  accessories: string
-  clothing: string
-  clothingColor: string
 }
 
 interface AvatarLayerProps {
@@ -213,9 +215,13 @@ const AvatarPreview: React.FC<AvatarLayerProps> = ({ config, showLayer }) => {
 }
 
 export default function AvatarCustomizerAdvanced() {
-  const toast = useToast()
   const [activeCategory, setActiveCategory] = useState('body')
-  const [config, setConfig] = useState<AvatarConfig>({
+  const [selectedGender, setSelectedGender] = useState<'male' | 'female'>('male')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+  
+  // Dos configuraciones separadas - una para cada género
+  const [maleConfig, setMaleConfig] = useState<AvatarConfig>({
     background: 'gradient1',
     body: 'default',
     hair: 'short',
@@ -227,6 +233,23 @@ export default function AvatarCustomizerAdvanced() {
     clothing: 'tshirt',
     clothingColor: '#3B82F6'
   })
+  
+  const [femaleConfig, setFemaleConfig] = useState<AvatarConfig>({
+    background: 'gradient2',
+    body: 'default',
+    hair: 'long',
+    hairColor: '#8B4513',
+    eyes: 'normal',
+    eyebrows: 'normal',
+    mouth: 'smile',
+    accessories: 'none',
+    clothing: 'dress',
+    clothingColor: '#EC4899'
+  })
+  
+  // La configuración actual según el género seleccionado
+  const currentConfig = selectedGender === 'male' ? maleConfig : femaleConfig
+  const setCurrentConfig = selectedGender === 'male' ? setMaleConfig : setFemaleConfig
 
   const [showLayer, setShowLayer] = useState({
     background: true,
@@ -241,6 +264,109 @@ export default function AvatarCustomizerAdvanced() {
 
   const [savedAvatars, setSavedAvatars] = useState<AvatarConfig[]>([])
 
+  // Cargar avatares del usuario automáticamente (sin bloquear UI)
+  useEffect(() => {
+    const loadUserAvatars = async () => {
+      try {
+        console.log('🔄 Cargando avatares del usuario...')
+        setIsLoading(true)
+        const response = await avatarAPI.getMyAvatars()
+        
+        if (response.avatars.length > 0) {
+          response.avatars.forEach(avatar => {
+            if (avatar.base_gender === 'male') {
+              // Configurar avatar masculino si existe
+              const maleAvatar = convertAvatarToConfig(avatar)
+              if (maleAvatar) setMaleConfig(maleAvatar)
+            } else if (avatar.base_gender === 'female') {
+              // Configurar avatar femenino si existe
+              const femaleAvatar = convertAvatarToConfig(avatar)
+              if (femaleAvatar) setFemaleConfig(femaleAvatar)
+            }
+          })
+          console.log('✅ Avatares cargados exitosamente')
+        } else {
+          console.log('ℹ️ No hay avatares guardados, usando configuraciones por defecto')
+        }
+      } catch (error) {
+        console.error('⚠️ Error cargando avatares (usando defaults):', error)
+      } finally {
+        setIsLoading(false)
+        setIsInitialized(true)
+        console.log('🎯 Sistema de avatar inicializado')
+      }
+    }
+
+    loadUserAvatars()
+  }, [])
+
+  // Función para convertir avatar del backend a configuración del editor
+  const convertAvatarToConfig = (avatar: any): AvatarConfig | null => {
+    if (!avatar.layers || avatar.layers.length === 0) return null
+
+    const config: AvatarConfig = {
+      background: 'gradient1',
+      body: 'default', 
+      hair: 'short',
+      hairColor: '#1a1a1a',
+      eyes: 'normal',
+      eyebrows: 'normal',
+      mouth: 'smile', 
+      accessories: 'none',
+      clothing: 'tshirt',
+      clothingColor: '#3B82F6'
+    }
+
+    avatar.layers.forEach((layer: any) => {
+      const assetName = layer.filename.split('.')[0]
+      
+      switch (layer.category) {
+        case 'hair':
+          if (avatarAssets.hairs.find(h => h.id === assetName)) {
+            config.hair = assetName
+          }
+          break
+        case 'eyes':
+          if (avatarAssets.eyes.find(e => e.id === assetName)) {
+            config.eyes = assetName
+          }
+          break
+        case 'eyebrows':
+          if (avatarAssets.eyebrows.find(e => e.id === assetName)) {
+            config.eyebrows = assetName
+          }
+          break
+        case 'mouth':
+          if (avatarAssets.mouths.find(m => m.id === assetName)) {
+            config.mouth = assetName
+          }
+          break
+        case 'accessories':
+          if (avatarAssets.accessories.find(a => a.id === assetName)) {
+            config.accessories = assetName
+          }
+          break
+        case 'clothing':
+          if (avatarAssets.clothing.find(c => c.id === assetName)) {
+            config.clothing = assetName
+          }
+          break
+        case 'body':
+          if (avatarAssets.bodies.find(b => b.id === assetName)) {
+            config.body = assetName
+          }
+          break
+        case 'background':
+          if (avatarAssets.backgrounds.find(b => b.id === assetName)) {
+            config.background = assetName
+          }
+          break
+      }
+    })
+
+    return config
+  }
+
   const categories = [
     { id: 'body', name: 'Cuerpo', icon: FiUser, color: 'from-orange-500 to-red-600' },
     { id: 'hair', name: 'Cabello', icon: FiRefreshCw, color: 'from-amber-500 to-orange-600' },
@@ -251,8 +377,8 @@ export default function AvatarCustomizerAdvanced() {
   ]
 
   const handleConfigChange = useCallback((key: keyof AvatarConfig, value: string) => {
-    setConfig(prev => ({ ...prev, [key]: value }))
-  }, [])
+    setCurrentConfig(prev => ({ ...prev, [key]: value }))
+  }, [selectedGender])
 
   const randomizeAvatar = () => {
     const random = {
@@ -267,13 +393,18 @@ export default function AvatarCustomizerAdvanced() {
       clothing: avatarAssets.clothing[Math.floor(Math.random() * avatarAssets.clothing.length)].id,
       clothingColor: avatarAssets.clothingColors[Math.floor(Math.random() * avatarAssets.clothingColors.length)]
     }
-    setConfig(random)
-    toast.success('¡Avatar aleatorio generado!', 'Se ha creado una nueva combinación única.')
+    setCurrentConfig(random)
+    console.log('🎲 Avatar aleatorio generado para género:', selectedGender)
   }
 
   const saveAvatar = () => {
-    setSavedAvatars(prev => [...prev, config])
-    toast.success('¡Avatar guardado!', 'Tu avatar ha sido añadido a la galería.')
+    setSavedAvatars(prev => [...prev, currentConfig])
+    console.log('💾 Avatar guardado para género:', selectedGender)
+  }
+
+  const switchGender = (gender: 'male' | 'female') => {
+    setSelectedGender(gender)
+    console.log('🚻 Cambiado a género:', gender)
   }
 
   const toggleLayer = (layer: keyof typeof showLayer) => {
@@ -295,7 +426,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('body', body.id)}
                     className={`w-12 h-12 rounded-xl border-2 ${
-                      config.body === body.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'
+                      currentConfig.body === body.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'
                     } hover:border-blue-400 transition-all duration-200`}
                     style={{ backgroundColor: body.color }}
                     title={body.name}
@@ -319,7 +450,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('hair', hair.id)}
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      config.hair === hair.id 
+                      currentConfig.hair === hair.id 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -340,7 +471,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('hairColor', color)}
                     className={`w-12 h-12 rounded-xl border-2 ${
-                      config.hairColor === color ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'
+                      currentConfig.hairColor === color ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'
                     } hover:border-blue-400 transition-all duration-200`}
                     style={{ backgroundColor: color }}
                   />
@@ -363,7 +494,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('eyes', eye.id)}
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      config.eyes === eye.id 
+                      currentConfig.eyes === eye.id 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -384,7 +515,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('eyebrows', eyebrow.id)}
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      config.eyebrows === eyebrow.id 
+                      currentConfig.eyebrows === eyebrow.id 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -405,7 +536,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('mouth', mouth.id)}
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      config.mouth === mouth.id 
+                      currentConfig.mouth === mouth.id 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -431,7 +562,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('accessories', accessory.id)}
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      config.accessories === accessory.id 
+                      currentConfig.accessories === accessory.id 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -457,7 +588,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('clothing', cloth.id)}
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      config.clothing === cloth.id 
+                      currentConfig.clothing === cloth.id 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -478,7 +609,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('clothingColor', color)}
                     className={`w-12 h-12 rounded-xl border-2 ${
-                      config.clothingColor === color ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'
+                      currentConfig.clothingColor === color ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300'
                     } hover:border-blue-400 transition-all duration-200`}
                     style={{ backgroundColor: color }}
                   />
@@ -501,7 +632,7 @@ export default function AvatarCustomizerAdvanced() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleConfigChange('background', bg.id)}
                     className={`h-16 rounded-lg border-2 text-xs font-medium text-white relative overflow-hidden ${
-                      config.background === bg.id 
+                      currentConfig.background === bg.id 
                         ? 'border-blue-500 ring-2 ring-blue-200' 
                         : 'border-gray-300 hover:border-blue-400'
                     } transition-all duration-200`}
@@ -524,21 +655,72 @@ export default function AvatarCustomizerAdvanced() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-purple-950/30">
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl">
+            <div className="flex items-center space-x-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Cargando Avatar
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Preparando tu editor personalizado...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
-                <HiSparkles className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                  <HiSparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                    Avatar Studio
+                  </h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Crea tu avatar perfecto
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Avatar Studio
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Crea tu avatar perfecto
-                </p>
+
+              {/* Gender Selector */}
+              <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <button
+                  onClick={() => {
+                    setSelectedGender('male')
+                    // toast.info('Género cambiado', 'Editando avatar masculino')
+                  }}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    selectedGender === 'male'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'
+                  }`}
+                >
+                  ♂ Masculino
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedGender('female')
+                    // toast.info('Género cambiado', 'Editando avatar femenino')
+                  }}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    selectedGender === 'female'
+                      ? 'bg-pink-600 text-white'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-pink-600'
+                  }`}
+                >
+                  ♀ Femenino
+                </button>
               </div>
             </div>
 
@@ -589,11 +771,24 @@ export default function AvatarCustomizerAdvanced() {
               </div>
               
               <div className="flex justify-center mb-6">
-                <AvatarPreview 
-                  config={config} 
-                  showLayer={showLayer} 
-                  onConfigChange={handleConfigChange} 
-                />
+                <div className="relative">
+                  <AvatarPreview 
+                    key={`${selectedGender}-${currentConfig.hair}-${currentConfig.clothing}`}
+                    config={currentConfig} 
+                    showLayer={showLayer} 
+                    onConfigChange={handleConfigChange} 
+                  />
+                  {/* Indicador de estado del sistema */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      isInitialized 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    }`}>
+                      {isInitialized ? `✅ ${selectedGender === 'male' ? 'Masculino' : 'Femenino'}` : '⏳ Cargando...'}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Layer Controls */}
@@ -653,6 +848,42 @@ export default function AvatarCustomizerAdvanced() {
 
               {/* Content */}
               <div className="p-6">
+                {/* Gender Selector - Always Visible */}
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-2xl shadow-xl text-white mb-6">
+                  <h3 className="text-lg font-bold mb-4 flex items-center">
+                    <FiUser className="mr-2" />
+                    🚻 Sistema de Género Intercambiable
+                  </h3>
+                  <p className="text-sm opacity-90 mb-4">
+                    Crea avatares masculinos y femeninos por separado. Puedes cambiar entre ellos cuando quieras.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => switchGender('male')}
+                      className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all ${
+                        selectedGender === 'male' 
+                          ? 'bg-white text-purple-600 shadow-lg' 
+                          : 'bg-white/20 text-white border border-white/30'
+                      }`}
+                    >
+                      👨 Masculino
+                    </button>
+                    <button
+                      onClick={() => switchGender('female')}
+                      className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all ${
+                        selectedGender === 'female' 
+                          ? 'bg-white text-purple-600 shadow-lg' 
+                          : 'bg-white/20 text-white border border-white/30'
+                      }`}
+                    >
+                      👩 Femenino
+                    </button>
+                  </div>
+                  <div className="mt-3 text-xs opacity-75 text-center">
+                    Configuración actual: {selectedGender === 'male' ? 'Masculino' : 'Femenino'}
+                  </div>
+                </div>
+
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeCategory}
@@ -679,7 +910,7 @@ export default function AvatarCustomizerAdvanced() {
                       key={index}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setConfig(avatar)}
+                      onClick={() => setCurrentConfig(avatar)}
                       className="relative group"
                     >
                       <div className="w-full aspect-square">

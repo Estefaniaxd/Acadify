@@ -59,14 +59,14 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
   // Sincronizar cambios con localStorage - optimizado con debounce
   useEffect(() => {
     if (saveToLocalStorage.current) clearTimeout(saveToLocalStorage.current);
-    saveToLocalStorage.current = setTimeout(() => {
+    saveToLocalStorage.current = window.setTimeout(() => {
       localStorage.setItem('avatar_male_layers', JSON.stringify(maleLayers));
     }, 500);
   }, [maleLayers]);
   
   useEffect(() => {
     if (saveToLocalStorage.current) clearTimeout(saveToLocalStorage.current);
-    saveToLocalStorage.current = setTimeout(() => {
+    saveToLocalStorage.current = window.setTimeout(() => {
       localStorage.setItem('avatar_female_layers', JSON.stringify(femaleLayers));
     }, 500);
   }, [femaleLayers]);
@@ -97,14 +97,14 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
       if (genderChangeTimeout) clearTimeout(genderChangeTimeout);
       const genderLabel = selectedGender === 'male' ? 'Masculino' : 'Femenino';
       const currentGenderLayers = selectedGender === 'male' ? maleLayers : femaleLayers;
-      const timeoutId = setTimeout(() => {
+      const timeoutId = window.setTimeout(() => {
         if (currentGenderLayers.length > 0) {
           info(`Se restauraron ${currentGenderLayers.length} elementos para ${genderLabel.toLowerCase()}`);
         } else {
           info(`Cambiando a ${genderLabel.toLowerCase()} - Selecciona nuevos elementos`);
         }
       }, 400);
-      setGenderChangeTimeout(timeoutId);
+      setGenderChangeTimeout(timeoutId as number);
       setIsManualGenderChange(false);
     }
   }, [selectedGender, maleLayers, femaleLayers, isManualGenderChange]);
@@ -141,14 +141,17 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
   }, [previewUrl]);
 
   // Generar preview cuando cambian las capas - optimizado para evitar ciclos
+  // Generar preview solo cuando manifest y selectedLayers están listos
   useEffect(() => {
+    if (!manifest) return;
+    if (!selectedLayers || selectedLayers.length === 0) return;
     const layersKey = JSON.stringify(selectedLayers);
-    if (selectedLayers.length > 0 && layersKey !== lastPreviewLayers.current) {
+    if (layersKey !== lastPreviewLayers.current) {
       lastPreviewLayers.current = layersKey;
       const timeoutId = setTimeout(() => generatePreview(), 200);
       return () => clearTimeout(timeoutId);
     }
-  }, [selectedLayers]);
+  }, [manifest, selectedLayers]);
 
   const loadUserSavedAvatar = async () => {
     try {
@@ -663,7 +666,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20 pt-20">
+    <div className="bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20 mt-6">
       {/* Modal de preview grande */}
       <AnimatePresence>
         {showPreviewModal && (

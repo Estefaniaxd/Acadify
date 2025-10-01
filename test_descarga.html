@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test de Descarga</title>
+</head>
+<body>
+    <h1>Test de Descarga de Archivos</h1>
+    <h2>Archivo: flujoAuth.odt</h2>
+    <p>Tipo: application/vnd.oasis.opendocument.text</p>
+    <p>URL: http://localhost:8000/static/uploads/cursos/322e6b11-f95a-494c-8cba-d01531d515cd/20250930_180832_76cac377_flujoAuth.odt</p>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="descargarArchivo()">🔽 Descargar Archivo</button>
+        <button onclick="abrirArchivo()">👁️ Abrir en Nueva Pestaña</button>
+    </div>
+    
+    <script>
+        function descargarArchivo() {
+            const link = document.createElement('a');
+            link.href = 'http://localhost:8000/static/uploads/cursos/322e6b11-f95a-494c-8cba-d01531d515cd/20250930_180832_76cac377_flujoAuth.odt';
+            link.download = 'flujoAuth.odt';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log('Descarga iniciada para: flujoAuth.odt');
+        }
+        
+        function abrirArchivo() {
+            window.open('http://localhost:8000/static/uploads/cursos/322e6b11-f95a-494c-8cba-d01531d515cd/20250930_180832_76cac377_flujoAuth.odt', '_blank');
+            console.log('Abriendo archivo: flujoAuth.odt');
+        }
+    </script>
+</body>
+</html>
+            

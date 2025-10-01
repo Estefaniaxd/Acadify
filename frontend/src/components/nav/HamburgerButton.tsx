@@ -5,7 +5,7 @@ export default function HamburgerButton({ onClick }: { onClick: () => void }) {
     <motion.button
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
-  className="fixed top-6 left-4 z-50 p-2 rounded-lg transition-colors duration-200 focus:outline-none"
+  className="fixed top-6 left-4 z-[110] p-2 rounded-lg transition-colors duration-200 focus:outline-none"
       aria-label="Abrir menú"
       onClick={onClick}
     >

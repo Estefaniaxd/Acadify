@@ -159,9 +159,11 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
 
   // Menú por rol con iconos React Icons
   const menu = useMemo(() => {
+    const userProfilePath = user?.id ? `/perfil/${user.id}` : '/perfil';
+    
     if (role === 'admin') {
       return [
-        { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+        { label: 'Perfil', icon: FiUser, path: userProfilePath, color: 'from-violet-500 to-purple-600' },
         { label: 'Panel Admin', icon: FiSettings, path: '/admin', color: 'from-red-500 to-pink-600' },
         { label: 'Instituciones', icon: HiOutlineOfficeBuilding, path: '/admin/instituciones', color: 'from-blue-500 to-indigo-600' },
         { label: 'Usuarios', icon: FiUsers, path: '/admin/usuarios', color: 'from-emerald-500 to-teal-600' },
@@ -171,7 +173,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
     }
     if (role === 'coordinador') {
       return [
-        { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+        { label: 'Perfil', icon: FiUser, path: userProfilePath, color: 'from-violet-500 to-purple-600' },
         { label: 'Panel Coordinador', icon: FiSettings, path: '/coordinador', color: 'from-blue-500 to-indigo-600' },
         { label: 'Mi institución', icon: HiOutlineOfficeBuilding, path: '/coordinador/institucion', color: 'from-emerald-500 to-teal-600' },
         { label: 'Profesores', icon: FiUserCheck, path: '/coordinador/profesores', color: 'from-orange-500 to-red-600' },
@@ -182,9 +184,9 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
     }
     if (role === 'profesor') {
       return [
-        { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
+        { label: 'Perfil', icon: FiUser, path: userProfilePath, color: 'from-violet-500 to-purple-600' },
         { label: 'Panel Profesor', icon: FiSettings, path: '/profesor', color: 'from-blue-500 to-indigo-600' },
-        { label: 'Mis clases', icon: FiBook, path: '/mis-clases', color: 'from-emerald-500 to-teal-600' },
+  { label: 'Mis clases', icon: FiBook, path: '/chat-clase', color: 'from-emerald-500 to-teal-600' },
         { label: 'Tareas', icon: FiUserCheck, path: '/profesor/tareas', color: 'from-orange-500 to-red-600' },
         { label: 'Materiales', icon: FiBook, path: '/profesor/materiales', color: 'from-purple-500 to-pink-600' },
         { label: 'Progreso', icon: FiTrendingUp, path: '/profesor/progreso', color: 'from-yellow-500 to-orange-600' },
@@ -193,8 +195,8 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
     }
     // estudiante o default
     return [
-      { label: 'Perfil', icon: FiUser, path: '/perfil', color: 'from-violet-500 to-purple-600' },
-      { label: 'Mis clases', icon: FiBook, path: '/mis-clases', color: 'from-blue-500 to-indigo-600' },
+      { label: 'Perfil', icon: FiUser, path: userProfilePath, color: 'from-violet-500 to-purple-600' },
+  { label: 'Mis clases', icon: FiBook, path: '/chat-clase', color: 'from-blue-500 to-indigo-600' },
       { label: 'Unirse a clase', icon: FiPlus, path: '/unirse-clase', color: 'from-emerald-500 to-teal-600' },
       { label: 'Tienda', icon: FiShoppingBag, path: '/tienda', color: 'from-orange-500 to-red-600' },
       { label: 'Logros', icon: FiAward, path: '/logros', color: 'from-yellow-500 to-orange-600' },
@@ -202,7 +204,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
       { label: 'Explorar Avatares', icon: FiUsers, path: '/explorar-avatares', color: 'from-indigo-500 to-purple-600' },
       { label: 'Ajustes', icon: FiSettings, path: '/ajustes', color: 'from-gray-500 to-gray-600' },
     ];
-  }, [role]);
+  }, [role, user]);
 
   // Insignias premium
   const badges = [
@@ -222,7 +224,7 @@ export default function SidebarRight({ open, onClose, role = 'estudiante' }: Sid
     if (typeof window !== 'undefined' && window.matchMedia) {
       const match = window.matchMedia('(prefers-color-scheme: dark)');
       setIsDark(match.matches);
-      const handler = (e) => setIsDark(e.matches);
+      const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
       match.addEventListener('change', handler);
       return () => match.removeEventListener('change', handler);
     }

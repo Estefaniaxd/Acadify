@@ -26,6 +26,176 @@ interface ValidationErrors {
   [key: string]: string
 }
 
+// Componente de campo personalizado fuera del componente principal
+const FormField = ({ 
+  icon: Icon, 
+  label, 
+  field, 
+  type = 'text', 
+  placeholder, 
+  options, 
+  isPassword = false,
+  formData,
+  errors,
+  focusedField,
+  showPassword,
+  showConfirm,
+  updateField,
+  setFocusedField,
+  setTouched,
+  setShowPassword,
+  setShowConfirm
+}: {
+  icon: any
+  label: string
+  field: keyof FormData
+  type?: string
+  placeholder: string
+  options?: { value: string; label: string }[]
+  isPassword?: boolean
+  formData: FormData
+  errors: ValidationErrors
+  focusedField: string | null
+  showPassword: boolean
+  showConfirm: boolean
+  updateField: (field: keyof FormData, value: string) => void
+  setFocusedField: (field: string | null) => void
+  setTouched: (fn: (prev: {[key: string]: boolean}) => {[key: string]: boolean}) => void
+  setShowPassword: (show: boolean) => void
+  setShowConfirm: (show: boolean) => void
+}) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    updateField(field, e.target.value)
+  }
+  
+  const handleFocus = () => {
+    setFocusedField(field)
+  }
+  
+  const handleBlur = () => {
+    setFocusedField(null)
+    setTouched(prev => ({ ...prev, [field]: true }))
+  }
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="space-y-2"
+    >
+      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <motion.div
+            animate={{
+              color: focusedField === field ? '#8b5cf6' : '#9ca3af'
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            <Icon className="w-5 h-5" />
+          </motion.div>
+        </div>
+        
+        {options ? (
+          <select
+            className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
+              focusedField === field
+                ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
+                : errors[field]
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+            }`}
+            value={formData[field]}
+            onChange={handleInputChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          >
+            <option value="">{placeholder}</option>
+            {options.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={isPassword ? (field === 'password' ? (showPassword ? 'text' : 'password') : (showConfirm ? 'text' : 'password')) : type}
+            className={`w-full pl-12 ${isPassword ? 'pr-12' : 'pr-4'} py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
+              focusedField === field
+                ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
+                : errors[field]
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+            }`}
+            value={formData[field]}
+            onChange={handleInputChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            placeholder={placeholder}
+          />
+        )}
+        
+        {isPassword && (
+          <motion.button
+            type="button"
+            className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-violet-600 transition-colors duration-200"
+            onClick={() => field === 'password' ? setShowPassword(!showPassword) : setShowConfirm(!showConfirm)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {(field === 'password' ? showPassword : showConfirm) ? 
+              <FiEyeOff className="w-5 h-5" /> : 
+              <FiEye className="w-5 h-5" />
+            }
+          </motion.button>
+        )}
+        
+        {/* Indicadores de validación */}
+        <AnimatePresence>
+          {formData[field] && !errors[field] && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
+            >
+              <FiCheckCircle className="w-5 h-5 text-emerald-500" />
+            </motion.div>
+          )}
+          {errors[field] && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
+            >
+              <FiAlertCircle className="w-5 h-5 text-red-500" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      
+      {/* Mensaje de error */}
+      <AnimatePresence>
+        {errors[field] && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
+          >
+            <FiAlertCircle className="w-4 h-4" />
+            {errors[field]}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 export default function Register() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>({
@@ -79,9 +249,14 @@ export default function Register() {
   const updateField = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     
-    // Validar en tiempo real
-    const error = validateField(field, value)
-    setErrors(prev => ({ ...prev, [field]: error }))
+    // Validar en tiempo real solo si el campo no está vacío
+    if (value.trim()) {
+      const error = validateField(field, value)
+      setErrors(prev => ({ ...prev, [field]: error }))
+    } else {
+      // Limpiar errores si el campo está vacío
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
     
     // Si es confirmar contraseña, también validar cuando cambie la contraseña
     if (field === 'password' && formData.confirm) {
@@ -178,15 +353,7 @@ export default function Register() {
   }
 
   // Componente de campo personalizado
-  const FormField = ({ 
-    icon: Icon, 
-    label, 
-    field, 
-    type = 'text', 
-    placeholder, 
-    options, 
-    isPassword = false 
-  }: {
+  const renderFormField = (props: {
     icon: any
     label: string
     field: keyof FormData
@@ -195,127 +362,19 @@ export default function Register() {
     options?: { value: string; label: string }[]
     isPassword?: boolean
   }) => (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6 }}
-      className="space-y-2"
-    >
-      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-        {label}
-      </label>
-      <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <motion.div
-            animate={{
-              color: focusedField === field ? '#8b5cf6' : '#9ca3af'
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            <Icon className="w-5 h-5" />
-          </motion.div>
-        </div>
-        
-        {options ? (
-          <select
-            className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
-              focusedField === field
-                ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
-                : errors[field]
-                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-            }`}
-            value={formData[field]}
-            onChange={(e) => updateField(field, e.target.value)}
-            onFocus={() => setFocusedField(field)}
-            onBlur={() => {
-              setFocusedField(null)
-              setTouched(prev => ({ ...prev, [field]: true }))
-            }}
-          >
-            <option value="">{placeholder}</option>
-            {options.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={isPassword ? (showPassword ? 'text' : 'password') : type}
-            className={`w-full pl-12 ${isPassword ? 'pr-12' : 'pr-4'} py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
-              focusedField === field
-                ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
-                : errors[field]
-                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-            }`}
-            value={formData[field]}
-            onChange={(e) => updateField(field, e.target.value)}
-            onFocus={() => setFocusedField(field)}
-            onBlur={() => {
-              setFocusedField(null)
-              setTouched(prev => ({ ...prev, [field]: true }))
-            }}
-            placeholder={placeholder}
-          />
-        )}
-        
-        {isPassword && (
-          <motion.button
-            type="button"
-            className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-violet-600 transition-colors duration-200"
-            onClick={() => field === 'password' ? setShowPassword(!showPassword) : setShowConfirm(!showConfirm)}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {(field === 'password' ? showPassword : showConfirm) ? 
-              <FiEyeOff className="w-5 h-5" /> : 
-              <FiEye className="w-5 h-5" />
-            }
-          </motion.button>
-        )}
-        
-        {/* Indicadores de validación */}
-        <AnimatePresence>
-          {touched[field] && !errors[field] && formData[field] && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
-            >
-              <FiCheckCircle className="w-5 h-5 text-emerald-500" />
-            </motion.div>
-          )}
-          {errors[field] && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
-            >
-              <FiAlertCircle className="w-5 h-5 text-red-500" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      
-      {/* Mensaje de error */}
-      <AnimatePresence>
-        {errors[field] && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
-          >
-            <FiAlertCircle className="w-4 h-4" />
-            {errors[field]}
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    <FormField
+      {...props}
+      formData={formData}
+      errors={errors}
+      focusedField={focusedField}
+      showPassword={showPassword}
+      showConfirm={showConfirm}
+      updateField={updateField}
+      setFocusedField={setFocusedField}
+      setTouched={setTouched}
+      setShowPassword={setShowPassword}
+      setShowConfirm={setShowConfirm}
+    />
   )
 
   return (
@@ -508,35 +567,35 @@ export default function Register() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <FormField
-                            icon={FiUser}
-                            label="Nombres"
-                            field="nombres"
-                            placeholder="Ingresa tus nombres"
-                          />
-                          <FormField
-                            icon={FiUser}
-                            label="Apellidos"
-                            field="apellidos"
-                            placeholder="Ingresa tus apellidos"
-                          />
-                          <FormField
-                            icon={FiFileText}
-                            label="Tipo de documento"
-                            field="tipoDocumento"
-                            placeholder="Selecciona..."
-                            options={[
+                          {renderFormField({
+                            icon: FiUser,
+                            label: "Nombres",
+                            field: "nombres",
+                            placeholder: "Ingresa tus nombres"
+                          })}
+                          {renderFormField({
+                            icon: FiUser,
+                            label: "Apellidos",
+                            field: "apellidos",
+                            placeholder: "Ingresa tus apellidos"
+                          })}
+                          {renderFormField({
+                            icon: FiFileText,
+                            label: "Tipo de documento",
+                            field: "tipoDocumento",
+                            placeholder: "Selecciona...",
+                            options: [
                               { value: 'cc', label: 'Cédula de ciudadanía (CC)' },
                               { value: 'ti', label: 'Tarjeta de identidad (TI)' },
                               { value: 'ce', label: 'Cédula de extranjería (CE)' }
-                            ]}
-                          />
-                          <FormField
-                            icon={FiCreditCard}
-                            label="Número de documento"
-                            field="numeroDocumento"
-                            placeholder="Número de identificación"
-                          />
+                            ]
+                          })}
+                          {renderFormField({
+                            icon: FiCreditCard,
+                            label: "Número de documento",
+                            field: "numeroDocumento",
+                            placeholder: "Número de identificación"
+                          })}
                         </div>
 
                         {/* Selector de rol */}
@@ -604,19 +663,19 @@ export default function Register() {
                         </div>
 
                         <div className="space-y-6">
-                          <FormField
-                            icon={FiUser}
-                            label="Nombre de usuario"
-                            field="username"
-                            placeholder="Elige un nombre de usuario único"
-                          />
-                          <FormField
-                            icon={FiMail}
-                            label="Correo electrónico"
-                            field="email"
-                            type="email"
-                            placeholder="tu.email@ejemplo.com"
-                          />
+                          {renderFormField({
+                            icon: FiUser,
+                            label: "Nombre de usuario",
+                            field: "username",
+                            placeholder: "Elige un nombre de usuario único"
+                          })}
+                          {renderFormField({
+                            icon: FiMail,
+                            label: "Correo electrónico",
+                            field: "email",
+                            type: "email",
+                            placeholder: "tu.email@ejemplo.com"
+                          })}
                         </div>
                       </motion.div>
                     )}
@@ -642,20 +701,20 @@ export default function Register() {
                         </div>
 
                         <div className="space-y-6">
-                          <FormField
-                            icon={FiLock}
-                            label="Contraseña"
-                            field="password"
-                            placeholder="Crea una contraseña segura"
-                            isPassword={true}
-                          />
-                          <FormField
-                            icon={FiLock}
-                            label="Confirmar contraseña"
-                            field="confirm"
-                            placeholder="Confirma tu contraseña"
-                            isPassword={true}
-                          />
+                          {renderFormField({
+                            icon: FiLock,
+                            label: "Contraseña",
+                            field: "password",
+                            placeholder: "Crea una contraseña segura",
+                            isPassword: true
+                          })}
+                          {renderFormField({
+                            icon: FiLock,
+                            label: "Confirmar contraseña",
+                            field: "confirm",
+                            placeholder: "Confirma tu contraseña",
+                            isPassword: true
+                          })}
                         </div>
 
                         {/* Política de privacidad */}

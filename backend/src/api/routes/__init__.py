@@ -86,51 +86,83 @@ except ImportError as e:
     avatar_available = False
 
 # Lista de rutas disponibles
-routers = [
-    # Academic
-    (curso_docente.router, "/cursos-docentes", ["CursoDocente"]),
-    (curso.router, "/cursos", ["Curso"]),
-    (estudiante_grupo.router, "/estudiantes-grupos", ["EstudianteGrupo"]),
-    (grupo_curso.router, "/grupos-cursos", ["GrupoCurso"]),
-    (grupo.router, "/grupos", ["Grupo"]),
-    (institucion.router, "/instituciones", ["Institucion"]),
-    (material_clase.router, "/materiales-clases", ["MaterialClase"]),
-    (material_curso.router, "/materiales-cursos", ["MaterialCurso"]),
-    (material_educativo.router, "/materiales-educativos", ["MaterialEducativo"]),
-    (programa.router, "/programas", ["Programa"]),
-    # Assessment
-    (escala_calificacion.router, "/escalas-calificacion", ["EscalaCalificacion"]),
-    (valor_calificacion.router, "/valores-calificacion", ["ValorCalificacion"]),
-    # Auth
-    (auth_router, "/auth", ["Autenticación"]),
-    # Classes
-    (asistencia.router, "/asistencias", ["Asistencia"]),
-    (clase.router, "/clases", ["Clase"]),
-    (entregar_tarea.router, "/entregas", ["EntregarTarea"]),
-    (plataforma.router, "/plataformas", ["Plataforma"]),
-    (tarea.router, "/tareas", ["Tarea"]),
-    # Communication
-    (archivo_chat.router, "/archivos-chats", ["ArchivoChat"]),
-    (chat_bot.router, "/chat-bot", ["ChatBot"]),
-    (chat_grupo.router, "/chats-grupos", ["ChatGrupo"]),
-    (faq_bot.router, "/faq-bot", ["FaqBot"]),
-    (mensaje_bot.router, "/mensajes-bot", ["MensajeBot"]),
-    (mensaje.router, "/mensajes", ["Mensaje"]),
-    # Gamification
-    (gamificacion.router, "/gamificaciones", ["Gamificacion"]),
-    (insignias.router, "/insignias", ["Insignia"]),
-    (puntos.router, "/puntos", ["Punto"]),
-    (recompensas.router, "/recompensas", ["Recompensa"]),
-    (temas.router, "/temas", ["Tema"]),
-    # Users
-    (usuario.router, "/usuarios", ["Usuario"]),
-    # Admin - Instituciones y Coordinadores
-    (admin_institucion_router, "/admin", ["Administrador"]),
-    (coordinador_invitacion_router, "/coordinador", ["Coordinador"]),
-    # Debug
-    (debug_router, "/debug", ["Depuración"]),
-]
 
-# Agregar avatar router si está disponible
-if avatar_available and avatar_router:
+routers = []
+# Academic
+if 'curso_docente' in locals():
+    routers.append((curso_docente.router, "/cursos-docentes", ["CursoDocente"]))
+if 'curso' in locals():
+    routers.append((curso.router, "/academic/cursos", ["Cursos"]))
+if 'estudiante_grupo' in locals():
+    routers.append((estudiante_grupo.router, "/estudiantes-grupos", ["EstudianteGrupo"]))
+if 'grupo_curso' in locals():
+    routers.append((grupo_curso.router, "/grupos-cursos", ["GrupoCurso"]))
+if 'grupo' in locals():
+    routers.append((grupo.router, "/grupos", ["Grupo"]))
+if 'institucion' in locals():
+    routers.append((institucion.router, "/instituciones", ["Institucion"]))
+if 'material_clase' in locals():
+    routers.append((material_clase.router, "/materiales-clases", ["MaterialClase"]))
+if 'material_curso' in locals():
+    routers.append((material_curso.router, "/materiales-cursos", ["MaterialCurso"]))
+if 'material_educativo' in locals():
+    routers.append((material_educativo.router, "/materiales-educativos", ["MaterialEducativo"]))
+if 'programa' in locals():
+    routers.append((programa.router, "/programas", ["Programa"]))
+# Assessment
+if 'escala_calificacion' in locals():
+    routers.append((escala_calificacion.router, "/escalas-calificacion", ["EscalaCalificacion"]))
+if 'valor_calificacion' in locals():
+    routers.append((valor_calificacion.router, "/valores-calificacion", ["ValorCalificacion"]))
+# Auth
+if 'auth_router' in locals():
+    routers.append((auth_router, "/auth", ["Autenticación"]))
+# Classes
+if 'asistencia' in locals():
+    routers.append((asistencia.router, "/asistencias", ["Asistencia"]))
+if 'clase' in locals():
+    routers.append((clase.router, "/clases", ["Clase"]))
+if 'entregar_tarea' in locals():
+    routers.append((entregar_tarea.router, "/entregas", ["EntregarTarea"]))
+if 'plataforma' in locals():
+    routers.append((plataforma.router, "/plataformas", ["Plataforma"]))
+if 'tarea' in locals():
+    routers.append((tarea.router, "/tareas", ["Tarea"]))
+# Communication
+if 'archivo_chat' in locals():
+    routers.append((archivo_chat.router, "/archivos-chats", ["ArchivoChat"]))
+if 'chat_bot' in locals():
+    routers.append((chat_bot.router, "/chat-bot", ["ChatBot"]))
+if 'chat_grupo' in locals():
+    routers.append((chat_grupo.router, "/chats-grupos", ["ChatGrupo"]))
+if 'faq_bot' in locals():
+    routers.append((faq_bot.router, "/faq-bot", ["FaqBot"]))
+if 'mensaje_bot' in locals():
+    routers.append((mensaje_bot.router, "/mensajes-bot", ["MensajeBot"]))
+if 'mensaje' in locals():
+    routers.append((mensaje.router, "/mensajes", ["Mensaje"]))
+# Gamification
+if 'gamificacion' in locals():
+    routers.append((gamificacion.router, "/gamificaciones", ["Gamificacion"]))
+if 'insignias' in locals():
+    routers.append((insignias.router, "/insignias", ["Insignia"]))
+if 'puntos' in locals():
+    routers.append((puntos.router, "/puntos", ["Punto"]))
+if 'recompensas' in locals():
+    routers.append((recompensas.router, "/recompensas", ["Recompensa"]))
+if 'temas' in locals():
+    routers.append((temas.router, "/temas", ["Tema"]))
+# Users
+if 'usuario' in locals():
+    routers.append((usuario.router, "/usuarios", ["Usuario"]))
+# Admin - Instituciones y Coordinadores
+if 'admin_institucion_router' in locals():
+    routers.append((admin_institucion_router, "/admin", ["Administrador"]))
+if 'coordinador_invitacion_router' in locals():
+    routers.append((coordinador_invitacion_router, "/coordinador", ["Coordinador"]))
+# Debug
+if 'debug_router' in locals():
+    routers.append((debug_router, "/debug", ["Depuración"]))
+# Avatar
+if 'avatar_available' in locals() and avatar_available and 'avatar_router' in locals() and avatar_router:
     routers.append((avatar_router, "/avatar", ["Avatar"]))

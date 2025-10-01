@@ -8,13 +8,14 @@ interface UserAvatarButtonProps {
 }
 
 export default function UserAvatarButton({ onClick }: UserAvatarButtonProps) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadUserAvatar = async () => {
-      if (!user) {
+      setLoading(true);
+      if (!user || !isAuthenticated) {
         setAvatarUrl(null);
         setLoading(false);
         return;
@@ -36,21 +37,22 @@ export default function UserAvatarButton({ onClick }: UserAvatarButtonProps) {
             avatarUrl = active.image_url;
           }
         }
-        setAvatarUrl(avatarUrl);
+        setAvatarUrl(avatarUrl || null);
       } catch (err) {
+        console.error('Error loading avatar:', err);
         setAvatarUrl(null);
       } finally {
         setLoading(false);
       }
     };
     loadUserAvatar();
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   const fallbackUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || 'acadify'}`;
 
   return (
     <button
-      className="fixed top-4 right-5 z-50 p-1 rounded-full border-2 border-primary bg-white dark:bg-[#18181b] shadow-lg hover:scale-105 transition-transform overflow-hidden"
+      className="fixed top-4 right-5 z-[110] p-1 rounded-full border-2 border-primary bg-white dark:bg-[#18181b] shadow-lg hover:scale-105 transition-transform overflow-hidden"
       aria-label="Abrir perfil"
       style={{
         width: '56px',

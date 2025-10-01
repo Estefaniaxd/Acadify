@@ -84,10 +84,42 @@ sys.path.append(str(Path(__file__).parent.parent))
 from src.api.routes.avatar_service_complete import router as avatar_complete_router
 app.include_router(avatar_complete_router, prefix="/avatar", tags=["avatars-complete"])
 
+# ROUTER DE PRUEBA TEMPORAL para verificar autenticación
+try:
+    sys.path.append(str(Path(__file__).parent.parent))
+    from test_simple_auth import test_router
+    app.include_router(test_router, prefix="/api", tags=["test"])
+    logger.info("✅ Router de prueba agregado en /api/test")
+except Exception as e:
+    logger.warning(f"⚠️ No se pudo cargar router de prueba: {e}")
+
+# ROUTER TEMPORAL para comentarios SIN Redis
+try:
+    import sys
+    import os
+    backend_path = os.path.join(os.path.dirname(__file__), "..")
+    sys.path.insert(0, backend_path)
+    from temp_comments_api import temp_router
+    app.include_router(temp_router, prefix="/temp", tags=["temp-comments"])
+    logger.info("✅ Router temporal de comentarios agregado en /temp")
+except Exception as e:
+    logger.warning(f"⚠️ No se pudo cargar router temporal de comentarios: {e}")
+    import traceback
+    traceback.print_exc()
+
+# Importar y registrar router de cursos directamente con prefijo /academic
+try:
+    from src.api.routes.academic.curso import router as curso_router
+    app.include_router(curso_router, prefix="/academic", tags=["Cursos"])
+    logger.info("✅ Router de cursos registrado exitosamente en /academic")
+except Exception as e:
+    logger.error(f"❌ Error registrando router de cursos: {e}")
+
 # Incluir todos los routers desde el archivo de configuración EXCEPTO el avatar router que puede causar conflictos
 for router, prefix, tags in routers:
     # Saltar el router de avatar porque ya incluimos avatar_service_complete
-    if prefix != "/avatar":
+    # Saltar el router de cursos académicos porque ya lo incluimos arriba
+    if prefix not in ["/avatar", "/academic", "/academic/cursos"]:
         app.include_router(router, prefix=prefix, tags=tags)
 
 # Handler específico para peticiones OPTIONS (CORS preflight)

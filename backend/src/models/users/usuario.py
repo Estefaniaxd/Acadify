@@ -88,3 +88,8 @@ class Usuario(Base):
     oauth_providers = relationship(
         "OAuthProvider", back_populates="usuario", passive_deletes=True
     )
+    
+    # Comentarios del usuario
+    comentarios = relationship(
+        "Comentario", back_populates="autor", passive_deletes=True
+    )

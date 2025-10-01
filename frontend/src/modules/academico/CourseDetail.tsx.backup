@@ -1,0 +1,914 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  FiArrowLeft,
+  FiUsers,
+  FiMessageCircle,
+  FiBookOpen,
+  FiCalendar,
+  FiSettings,
+  FiPlus,
+  FiSearch,
+  FiMoreVertical,
+  FiPaperclip,
+  FiSend,
+  FiLoader,
+  FiAlertCircle
+} from 'react-icons/fi';
+
+import courseService from './services/courseService';
+
+interface CourseDetailProps {
+  courseId: string;
+  onBack: () => void;
+}
+
+interface Course {
+  id: string;
+  nombre: string;
+  codigo: string;
+  profesor: string;
+  descripcion: string;
+  estudiantes: number;
+  estado: string;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+interface StreamPost {
+  id: string;
+  tipo: 'anuncio' | 'tarea' | 'material';
+  titulo: string;
+  contenido: string;
+  autor: string;
+  fecha: string;
+  adjuntos?: string[];
+  comentarios?: number;
+}
+
+export default function CourseDetail({ courseId, onBack }: CourseDetailProps) {
+  const [activeTab, setActiveTab] = useState('stream');
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [streamPosts, setStreamPosts] = useState<StreamPost[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [newPostContent, setNewPostContent] = useState('');
+  const [newPostType, setNewPostType] = useState<'anuncio' | 'pregunta' | 'comentario'>('anuncio');
+
+  useEffect(() => {
+    loadCourseData();
+  }, [courseId]);
+
+  const loadCourseData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log(`🔄 Cargando datos del curso ${courseId}...`);
+      
+      // Cargar datos del curso desde la API real
+      const courseResponse = await courseService.getCourseById(courseId);
+      
+      if (courseResponse.success) {
+        const courseData = courseResponse.data;
+        
+        const course: Course = {
+          id: courseData.id,
+          nombre: courseData.nombre,
+          codigo: courseData.codigo,
+          profesor: courseData.profesor,
+          descripcion: courseData.descripcion,
+          estudiantes: courseData.estudiantes,
+          estado: courseData.estado,
+          fechaInicio: courseData.fecha_inicio || courseData.fecha_creacion.split('T')[0],
+          fechaFin: courseData.fecha_fin || '2024-06-15'
+        };
+        
+        setCourse(course);
+        console.log('✅ Datos del curso cargados:', course);
+        
+        // Cargar comentarios del curso
+        await loadComments();
+        
+        // Cargar tareas del curso
+        await loadTasks();
+        
+      } else {
+        throw new Error('No se pudo obtener el curso');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error cargando curso:', error);
+      setError(`Error cargando el curso: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadComments = async () => {
+    try {
+      console.log(`🔄 Cargando comentarios del curso ${courseId}...`);
+      const commentsResponse = await courseService.getCourseComments(courseId);
+      
+      if (commentsResponse.success) {
+        setComments(commentsResponse.data);
+        console.log(`✅ ${commentsResponse.total} comentarios cargados`);
+        
+        // Transformar comentarios a posts del stream
+        const commentPosts: StreamPost[] = commentsResponse.data.map(comment => ({
+          id: comment.id,
+          tipo: comment.tipo as 'anuncio' | 'tarea' | 'material',
+          titulo: comment.tipo === 'anuncio' ? 'Anuncio' : 
+                 comment.tipo === 'pregunta' ? 'Pregunta' : 'Comentario',
+          contenido: comment.contenido,
+          autor: comment.autor,
+          fecha: comment.fecha,
+          comentarios: 0
+        }));
+        
+        setStreamPosts(prev => [...commentPosts, ...prev]);
+      }
+    } catch (error) {
+      console.warn('⚠️ Error cargando comentarios:', error);
+    }
+  };
+
+  const loadTasks = async () => {
+    try {
+      console.log(`🔄 Cargando tareas del curso ${courseId}...`);
+      const tasksResponse = await courseService.getCourseTasks(courseId);
+      
+      if (tasksResponse.success) {
+        setTasks(tasksResponse.data);
+        console.log(`✅ ${tasksResponse.total} tareas cargadas`);
+        
+        // Transformar tareas a posts del stream
+        const taskPosts: StreamPost[] = tasksResponse.data.map(task => ({
+          id: task.id,
+          tipo: 'tarea' as const,
+          titulo: task.titulo,
+          contenido: task.descripcion,
+          autor: task.profesor,
+          fecha: task.fecha_asignacion,
+          adjuntos: task.archivo_adjunto ? [task.archivo_adjunto] : [],
+          comentarios: task.entregas
+        }));
+        
+        setStreamPosts(prev => [...taskPosts, ...prev]);
+      }
+    } catch (error) {
+      console.warn('⚠️ Error cargando tareas:', error);
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!newPostContent.trim()) return;
+    
+    try {
+      console.log(`🔄 Creando ${newPostType}...`);
+      
+      const postData = {
+        autor: 'Usuario Actual', // TODO: obtener del contexto de auth
+        contenido: newPostContent,
+        tipo: newPostType
+      };
+      
+      const response = await courseService.createComment(courseId, postData);
+      
+      if (response.success && response.data) {
+        console.log('✅ Post creado exitosamente');
+        
+        // Agregar el nuevo post al stream
+        const newPost: StreamPost = {
+          id: response.data.id,
+          tipo: newPostType as 'anuncio' | 'tarea' | 'material',
+          titulo: newPostType === 'anuncio' ? 'Anuncio' : 
+                 newPostType === 'pregunta' ? 'Pregunta' : 'Comentario',
+          contenido: response.data.contenido,
+          autor: response.data.autor,
+          fecha: response.data.fecha,
+          comentarios: 0
+        };
+        
+        setStreamPosts(prev => [newPost, ...prev]);
+        setNewPostContent('');
+        
+        // Mostrar notificación de éxito (opcional)
+        alert('Post creado exitosamente!');
+        
+      } else {
+        throw new Error(response.message);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error creando post:', error);
+      alert(`Error creando el post: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
+  };
+      
+      // Intentar cargar datos reales de la API
+      try {
+        const courseData = await academicAPI.cursos.obtenerPorId(parseInt(courseId));
+        const realCourse: Course = {
+          id: courseData.id.toString(),
+          nombre: courseData.nombre,
+          codigo: courseData.codigo || `CUR${courseData.id}`,
+          profesor: 'Prof. Ana García', // TODO: Get from coordinador data
+          descripcion: courseData.descripcion || 'Sin descripción disponible',
+          estudiantes: 0, // TODO: Get real student count
+          estado: courseData.activo ? 'activo' : 'inactivo',
+          fechaInicio: courseData.fecha_creacion.split('T')[0] || '2024-01-15',
+          fechaFin: '2024-06-15' // TODO: Get real end date
+        };
+        setCourse(realCourse);
+      } catch (apiError) {
+        console.warn('Error cargando datos del curso desde la API, usando datos de respaldo:', apiError);
+        
+        // Usar datos basados en el courseId
+        const mockCourse: Course = {
+          id: courseId,
+          nombre: courseData.nombre,
+          codigo: courseData.codigo,
+          profesor: courseData.profesor,
+          descripcion: courseData.descripcion,
+          estudiantes: courseData.estudiantes,
+          estado: 'activo',
+          fechaInicio: '2024-01-15',
+          fechaFin: '2024-06-15'
+        };
+        setCourse(mockCourse);
+      }
+
+      const mockPosts: StreamPost[] = [
+        {
+          id: '1',
+          tipo: 'anuncio',
+          titulo: `Bienvenidos al curso de ${courseData.nombre}`,
+          contenido: 'Estimados estudiantes, les doy la bienvenida a este curso. Aquí encontrarán todos los materiales y actividades necesarias para su aprendizaje.',
+          autor: courseData.profesor,
+          fecha: '2024-01-15T08:00:00Z',
+          comentarios: 5
+        },
+        {
+          id: '2',
+          tipo: 'tarea',
+          titulo: 'Tarea 1: Límites y Continuidad',
+          contenido: 'Resolver los ejercicios del capítulo 2, páginas 45-50. Fecha de entrega: 25 de enero.',
+          autor: 'Prof. Ana García',
+          fecha: '2024-01-18T10:00:00Z',
+          adjuntos: ['ejercicios_limites.pdf'],
+          comentarios: 12
+        },
+        {
+          id: '3',
+          tipo: 'material',
+          titulo: 'Material de apoyo - Derivadas',
+          contenido: 'He subido el material complementario sobre derivadas que les ayudará con los próximos temas.',
+          autor: 'Prof. Ana García',
+          fecha: '2024-01-20T14:00:00Z',
+          adjuntos: ['guia_derivadas.pdf', 'ejemplos_derivadas.pptx']
+        }
+      ];
+
+      // Intentar cargar materiales del curso desde la API
+      try {
+        const materialsData = await academicAPI.material.listar();
+        const materialPosts = materialsData.map((material: any) => ({
+          id: `material-${material.id}`,
+          tipo: 'material' as const,
+          titulo: material.titulo,
+          contenido: material.descripcion || 'Material educativo del curso',
+          autor: courseData.profesor,
+          fecha: material.fecha_creacion,
+          adjuntos: material.url_contenido ? [material.url_contenido] : [],
+          comentarios: 0
+        }));
+        
+        setStreamPosts([...mockPosts, ...materialPosts]);
+      } catch (materialError) {
+        console.warn('Error cargando materiales del curso desde la API:', materialError);
+        
+        // Crear materiales mock específicos por curso
+        const mockMaterialsByCourse = {
+          '1': [ // Matemáticas Avanzadas
+            {
+              id: 'mat-1',
+              tipo: 'material' as const,
+              titulo: 'Introducción al Cálculo Diferencial',
+              contenido: 'Material de estudio sobre límites y derivadas',
+              autor: courseData.profesor,
+              fecha: '2024-01-20T10:00:00Z',
+              adjuntos: ['calculo_diferencial.pdf'],
+              comentarios: 3
+            },
+            {
+              id: 'mat-2',
+              tipo: 'material' as const,
+              titulo: 'Ejercicios de Integrales',
+              contenido: 'Práctica guiada de integrales definidas e indefinidas',
+              autor: courseData.profesor,
+              fecha: '2024-01-25T10:00:00Z',
+              adjuntos: ['ejercicios_integrales.pdf'],
+              comentarios: 1
+            }
+          ],
+          '2': [ // Historia Universal
+            {
+              id: 'hist-1',
+              tipo: 'material' as const,
+              titulo: 'La Revolución Francesa',
+              contenido: 'Análisis de las causas y consecuencias de la Revolución Francesa',
+              autor: courseData.profesor,
+              fecha: '2024-01-20T10:00:00Z',
+              adjuntos: ['revolucion_francesa.pdf'],
+              comentarios: 2
+            }
+          ],
+          '3': [ // POO
+            {
+              id: 'poo-1',
+              tipo: 'material' as const,
+              titulo: 'Conceptos básicos de POO',
+              contenido: 'Clases, objetos, herencia y polimorfismo en Java',
+              autor: courseData.profesor,
+              fecha: '2024-01-20T10:00:00Z',
+              adjuntos: ['poo_basicos.pdf', 'ejemplos_java.zip'],
+              comentarios: 5
+            }
+          ],
+          '4': [ // Química Orgánica
+            {
+              id: 'qui-1',
+              tipo: 'material' as const,
+              titulo: 'Hidrocarburos alifáticos',
+              contenido: 'Estudio de alcanos, alquenos y alquinos',
+              autor: courseData.profesor,
+              fecha: '2024-01-20T10:00:00Z',
+              adjuntos: ['hidrocarburos.pdf'],
+              comentarios: 1
+            }
+          ],
+          '5': [ // Literatura Latinoamericana
+            {
+              id: 'lit-1',
+              tipo: 'material' as const,
+              titulo: 'El Realismo Mágico',
+              contenido: 'Características y exponentes del realismo mágico en Latinoamérica',
+              autor: courseData.profesor,
+              fecha: '2024-01-20T10:00:00Z',
+              adjuntos: ['realismo_magico.pdf'],
+              comentarios: 4
+            }
+          ]
+        };
+        
+        const courseMaterials = mockMaterialsByCourse[courseId as keyof typeof mockMaterialsByCourse] || [];
+        setStreamPosts([...mockPosts, ...courseMaterials]);
+      }
+      
+    } catch (error) {
+      console.error('Error loading course data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostSubmit = () => {
+    if (!newPostContent.trim()) return;
+
+    const newPost: StreamPost = {
+      id: Date.now().toString(),
+      tipo: 'anuncio',
+      titulo: 'Nuevo anuncio',
+      contenido: newPostContent,
+      autor: 'Usuario Actual', // TODO: Get from auth context
+      fecha: new Date().toISOString(),
+      comentarios: 0
+    };
+
+    setStreamPosts([newPost, ...streamPosts]);
+    setNewPostContent('');
+  };
+
+  const getPostIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'tarea': return '📝';
+      case 'material': return '📁';
+      case 'anuncio': 
+      default: return '📢';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Cargando curso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20">
+        <div className="text-center">
+          <p className="text-red-600 dark:text-red-400">Error al cargar el curso</p>
+          <button 
+            onClick={onBack}
+            className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+          >
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 pt-6 pb-6">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={onBack}
+                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <FiArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {course.nombre}
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {course.codigo} • {course.profesor}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <FiSettings className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Course Banner */}
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">{course.nombre}</h2>
+              <p className="text-emerald-100 mb-4">{course.descripcion}</p>
+              <div className="flex items-center space-x-6 text-emerald-100">
+                <div className="flex items-center space-x-2">
+                  <FiUsers className="w-4 h-4" />
+                  <span>{course.estudiantes} estudiantes</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <FiCalendar className="w-4 h-4" />
+                  <span>{formatDate(course.fechaInicio)} - {formatDate(course.fechaFin)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                <p className="text-sm opacity-90">Código del curso</p>
+                <p className="font-mono font-bold text-lg">{course.codigo}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8">
+            {[
+              { id: 'stream', label: 'Stream', icon: FiMessageCircle },
+              { id: 'classwork', label: 'Trabajo de clase', icon: FiBookOpen },
+              { id: 'people', label: 'Personas', icon: FiUsers },
+            ].map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === id
+                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'stream' && (
+          <div className="space-y-6">
+            {/* New Post Input */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+              <div className="flex items-start space-x-4">
+                <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold">U</span>
+                </div>
+                <div className="flex-1">
+                  <textarea
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    placeholder="Comparte algo con tu clase..."
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                    rows={3}
+                  />
+                  <div className="flex items-center justify-between mt-3">
+                    <button className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                      <FiPaperclip className="w-4 h-4" />
+                      <span>Adjuntar</span>
+                    </button>
+                    <button
+                      onClick={handlePostSubmit}
+                      disabled={!newPostContent.trim()}
+                      className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FiSend className="w-4 h-4" />
+                      <span>Publicar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Stream Posts */}
+            {streamPosts.map((post) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">{getPostIcon(post.tipo)}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {post.titulo}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {post.autor} • {formatDate(post.fecha)}
+                      </p>
+                    </div>
+                  </div>
+                  <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <FiMoreVertical className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  {post.contenido}
+                </p>
+
+                {post.adjuntos && post.adjuntos.length > 0 && (
+                  <div className="mb-4 space-y-2">
+                    {post.adjuntos.map((adjunto, index) => (
+                      <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FiPaperclip className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                          {adjunto}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
+                  <button className="flex items-center space-x-2 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400">
+                    <FiMessageCircle className="w-4 h-4" />
+                    <span className="text-sm">
+                      {post.comentarios || 0} comentarios
+                    </span>
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'classwork' && (
+          <div className="space-y-6">
+            {/* Create Activity Button */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                <FiPlus className="w-4 h-4" />
+                <span>Crear</span>
+              </button>
+            </div>
+
+            {/* Assignments Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tareas</h3>
+              
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">📝</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      Tarea 1: Límites y Continuidad
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Publicado el 18 ene • Vence el 25 ene
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300 mb-3">
+                      Resolver los ejercicios del capítulo 2, páginas 45-50.
+                    </p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="text-green-600 dark:text-green-400">15 entregados</span>
+                      <span className="text-orange-600 dark:text-orange-400">8 pendientes</span>
+                      <span className="text-red-600 dark:text-red-400">5 atrasados</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <button className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                      Ver entregas
+                    </button>
+                    <button className="px-3 py-1 text-xs bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-800">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">📊</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      Quiz: Derivadas Básicas
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Publicado el 22 ene • Vence el 29 ene
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300 mb-3">
+                      Evaluación sobre conceptos básicos de derivadas.
+                    </p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="text-blue-600 dark:text-blue-400">10 preguntas</span>
+                      <span className="text-gray-600 dark:text-gray-400">45 min</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <span className="px-3 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg text-center">
+                      Activo
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Materials Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Material</h3>
+              
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">📄</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      Guía de Derivadas
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Publicado el 20 ene
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300 mb-3">
+                      Material complementario sobre derivadas y sus aplicaciones.
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FiPaperclip className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                          guia_derivadas.pdf
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <FiPaperclip className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                          ejemplos_derivadas.pptx
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🎥</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      Video: Introducción a Límites
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Publicado el 15 ene
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300 mb-3">
+                      Video explicativo sobre el concepto de límites matemáticos.
+                    </p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">25:30 min</span>
+                      <span className="text-green-600 dark:text-green-400">22 visualizaciones</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Topics Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Temas</h3>
+              
+              <div className="space-y-2">
+                {[
+                  { id: 1, title: 'Unidad 1: Límites', items: 5, color: 'blue' },
+                  { id: 2, title: 'Unidad 2: Derivadas', items: 8, color: 'emerald' },
+                  { id: 3, title: 'Unidad 3: Integrales', items: 6, color: 'purple' },
+                ].map((topic) => (
+                  <div key={topic.id} className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-4 h-4 bg-${topic.color}-500 rounded-full`}></div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{topic.title}</h4>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {topic.items} elementos
+                        </span>
+                        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                          <FiMoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'people' && (
+          <div className="space-y-6">
+            {/* Teachers Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Profesores</h3>
+                <button className="flex items-center space-x-2 px-3 py-1 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900 rounded-lg">
+                  <FiPlus className="w-4 h-4" />
+                  <span>Invitar profesor</span>
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 border dark:border-gray-700 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-lg">AG</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{course.profesor}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Profesor principal</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">ana.garcia@universidad.edu</p>
+                    </div>
+                  </div>
+                  <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <FiMoreVertical className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Students Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Estudiantes ({course.estudiantes})
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <FiSearch className="w-4 h-4" />
+                  </button>
+                  <button className="flex items-center space-x-2 px-3 py-1 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900 rounded-lg">
+                    <FiPlus className="w-4 h-4" />
+                    <span>Invitar estudiantes</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { id: 1, name: 'María González', email: 'maria.gonzalez@estudiante.edu', avatar: 'MG' },
+                  { id: 2, name: 'Carlos Rivera', email: 'carlos.rivera@estudiante.edu', avatar: 'CR' },
+                  { id: 3, name: 'Ana López', email: 'ana.lopez@estudiante.edu', avatar: 'AL' },
+                  { id: 4, name: 'Diego Martín', email: 'diego.martin@estudiante.edu', avatar: 'DM' },
+                  { id: 5, name: 'Sofía Chen', email: 'sofia.chen@estudiante.edu', avatar: 'SC' },
+                  { id: 6, name: 'Roberto Silva', email: 'roberto.silva@estudiante.edu', avatar: 'RS' },
+                ].map((student) => (
+                  <div key={student.id} className="flex items-center justify-between p-3 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-sm">{student.avatar}</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{student.name}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{student.email}</p>
+                      </div>
+                    </div>
+                    <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                      <FiMessageCircle className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {course.estudiantes > 6 && (
+                <div className="mt-4 text-center">
+                  <button className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">
+                    Ver todos los estudiantes ({course.estudiantes})
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Invite Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Invitar personas</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Código de la clase
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
+                      <code className="font-mono text-lg">{course.codigo}</code>
+                    </div>
+                    <button className="px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
+                      Copiar
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Comparte este código con los estudiantes para que se unan a la clase
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Invitar por correo electrónico
+                  </label>
+                  <div className="flex space-x-2">
+                    <input
+                      type="email"
+                      placeholder="correo@ejemplo.com"
+                      className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                    />
+                    <button className="px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
+                      Invitar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

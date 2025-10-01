@@ -1,6 +1,6 @@
 import React from 'react'
-import MensajesPageAdvanced from './MensajesPageAdvanced'
+import { ComunicacionPage } from './comunicacion/ComunicacionPage'
 
 export default function MensajesPage() {
-  return <MensajesPageAdvanced />
+  return <ComunicacionPage />
 }

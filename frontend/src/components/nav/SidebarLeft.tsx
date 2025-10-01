@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiHome, FiBook, FiUsers, FiBarChart, FiUserCheck,
   FiPlus, FiShoppingBag, FiTarget, FiSettings, FiX,
-  FiChevronRight, FiTrendingUp, FiClock, FiUser
+  FiChevronRight, FiTrendingUp, FiClock, FiUser,
+  FiFileText, FiMessageSquare, FiCalendar
 } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 
@@ -143,21 +144,30 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
           { label: 'Panel Admin', icon: FiSettings, href: '/admin' },
           { label: 'Usuarios', icon: FiUsers, href: '/admin' },
           { label: 'Instituciones', icon: HiOutlineOfficeBuilding, href: '/admin' },
+          { label: 'Cursos', icon: FiBook, href: '/cursos' },
+          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
+          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
           { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
         ];
       case 'coordinador':
         return [
           ...baseItems,
           { label: 'Panel Coordinador', icon: FiSettings, href: '/coordinador' },
+          { label: 'Cursos', icon: FiBook, href: '/cursos' },
           { label: 'Profesores', icon: FiUserCheck, href: '/coordinador' },
-          { label: 'Clases', icon: FiBook, href: '/coordinador' },
+          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
+          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
+          { label: 'Clases', icon: FiCalendar, href: '/mis-clases' },
           { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
         ];
       case 'profesor':
         return [
           ...baseItems,
           { label: 'Panel Profesor', icon: FiSettings, href: '/profesor' },
-          { label: 'Mis clases', icon: FiBook, href: '/mis-clases' },
+          { label: 'Cursos', icon: FiBook, href: '/cursos' },
+          { label: 'Mis clases', icon: FiCalendar, href: '/mis-clases' },
+          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
+          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
           { label: 'Crear clase', icon: FiPlus, href: '/crear-clase' },
           { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
         ];
@@ -165,12 +175,14 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
       default:
         return [
           ...baseItems,
-          { label: 'Mis clases', icon: FiBook, href: '/mis-clases' },
+          { label: 'Cursos', icon: FiBook, href: '/cursos' },
+          { label: 'Mis clases', icon: FiCalendar, href: '/mis-clases' },
+          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
+          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
           { label: 'Unirse a clase', icon: FiPlus, href: '/unirse-clase' },
           { label: 'Logros', icon: FiTarget, href: '/logros' },
           { label: 'Tienda', icon: FiShoppingBag, href: '/tienda' },
           { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
-          { label: 'Explorar Avatares', icon: FiUsers, href: '/explorar-avatares' },
         ];
     }
   }, [role]);
