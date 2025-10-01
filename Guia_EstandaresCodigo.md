@@ -4,28 +4,34 @@ En esta guía vamos a establecer los estándares de codificación para nuestro p
 
 - **Python con FastAPI**
 - **TypeScript**
+- **JavaScript**
 - **React**
 - **TailwindCSS**
 
 ## 1. Reglas de Nomenclatura
 
 ### Variables
-- **Python y TypeScript**: Usamos `snake_case`
-- **React (JSX/TSX)**: Usamos `camelCase` para variables locales
+- **Python**: Usamos `snake_case`
+- **TypeScript y JavaScript**: Usamos `camelCase`
+- **React con TypeScript(TSX)**: Usamos `camelCase` para variables locales
 
 ### Clases
-- **Todas las tecnologías**: Utilizamos `PascalCase`
+- **Python (en las demás tecnologías no aplica)**: Utilizamos `PascalCase`
 
 ### Métodos/Funciones
 - **Python**: Utilizamos `snake_case`
-- **TypeScript/React**: Utilizamos `camelCase`
+- **JavaScript y TypeScript**: Utilizamos `camelCase`
+- **React con TypeScript (TSX)**: Utilizamos `camelCase`
 
 ### Constantes
-- **Todas las tecnologías**: Utilizamos `UPPER_SNAKE_CASE`
+- **Python**: Utilizamos `UPPER_SNAKE_CASE`
+- **Javascript/TypeScrippt y React con TypeScript (TSX)**: Utilizamos la declaración `const` para constantes locales, para globales o de configuración usamos `UPPER_SNAKE_CASE`
 
 ### Archivos
 - **Python**: `snake_case.py`
-- **TypeScript/React**: `PascalCase.tsx` para componentes, `camelCase.ts` para utilidades
+- **JavaScript**: `kebab-case.js`
+- **TypeScript**: `camelCase.ts`
+- **React con TypeScript (TSX)**: `PascalCase.tsx`
 
 ## 2. Comentarios y Documentación
 
@@ -57,7 +63,7 @@ En esta guía vamos a establecer los estándares de codificación para nuestro p
 #### ✅ ACEPTADO
 ```python
 # Python
-user_name = "Juan"
+user_name = "Harry"
 MAX_CONNECTIONS = 100
 
 class UserManager:
@@ -67,7 +73,7 @@ class UserManager:
 
 ```typescript
 // TypeScript/React
-const userName = "Juan";
+const userName = "Harry";
 const MAX_CONNECTIONS = 100;
 
 class UserManager {
@@ -84,7 +90,7 @@ const UserProfile: React.FC = () => {
 #### ❌ NO ACEPTADO
 ```python
 # Python
-userName = "Juan"  # Debería ser snake_case
+userName = "Harry"  # Debería ser snake_case
 maxConnections = 100  # Constantes deben ser UPPER_SNAKE_CASE
 
 class userManager:  # Debería ser PascalCase
@@ -94,7 +100,7 @@ class userManager:  # Debería ser PascalCase
 
 ```typescript
 // TypeScript/React
-const user_name = "Juan";  // Debería ser camelCase
+const user_name = "Harry";  // Debería ser camelCase
 const maxConnections = 100;  // Constantes deben ser UPPER_SNAKE_CASE
 
 class userManager {  // Debería ser PascalCase
@@ -252,15 +258,17 @@ const UserComponent = ({name,age}) => {
 
 ### Commits
 - Usamos mensajes descriptivos en inglés
-- Formato: `tipo(scope): descripción`
+- Formato: `tipo(scope): descripción:v`
 - Ejemplo: `feat(auth): add user login validation`
 
 ### Branches
-- `main`: rama principal
-- `develop`: rama de desarrollo
-- `feature/nombre-caracteristica`: nuevas características
-- `fix/nombre-bug`: corrección de errores
-
+- `develop`: rama principal
+- `develop2.0`: rama piloto de desarrollo desactualizada
+- `feature_classes_communication`: desarrollo del módulo de comunicación
+- `feature/consentimiento-legal`: desarrollo de la funcionalidad de consentimiento legal
+- `feature/gamification`: desarrollo del módulo de gamificación
+- `fix-auth`: corrección de errores en autenticación
+- `model-academic`: desarrollo del módulo académico
 ---
 
 **Nota**: Esta guía debe ser revisada y actualizada regularmente conforme evolucionen las mejores prácticas del equipo.

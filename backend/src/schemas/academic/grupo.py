@@ -9,7 +9,7 @@ class GrupoBase(BaseModel):
 
 
 class GrupoCreate(GrupoBase):
-    programa_id: UUID
+    programa_id: UUID | None = None
     docente_tutor_id: UUID | None = None
 
 
@@ -20,7 +20,7 @@ class GrupoUpdate(BaseModel):
 
 class GrupoInDBBase(GrupoBase):
     grupo_id: UUID
-    programa_id: UUID
+    programa_id: UUID | None = None
     docente_tutor_id: UUID | None = None
 
     class Config:

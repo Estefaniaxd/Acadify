@@ -30,8 +30,13 @@ class CursoBase(BaseModel):
 
 class CursoCreate(CursoBase):
     institucion_id: UUID
+<<<<<<< HEAD
     coordinador_id: Optional[UUID] = None
     programa_id: UUID
+=======
+    coordinador_id: UUID | None = None
+    programa_id: UUID | None = None
+>>>>>>> cf42a38e98e83ad9207c8f65d1c1d4100a739333
 
 
 class CursoUpdate(BaseModel):
@@ -55,6 +60,7 @@ class CursoUpdate(BaseModel):
 class CursoInDBBase(CursoBase):
     curso_id: UUID
     institucion_id: UUID
+<<<<<<< HEAD
     coordinador_id: Optional[UUID] = None
     programa_id: UUID
     activo: bool
@@ -62,6 +68,10 @@ class CursoInDBBase(CursoBase):
     carpeta_drive_url: Optional[str] = None
     fecha_creacion: datetime
     fecha_actualizacion: Optional[datetime]
+=======
+    coordinador_id: UUID | None = None
+    programa_id: UUID | None = None
+>>>>>>> cf42a38e98e83ad9207c8f65d1c1d4100a739333
 
     class Config:
         from_attributes = True
