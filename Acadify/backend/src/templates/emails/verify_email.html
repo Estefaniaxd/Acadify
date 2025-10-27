@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Verifica tu correo - Acadify{% endblock %}
+
+{% block header_title %}<span class="sparkle">✨</span> Verifica tu cuenta <span class="sparkle">✨</span>{% endblock %}
+
+{% block content %}
+<h2>¡Hola {{ nombre }}! 👋</h2>
+
+<p>¡Bienvenido a <strong>Acadify</strong>! <span class="sparkle">✨</span> Tu aventura de aprendizaje está a punto de comenzar.</p>
+
+<p>Para activar tu cuenta y asegurar que eres tú, necesitamos verificar tu correo electrónico. Es súper fácil:</p>
+
+<div class="alert alert-info">
+    <strong>🎯 Opción 1: Código de verificación</strong><br>
+    Usa este código mágico en la página de verificación:
+</div>
+
+<div class="code-box">
+    <div class="verification-code">{{ codigo }}</div>
+    <p class="text-muted">Válido por {{ valido_hasta }}</p>
+</div>
+
+<div class="alert alert-success">
+    <strong>🚀 Opción 2: Click directo</strong><br>
+    O simplemente haz click en el botón de abajo:
+</div>
+
+<div class="text-center">
+    <a href="{{ enlace_verificacion }}" class="button">✨ Verificar mi cuenta ✨</a>
+</div>
+
+<div class="alert alert-warning">
+    <strong>⏰ Importante:</strong>
+    <ul style="margin: 10px 0;">
+        <li>Este código expirará en {{ valido_hasta }}</li>
+        <li>Solo puedes usarlo una vez</li>
+        <li>Si no fuiste tú quien se registró, puedes ignorar este correo</li>
+    </ul>
+</div>
+
+<p><strong>¿Qué viene después?</strong> <span class="sparkle">✨</span></p>
+<ul>
+    <li>🎓 Acceso completo a todos los cursos</li>
+    <li>📚 Biblioteca de recursos exclusivos</li>
+    <li>🤝 Conecta con otros estudiantes</li>
+    <li>📊 Seguimiento de tu progreso</li>
+    <li>🏆 Sistema de logros y reconocimientos</li>
+</ul>
+
+<p>Si tienes alguna pregunta o necesitas ayuda, nuestro equipo está aquí para ti. ¡Estamos emocionados de tenerte en Acadify!</p>
+
+<p>¡Que comience la aventura! <span class="sparkle">🚀</span></p>
+
+<p>Con amor,<br>
+<strong>El equipo de Acadify</strong> <span class="sparkle">💜</span></p>
+{% endblock %}

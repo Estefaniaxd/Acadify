@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Acadify - Test Token</title>
+</head>
+<body>
+    <h1>Acadify Token Setter</h1>
+    <p>Esta página configura el token de acceso para pruebas</p>
+    
+    <script>
+        // Token válido para Estefania Londoño
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTkzOGFkMS0xYjA3LTRmYTItYjJjZS03NDFiYTk3MDZmMjMiLCJlbWFpbCI6ImVzdGVmYW5pYUBhcnAuZWR1LmNvIiwibm9tYnJlcyI6IkVzdGVmYW5pYSIsImFwZWxsaWRvcyI6IkxvbmRvbm8iLCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU5MjY4MzIxLCJpYXQiOjE3NTkyNjQ3MjF9.JuAHjyhNzfRwiaTAa-9S6zLaMvIniQ4i-ZerPJCQGjo";
+        
+        // Configurar token en localStorage
+        localStorage.setItem('access_token', token);
+        
+        // Información del usuario
+        const userInfo = {
+            id: "69938ad1-1b07-4fa2-b2ce-741ba9706f23",
+            name: "Estefania Londoño", 
+            email: "estefania@arp.edu.co"
+        };
+        
+        localStorage.setItem('user_info', JSON.stringify(userInfo));
+        
+        console.log('✅ Token configurado exitosamente');
+        console.log('Token:', token);
+        console.log('Usuario:', userInfo);
+        
+        // Mostrar en la página
+        document.body.innerHTML += `
+            <div style="margin-top: 20px; padding: 20px; background: #f0f0f0; border-radius: 5px;">
+                <h3>Token configurado exitosamente ✅</h3>
+                <p><strong>Usuario:</strong> ${userInfo.name}</p>
+                <p><strong>Email:</strong> ${userInfo.email}</p>
+                <p><strong>ID:</strong> ${userInfo.id}</p>
+                <p><strong>Token válido hasta:</strong> ${new Date(1759268321 * 1000).toLocaleString()}</p>
+                <br>
+                <p><a href="/" style="color: blue; text-decoration: underline;">→ Ir a la aplicación principal</a></p>
+            </div>
+        `;
+    </script>
+</body>
+</html>

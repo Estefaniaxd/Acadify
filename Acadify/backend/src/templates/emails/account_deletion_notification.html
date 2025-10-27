@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Cuenta Eliminada - Acadify{% endblock %}
+
+{% block header_title %}🗑️ Eliminación de Cuenta{% endblock %}
+
+{% block content %}
+<h2>Hola {{ nombre }}!</h2>
+
+<div class="alert alert-warning">
+    <strong>🚨 Solicitud de eliminación procesada</strong><br>
+    Hemos recibido y procesado tu solicitud para eliminar tu cuenta de Acadify.
+</div>
+
+<p>Te confirmamos que hemos recibido tu solicitud de eliminación de cuenta. Aunque lamentamos verte partir, respetamos tu decisión. <span class="sparkle">😔</span></p>
+
+<div style="background: rgba(254, 243, 199, 0.8); border: 2px solid rgba(251, 191, 36, 0.3); border-radius: 20px; padding: 30px; margin: 25px 0; text-align: center;">
+    <h3 style="color: #92400e; margin: 0 0 15px 0; font-size: 22px;">⏰ Período de Gracia Activo</h3>
+    <p style="color: #92400e; margin: 10px 0;">Tu cuenta será eliminada permanentemente en:</p>
+    <div style="font-size: 32px; font-weight: 900; color: #dc2626; margin: 15px 0; font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;">
+        {{ dias_restantes }} días
+    </div>
+    <p style="color: #92400e; margin: 10px 0;"><strong>Fecha límite:</strong> {{ fecha_eliminacion_final }}</p>
+    <p style="color: #92400e; margin: 0;">Hasta esa fecha, puedes restaurar tu cuenta si cambias de opinión.</p>
+</div>
+
+<h3 style="color: #1f2937; margin-top: 30px; margin-bottom: 20px;">📋 Detalles de la eliminación:</h3>
+
+<div style="background: rgba(249, 250, 251, 0.8); border-radius: 16px; padding: 25px; margin: 20px 0; border: 1px solid rgba(229, 231, 235, 0.5);">
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(229, 231, 235, 0.5);">
+        <span style="font-weight: 600; color: #374151;">📅 Fecha de solicitud:</span>
+        <span style="color: #6b7280;">{{ fecha_solicitud }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(229, 231, 235, 0.5);">
+        <span style="font-weight: 600; color: #374151;">🌍 Dirección IP:</span>
+        <span style="color: #6b7280; font-family: monospace;">{{ ip_address }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(229, 231, 235, 0.5);">
+        <span style="font-weight: 600; color: #374151;">💻 Dispositivo:</span>
+        <span style="color: #6b7280;">{{ dispositivo }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(229, 231, 235, 0.5);">
+        <span style="font-weight: 600; color: #374151;">📧 Email de la cuenta:</span>
+        <span style="color: #6b7280;">{{ email_cuenta }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+        <span style="font-weight: 600; color: #374151;">🆔 ID de usuario:</span>
+        <span style="color: #6b7280; font-family: monospace;">{{ usuario_id }}</span>
+    </div>
+</div>
+
+<div class="text-center" style="margin: 30px 0;">
+    <a href="{{ enlace_restaurar }}" style="
+        display: inline-block;
+        padding: 18px 36px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 25%, #047857 75%, #065f46 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 18px;
+        margin: 10px;
+        box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    ">♻️ Restaurar mi cuenta</a>
+    
+    <a href="{{ enlace_soporte }}" style="
+        display: inline-block;
+        padding: 16px 32px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 25%, #6366f1 75%, #4f46e5 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 16px;
+        font-weight: 700;
+        margin: 10px;
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    ">💬 Contactar Soporte</a>
+</div>
+
+<div class="alert alert-info">
+    <strong>📊 ¿Qué sucederá con tus datos?</strong>
+    <ul style="margin: 10px 0;">
+        <li><strong>Datos del perfil:</strong> Eliminados permanentemente</li>
+        <li><strong>Archivos y documentos:</strong> Eliminados permanentemente</li>
+        <li><strong>Historial académico:</strong> Anonimizado según políticas</li>
+        <li><strong>Mensajes y comunicaciones:</strong> Eliminados</li>
+        <li><strong>Configuraciones:</strong> Eliminadas</li>
+        <li><strong>Datos de respaldo:</strong> Eliminados después de 90 días</li>
+    </ul>
+</div>
+
+<div class="alert alert-warning">
+    <strong>⚠️ Importante:</strong> Esta acción NO se puede deshacer después del período de gracia. Asegúrate de haber descargado toda la información importante antes de que expire el plazo.
+</div>
+
+<p><strong>¿Has cambiado de opinión?</strong> <span class="sparkle">🤔</span><br>
+Si eliminaste tu cuenta por error o has cambiado de opinión, puedes restaurarla fácilmente haciendo clic en el botón "Restaurar mi cuenta" arriba. Solo necesitarás tu contraseña para confirmar la restauración.</p>
+
+<p><strong>¿Necesitas ayuda?</strong> <span class="sparkle">💬</span><br>
+Si tienes preguntas sobre la eliminación de tu cuenta o necesitas asistencia, nuestro equipo de soporte está aquí para ayudarte. No dudes en contactarnos.</p>
+
+<p>Durante este período de gracia, tu cuenta permanece inactiva pero recuperable. Todos tus datos están seguros hasta la eliminación final.</p>
+
+<p>Lamentamos verte partir, pero esperamos que hayas tenido una buena experiencia con nosotros. <span class="sparkle">💜</span></p>
+
+<p>Con los mejores deseos,<br>
+<strong>El equipo de Acadify</strong> <span class="sparkle">🙏</span></p>
+{% endblock %}
