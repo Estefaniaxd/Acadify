@@ -37,7 +37,4 @@ class Grupo(Base):
     estudiante_grupos = relationship("EstudianteGrupo", back_populates="grupo")
     grupo_cursos = relationship("GrupoCurso", back_populates="grupo")
     chat_grupos = relationship("ChatGrupo", backref="grupo")
-<<<<<<< HEAD
     tareas = relationship("src.models.academic.tarea.Tarea", back_populates="grupo")
-=======
->>>>>>> cf42a38e98e83ad9207c8f65d1c1d4100a739333

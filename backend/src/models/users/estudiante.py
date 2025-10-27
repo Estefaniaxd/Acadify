@@ -21,9 +21,9 @@ class Estudiante(Base):
     )
 
     programa_id = Column(
-        UUID(as_uuid=True),
-        nullable=True,
-        ForeignKey("Programa.programa_id", ondelete="SET NULL"),
+           UUID(as_uuid=True),
+           ForeignKey("Programa.programa_id", ondelete="SET NULL"),
+           nullable=True,
     )
 
     fecha_ingreso = Column(DATE, nullable=False)

@@ -63,16 +63,6 @@ class Curso(Base):
     # Configuración de material
     permite_material_estudiantes = Column(Boolean, default=False)
     requiere_aprobacion_material = Column(Boolean, default=True)
-    
-    # Google Drive Integration
-    carpeta_drive_id = Column(String(50))
-    carpeta_drive_url = Column(String(500))
-    
-    # Auditoría
-    fecha_creacion = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    fecha_actualizacion = Column(TIMESTAMP(timezone=True), onupdate=func.now())
-
-<<<<<<< HEAD
     # Relaciones
     institucion = relationship("Institucion", backref="cursos")
     coordinador = relationship("Coordinador", backref="cursos_coordinados")
@@ -99,7 +89,5 @@ class Curso(Base):
     def total_grupos(self) -> int:
         """Calcula el total de grupos vinculados al curso"""
         return len(self.grupo_cursos)
-=======
-    curso_docentes = relationship("CursoDocente", back_populates="curso")
-    grupo_cursos = relationship("GrupoCurso", back_populates="curso")
->>>>>>> cf42a38e98e83ad9207c8f65d1c1d4100a739333
+        curso_docentes = relationship("CursoDocente", back_populates="curso")
+        grupo_cursos = relationship("GrupoCurso", back_populates="curso")
