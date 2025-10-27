@@ -1,0 +1,36 @@
+# Node
+node_modules/
+
+# Build
+/dist/
+
+# Env
+.env
+
+# IDE
+.vscode/
+
+# Logs
+*.log
+
+# Others
+.DS_Store
+*.swp
+
+# OS
+Thumbs.db
+
+# Yarn
+.yarn/
+
+# pnpm
+.pnpm-debug.log
+
+# Mac
+__MACOSX/
+
+# Next.js
+.next/
+
+# TypeScript
+*.tsbuildinfo
