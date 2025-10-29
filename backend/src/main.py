@@ -107,19 +107,21 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
-# Importar y registrar router de cursos directamente con prefijo /academic
-try:
-    from src.api.routes.academic.curso import router as curso_router
-    app.include_router(curso_router, prefix="/academic", tags=["Cursos"])
-    logger.info("✅ Router de cursos registrado exitosamente en /academic")
-except Exception as e:
-    logger.error(f"❌ Error registrando router de cursos: {e}")
+# ⚠️ DEPRECADO: Router monolítico curso.py eliminado - ahora usamos routers modularizados
+# Los routers refactorizados se registran automáticamente desde routes.py:
+# - cursos.py, inscripciones.py, curso_tareas.py, curso_comentarios.py, etc.
+#
+# try:
+#     from src.api.routes.academic.curso import router as curso_router
+#     app.include_router(curso_router, prefix="/academic", tags=["Cursos"])
+#     logger.info("✅ Router de cursos registrado exitosamente en /academic")
+# except Exception as e:
+#     logger.error(f"❌ Error registrando router de cursos: {e}")
 
-# Incluir todos los routers desde el archivo de configuración EXCEPTO el avatar router que puede causar conflictos
+# Incluir todos los routers desde el archivo de configuración
 for router, prefix, tags in routers:
     # Saltar el router de avatar porque ya incluimos avatar_service_complete
-    # Saltar el router de cursos académicos porque ya lo incluimos arriba
-    if prefix not in ["/avatar", "/academic", "/academic/cursos"]:
+    if prefix not in ["/avatar"]:
         app.include_router(router, prefix=prefix, tags=tags)
 
 # Handler específico para peticiones OPTIONS (CORS preflight)
