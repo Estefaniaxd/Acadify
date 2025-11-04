@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, Text, Integer, DateTime, Boolean, Float, ForeignKey, JSON, Enum as SQLEnum
+from sqlalchemy import Column, String, Text, Integer, DateTime, Boolean, Float, ForeignKey, JSON, Enum as SQLEnum, NUMERIC
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from enum import Enum
@@ -31,60 +32,106 @@ class PrioridadTarea(str, Enum):
     URGENTE = "urgente"
 
 class Tarea(Base):
+    """
+    Modelo de Tarea Académica
+    
+    Representa una tarea asignada a un grupo de estudiantes con funcionalidades completas:
+    - Gestión de entregas y calificaciones
+    - Integración con IA para retroalimentación
+    - Sistema de rúbricas
+    - Control de fechas y entregas tardías
+    - Gamificación con puntos
+    """
     __tablename__ = "tareas"
     
-    # Clave primaria
+    # ============================================
+    # IDENTIFICACIÓN Y RELACIONES
+    # ============================================
     tarea_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    
-    # Relaciones principales
     grupo_id = Column(String, ForeignKey("Grupo.grupo_id", ondelete="CASCADE"), nullable=False)
     docente_id = Column(String, ForeignKey("Usuario.usuario_id", ondelete="CASCADE"), nullable=False)
+    clase_id = Column(String, ForeignKey("Clase.clase_id", ondelete="SET NULL"), nullable=True)
     
-    # Información básica
+    # ============================================
+    # INFORMACIÓN BÁSICA
+    # ============================================
     titulo = Column(String(200), nullable=False)
     descripcion = Column(Text)
-    instrucciones = Column(Text)  # Instrucciones detalladas
-    objetivos = Column(Text)  # Objetivos de aprendizaje
+    instrucciones = Column(Text)
+    objetivos = Column(Text)
+    archivo_adjunto = Column(String(500), nullable=True)  # Archivo adjunto de la tarea (enunciado PDF, etc.)
     
-    # Clasificación
-    tipo_tarea = Column(SQLEnum(TipoTarea), nullable=False, default=TipoTarea.ENSAYO)
+    # ============================================
+    # CLASIFICACIÓN
+    # ============================================
+    tipo = Column(String(13), nullable=True)  # Nombre del campo en BD (sincronizado)
+    tipo_tarea = Column(SQLEnum(TipoTarea), nullable=False, default=TipoTarea.ENSAYO)  # ENUM para código
     prioridad = Column(SQLEnum(PrioridadTarea), nullable=False, default=PrioridadTarea.MEDIA)
-    categoria = Column(String(100))  # Categoria personalizada
-    tags = Column(String(500))  # Tags separados por comas
+    categoria = Column(String(100), nullable=True)
+    tags = Column(String(500), nullable=True)
     
-    # Fechas y tiempo
+    # ============================================
+    # FECHAS Y TIEMPO
+    # ============================================
     fecha_asignacion = Column(DateTime(timezone=True), server_default=func.now())
     fecha_limite = Column(DateTime(timezone=True), nullable=False)
-    fecha_inicio_disponible = Column(DateTime(timezone=True))  # Cuando se puede empezar
-    tiempo_estimado = Column(Integer)  # Tiempo estimado en minutos
+    fecha_inicio_disponible = Column(DateTime(timezone=True), nullable=True)
+    tiempo_estimado = Column(Integer, nullable=True)
     
-    # Configuración de entrega
+    # ============================================
+    # CONFIGURACIÓN DE ENTREGA
+    # ============================================
     permite_entrega_tardia = Column(Boolean, default=False)
-    penalizacion_tardia = Column(Float, default=0.0)  # Porcentaje de penalización
+    permite_entregas_tardias = Column(Boolean, default=False)  # Campo duplicado en BD
+    penalizacion_tardia = Column(Float, default=0.0)
     intentos_maximos = Column(Integer, default=1)
-    formato_entrega = Column(String(200))  # Formatos aceptados: PDF, DOCX, etc.
-    tamano_maximo_mb = Column(Float, default=10.0)  # Tamaño máximo en MB
+    formato_entrega = Column(String(200), nullable=True)
+    tamano_maximo_mb = Column(Float, default=10.0)
+    restricciones_archivo = Column(JSONB, nullable=True)  # Restricciones detalladas de archivos
     
-    # Calificación
+    # ============================================
+    # CALIFICACIÓN Y PUNTUACIÓN
+    # ============================================
     puntuacion_maxima = Column(Float, nullable=False, default=100.0)
-    peso_evaluacion = Column(Float, default=1.0)  # Peso en la nota final
+    peso_evaluacion = Column(Float, default=1.0)
+    peso_calificacion = Column(NUMERIC(5, 2), nullable=True)  # Peso en calificación final
     rubrica_id = Column(String, ForeignKey("rubricas.rubrica_id"), nullable=True)
+    rubrica = Column(JSONB, nullable=True)  # Rúbrica en formato JSON
+    criterios_evaluacion = Column(Text, nullable=True)
     
-    # Estado y configuración
-    estado = Column(SQLEnum(EstadoTarea), nullable=False, default=EstadoTarea.ASIGNADA)
-    es_grupal = Column(Boolean, default=False)  # Tarea individual o grupal
-    es_publica = Column(Boolean, default=True)  # Visible para todos los estudiantes del grupo
-    requiere_aprobacion = Column(Boolean, default=False)  # Si requiere aprobación antes de mostrar
+    # ============================================
+    # GAMIFICACIÓN
+    # ============================================
+    puntos_base = Column(Integer, nullable=True)  # Puntos base por completar
+    puntos_bonificacion = Column(Integer, nullable=True)  # Puntos extra por excelencia
     
-    # Opciones avanzadas
-    configuracion_json = Column(JSON)  # Configuraciones adicionales en JSON
-    recursos_necesarios = Column(Text)  # Lista de recursos necesarios
-    criterios_evaluacion = Column(Text)  # Criterios de evaluación
+    # ============================================
+    # INTELIGENCIA ARTIFICIAL
+    # ============================================
+    habilitar_retroalimentacion_ia = Column(Boolean, default=False)
+    prompt_ia_personalizado = Column(Text, nullable=True)  # Prompt personalizado para IA
     
-    # Metadatos
+    # ============================================
+    # ESTADO Y CONFIGURACIÓN
+    # ============================================
+    estado = Column(String(11), nullable=False, default="asignada")  # Campo VARCHAR en BD
+    es_grupal = Column(Boolean, default=False)
+    es_publica = Column(Boolean, default=True)
+    requiere_aprobacion = Column(Boolean, default=False)
     activa = Column(Boolean, default=True)
+    
+    # ============================================
+    # RECURSOS Y CONFIGURACIÓN
+    # ============================================
+    configuracion_json = Column(JSON, nullable=True)
+    recursos_necesarios = Column(Text, nullable=True)
+    
+    # ============================================
+    # AUDITORÍA Y METADATOS
+    # ============================================
     fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
     fecha_actualizacion = Column(DateTime(timezone=True), onupdate=func.now())
+    fecha_modificacion = Column(DateTime(timezone=True), nullable=True)  # Última modificación manual
     creado_por = Column(String, ForeignKey("Usuario.usuario_id"), nullable=True)
     actualizado_por = Column(String, ForeignKey("Usuario.usuario_id"), nullable=True)
     
