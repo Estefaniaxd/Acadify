@@ -34,6 +34,19 @@ class Clase(Base):
         ForeignKey("Docente.docente_id", ondelete="CASCADE"),
         nullable=False,
     )
+    
+    # Campos adicionales de organización
+    grupo_curso_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("GrupoCurso.grupo_curso_id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    
+    plataforma_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("Plataforma.plataforma_id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     titulo = Column(String(150), nullable=False)
     descripcion = Column(TEXT)
@@ -54,7 +67,12 @@ class Clase(Base):
     # Campos de fecha y horario
     fecha_inicio = Column(TIMESTAMP(timezone=True), nullable=False)
     fecha_fin = Column(TIMESTAMP(timezone=True))
+    hora_inicio = Column(TIMESTAMP(timezone=True), nullable=True)
+    duracion = Column(INTEGER, nullable=True)  # Duración en minutos
     duracion_estimada = Column(INTEGER)  # En minutos
+    
+    # Videollamada
+    link_videollamada = Column(String(500), nullable=True)
 
     # Sistema de código de acceso
     codigo_acceso = Column(String(10), unique=True, nullable=False)
