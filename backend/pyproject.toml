@@ -1,0 +1,270 @@
+[project]
+name = "acadify-backend"
+version = "1.0.0"
+description = "Sistema educativo Acadify - Backend API"
+requires-python = ">=3.12"
+
+[tool.black]
+line-length = 88
+skip-string-normalization = false
+target-version = ['py312']
+
+[tool.ruff]
+# Configuración general
+select = ["E", "F", "I"]
+extend-ignore = [
+    "E501",
+    "E203",
+]
+
+target-version = "py312"
+line-length = 100
+indent-width = 4
+
+# Archivos y directorios a excluir
+extend-exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "*.pyc",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "build",
+    "dist",
+    "*.egg-info",
+    "alembic/versions/*",
+    "BACKUP_LEGACY",
+    "TEST",
+    "Docs",
+]
+
+[tool.ruff.lint]
+# Reglas a activar (muy completo)
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort (import sorting)
+    "N",      # pep8-naming
+    "D",      # pydocstyle (docstrings)
+    "UP",     # pyupgrade (modernización de código)
+    "YTT",    # flake8-2020
+    "ANN",    # flake8-annotations (type hints)
+    "ASYNC",  # flake8-async
+    "S",      # flake8-bandit (seguridad)
+    "BLE",    # flake8-blind-except
+    "FBT",    # flake8-boolean-trap
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "COM",    # flake8-commas
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "DJ",     # flake8-django
+    "EM",     # flake8-errmsg
+    "EXE",    # flake8-executable
+    "FA",     # flake8-future-annotations
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "G",      # flake8-logging-format
+    "INP",    # flake8-no-pep420
+    "PIE",    # flake8-pie
+    "T20",    # flake8-print
+    "PYI",    # flake8-pyi
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SLF",    # flake8-self
+    "SLOT",   # flake8-slots
+    "SIM",    # flake8-simplify
+    "TID",    # flake8-tidy-imports
+    "TCH",    # flake8-type-checking
+    "INT",    # flake8-gettext
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+    "TD",     # flake8-todos
+    "FIX",    # flake8-fixme
+    "ERA",    # eradicate (commented code)
+    "PD",     # pandas-vet
+    "PGH",    # pygrep-hooks
+    "PL",     # Pylint
+    "TRY",    # tryceratops
+    "FLY",    # flynt (f-strings)
+    "NPY",    # NumPy-specific rules
+    "AIR",    # Airflow
+    "PERF",   # Perflint (performance)
+    "FURB",   # refurb (modernización)
+    "LOG",    # flake8-logging
+    "RUF",    # Ruff-specific rules
+]
+
+# Reglas a ignorar (ajustes para FastAPI/SQLAlchemy)
+ignore = [
+    "D100",    # Missing docstring in public module
+    "D104",    # Missing docstring in public package
+    "D203",    # 1 blank line required before class docstring (conflicto con D211)
+    "D213",    # Multi-line docstring summary should start at the second line (conflicto con D212)
+    "ANN101",  # Missing type annotation for self in method
+    "ANN102",  # Missing type annotation for cls in classmethod
+    "ANN401",  # Dynamically typed expressions (Any) are disallowed
+    "S101",    # Use of assert detected (común en tests)
+    "S104",    # Possible binding to all interfaces
+    "S105",    # Possible hardcoded password
+    "S106",    # Possible hardcoded password
+    "S107",    # Possible hardcoded password
+    "B008",    # Do not perform function call in argument defaults (FastAPI Depends)
+    "COM812",  # Trailing comma missing (conflicto con formatter)
+    "ISC001",  # Implicitly concatenated string (conflicto con formatter)
+    "FBT001",  # Boolean positional arg (común en FastAPI)
+    "FBT002",  # Boolean default value (común en FastAPI)
+    "TD002",   # Missing author in TODO
+    "TD003",   # Missing issue link on TODO
+    "FIX002",  # Line contains TODO
+    "ERA001",  # Found commented-out code
+    "PLR0913", # Too many arguments to function call (común en CRUD)
+    "PLR2004", # Magic value used in comparison
+    "TRY003",  # Avoid specifying long messages outside exception class
+]
+
+# Configuración por archivo
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",    # Unused imports (normal en __init__.py)
+    "D104",    # Missing docstring
+]
+"alembic/env.py" = ["INP001"]
+"scripts/*.py" = [
+    "T20",     # print statements ok en scripts
+    "INP001",  # No __init__.py needed
+]
+"TEST/*.py" = [
+    "S101",    # Assert ok en tests
+    "ANN",     # Type hints opcionales en tests
+    "D",       # Docstrings opcionales en tests
+    "PLR2004", # Magic values ok en tests
+]
+
+# === Exception Handling - BLE001 Suppressions ===
+# Casos donde catch Exception genérico es aceptable
+"src/core/redis_manager.py" = [
+    "BLE001",  # Redis operations: múltiples tipos de excepciones (ConnectionError, TimeoutError, ResponseError)
+               # Patrón: try: redis_op() except Exception: return False/None
+               # Justificación: Degradación graciosa - app continúa si Redis falla
+]
+"src/services/auth/email_service.py" = [
+    "BLE001",  # SMTP operations: múltiples tipos de error (SMTPException, socket.error, OSError)
+               # Patrón: try: smtp.send() except Exception: return False/pass
+               # Justificación: Email async en background no debe fallar request
+]
+"src/api/deps.py" = [
+    "BLE001",  # get_optional_current_user: función opcional que retorna None en cualquier error
+               # Justificación: Usuario opcional, cualquier error = None (no autenticado)
+]
+
+# Configuración de docstrings
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # Google, numpy, o pep257
+
+# Configuración de isort (import sorting)
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+lines-after-imports = 2
+force-sort-within-sections = true
+
+# Configuración de quotes
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "double"
+
+# Configuración de type checking
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+# Configuración de complejidad
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+# Configuración de pylint
+[tool.ruff.lint.pylint]
+max-args = 8
+max-branches = 15
+max-returns = 6
+max-statements = 50
+
+# Configuración del formatter
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = 80
+
+# Configuración de Pytest (bonus)
+[tool.pytest.ini_options]
+testpaths = ["TEST", "tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers --tb=short"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+# Configuración de Coverage (bonus)
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/TEST/*",
+    "*/alembic/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+# ============================================================================
+# Bandit - Security linting
+# ============================================================================
+[tool.bandit]
+# Targets to scan
+targets = ["src"]
+
+# Exclude paths
+exclude_dirs = [
+    "/TEST/",
+    "/tests/",
+    "/test_",
+    "/venv/",
+    "/.venv/",
+]
+
+# Tests to skip
+skips = [
+    "B101",  # assert_used - Assert is ok in tests
+    "B601",  # paramiko_calls - We may need shell commands
+    "B602",  # subprocess_popen_with_shell_equals_true
+    "B603",  # subprocess_without_shell_equals_true
+    "B607",  # start_process_with_partial_path
+]
+
+# Severity level
+severity = "medium"
+
+# Confidence level
+confidence = "medium"

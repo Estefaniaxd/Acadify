@@ -1,7 +1,6 @@
 # src/api/routes/auth/__init__.py
 
-"""
-Módulo de rutas de autenticación reorganizado.
+"""Módulo de rutas de autenticación reorganizado.
 
 Este módulo contiene todas las rutas relacionadas con autenticación
 organizadas por funcionalidad:
@@ -15,20 +14,21 @@ organizadas por funcionalidad:
 """
 
 
-from .auth_core import router as core_router
-from .auth_password import router as password_router
 from .auth_2fa import router as twofa_router
-from .auth_users import router as users_router
 from .auth_account import router as account_router
+from .auth_core import router as core_router
 from .auth_health import router as health_router
+from .auth_password import router as password_router
+from .auth_users import router as users_router
 from .auth_verify import router as verify_router
 
+
 __all__ = [
+    "account_router",
     "core_router",
-    "password_router", 
+    "health_router",
+    "password_router",
     "twofa_router",
     "users_router",
-    "account_router",
-    "health_router",
-    "verify_router"
+    "verify_router",
 ]

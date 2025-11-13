@@ -1,16 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '../../hooks/useWebSocket.js';
 import { MessageList } from './MessageList.js';
 import { MessageInput } from './MessageInput.js';
 import { UserList } from './UserList.js';
 import { NotificationCenter } from './NotificationCenter.js';
-import { 
-  ChatBubbleLeftRightIcon, 
-  UserGroupIcon, 
-  BellIcon,
-  Cog6ToothIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
+import { Bell, MessageSquare, Users, X, Settings } from 'lucide-react';
+import { buildURL, getAuthHeaders, API_ENDPOINTS } from '../../config/api.config';
 
 interface SalaChat {
   id: string;
@@ -25,7 +20,7 @@ interface SalaChat {
   ultimo_mensaje_fecha?: string;
 }
 
-interface Participante {
+interface ParticipanteLocal {
   id: string;
   usuario_id: string;
   nombre: string;
@@ -34,6 +29,7 @@ interface Participante {
   es_moderador: boolean;
   esta_activo: boolean;
   ultimo_acceso?: string;
+  puede_escribir: boolean;
 }
 
 interface ChatRoomProps {
@@ -48,7 +44,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   onClose 
 }) => {
   const [sala, setSala] = useState<SalaChat | null>(null);
-  const [participantes, setParticipantes] = useState<Participante[]>([]);
+  const [participantes, setParticipantes] = useState<ParticipanteLocal[]>([]);
   const [showUserList, setShowUserList] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,10 +64,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     const fetchSalaInfo = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/comunicacion/salas/${salaId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
+        const response = await fetch(buildURL(API_ENDPOINTS.CHAT.SALA(salaId)), {
+          headers: getAuthHeaders(),
         });
         
         if (!response.ok) {
@@ -82,10 +76,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         setSala(salaData);
         
         // Cargar participantes
-        const participantesResponse = await fetch(`/api/comunicacion/salas/${salaId}/participantes`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
+        const participantesResponse = await fetch(buildURL(API_ENDPOINTS.CHAT.PARTICIPANTES(salaId)), {
+          headers: getAuthHeaders(),
         });
         
         if (participantesResponse.ok) {
@@ -143,7 +135,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <ChatBubbleLeftRightIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">{error}</p>
         </div>
       </div>
@@ -183,7 +175,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
           >
-            <BellIcon className="h-5 w-5" />
+            <Bell className="h-5 w-5" />
           </button>
           
           {/* Botón de lista de usuarios */}
@@ -191,12 +183,12 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
             onClick={() => setShowUserList(!showUserList)}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
           >
-            <UserGroupIcon className="h-5 w-5" />
+            <Users className="h-5 w-5" />
           </button>
           
           {/* Botón de configuración */}
           <button className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
-            <Cog6ToothIcon className="h-5 w-5" />
+            <Settings className="h-5 w-5" />
           </button>
           
           {/* Botón de cerrar */}
@@ -205,7 +197,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
             >
-              <XMarkIcon className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </button>
           )}
         </div>
@@ -238,7 +230,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
             <UserList
               participantes={participantes}
               onlineUsers={onlineUsers}
-              onMention={(usuario: any) => handleMention('usuario', usuario)}
+              onMention={(usuario: string) => handleMention('usuario', usuario)}
             />
           </div>
         )}

@@ -1,16 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from typing import List
-from sqlalchemy.orm import Session
 import uuid
 
-from src.schemas.users.usuario import Usuario, UsuarioUpdate
-from src.crud.auth.user_crud import UserCRUD
-from src.api.deps import get_db
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy.orm import Session
+
 from src.api.dependencies import (
     get_current_user,
     get_user_crud,
     require_admin_or_coordinator,
 )
+from src.api.deps import get_db
+from src.crud.auth.user_crud import UserCRUD
+from src.schemas.users.usuario import Usuario, UsuarioUpdate
+
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ USUARIO_NO_ENCONTRADO = "Usuario no encontrado"
 
 @router.get(
     "/",
-    response_model=List[Usuario],
+    response_model=list[Usuario],
     summary="Listar usuarios",
     description="Retorna una lista de todos los usuarios.",
 )

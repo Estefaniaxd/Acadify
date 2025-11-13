@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChatRoom } from '../../components/comunicacion';
-import { 
-  ChatBubbleLeftRightIcon,
-  UserGroupIcon,
-  AcademicCapIcon,
-  DocumentTextIcon,
-  PlusIcon
-} from '@heroicons/react/24/outline';
+import { FileText, GraduationCap, MessageSquare, Plus, Users } from 'lucide-react';
+import { buildURL, getAuthHeaders, API_ENDPOINTS } from '../../config/api.config';
 
 interface SalaChat {
   id: string;
@@ -32,17 +27,15 @@ export const ComunicacionPage: React.FC = () => {
     const fetchSalas = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/comunicacion/salas/mis-salas', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
+        const response = await fetch(buildURL(API_ENDPOINTS.CHAT.MIS_SALAS), {
+          headers: getAuthHeaders(),
         });
 
         if (response.ok) {
           const data = await response.json();
-          setSalas(data.salas || []);
+          setSalas(data.salas || data || []);
         } else {
-          console.error('Error cargando salas');
+          console.error('Error cargando salas:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -57,13 +50,13 @@ export const ComunicacionPage: React.FC = () => {
   const getSalaIcon = (tipo: string) => {
     switch (tipo) {
       case 'curso':
-        return <AcademicCapIcon className="h-5 w-5" />;
+        return <GraduationCap className="h-5 w-5" />;
       case 'tarea':
-        return <DocumentTextIcon className="h-5 w-5" />;
+        return <FileText className="h-5 w-5" />;
       case 'grupo':
-        return <UserGroupIcon className="h-5 w-5" />;
+        return <Users className="h-5 w-5" />;
       default:
-        return <ChatBubbleLeftRightIcon className="h-5 w-5" />;
+        return <MessageSquare className="h-5 w-5" />;
     }
   };
 
@@ -121,7 +114,7 @@ export const ComunicacionPage: React.FC = () => {
                   onClick={() => setShowCreateModal(true)}
                   className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <PlusIcon className="h-5 w-5 mr-2" />
+                  <Plus className="h-5 w-5 mr-2" />
                   Nueva sala
                 </button>
               </div>
@@ -130,7 +123,7 @@ export const ComunicacionPage: React.FC = () => {
             {/* Grid de salas */}
             {salas.length === 0 ? (
               <div className="text-center py-12">
-                <ChatBubbleLeftRightIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No hay salas disponibles</h3>
                 <p className="text-gray-600 mb-6">
                   Crea una nueva sala de chat o espera a que te inviten a una
@@ -139,7 +132,7 @@ export const ComunicacionPage: React.FC = () => {
                   onClick={() => setShowCreateModal(true)}
                   className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <PlusIcon className="h-5 w-5 mr-2" />
+                  <Plus className="h-5 w-5 mr-2" />
                   Crear primera sala
                 </button>
               </div>
@@ -194,7 +187,7 @@ export const ComunicacionPage: React.FC = () => {
                         {/* Footer */}
                         <div className="flex items-center justify-between text-sm text-gray-500">
                           <span className="flex items-center">
-                            <UserGroupIcon className="h-4 w-4 mr-1" />
+                            <Users className="h-4 w-4 mr-1" />
                             {sala.participantes_conectados} conectados
                           </span>
                           <span className={`px-2 py-1 bg-${color}-100 text-${color}-700 rounded-full text-xs font-medium`}>
@@ -215,7 +208,7 @@ export const ComunicacionPage: React.FC = () => {
                 {/* Sala General */}
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white p-6 cursor-pointer hover:from-blue-600 hover:to-purple-700 transition-all">
                   <div className="flex items-center mb-4">
-                    <ChatBubbleLeftRightIcon className="h-8 w-8 mr-3" />
+                    <MessageSquare className="h-8 w-8 mr-3" />
                     <div>
                       <h3 className="text-lg font-semibold">Sala General</h3>
                       <p className="text-blue-100">Chat general con @rutilio IA</p>
@@ -229,7 +222,7 @@ export const ComunicacionPage: React.FC = () => {
                 {/* Ayuda Académica */}
                 <div className="bg-gradient-to-r from-green-500 to-blue-500 rounded-lg text-white p-6 cursor-pointer hover:from-green-600 hover:to-blue-600 transition-all">
                   <div className="flex items-center mb-4">
-                    <AcademicCapIcon className="h-8 w-8 mr-3" />
+                    <GraduationCap className="h-8 w-8 mr-3" />
                     <div>
                       <h3 className="text-lg font-semibold">Ayuda Académica</h3>
                       <p className="text-green-100">Dudas y consultas</p>

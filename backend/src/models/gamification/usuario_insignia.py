@@ -1,8 +1,9 @@
-from ...db.base_class import Base
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
-from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from src.db.base_class import Base
 
 
 class UsuarioInsignia(Base):
@@ -31,11 +32,9 @@ class UsuarioInsignia(Base):
         "Usuario",
         back_populates="usuario_insignias",
         foreign_keys=[usuario_id],
-        passive_deletes=True
+        passive_deletes=True,
     )
     otorgante = relationship(
-        "Usuario",
-        foreign_keys=[otorgada_por],
-        passive_deletes=True
+        "Usuario", foreign_keys=[otorgada_por], passive_deletes=True
     )
     insignia = relationship("Insignia", back_populates="usuario_insignias")

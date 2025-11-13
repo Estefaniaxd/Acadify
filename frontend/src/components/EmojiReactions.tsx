@@ -75,7 +75,7 @@ export const EmojiReactions: React.FC<EmojiReactionsProps> = ({ comentarioId, cu
 
   const handleReact = async (emoji: string) => {
     try {
-      await axios.post(`${apiBaseUrl}/cursos/comentarios/${comentarioId}/reacciones`, { emoji });
+      await axios.post(`${apiBaseUrl}/cursos/comentarios/${comentarioId}/reacciones`, { emoji, tipo: 'like' });
       setShowMenu(false);
       setFeedback("¡Reacción agregada!");
       setTimeout(() => setFeedback(null), 1200);

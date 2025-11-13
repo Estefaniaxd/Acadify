@@ -1,8 +1,9 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, String, CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID, TEXT, INTEGER, ENUM
-from ...enums.gamification.recompensa_enums import TipoRecompensa
+from sqlalchemy import CheckConstraint, Column, String, text
+from sqlalchemy.dialects.postgresql import ENUM, INTEGER, TEXT, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
+from src.enums.gamification.recompensa_enums import TipoRecompensa
 
 
 class Recompensa(Base):
@@ -13,7 +14,7 @@ class Recompensa(Base):
     )
 
     recompensa_id = Column(
-    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     nombre = Column(String(100), nullable=False)
     descripcion = Column(TEXT)

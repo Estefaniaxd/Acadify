@@ -1,22 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import {
-  PlusIcon,
-  TrashIcon,
-  DocumentDuplicateIcon,
-  ArrowsUpDownIcon,
-  PhotoIcon,
-  PlayIcon,
-  PauseIcon,
-  SpeakerWaveIcon,
-  DocumentTextIcon,
-  EyeIcon,
-  XMarkIcon,
-  InformationCircleIcon,
-  AcademicCapIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
+import { AlertTriangle, ArrowUpDown, Eye, FileText, GraduationCap, Image as ImageIcon, Info, Plus, Tag, Trash, Volume2, X } from 'lucide-react';
 import { Card, CardHeader, CardContent, Grid } from '../common/LayoutComponents';
 import { LoadingSpinner, ProgressBar } from '../common/LoadingComponents';
 import { ConfirmDialog, useToast } from '../common/AlertComponents';
@@ -239,7 +224,7 @@ export function EditorPreguntas({ examen, onVolver }: EditorPreguntasProps) {
                 </h2>
                 <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center space-x-2">
-                    <DocumentTextIcon className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                     <span>{preguntas.length} preguntas</span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -265,14 +250,14 @@ export function EditorPreguntas({ examen, onVolver }: EditorPreguntasProps) {
                       onClick={() => setMostrarBanco(true)}
                       className="flex items-center space-x-2 px-4 py-2 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                     >
-                      <DocumentTextIcon className="h-5 w-5" />
+                      <FileText className="h-5 w-5" />
                       <span>Banco de Preguntas</span>
                     </button>
                     <button
                       onClick={manejarCrearPregunta}
                       className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg"
                     >
-                      <PlusIcon className="h-5 w-5" />
+                      <Plus className="h-5 w-5" />
                       <span>Nueva Pregunta</span>
                     </button>
                   </>
@@ -449,7 +434,7 @@ function ListaPreguntas({
       <Card>
         <CardContent>
           <div className="text-center py-12">
-            <DocumentTextIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No hay preguntas
             </h3>
@@ -538,7 +523,7 @@ function TarjetaPregunta({
               
               {pregunta.imagen_url && (
                 <div className="flex items-center space-x-1 text-xs text-blue-600 dark:text-blue-400 mb-2">
-                  <PhotoIcon className="h-3 w-3" />
+                  <ImageIcon className="h-3 w-3" />
                   <span>Con imagen</span>
                 </div>
               )}
@@ -555,7 +540,7 @@ function TarjetaPregunta({
               className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
               title="Vista previa"
             >
-              <EyeIcon className="h-4 w-4" />
+              <Eye className="h-4 w-4" />
             </button>
             
             <div className="relative">
@@ -563,7 +548,7 @@ function TarjetaPregunta({
                 onClick={() => setMostrarMenu(!mostrarMenu)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors"
               >
-                <ArrowsUpDownIcon className="h-4 w-4" />
+                <ArrowUpDown className="h-4 w-4" />
               </button>
               
               <AnimatePresence>
@@ -788,10 +773,10 @@ function FormularioPregunta({
   }, [setValue, showToast]);
 
   const secciones = [
-    { id: 'contenido', nombre: 'Contenido', icono: DocumentTextIcon },
-    { id: 'opciones', nombre: 'Opciones', icono: InformationCircleIcon },
-    { id: 'multimedia', nombre: 'Multimedia', icono: PhotoIcon },
-    { id: 'configuracion', nombre: 'Configuración', icono: AcademicCapIcon }
+    { id: 'contenido', nombre: 'Contenido', icono: FileText },
+    { id: 'opciones', nombre: 'Opciones', icono: Info },
+    { id: 'multimedia', nombre: 'Multimedia', icono: ImageIcon },
+    { id: 'configuracion', nombre: 'Configuración', icono: GraduationCap }
   ];
 
   return (
@@ -977,7 +962,7 @@ function FormularioPregunta({
                         onClick={agregarOpcion}
                         className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                       >
-                        <PlusIcon className="h-4 w-4" />
+                        <Plus className="h-4 w-4" />
                         <span>Agregar Opción</span>
                       </button>
                     )
@@ -986,7 +971,7 @@ function FormularioPregunta({
                 <CardContent>
                   {(tipoPregunta === 'ESSAY' || tipoPregunta === 'SHORT_ANSWER') ? (
                     <div className="text-center py-8">
-                      <DocumentTextIcon className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                      <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                       <p className="text-gray-500 dark:text-gray-400">
                         Las preguntas de tipo {TIPO_PREGUNTA_LABELS[tipoPregunta]} no requieren opciones predefinidas
                       </p>
@@ -1027,7 +1012,7 @@ function FormularioPregunta({
                               onClick={() => eliminarOpcion(index)}
                               className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                             >
-                              <TrashIcon className="h-4 w-4" />
+                              <Trash className="h-4 w-4" />
                             </button>
                           )}
                         </motion.div>
@@ -1073,7 +1058,7 @@ function FormularioPregunta({
                             onClick={() => setValue('imagen_url', '')}
                             className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                           >
-                            <XMarkIcon className="h-4 w-4" />
+                            <X className="h-4 w-4" />
                           </button>
                         </div>
                       ) : (
@@ -1081,7 +1066,7 @@ function FormularioPregunta({
                           onClick={() => fileInputRef.current?.click()}
                           className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
                         >
-                          <PhotoIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                          <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                           <p className="text-gray-500 dark:text-gray-400">
                             Haz clic para subir una imagen
                           </p>
@@ -1121,7 +1106,7 @@ function FormularioPregunta({
                             onClick={() => setValue('audio_url', '')}
                             className="flex items-center space-x-2 px-3 py-2 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <Trash className="h-4 w-4" />
                             <span>Eliminar audio</span>
                           </button>
                         </div>
@@ -1130,7 +1115,7 @@ function FormularioPregunta({
                           onClick={() => audioInputRef.current?.click()}
                           className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
                         >
-                          <SpeakerWaveIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                          <Volume2 className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                           <p className="text-gray-500 dark:text-gray-400">
                             Haz clic para subir un audio
                           </p>
@@ -1322,13 +1307,13 @@ function FormularioPregunta({
                     onClick={() => setMostrarPrevia(!mostrarPrevia)}
                     className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <EyeIcon className="h-5 w-5" />
+                    <Eye className="h-5 w-5" />
                     <span>{mostrarPrevia ? 'Ocultar' : 'Ver'} previa</span>
                   </button>
 
                   {isDirty && (
                     <div className="flex items-center space-x-2 text-sm text-amber-600 dark:text-amber-400">
-                      <ExclamationTriangleIcon className="h-4 w-4" />
+                      <AlertTriangle className="h-4 w-4" />
                       <span>Cambios sin guardar</span>
                     </div>
                   )}
@@ -1384,7 +1369,7 @@ function PreviaEstudiante({
             onClick={onCerrar}
             className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </button>
         }
       />
@@ -1498,7 +1483,7 @@ function BancoPreguntas({
           onClick={onCerrar}
           className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
@@ -1584,7 +1569,7 @@ function BancoPreguntas({
           </div>
         ) : preguntasFiltradas.length === 0 ? (
           <div className="text-center py-12">
-            <DocumentTextIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <FileText className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No hay preguntas
             </h3>
@@ -1628,7 +1613,7 @@ function BancoPreguntas({
                     )}
                     className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
                   >
-                    <EyeIcon className="h-4 w-4" />
+                    <Eye className="h-4 w-4" />
                   </button>
                 </div>
 

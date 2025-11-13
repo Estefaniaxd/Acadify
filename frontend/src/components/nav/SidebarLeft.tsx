@@ -1,13 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Book, Building2, ChevronDown, ChevronRight, Clock, Target, X } from 'lucide-react';
 import { 
-  FiHome, FiBook, FiUsers, FiBarChart, FiUserCheck,
-  FiPlus, FiShoppingBag, FiTarget, FiSettings, FiX,
-  FiChevronRight, FiTrendingUp, FiClock, FiUser,
-  FiFileText, FiMessageSquare, FiCalendar
-} from 'react-icons/fi';
-import { HiOutlineOfficeBuilding } from 'react-icons/hi';
+  getNavigationBySection, 
+  SECTION_NAMES,
+  type UserRole 
+} from '../../config/navigation';
 
 // Mock data para diferentes roles
 const mockClases = [
@@ -81,21 +80,22 @@ const getRecentItemsByRole = (role: string) => {
       return {
         title: 'Institución Reciente',
         items: mockInstituciones,
-        icon: HiOutlineOfficeBuilding,
+        icon: Building2,
         routePrefix: '/admin/institucion'
       };
     case 'coordinador':
       return {
         title: 'Clase Reciente',
         items: mockClases,
-        icon: FiBook,
+        icon: Book,
         routePrefix: '/coordinador/clase'
       };
     case 'profesor':
+    case 'docente':
       return {
         title: 'Tarea Reciente',
         items: mockTareas,
-        icon: FiTarget,
+        icon: Target,
         routePrefix: '/profesor/tarea'
       };
     case 'estudiante':
@@ -103,7 +103,7 @@ const getRecentItemsByRole = (role: string) => {
       return {
         title: 'Clase Reciente',
         items: mockClases,
-        icon: FiBook,
+        icon: Book,
         routePrefix: '/clase'
       };
   }
@@ -115,15 +115,16 @@ interface SidebarLeftProps {
   role: string;
 }
 
-export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
+export default function SidebarLeft({ open, onClose, role }: Readonly<SidebarLeftProps>) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [expandedSections, setExpandedSections] = useState<string[]>(['main', 'academic']);
 
   // Detectar modo oscuro igual que en Nav
   const [isDark, setIsDark] = useState(false);
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      const match = window.matchMedia('(prefers-color-scheme: dark)');
+    const match = globalThis.window?.matchMedia?.('(prefers-color-scheme: dark)');
+    if (match) {
       setIsDark(match.matches);
       const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
       match.addEventListener('change', handler);
@@ -131,68 +132,22 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
     }
   }, []);
 
-  // Configuración de menú por rol
-  const getMenuItems = useMemo(() => {
-    const baseItems = [
-      { label: 'Dashboard', icon: FiHome, href: '/dashboard' }
-    ];
+  // Obtener navegación por sección
+  const navigationSections = getNavigationBySection(role as UserRole);
 
-    switch (role) {
-      case 'admin':
-        return [
-          ...baseItems,
-          { label: 'Panel Admin', icon: FiSettings, href: '/admin' },
-          { label: 'Usuarios', icon: FiUsers, href: '/admin' },
-          { label: 'Instituciones', icon: HiOutlineOfficeBuilding, href: '/admin' },
-          { label: 'Cursos', icon: FiBook, href: '/cursos' },
-          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
-          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
-          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
-        ];
-      case 'coordinador':
-        return [
-          ...baseItems,
-          { label: 'Panel Coordinador', icon: FiSettings, href: '/coordinador' },
-          { label: 'Cursos', icon: FiBook, href: '/cursos' },
-          { label: 'Profesores', icon: FiUserCheck, href: '/coordinador' },
-          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
-          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
-          { label: 'Clases', icon: FiCalendar, href: '/mis-clases' },
-          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
-        ];
-      case 'profesor':
-        return [
-          ...baseItems,
-          { label: 'Panel Profesor', icon: FiSettings, href: '/profesor' },
-          { label: 'Cursos', icon: FiBook, href: '/cursos' },
-          { label: 'Mis clases', icon: FiCalendar, href: '/mis-clases' },
-          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
-          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
-          { label: 'Crear clase', icon: FiPlus, href: '/crear-clase' },
-          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
-        ];
-      case 'estudiante':
-      default:
-        return [
-          ...baseItems,
-          { label: 'Cursos', icon: FiBook, href: '/cursos' },
-          { label: 'Mis clases', icon: FiCalendar, href: '/mis-clases' },
-          { label: 'Evaluaciones', icon: FiFileText, href: '/evaluaciones' },
-          { label: 'Comunicación', icon: FiMessageSquare, href: '/comunicacion' },
-          { label: 'Unirse a clase', icon: FiPlus, href: '/unirse-clase' },
-          { label: 'Logros', icon: FiTarget, href: '/logros' },
-          { label: 'Tienda', icon: FiShoppingBag, href: '/tienda' },
-          { label: 'Editor de Avatar', icon: FiUser, href: '/avatar' },
-        ];
-    }
-  }, [role]);
+  // Toggle de secciones
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev =>
+      prev.includes(section)
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
+  };
 
   if (!open) return null;
 
   // Fondos igual que Nav
   const darkBg = 'rgba(24, 16, 48, 0.92)';
-  // Fondo blanco puro y sólido para modo claro
-  const lightBg = '#fff';
   const sidebarBg = isDark ? darkBg : '#fff';
   const borderColor = isDark
     ? '1px solid rgba(139, 92, 246, 0.35)'
@@ -233,50 +188,111 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FiX className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </motion.button>
         </motion.div>
 
         {/* Contenido scrolleable */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Menú principal */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>Navegación</h3>
-            <div className="space-y-2">
-              {getMenuItems.map((item, idx) => {
-                const active = location.pathname === item.href;
-                const Icon = item.icon;
-                return (
-                  <motion.button
-                    key={item.label}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left ${
-                      active
-                        ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
-                        : isDark
-                          ? 'text-gray-300 hover:bg-violet-900/50 hover:text-violet-300'
-                          : 'text-gray-800 hover:bg-violet-50 hover:text-violet-700'
-                    }`}
-                    onClick={() => {
-                      navigate(item.href);
-                      onClose();
-                    }}
-                    whileHover={{ x: active ? 0 : 4 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.05 * idx }}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Navegación por secciones */}
+          {Object.entries(navigationSections).map(([section, items], sectionIdx) => {
+            const isExpanded = expandedSections.includes(section);
+            const sectionName = SECTION_NAMES[section] || section;
+
+            return (
+              <motion.div
+                key={section}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * sectionIdx }}
+              >
+                {/* Header de sección (colapsable) */}
+                <motion.button
+                  className={`w-full flex items-center justify-between mb-3 px-2 py-1 rounded-lg transition-colors ${
+                    isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
+                  }`}
+                  onClick={() => toggleSection(section)}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <h3 className={`text-sm font-bold uppercase tracking-wide ${
+                    isDark ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {sectionName}
+                  </h3>
+                  <motion.div
+                    animate={{ rotate: isExpanded ? 0 : -90 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-current'}`} />
-                    <span className="font-medium">{item.label}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
+                    <ChevronDown className={`w-4 h-4 ${
+                      isDark ? 'text-gray-400' : 'text-gray-600'
+                    }`} />
+                  </motion.div>
+                </motion.button>
+
+                {/* Items de la sección */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-1 overflow-hidden"
+                    >
+                      {items.map((item, idx) => {
+                        const active = location.pathname === item.href;
+                        const Icon = item.icon;
+                        
+                        const inactiveClasses = isDark
+                          ? 'text-gray-300 hover:bg-violet-900/50 hover:text-violet-300'
+                          : 'text-gray-800 hover:bg-violet-50 hover:text-violet-700';
+                        const buttonClasses = active
+                          ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
+                          : inactiveClasses;
+                        
+                        return (
+                          <motion.button
+                            key={item.label}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left group ${buttonClasses}`}
+                            onClick={() => {
+                              navigate(item.href);
+                              onClose();
+                            }}
+                            whileHover={{ x: active ? 0 : 4 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.05 * idx }}
+                            title={item.description}
+                          >
+                            <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : 'text-current'}`} />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium block truncate">{item.label}</span>
+                              {item.description && !active && (
+                                <span className="text-xs block truncate text-gray-500">
+                                  {item.description}
+                                </span>
+                              )}
+                            </div>
+                            {item.badge && (
+                              <span className={`px-2 py-1 text-xs rounded-full font-bold ${
+                                active 
+                                  ? 'bg-white/20 text-white'
+                                  : 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300'
+                              }`}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
 
           {/* Elemento más reciente según el rol */}
           <motion.div
@@ -295,7 +311,7 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                 <>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className={`text-lg font-bold flex items-center gap-2 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                      <FiClock className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                      <Clock className="w-5 h-5 text-violet-600 dark:text-violet-400" />
                       {recentData.title}
                     </h3>
                   </div>
@@ -313,9 +329,11 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                           {mostRecent.name}
                         </h4>
                         <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}> 
-                          {role === 'admin' ? `${(mostRecent as any).usuarios} usuarios` :
-                           role === 'profesor' ? `${(mostRecent as any).pendientes} pendientes` :
-                           `${(mostRecent as any).students} estudiantes`}
+                          {(() => {
+                            if (role === 'admin') return `${(mostRecent as any).usuarios} usuarios`;
+                            if (role === 'profesor' || role === 'docente') return `${(mostRecent as any).pendientes} pendientes`;
+                            return `${(mostRecent as any).students} estudiantes`;
+                          })()}
                         </p>
                         <p className={`text-xs mt-1 font-medium ${isDark ? 'text-violet-400' : 'text-violet-600'}`}> 
                           Accedido hoy
@@ -333,15 +351,18 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                             <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{(mostRecent as any).progress}% completado</p>
                           </>
                         )}
-                        {role === 'admin' && (mostRecent as any).estado && (
-                          <p className={`text-xs mt-1 font-medium ${
-                            (mostRecent as any).estado === 'Activa'
-                              ? (isDark ? 'text-green-400' : 'text-green-600')
-                              : (isDark ? 'text-yellow-400' : 'text-yellow-600')
-                          }`}>
-                            {(mostRecent as any).estado}
-                          </p>
-                        )}
+                        {role === 'admin' && (mostRecent as any).estado && (() => {
+                          const isActive = (mostRecent as any).estado === 'Activa';
+                          const activeColor = isDark ? 'text-green-400' : 'text-green-600';
+                          const inactiveColor = isDark ? 'text-yellow-400' : 'text-yellow-600';
+                          const statusColor = isActive ? activeColor : inactiveColor;
+                          
+                          return (
+                            <p className={`text-xs mt-1 font-medium ${statusColor}`}>
+                              {(mostRecent as any).estado}
+                            </p>
+                          );
+                        })()}
                       </div>
                       <motion.div
                         className={`w-12 h-12 rounded-xl bg-gradient-to-br ${mostRecent.color} flex items-center justify-center shadow-lg`}
@@ -381,7 +402,7 @@ export default function SidebarLeft({ open, onClose, role }: SidebarLeftProps) {
                   >
                     <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${clase.color}`} />
                     <span className="font-medium text-sm">{clase.name}</span>
-                    <FiChevronRight className="w-4 h-4 ml-auto" />
+                    <ChevronRight className="w-4 h-4 ml-auto" />
                   </motion.button>
                 ))}
               </div>

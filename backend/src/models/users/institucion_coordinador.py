@@ -1,8 +1,9 @@
-from ...db.base_class import Base
 from sqlalchemy import Column, ForeignKey, text
-from sqlalchemy.dialects.postgresql import UUID, ENUM, DATE
-from ...enums.users.coordinador_enums import EstadoCoordinador
+from sqlalchemy.dialects.postgresql import DATE, ENUM, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
+from src.enums.users.coordinador_enums import EstadoCoordinador
 
 
 class InstitucionCoordinador(Base):

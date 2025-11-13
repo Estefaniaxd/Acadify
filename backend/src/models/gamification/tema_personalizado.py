@@ -1,7 +1,7 @@
-from ...db.base_class import Base
 from sqlalchemy import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
 
 
 class TemaPersonalizado(Base):
@@ -20,5 +20,3 @@ class TemaPersonalizado(Base):
         UUID(as_uuid=True),
         ForeignKey("Usuario.usuario_id", ondelete="CASCADE"),
     )
-    
-    

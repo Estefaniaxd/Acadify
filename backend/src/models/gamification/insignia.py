@@ -1,15 +1,16 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, String
-from sqlalchemy.dialects.postgresql import UUID, TEXT, ENUM, BOOLEAN
-from ...enums.gamification.insignia_enums import TipoInsignia
+from sqlalchemy import Column, String, text
+from sqlalchemy.dialects.postgresql import BOOLEAN, ENUM, TEXT, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
+from src.enums.gamification.insignia_enums import TipoInsignia
 
 
 class Insignia(Base):
     __tablename__ = "Insignia"
 
     insignia_id = Column(
-    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     nombre = Column(String(100), nullable=False, unique=True)
     descripcion = Column(TEXT)

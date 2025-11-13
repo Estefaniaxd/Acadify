@@ -1,0 +1,330 @@
+[
+  {
+    "from": "backend/static/assets/base/base-man/167 sin título_20250922233558.png",
+    "to": "backend/static/assets/base/167 sin título_20250922233558.png"
+  },
+  {
+    "from": "backend/static/assets/base/base-man/167 sin título_20250923002615.png",
+    "to": "backend/static/assets/base/167 sin título_20250923002615.png"
+  },
+  {
+    "from": "backend/static/assets/base/base-woman/167 sin título_20250923002534.png",
+    "to": "backend/static/assets/base/167 sin título_20250923002534.png"
+  },
+  {
+    "from": "backend/static/assets/base/base-woman/167 sin título_20250922233650.png",
+    "to": "backend/static/assets/base/167 sin título_20250922233650.png"
+  },
+  {
+    "from": "backend/static/assets/eyes/female/ojos_6.png",
+    "to": "backend/static/assets/eyes/male/ojos_6.png"
+  },
+  {
+    "from": "backend/static/assets/eyes/female/ojos_5.png",
+    "to": "backend/static/assets/eyes/male/ojos_5.png"
+  },
+  {
+    "from": "backend/static/assets/eyes/female/ojos_4.png",
+    "to": "backend/static/assets/eyes/male/ojos_4.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/unisex/camisa_cafe_mujer.png",
+    "to": "backend/static/assets/clothes/female/camisa_cafe_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/Medias_maya.png",
+    "to": "backend/static/assets/clothes/male/Medias_maya.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/camisa_miku.png",
+    "to": "backend/static/assets/clothes/male/camisa_miku.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/vestido.png",
+    "to": "backend/static/assets/clothes/male/vestido.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/Camisa_morada_mujer.png",
+    "to": "backend/static/assets/clothes/male/Camisa_morada_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/zapatos_beige.png",
+    "to": "backend/static/assets/clothes/male/zapatos_beige.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/Camisa_verde_mujer.png",
+    "to": "backend/static/assets/clothes/male/Camisa_verde_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/Corset_rojo.png",
+    "to": "backend/static/assets/clothes/male/Corset_rojo.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/esqueleto_azul.png",
+    "to": "backend/static/assets/clothes/male/esqueleto_azul.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/falda_miku.png",
+    "to": "backend/static/assets/clothes/male/falda_miku.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/falda_2.png",
+    "to": "backend/static/assets/clothes/male/falda_2.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/camisa_cafe.png",
+    "to": "backend/static/assets/clothes/male/camisa_cafe.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/esqueleto_blanco_mujer.png",
+    "to": "backend/static/assets/clothes/male/esqueleto_blanco_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/zapatos_rosados.png",
+    "to": "backend/static/assets/clothes/male/zapatos_rosados.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/calentadoras.png",
+    "to": "backend/static/assets/clothes/male/calentadoras.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/Camisa_roja_mujer.png",
+    "to": "backend/static/assets/clothes/male/Camisa_roja_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/Camisa_negra_mujer.png",
+    "to": "backend/static/assets/clothes/male/Camisa_negra_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/camisa_elegante_mujer.png",
+    "to": "backend/static/assets/clothes/male/camisa_elegante_mujer.png"
+  },
+  {
+    "from": "backend/static/assets/clothes/female/falda_blanca.png",
+    "to": "backend/static/assets/clothes/male/falda_blanca.png"
+  },
+  {
+    "from": "backend/static/assets/backgrounds/bg_002.png",
+    "to": "backend/static/assets/backgrounds/unisex/bg_002.png"
+  },
+  {
+    "from": "backend/static/assets/hair/female/hair_4.png",
+    "to": "backend/static/assets/hair/male/hair_4.png"
+  },
+  {
+    "from": "backend/static/assets/hair/female/hair_2.png",
+    "to": "backend/static/assets/hair/male/hair_2.png"
+  },
+  {
+    "from": "backend/static/assets/hair/female/hair_1.png",
+    "to": "backend/static/assets/hair/male/hair_1.png"
+  },
+  {
+    "from": "backend/static/assets/hair/female/hair_3.png",
+    "to": "backend/static/assets/hair/male/hair_3.png"
+  },
+  {
+    "from": "backend/static/assets/accessories/unisex/manilla_1.png",
+    "to": "backend/static/assets/accessories/male/manilla_1.png"
+  },
+  {
+    "from": "backend/static/assets/accessories/female/collar_1.png",
+    "to": "backend/static/assets/accessories/male/collar_1.png"
+  },
+  {
+    "from": "backend/static/assets/accessories/female/manilla_2.png",
+    "to": "backend/static/assets/accessories/male/manilla_2.png"
+  },
+  {
+    "from": "backend/static/assets/accessories/female/moño.png",
+    "to": "backend/static/assets/accessories/male/moño.png"
+  },
+  {
+    "from": "backend/static/assets/accessories/female/gafas_2.png",
+    "to": "backend/static/assets/accessories/male/gafas_2.png"
+  },
+  {
+    "from": "backend/static/assets/accessories/female/orejas_gato.png",
+    "to": "backend/static/assets/accessories/male/orejas_gato.png"
+  },
+  {
+    "from": "backend/static/assets/makeup/female/rubor.png",
+    "to": "backend/static/assets/makeup/male/rubor.png"
+  },
+  {
+    "from": "backend/static/assets/makeup/female/ahumado_morado.png",
+    "to": "backend/static/assets/makeup/male/ahumado_morado.png"
+  },
+  {
+    "from": "backend/static/assets/makeup/female/ahumado_negro.png",
+    "to": "backend/static/assets/makeup/male/ahumado_negro.png"
+  },
+  {
+    "from": "backend/static/assets/makeup/female/remolino_rubor.png",
+    "to": "backend/static/assets/makeup/male/remolino_rubor.png"
+  },
+  {
+    "from": "backend/static/assets/mouth/female/boca_3.png",
+    "to": "backend/static/assets/mouth/male/boca_3.png"
+  },
+  {
+    "from": "avatares/eyes/ojos_6.png",
+    "to": "backend/static/assets/eyes/unisex/ojos_6.png"
+  },
+  {
+    "from": "avatares/eyes/ojos_5.png",
+    "to": "backend/static/assets/eyes/unisex/ojos_5.png"
+  },
+  {
+    "from": "avatares/eyes/ojos_4.png",
+    "to": "backend/static/assets/eyes/unisex/ojos_4.png"
+  },
+  {
+    "from": "avatares/clothes/camisa_colombia_2.png",
+    "to": "backend/static/assets/clothes/unisex/camisa_colombia_2.png"
+  },
+  {
+    "from": "avatares/clothes/pantalon_rojo.png",
+    "to": "backend/static/assets/clothes/unisex/pantalon_rojo.png"
+  },
+  {
+    "from": "avatares/clothes/Medias_maya.png",
+    "to": "backend/static/assets/clothes/unisex/Medias_maya.png"
+  },
+  {
+    "from": "avatares/clothes/pantalon_blanco.png",
+    "to": "backend/static/assets/clothes/unisex/pantalon_blanco.png"
+  },
+  {
+    "from": "avatares/clothes/camisa_miku.png",
+    "to": "backend/static/assets/clothes/unisex/camisa_miku.png"
+  },
+  {
+    "from": "avatares/clothes/vestido.png",
+    "to": "backend/static/assets/clothes/unisex/vestido.png"
+  },
+  {
+    "from": "avatares/clothes/zapatos_beige.png",
+    "to": "backend/static/assets/clothes/unisex/zapatos_beige.png"
+  },
+  {
+    "from": "avatares/clothes/pantalon_azul.png",
+    "to": "backend/static/assets/clothes/unisex/pantalon_azul.png"
+  },
+  {
+    "from": "avatares/clothes/Corset_rojo.png",
+    "to": "backend/static/assets/clothes/unisex/Corset_rojo.png"
+  },
+  {
+    "from": "avatares/clothes/esqueleto_azul.png",
+    "to": "backend/static/assets/clothes/unisex/esqueleto_azul.png"
+  },
+  {
+    "from": "avatares/clothes/falda_miku.png",
+    "to": "backend/static/assets/clothes/unisex/falda_miku.png"
+  },
+  {
+    "from": "avatares/clothes/falda_2.png",
+    "to": "backend/static/assets/clothes/unisex/falda_2.png"
+  },
+  {
+    "from": "avatares/clothes/camisa_cafe.png",
+    "to": "backend/static/assets/clothes/unisex/camisa_cafe.png"
+  },
+  {
+    "from": "avatares/clothes/camisa_colombia.png",
+    "to": "backend/static/assets/clothes/unisex/camisa_colombia.png"
+  },
+  {
+    "from": "avatares/clothes/real_madrid.png",
+    "to": "backend/static/assets/clothes/unisex/real_madrid.png"
+  },
+  {
+    "from": "avatares/clothes/zapatos_rosados.png",
+    "to": "backend/static/assets/clothes/unisex/zapatos_rosados.png"
+  },
+  {
+    "from": "avatares/clothes/calentadoras.png",
+    "to": "backend/static/assets/clothes/unisex/calentadoras.png"
+  },
+  {
+    "from": "avatares/clothes/pantalon_cafe.png",
+    "to": "backend/static/assets/clothes/unisex/pantalon_cafe.png"
+  },
+  {
+    "from": "avatares/clothes/camisa_elegante_blanca.png",
+    "to": "backend/static/assets/clothes/unisex/camisa_elegante_blanca.png"
+  },
+  {
+    "from": "avatares/clothes/falda_blanca.png",
+    "to": "backend/static/assets/clothes/unisex/falda_blanca.png"
+  },
+  {
+    "from": "avatares/hair/hair_6.png",
+    "to": "backend/static/assets/hair/unisex/hair_6.png"
+  },
+  {
+    "from": "avatares/hair/hair_5.png",
+    "to": "backend/static/assets/hair/unisex/hair_5.png"
+  },
+  {
+    "from": "avatares/hair/hair_4.png",
+    "to": "backend/static/assets/hair/unisex/hair_4.png"
+  },
+  {
+    "from": "avatares/hair/hair_7.png",
+    "to": "backend/static/assets/hair/unisex/hair_7.png"
+  },
+  {
+    "from": "avatares/hair/hair_2.png",
+    "to": "backend/static/assets/hair/unisex/hair_2.png"
+  },
+  {
+    "from": "avatares/hair/hair_1.png",
+    "to": "backend/static/assets/hair/unisex/hair_1.png"
+  },
+  {
+    "from": "avatares/hair/hair_3.png",
+    "to": "backend/static/assets/hair/unisex/hair_3.png"
+  },
+  {
+    "from": "avatares/mounth/boca_4.png",
+    "to": "backend/static/assets/mouth/unisex/boca_4.png"
+  },
+  {
+    "from": "avatares/mounth/boca_3.png",
+    "to": "backend/static/assets/mouth/unisex/boca_3.png"
+  },
+  {
+    "from": "avatares/accessories/collar_1.png",
+    "to": "backend/static/assets/accessories/unisex/collar_1.png"
+  },
+  {
+    "from": "avatares/accessories/moño.png",
+    "to": "backend/static/assets/accessories/unisex/moño.png"
+  },
+  {
+    "from": "avatares/accessories/gafas_2.png",
+    "to": "backend/static/assets/accessories/unisex/gafas_2.png"
+  },
+  {
+    "from": "avatares/accessories/orejas_gato.png",
+    "to": "backend/static/assets/accessories/unisex/orejas_gato.png"
+  },
+  {
+    "from": "avatares/makeup/rubor.png",
+    "to": "backend/static/assets/makeup/unisex/rubor.png"
+  },
+  {
+    "from": "avatares/makeup/ahumado_morado.png",
+    "to": "backend/static/assets/makeup/unisex/ahumado_morado.png"
+  },
+  {
+    "from": "avatares/makeup/ahumado_negro.png",
+    "to": "backend/static/assets/makeup/unisex/ahumado_negro.png"
+  },
+  {
+    "from": "avatares/makeup/remolino_rubor.png",
+    "to": "backend/static/assets/makeup/unisex/remolino_rubor.png"
+  }
+]

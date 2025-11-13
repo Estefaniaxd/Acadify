@@ -1,30 +1,28 @@
-from datetime import timedelta, datetime
-from src.utils.datetime_utils import utcnow_aware
-from typing import Optional, List
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from datetime import datetime, timedelta
 import uuid
 
-from ...models.users.usuario import Usuario
-from ...models.users.oauth_provider import OAuthProvider
-from ...schemas.auth.user_auth_schemas import UserRegisterRequest, UserProfileUpdate
-from ...schemas.users.usuario import UsuarioCreate, UsuarioUpdate
-from ...services.auth.password_service import PasswordService
-from ...enums.users.usuario_enums import RolUsuario, EstadoCuentaUsuario
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session
+
+from src.enums.users.usuario_enums import EstadoCuentaUsuario, RolUsuario
+from src.models.users.usuario import Usuario
+from src.schemas.auth.user_auth_schemas import UserProfileUpdate, UserRegisterRequest
+from src.services.auth.password_service import PasswordService
+from src.utils.datetime_utils import utcnow_aware
 
 
 class UserCRUD:
-    """CRUD operations para usuarios"""
+    """CRUD operations para usuarios."""
 
-    def __init__(self, password_service: PasswordService):
+    def __init__(self, password_service: PasswordService) -> None:
         self.password_service = password_service
 
-    def get_by_id(self, db: Session, user_id: str) -> Optional[Usuario]:
-        """Obtener usuario por ID"""
+    def get_by_id(self, db: Session, user_id: str) -> Usuario | None:
+        """Obtener usuario por ID."""
         return db.query(Usuario).filter(Usuario.usuario_id == user_id).first()
 
-    def get_by_email(self, db: Session, email: str) -> Optional[Usuario]:
-        """Obtener usuario por email institucional"""
+    def get_by_email(self, db: Session, email: str) -> Usuario | None:
+        """Obtener usuario por email institucional."""
         if not email:
             return None
         return (
@@ -33,14 +31,14 @@ class UserCRUD:
             .first()
         )
 
-    def get_by_username(self, db: Session, username: str) -> Optional[Usuario]:
-        """Obtener usuario por username (solo administradores)"""
+    def get_by_username(self, db: Session, username: str) -> Usuario | None:
+        """Obtener usuario por username (solo administradores)."""
         return db.query(Usuario).filter(Usuario.username == username).first()
 
     def get_by_document(
         self, db: Session, tipo_documento: str, numero_documento: str
-    ) -> Optional[Usuario]:
-        """Obtener usuario por documento"""
+    ) -> Usuario | None:
+        """Obtener usuario por documento."""
         return (
             db.query(Usuario)
             .filter(
@@ -53,8 +51,7 @@ class UserCRUD:
         )
 
     def create_user(self, db: Session, user_create: UserRegisterRequest) -> Usuario:
-        """
-        Crear nuevo usuario con validaciones de seguridad
+        """Crear nuevo usuario con validaciones de seguridad.
 
         Args:
             db: Sesión de base de datos
@@ -70,26 +67,30 @@ class UserCRUD:
         if user_create.correo_institucional:
             existing_user = self.get_by_email(db, user_create.correo_institucional)
             if existing_user:
-                raise ValueError("Ya existe un usuario con este email institucional")
+                msg = "Ya existe un usuario con este email institucional"
+                raise ValueError(msg)
 
         if user_create.username:
             existing_user = self.get_by_username(db, user_create.username)
             if existing_user:
-                raise ValueError("Ya existe un usuario con este nombre de usuario")
+                msg = "Ya existe un usuario con este nombre de usuario"
+                raise ValueError(msg)
 
         # Verificar documento
         existing_user = self.get_by_document(
             db, user_create.tipo_documento, user_create.numero_documento
         )
         if existing_user:
-            raise ValueError("Ya existe un usuario con este documento")
+            msg = "Ya existe un usuario con este documento"
+            raise ValueError(msg)
 
         # Validar política de contraseñas
         is_valid, errors = self.password_service.validate_password_policy(
             user_create.password
         )
         if not is_valid:
-            raise ValueError(f"Contraseña no cumple políticas: {', '.join(errors)}")
+            msg = f"Contraseña no cumple políticas: {', '.join(errors)}"
+            raise ValueError(msg)
 
         # Crear usuario
         hashed_password = self.password_service.hash_password(user_create.password)
@@ -130,9 +131,8 @@ class UserCRUD:
         user_id: str,
         user_update: UserProfileUpdate,
         current_user: Usuario = None,
-    ) -> Optional[Usuario]:
-        """
-        Actualizar usuario (solo campos permitidos según rol)
+    ) -> Usuario | None:
+        """Actualizar usuario (solo campos permitidos según rol).
 
         Args:
             db: Sesión de base de datos
@@ -148,12 +148,12 @@ class UserCRUD:
             return None
 
         # Verificar permisos: solo el propio usuario o admin puede actualizar
-        if current_user:
-            if (
-                str(current_user.usuario_id) != user_id
-                and current_user.rol != RolUsuario.administrador
-            ):
-                raise ValueError("No tiene permisos para actualizar este usuario")
+        if current_user and (
+            str(current_user.usuario_id) != user_id
+            and current_user.rol != RolUsuario.administrador
+        ):
+            msg = "No tiene permisos para actualizar este usuario"
+            raise ValueError(msg)
 
         # Actualizar campos permitidos
         update_data = user_update.dict(exclude_unset=True)
@@ -170,10 +170,9 @@ class UserCRUD:
         user_id: str,
         new_password: str,
         verify_current: bool = True,
-        current_password: str = None,
+        current_password: str | None = None,
     ) -> bool:
-        """
-        Actualizar contraseña de usuario
+        """Actualizar contraseña de usuario.
 
         Args:
             db: Sesión de base de datos
@@ -194,14 +193,14 @@ class UserCRUD:
             if not self.password_service.verify_password(
                 current_password, db_user.password_hash
             ):
-                raise ValueError("Contraseña actual incorrecta")
+                msg = "Contraseña actual incorrecta"
+                raise ValueError(msg)
 
         # Validar nueva contraseña
         is_valid, errors = self.password_service.validate_password_policy(new_password)
         if not is_valid:
-            raise ValueError(
-                f"Nueva contraseña no cumple políticas: {', '.join(errors)}"
-            )
+            msg = f"Nueva contraseña no cumple políticas: {', '.join(errors)}"
+            raise ValueError(msg)
 
         # Actualizar contraseña
         hashed_password = self.password_service.hash_password(new_password)
@@ -215,7 +214,7 @@ class UserCRUD:
         return True
 
     def verify_password(self, db: Session, user_id: str, password: str) -> bool:
-        """Verificar contraseña de usuario"""
+        """Verificar contraseña de usuario."""
         db_user = self.get_by_id(db, user_id)
         if not db_user:
             return False
@@ -223,7 +222,7 @@ class UserCRUD:
         return self.password_service.verify_password(password, db_user.password_hash)
 
     def increment_failed_attempts(self, db: Session, user_id: str) -> int:
-        """Incrementar contador de intentos fallidos"""
+        """Incrementar contador de intentos fallidos."""
         db_user = self.get_by_id(db, user_id)
         if not db_user:
             return 0
@@ -240,8 +239,8 @@ class UserCRUD:
         db.commit()
         return db_user.failed_login_attempts
 
-    def reset_failed_attempts(self, db: Session, user_id: str):
-        """Resetear contador de intentos fallidos (login exitoso)"""
+    def reset_failed_attempts(self, db: Session, user_id: str) -> None:
+        """Resetear contador de intentos fallidos (login exitoso)."""
         db_user = self.get_by_id(db, user_id)
         if db_user:
             db_user.failed_login_attempts = 0
@@ -251,8 +250,8 @@ class UserCRUD:
 
     def is_account_locked(
         self, db: Session, user_id: str
-    ) -> tuple[bool, Optional[datetime]]:
-        """Verificar si la cuenta está bloqueada"""
+    ) -> tuple[bool, datetime | None]:
+        """Verificar si la cuenta está bloqueada."""
         db_user = self.get_by_id(db, user_id)
         if not db_user or not db_user.locked_until:
             return False, None
@@ -264,23 +263,25 @@ class UserCRUD:
             return False, None
         return True, db_user.locked_until
 
-    def set_email_verified(self, db: Session, user_id: str, verified: bool = True):
-        """Marcar email como verificado"""
+    def set_email_verified(
+        self, db: Session, user_id: str, verified: bool = True
+    ) -> None:
+        """Marcar email como verificado."""
         db_user = self.get_by_id(db, user_id)
         if db_user:
             db_user.email_verified = verified
             db.commit()
 
-    def enable_2fa(self, db: Session, user_id: str, secret: str):
-        """Habilitar 2FA para usuario"""
+    def enable_2fa(self, db: Session, user_id: str, secret: str) -> None:
+        """Habilitar 2FA para usuario."""
         db_user = self.get_by_id(db, user_id)
         if db_user:
             db_user.twofa_enabled = True
             db_user.twofa_secret = secret
             db.commit()
 
-    def disable_2fa(self, db: Session, user_id: str):
-        """Deshabilitar 2FA para usuario"""
+    def disable_2fa(self, db: Session, user_id: str) -> None:
+        """Deshabilitar 2FA para usuario."""
         db_user = self.get_by_id(db, user_id)
         if db_user:
             db_user.twofa_enabled = False
@@ -292,11 +293,10 @@ class UserCRUD:
         db: Session,
         skip: int = 0,
         limit: int = 100,
-        role_filter: Optional[RolUsuario] = None,
-        search: Optional[str] = None,
-    ) -> tuple[List[Usuario], int]:
-        """
-        Obtener usuarios con paginación y filtros
+        role_filter: RolUsuario | None = None,
+        search: str | None = None,
+    ) -> tuple[list[Usuario], int]:
+        """Obtener usuarios con paginación y filtros.
 
         Returns:
             tuple: (usuarios, total_count)
@@ -323,7 +323,7 @@ class UserCRUD:
         return users, total_count
 
     def delete_user(self, db: Session, user_id: str) -> bool:
-        """Eliminar usuario (soft delete cambiando estado)"""
+        """Eliminar usuario (soft delete cambiando estado)."""
         db_user = self.get_by_id(db, user_id)
         if not db_user:
             return False
@@ -333,9 +333,9 @@ class UserCRUD:
         return True
 
     def lock_user_account(
-        self, db: Session, user_id: str, duration_minutes: int = None
-    ):
-        """Bloquear cuenta de usuario (admin action)"""
+        self, db: Session, user_id: str, duration_minutes: int | None = None
+    ) -> bool:
+        """Bloquear cuenta de usuario (admin action)."""
         db_user = self.get_by_id(db, user_id)
         if not db_user:
             return False

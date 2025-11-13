@@ -1,14 +1,16 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, ForeignKey, func
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, ENUM, TEXT, BOOLEAN, INTEGER
-from ...enums.communication.chat_grupo_enums import EstadoChatGrupo
+from sqlalchemy import Column, ForeignKey, func, text
+from sqlalchemy.dialects.postgresql import BOOLEAN, ENUM, INTEGER, TEXT, TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
+from src.enums.communication.chat_grupo_enums import EstadoChatGrupo
+
 
 class ChatGrupo(Base):
     __tablename__ = "ChatGrupo"
 
     chat_grupo_id = Column(
-    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     grupo_id = Column(
         UUID(as_uuid=True),
@@ -31,6 +33,8 @@ class ChatGrupo(Base):
         server_default=text("'activo'"),
     )
 
-    mensajes = relationship("Mensaje", backref="chat_grupo", passive_deletes=True)
+    # Relación con archivos del chat del grupo
+    #     archivos = relationship("ArchivoChat", backref="chat_grupo", passive_deletes=True)
 
-    archivos = relationship("ArchivoChat", backref="chat_grupo", passive_deletes=True)
+    # NOTA: ChatGrupo NO tiene relación directa con Mensaje
+    # Los mensajes se relacionan con SalaChat (salas_chat), no con ChatGrupo

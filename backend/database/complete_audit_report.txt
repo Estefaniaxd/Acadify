@@ -1,0 +1,95 @@
+
+================================================================================
+📊 REPORTE DE AUDITORÍA COMPLETA
+================================================================================
+Fecha: 2025-11-05T16:19:35.599773
+
+📈 ESTADÍSTICAS GENERALES:
+  • Tablas auditadas: 17
+  • Modelos verificados: 17
+  • Columnas comparadas: 560
+  • Problemas encontrados: 28
+
+📋 RESUMEN POR TABLA:
+
+  ✅ OK Usuario
+     Columnas: DB=26, Model=26, Común=26
+
+  ✅ OK Estudiante
+     Columnas: DB=6, Model=6, Común=6
+
+  ✅ OK Docente
+     Columnas: DB=6, Model=6, Común=6
+
+  ✅ OK Coordinador
+     Columnas: DB=3, Model=3, Común=3
+
+  ✅ OK AdministradorSistema
+     Columnas: DB=1, Model=1, Común=1
+
+  ⚠️  ADVERTENCIAS Curso
+     Columnas: DB=64, Model=64, Común=64
+     ⚠️  3 advertencias
+
+  ⚠️  ADVERTENCIAS Grupo
+     Columnas: DB=56, Model=56, Común=56
+     ⚠️  1 advertencias
+
+  ✅ OK GrupoCurso
+     Columnas: DB=5, Model=5, Común=5
+
+  ✅ OK EstudianteGrupo
+     Columnas: DB=3, Model=3, Común=3
+
+  ✅ OK Programa
+     Columnas: DB=67, Model=67, Común=67
+
+  ❌ ERRORES tareas
+     Columnas: DB=45, Model=45, Común=45
+     ❌ 15 errores
+        • Tipo incompatible en 'docente_id': DB=UUID, Model=VARCHAR
+        • Tipo incompatible en 'puntuacion_maxima': DB=DOUBLE PRECISION, Model=FLOAT
+        • Tipo incompatible en 'peso_evaluacion': DB=DOUBLE PRECISION, Model=FLOAT
+     ⚠️  4 advertencias
+
+  ❌ ERRORES entregas_tareas
+     Columnas: DB=36, Model=36, Común=36
+     ❌ 8 errores
+        • Tipo incompatible en 'fecha_limite_original': DB=TIMESTAMP, Model=DATETIME
+        • Tipo incompatible en 'calificado_por': DB=UUID, Model=VARCHAR
+        • Tipo incompatible en 'fecha_calificacion': DB=TIMESTAMP, Model=DATETIME
+     ⚠️  2 advertencias
+
+  ✅ OK evaluaciones
+     Columnas: DB=82, Model=82, Común=82
+
+  ✅ OK intentos_evaluacion
+     Columnas: DB=68, Model=68, Común=68
+
+  ❌ ERRORES preguntas_evaluacion
+     Columnas: DB=42, Model=42, Común=42
+     ❌ 1 errores
+        • Tipo incompatible en 'puntos_respuesta_parcial': DB=BOOLEAN, Model=DOUBLE PRECISION
+     ⚠️  2 advertencias
+
+  ❌ ERRORES Comentario
+     Columnas: DB=13, Model=13, Común=13
+     ❌ 4 errores
+        • Tipo incompatible en 'fecha_actualizacion': DB=TIMESTAMP, Model=DATETIME
+        • Tipo incompatible en 'fecha_eliminacion': DB=TIMESTAMP, Model=DATETIME
+        • Tipo incompatible en 'fecha_creacion': DB=TIMESTAMP, Model=DATETIME
+
+  ✅ OK Institucion
+     Columnas: DB=37, Model=37, Común=37
+
+================================================================================
+🎯 RESUMEN FINAL:
+  ✅ Tablas sin problemas: 11
+  ❌ Tablas con errores: 4
+
+⚠️  TABLAS QUE REQUIEREN ATENCIÓN:
+  • tareas: 15 errores
+  • entregas_tareas: 8 errores
+  • preguntas_evaluacion: 1 errores
+  • Comentario: 4 errores
+================================================================================

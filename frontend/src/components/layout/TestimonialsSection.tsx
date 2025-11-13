@@ -1,38 +1,35 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FiStar, FiUsers, FiHeart } from 'react-icons/fi';
-import { RiDoubleQuotesL } from 'react-icons/ri';
-
+import { motion } from "framer-motion";
+import { Heart, Quote, Star, Users } from "lucide-react";
 const testimonials = [
   {
-    name: 'María López',
-    role: 'Estudiante de Ingeniería',
-    university: 'Universidad Tecnológica',
-    text: 'Acadify transformó completamente mi experiencia de aprendizaje. Los retos gamificados me mantienen motivada y las recompensas hacen que cada logro se sienta increíble. ¡Mi rendimiento académico mejoró un 40%!',
-    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+    name: "María López",
+    role: "Estudiante de Ingeniería",
+    university: "Universidad Tecnológica",
+    text: "Acadify transformó completamente mi experiencia de aprendizaje. Los retos gamificados me mantienen motivada y las recompensas hacen que cada logro se sienta increíble. ¡Mi rendimiento académico mejoró un 40%!",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
     rating: 5,
-    color: 'from-pink-500 to-rose-600',
-    bgColor: 'from-pink-50 to-rose-50',
+    color: "from-pink-500 to-rose-600",
+    bgColor: "from-pink-50 to-rose-50",
   },
   {
-    name: 'Carlos Pérez',
-    role: 'Docente universitario',
-    university: 'Instituto de Ciencias',
-    text: 'La inteligencia artificial y la gamificación de Acadify revolucionaron mi metodología de enseñanza. Mis estudiantes están más comprometidos que nunca y los resultados de aprendizaje son extraordinarios.',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+    name: "Carlos Pérez",
+    role: "Docente universitario",
+    university: "Instituto de Ciencias",
+    text: "La inteligencia artificial y la gamificación de Acadify revolucionaron mi metodología de enseñanza. Mis estudiantes están más comprometidos que nunca y los resultados de aprendizaje son extraordinarios.",
+    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
     rating: 5,
-    color: 'from-blue-500 to-indigo-600',
-    bgColor: 'from-blue-50 to-indigo-50',
+    color: "from-blue-500 to-indigo-600",
+    bgColor: "from-blue-50 to-indigo-50",
   },
   {
-    name: 'Ana Torres',
-    role: 'Desarrolladora Full-Stack',
-    university: 'Freelancer & Mentora',
-    text: 'Como desarrolladora, aprecio profundamente que Acadify sea open source. La comunidad es increíble y el impacto social que genera es inspirador. La plataforma es técnicamente excelente y visualmente stunning.',
-    avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
+    name: "Ana Torres",
+    role: "Desarrolladora Full-Stack",
+    university: "Freelancer & Mentora",
+    text: "Como desarrolladora, aprecio profundamente que Acadify sea open source. La comunidad es increíble y el impacto social que genera es inspirador. La plataforma es técnicamente excelente y visualmente stunning.",
+    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
     rating: 5,
-    color: 'from-emerald-500 to-teal-600',
-    bgColor: 'from-emerald-50 to-teal-50',
+    color: "from-emerald-500 to-teal-600",
+    bgColor: "from-emerald-50 to-teal-50",
   },
 ];
 
@@ -69,19 +66,19 @@ export default function TestimonialsSection() {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-200 font-medium text-sm mb-6"
           >
-            <FiUsers className="w-4 h-4" />
+            <Users className="w-4 h-4" />
             Testimonios reales
           </motion.div>
-          
+
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6">
-            Lo que dicen nuestros{' '}
+            Lo que dicen nuestros{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600">
               usuarios
             </span>
           </h2>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Miles de estudiantes y educadores ya han transformado su experiencia de aprendizaje. 
+            Miles de estudiantes y educadores ya han transformado su experiencia de aprendizaje.
             Descubre por qué Acadify es la plataforma educativa más amada del momento.
           </p>
         </motion.div>
@@ -101,16 +98,16 @@ export default function TestimonialsSection() {
               {/* Tarjeta principal */}
               <div className="relative h-full p-8 rounded-3xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-white/50 dark:border-gray-800/60 shadow-xl transition-all duration-500 group-hover:shadow-2xl overflow-hidden">
                 {/* Fondo gradiente sutil */}
-                <div 
+                <div
                   className={`absolute inset-0 bg-gradient-to-br ${testimonial.bgColor} dark:from-gray-800 dark:to-gray-900 opacity-0 group-hover:opacity-60 dark:group-hover:opacity-40 transition-opacity duration-500`}
                 />
-                
+
                 {/* Icono de comillas */}
                 <motion.div
                   className={`absolute top-6 right-6 w-12 h-12 rounded-2xl bg-gradient-to-br ${testimonial.color} dark:from-violet-900 dark:to-purple-900 flex items-center justify-center shadow-lg opacity-20 group-hover:opacity-100 transition-opacity duration-300`}
                   whileHover={{ rotate: 10, scale: 1.1 }}
                 >
-                  <RiDoubleQuotesL className="w-6 h-6 text-white" />
+                  <Quote className="w-6 h-6 text-white" />
                 </motion.div>
 
                 {/* Avatar con efecto 3D */}
@@ -119,20 +116,22 @@ export default function TestimonialsSection() {
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${testimonial.color} dark:from-violet-900 dark:to-purple-900 p-1 mx-auto shadow-lg`}>
-                    <img 
-                      src={testimonial.avatar} 
-                      alt={testimonial.name} 
+                  <div
+                    className={`w-20 h-20 rounded-full bg-gradient-to-br ${testimonial.color} dark:from-violet-900 dark:to-purple-900 p-1 mx-auto shadow-lg`}
+                  >
+                    <img
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
                       className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-800"
                     />
                   </div>
-                  
+
                   {/* Badge de verificación */}
                   <motion.div
                     className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-emerald-800 dark:to-teal-800 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-800"
                     whileHover={{ scale: 1.2 }}
                   >
-                    <FiHeart className="w-3 h-3 text-white" />
+                    <Heart className="w-3 h-3 text-white" />
                   </motion.div>
                 </motion.div>
 
@@ -144,10 +143,10 @@ export default function TestimonialsSection() {
                       initial={{ opacity: 0, scale: 0 }}
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
-                      transition={{ delay: 0.5 + (i * 0.1), duration: 0.3 }}
+                      transition={{ delay: 0.5 + i * 0.1, duration: 0.3 }}
                       whileHover={{ scale: 1.2 }}
                     >
-                      <FiStar className="w-5 h-5 text-yellow-400 fill-current" />
+                      <Star className="w-5 h-5 text-yellow-400 fill-current" />
                     </motion.div>
                   ))}
                 </div>
@@ -175,7 +174,7 @@ export default function TestimonialsSection() {
                 {/* Elementos decorativos */}
                 <div className="absolute bottom-4 left-4 w-2 h-2 bg-violet-400 dark:bg-violet-700 rounded-full opacity-40"></div>
                 <div className="absolute top-4 left-4 w-1 h-1 bg-purple-400 dark:bg-purple-700 rounded-full opacity-60"></div>
-                
+
                 {/* Efecto de brillo eliminado por feedback */}
               </div>
             </motion.div>
@@ -192,17 +191,17 @@ export default function TestimonialsSection() {
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { number: '50K+', label: 'Estudiantes activos' },
-              { number: '1.2K+', label: 'Educadores certificados' },
-              { number: '4.9', label: 'Rating promedio' },
-              { number: '96%', label: 'Tasa de satisfacción' }
+              { number: "50K+", label: "Estudiantes activos" },
+              { number: "1.2K+", label: "Educadores certificados" },
+              { number: "4.9", label: "Rating promedio" },
+              { number: "96%", label: "Tasa de satisfacción" },
             ].map((stat, idx) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 1.2 + (0.1 * idx), duration: 0.6 }}
+                transition={{ delay: 1.2 + 0.1 * idx, duration: 0.6 }}
                 className="text-center"
               >
                 <div className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 mb-2">

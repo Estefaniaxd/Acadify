@@ -1,13 +1,141 @@
-import { useState, ChangeEvent, FormEvent, useEffect } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import formatApiError from '../../utils/formatApiError'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  FiEye, FiEyeOff, FiLock, FiCheckCircle, FiAlertCircle, FiMail, 
-  FiArrowRight, FiShield, FiKey, FiRefreshCw 
-} from 'react-icons/fi'
+import { AlertCircle, ArrowRight, CheckCircle, Eye, EyeOff, Lock, Mail, RefreshCw, Shield } from 'lucide-react'
 import { HiShieldCheck } from 'react-icons/hi'
+import { FiKey } from 'react-icons/fi'
+
+// Componente de campo personalizado (movido fuera para evitar recreación)
+const FormField = ({ 
+  icon: Icon, 
+  label, 
+  field, 
+  type = 'text', 
+  placeholder, 
+  isPassword = false,
+  showPasswordToggle = null,
+  onTogglePassword,
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  error,
+  touched,
+  focusedField
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  field: string
+  type?: string
+  placeholder: string
+  isPassword?: boolean
+  showPasswordToggle?: boolean | null
+  onTogglePassword?: () => void
+  value: string
+  onChange: (value: string) => void
+  onFocus: () => void
+  onBlur: () => void
+  error: string
+  touched: boolean
+  focusedField: string | null
+}) => {
+  const isVisible = showPasswordToggle !== null ? showPasswordToggle : false
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="space-y-2"
+    >
+      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <motion.div
+            animate={{
+              color: focusedField === field ? '#3b82f6' : '#9ca3af'
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            <Icon className="w-5 h-5" />
+          </motion.div>
+        </div>
+        
+        <input
+          type={isPassword ? (isVisible ? 'text' : 'password') : type}
+          className={`w-full pl-12 ${isPassword ? 'pr-12' : 'pr-4'} py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
+            focusedField === field
+              ? 'border-blue-500 bg-white dark:bg-gray-700 shadow-lg shadow-blue-500/20'
+              : error
+              ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+          }`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          autoComplete={field === 'email' ? 'username' : isPassword ? 'new-password' : 'off'}
+        />
+        
+        {isPassword && onTogglePassword && (
+          <motion.button
+            type="button"
+            className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-blue-600 transition-colors duration-200"
+            onClick={onTogglePassword}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {isVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </motion.button>
+        )}
+        
+        {/* Indicadores de validación */}
+        <AnimatePresence>
+          {touched && !error && value && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
+            >
+              <CheckCircle className="w-5 h-5 text-emerald-500" />
+            </motion.div>
+          )}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
+            >
+              <AlertCircle className="w-5 h-5 text-red-500" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      
+      {/* Mensaje de error */}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
+          >
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('')
@@ -32,7 +160,7 @@ export default function ResetPassword() {
         return !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) ? 'Email inválido' : ''
       case 'code':
         return value.length < 6 ? 'El código debe tener al menos 6 caracteres' : ''
-      case 'password':
+      case 'password': {
         if (value.length < 10) return 'La contraseña debe tener al menos 10 caracteres'
         const hasUpper = /[A-Z]/.test(value)
         const hasLower = /[a-z]/.test(value)
@@ -41,6 +169,7 @@ export default function ResetPassword() {
         if (!hasUpper || !hasLower || !hasDigit || !hasSpecial) 
           return 'Debe contener mayúscula, minúscula, número y carácter especial'
         return ''
+      }
       case 'confirm':
         return value !== password ? 'Las contraseñas no coinciden' : ''
       default:
@@ -118,133 +247,20 @@ export default function ResetPassword() {
       )
       setSuccess(true)
       setTimeout(() => navigate('/login'), 3000)
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setGlobalError(formatApiError(err.response.data))
+    } catch (err) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: unknown } }
+        if (axiosError.response?.data) {
+          setGlobalError(formatApiError(axiosError.response.data))
+        } else {
+          setGlobalError('Error al restablecer la contraseña. Intenta de nuevo.')
+        }
       } else {
         setGlobalError('Error al restablecer la contraseña. Intenta de nuevo.')
       }
     } finally {
       setLoading(false)
     }
-  }
-
-  // Componente de campo personalizado
-  const FormField = ({ 
-    icon: Icon, 
-    label, 
-    field, 
-    type = 'text', 
-    placeholder, 
-    isPassword = false,
-    showPasswordToggle = null
-  }: {
-    icon: any
-    label: string
-    field: string
-    type?: string
-    placeholder: string
-    isPassword?: boolean
-    showPasswordToggle?: boolean | null
-  }) => {
-    const value = field === 'email' ? email : field === 'code' ? code : field === 'password' ? password : confirm
-    const isVisible = showPasswordToggle !== null ? showPasswordToggle : false
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="space-y-2"
-      >
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-          {label}
-        </label>
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <motion.div
-              animate={{
-                color: focusedField === field ? '#3b82f6' : '#9ca3af'
-              }}
-              transition={{ duration: 0.2 }}
-            >
-              <Icon className="w-5 h-5" />
-            </motion.div>
-          </div>
-          
-          <input
-            type={isPassword ? (isVisible ? 'text' : 'password') : type}
-            className={`w-full pl-12 ${isPassword ? 'pr-12' : 'pr-4'} py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
-              focusedField === field
-                ? 'border-blue-500 bg-white dark:bg-gray-700 shadow-lg shadow-blue-500/20'
-                : errors[field]
-                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-            }`}
-            value={value}
-            onChange={(e) => updateField(field, e.target.value)}
-            onFocus={() => setFocusedField(field)}
-            onBlur={() => {
-              setFocusedField(null)
-              setTouched(prev => ({ ...prev, [field]: true }))
-            }}
-            placeholder={placeholder}
-            autoComplete={field === 'email' ? 'username' : isPassword ? 'new-password' : 'off'}
-          />
-          
-          {isPassword && (
-            <motion.button
-              type="button"
-              className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-blue-600 transition-colors duration-200"
-              onClick={() => field === 'password' ? setShowPassword(!showPassword) : setShowConfirm(!showConfirm)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {isVisible ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
-            </motion.button>
-          )}
-          
-          {/* Indicadores de validación */}
-          <AnimatePresence>
-            {touched[field] && !errors[field] && value && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-                className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
-              >
-                <FiCheckCircle className="w-5 h-5 text-emerald-500" />
-              </motion.div>
-            )}
-            {errors[field] && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-                className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
-              >
-                <FiAlertCircle className="w-5 h-5 text-red-500" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        
-        {/* Mensaje de error */}
-        <AnimatePresence>
-          {errors[field] && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
-            >
-              <FiAlertCircle className="w-4 h-4" />
-              {errors[field]}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    )
   }
 
   const floatingAnimation = {
@@ -402,11 +418,21 @@ export default function ResetPassword() {
                 
                 <div className="relative z-10 space-y-6">
                   <FormField
-                    icon={FiMail}
+                    icon={Mail}
                     label="Correo electrónico"
                     field="email"
                     type="email"
                     placeholder="tu.email@ejemplo.com"
+                    value={email}
+                    onChange={(value) => updateField('email', value)}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => {
+                      setFocusedField(null)
+                      setTouched(prev => ({ ...prev, email: true }))
+                    }}
+                    error={errors.email}
+                    touched={touched.email}
+                    focusedField={focusedField}
                   />
                   
                   <FormField
@@ -414,24 +440,56 @@ export default function ResetPassword() {
                     label="Código de verificación"
                     field="code"
                     placeholder="Ingresa el código recibido"
+                    value={code}
+                    onChange={(value) => updateField('code', value)}
+                    onFocus={() => setFocusedField('code')}
+                    onBlur={() => {
+                      setFocusedField(null)
+                      setTouched(prev => ({ ...prev, code: true }))
+                    }}
+                    error={errors.code}
+                    touched={touched.code}
+                    focusedField={focusedField}
                   />
                   
                   <FormField
-                    icon={FiLock}
+                    icon={Lock}
                     label="Nueva contraseña"
                     field="password"
                     placeholder="Crea una contraseña segura"
                     isPassword={true}
                     showPasswordToggle={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                    value={password}
+                    onChange={(value) => updateField('password', value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => {
+                      setFocusedField(null)
+                      setTouched(prev => ({ ...prev, password: true }))
+                    }}
+                    error={errors.password}
+                    touched={touched.password}
+                    focusedField={focusedField}
                   />
                   
                   <FormField
-                    icon={FiShield}
+                    icon={Shield}
                     label="Confirmar contraseña"
                     field="confirm"
                     placeholder="Confirma tu nueva contraseña"
                     isPassword={true}
                     showPasswordToggle={showConfirm}
+                    onTogglePassword={() => setShowConfirm(!showConfirm)}
+                    value={confirm}
+                    onChange={(value) => updateField('confirm', value)}
+                    onFocus={() => setFocusedField('confirm')}
+                    onBlur={() => {
+                      setFocusedField(null)
+                      setTouched(prev => ({ ...prev, confirm: true }))
+                    }}
+                    error={errors.confirm}
+                    touched={touched.confirm}
+                    focusedField={focusedField}
                   />
 
                   {/* Indicador de seguridad de contraseña */}
@@ -465,7 +523,7 @@ export default function ResetPassword() {
                               }`}
                             >
                               {req.check ? (
-                                <FiCheckCircle className="w-3 h-3" />
+                                <CheckCircle className="w-3 h-3" />
                               ) : (
                                 <div className="w-3 h-3 rounded-full border border-current" />
                               )}
@@ -486,7 +544,7 @@ export default function ResetPassword() {
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium flex items-center gap-3"
                       >
-                        <FiAlertCircle className="w-5 h-5 flex-shrink-0" />
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
                         <span>{globalError}</span>
                       </motion.div>
                     )}
@@ -538,12 +596,12 @@ export default function ResetPassword() {
                           </>
                         ) : (
                           <>
-                            <FiRefreshCw className="w-5 h-5" />
+                            <RefreshCw className="w-5 h-5" />
                             Restablecer Contraseña
                             <motion.div
                               className="group-hover:translate-x-1 transition-transform duration-200"
                             >
-                              <FiArrowRight className="w-4 h-4" />
+                              <ArrowRight className="w-4 h-4" />
                             </motion.div>
                           </>
                         )}

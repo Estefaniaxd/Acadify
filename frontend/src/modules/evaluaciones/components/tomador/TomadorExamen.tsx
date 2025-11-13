@@ -1,31 +1,29 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ClockIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  FlagIcon,
-  EyeIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-  ArrowPathIcon
-} from '@heroicons/react/24/outline';
-import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
+;
+import { Card, CardContent } from '../common/LayoutComponents';
 import { LoadingSpinner, ProgressBar } from '../common/LoadingComponents';
 import { ConfirmDialog, useToast } from '../common/AlertComponents';
-import { useTomarExamen, useAntiTrampa } from '../../hooks';
+import { useTomarExamen } from '../../hooks';
 import { 
   Examen, 
-  PreguntaExamen, 
   IntentoExamen,
-  RespuestaEstudiante 
+  RespuestaEstudiante,
+  ConfiguracionProctoring,
+  AlertaProctoring,
+  SnapshotProctoring,
+  EventoAudio
 } from '../../types';
 import { formatearTiempo, obtenerColorEstado } from '../../utils';
 import { PantallaPregunta } from './PantallaPregunta';
 import { NavegadorPreguntas } from './NavegadorPreguntas';
 import { TimerExamen } from './TimerExamen';
 import { ResumenFinal } from './ResumenFinal';
+import { ProctoringCamera } from '../proctoring/ProctoringCamera';
+import { ProctoringAudio } from '../proctoring/ProctoringAudio';
+import { AlertasProctoring } from '../proctoring/AlertasProctoring';
+import { proctoringService } from '../../services/proctoringService';
+import { CheckCircle, ChevronRight, Eye, X, AlertTriangle } from 'lucide-react';
 
 interface TomadorExamenProps {
   examen: Examen;
@@ -47,6 +45,30 @@ export function TomadorExamen({
   const [mostrarNavegador, setMostrarNavegador] = useState(false);
   const [mostrarResumen, setMostrarResumen] = useState(false);
   const [modoFullscreen, setModoFullscreen] = useState(false);
+  
+  // Estados para proctoring
+  const [alertasProctoring, setAlertasProctoring] = useState<AlertaProctoring[]>([]);
+  const [snapshotsCapturados, setSnapshotsCapturados] = useState<SnapshotProctoring[]>([]);
+  const [eventosAudio, setEventosAudio] = useState<EventoAudio[]>([]);
+  const [monitoreoActivo, setMonitoreoActivo] = useState(false);
+  
+  // Configuración de proctoring desde el examen
+  const configuracionProctoring: ConfiguracionProctoring = {
+    habilitarCamera: examen.configuracion_avanzada?.proctoring?.camera ?? false,
+    habilitarMicrofono: examen.configuracion_avanzada?.proctoring?.audio ?? false,
+    deteccionRostros: examen.configuracion_avanzada?.proctoring?.deteccionRostros ?? true,
+    deteccionMultiplesRostros: examen.configuracion_avanzada?.proctoring?.deteccionMultiplesRostros ?? true,
+    deteccionAudio: examen.configuracion_avanzada?.proctoring?.deteccionAudio ?? true,
+    grabarVideo: examen.configuracion_avanzada?.proctoring?.grabarVideo ?? false,
+    grabarAudio: examen.configuracion_avanzada?.proctoring?.grabarAudio ?? false,
+    frecuenciaSnapshotsSegundos: examen.configuracion_avanzada?.proctoring?.frecuenciaSnapshotsSegundos ?? 30,
+    umbralConfianzaRostro: examen.configuracion_avanzada?.proctoring?.umbralConfianzaRostro ?? 0.7,
+    alertarSinRostro: examen.configuracion_avanzada?.proctoring?.alertarSinRostro ?? true,
+    alertarMultiplesRostros: examen.configuracion_avanzada?.proctoring?.alertarMultiplesRostros ?? true,
+    alertarRostroDesconocido: examen.configuracion_avanzada?.proctoring?.alertarRostroDesconocido ?? false,
+    alertarMultiplesVoces: examen.configuracion_avanzada?.proctoring?.alertarMultiplesVoces ?? true,
+  };
+  
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -63,27 +85,82 @@ export function TomadorExamen({
 
   const {
     intento,
-    preguntas,
+    preguntasExamen,
     respuestas,
     tiempoRestante,
     loading,
     error,
     iniciarIntento,
-    guardarRespuesta,
-    finalizarIntento,
-    pausarIntento,
-    reanudarIntento,
-    obtenerProgreso
+    enviarRespuesta,
+    finalizarIntento: finalizarIntentoHook,
+    navegarPregunta,
+    siguientePregunta,
+    preguntaAnterior
   } = useTomarExamen(examen.examen_id);
 
-  const {
-    eventosAntiTrampa,
-    alertasActivas,
-    iniciarMonitoreo,
-    detenerMonitoreo,
-    reportarEvento,
-    verificarIntegridad
-  } = useAntiTrampa(intento?.intento_id);
+  // Callbacks para proctoring
+  const handleAlertaProctoring = useCallback(async (alerta: AlertaProctoring) => {
+    setAlertasProctoring(prev => [...prev, alerta]);
+    
+    // Mostrar toast según severidad
+    if (alerta.severidad === 'critica' || alerta.severidad === 'alta') {
+      showToast({
+        type: 'error',
+        title: 'Alerta de Seguridad',
+        message: alerta.mensaje
+      });
+    }
+    
+    // Reportar al backend
+    if (intento?.intento_id) {
+      try {
+        await proctoringService.registrarEvento(intento.intento_id, alerta);
+      } catch (error) {
+        console.error('Error al registrar evento de proctoring:', error);
+      }
+    }
+  }, [showToast, intento?.intento_id]);
+
+  const handleSnapshotProctoring = useCallback(async (snapshot: SnapshotProctoring) => {
+    setSnapshotsCapturados(prev => [...prev, snapshot].slice(-20)); // Mantener últimos 20
+    
+    // Enviar snapshot al backend
+    if (intento?.intento_id) {
+      try {
+        await proctoringService.subirSnapshot(intento.intento_id, snapshot);
+      } catch (error) {
+        console.error('Error al subir snapshot:', error);
+      }
+    }
+  }, [intento?.intento_id]);
+
+  const handleEventoAudio = useCallback(async (evento: EventoAudio) => {
+    setEventosAudio(prev => [...prev, evento].slice(-50)); // Mantener últimos 50
+    
+    // Enviar evento al backend
+    if (intento?.intento_id) {
+      try {
+        await proctoringService.registrarEventoAudio(intento.intento_id, evento);
+      } catch (error) {
+        console.error('Error al registrar evento de audio:', error);
+      }
+    }
+  }, [intento?.intento_id]);
+
+  const handleAlertaCritica = useCallback((contadorCriticas: number) => {
+    // Si hay 3 o más alertas críticas, finalizar el examen automáticamente
+    if (contadorCriticas >= 3) {
+      showToast({
+        type: 'error',
+        title: 'Examen Finalizado',
+        message: 'Se detectaron múltiples infracciones de seguridad. El examen se finalizará automáticamente.'
+      });
+      
+      setTimeout(() => {
+        manejarFinalizarExamen();
+      }, 3000);
+    }
+  }, [showToast]);
 
   // Inicializar el examen
   useEffect(() => {
@@ -96,7 +173,11 @@ export function TomadorExamen({
           await entrarFullscreen();
         }
         
-        await iniciarMonitoreo();
+        // Iniciar monitoreo de proctoring si está habilitado
+        if (configuracionProctoring.habilitarCamera || configuracionProctoring.habilitarMicrofono) {
+          setMonitoreoActivo(true);
+        }
+        
         setEstado('en_progreso');
       } catch (error) {
         console.error('Error al inicializar examen:', error);
@@ -113,7 +194,7 @@ export function TomadorExamen({
 
     // Cleanup al desmontar
     return () => {
-      detenerMonitoreo();
+      setMonitoreoActivo(false);
       if (modoFullscreen) {
         salirFullscreen();
       }
@@ -127,25 +208,6 @@ export function TomadorExamen({
     }
   }, [tiempoRestante, estado]);
 
-  // Monitorear eventos anti-trampa
-  useEffect(() => {
-    if (alertasActivas.length > 0) {
-      const ultimaAlerta = alertasActivas[alertasActivas.length - 1];
-      
-      showToast({
-        type: 'warning',
-        title: 'Advertencia de Seguridad',
-        message: ultimaAlerta.mensaje,
-        duration: 5000
-      });
-
-      // Si hay demasiadas infracciones, finalizar automáticamente
-      if (alertasActivas.filter(a => a.severidad === 'CRITICA').length >= 3) {
-        manejarFinalizacionForzada('Múltiples infracciones de seguridad detectadas');
-      }
-    }
-  }, [alertasActivas]);
-
   const entrarFullscreen = useCallback(async () => {
     try {
       await document.documentElement.requestFullscreen();
@@ -156,10 +218,11 @@ export function TomadorExamen({
         if (!document.fullscreenElement) {
           setModoFullscreen(false);
           if (examen.detectar_cambio_pestana) {
-            reportarEvento({
-              tipo: 'SALIDA_PANTALLA_COMPLETA',
-              detalle: 'Usuario salió de pantalla completa'
-            });
+            // TODO: Reportar evento cuando exista el servicio
+            // reportarEvento({
+            //   tipo: 'SALIDA_PANTALLA_COMPLETA',
+            //   detalle: 'Usuario salió de pantalla completa'
+            // });
           }
         }
       };
@@ -172,7 +235,7 @@ export function TomadorExamen({
     } catch (error) {
       console.error('Error al entrar en pantalla completa:', error);
     }
-  }, [examen.detectar_cambio_pestana, reportarEvento]);
+  }, [examen.detectar_cambio_pestana]);
 
   const salirFullscreen = useCallback(async () => {
     try {
@@ -414,10 +477,26 @@ export function TomadorExamen({
             <div className="flex items-center space-x-6">
               {/* Timer */}
               <TimerExamen
-                tiempoRestante={tiempoRestante}
-                tiempoTotal={examen.tiempo_limite * 60}
+                tiempoRestante={tiempoRestante || 0}
+                tiempoTotal={examen.tiempo_limite ? examen.tiempo_limite * 60 : 3600}
                 onTiempoAgotado={manejarTiempoAgotado}
+                onAutoSave={async () => {
+                  // Auto-guardar respuesta actual si existe
+                  if (preguntasExamen[preguntaActual] && respuestas.get(preguntasExamen[preguntaActual].pregunta_id)) {
+                    try {
+                      const respuestaActual = respuestas.get(preguntasExamen[preguntaActual].pregunta_id);
+                      if (respuestaActual?.respuesta_texto) {
+                        await enviarRespuesta(preguntasExamen[preguntaActual].pregunta_id, respuestaActual.respuesta_texto);
+                      }
+                    } catch (error) {
+                      console.error('Error en auto-guardado:', error);
+                    }
+                  }
+                }}
                 pausado={estado === 'pausado'}
+                habilitarNotificaciones={true}
+                habilitarAutoSave={true}
+                intervaloAutoSaveSegundos={30}
               />
 
               {/* Progreso */}
@@ -438,7 +517,7 @@ export function TomadorExamen({
                 onClick={() => setMostrarNavegador(!mostrarNavegador)}
                 className="flex items-center space-x-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                <EyeIcon className="h-4 w-4" />
+                <Eye className="h-4 w-4" />
                 <span className="hidden sm:inline">Vista general</span>
               </button>
             </div>
@@ -450,7 +529,7 @@ export function TomadorExamen({
                   onClick={manejarReanudar}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
                 >
-                  <CheckCircleIcon className="h-4 w-4" />
+                  <CheckCircle className="h-4 w-4" />
                   <span>Reanudar</span>
                 </button>
               ) : (
@@ -477,7 +556,7 @@ export function TomadorExamen({
                 onClick={manejarSalir}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -533,7 +612,7 @@ export function TomadorExamen({
             className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
           >
             <span>Siguiente</span>
-            <ChevronRightIcon className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -565,12 +644,12 @@ export function TomadorExamen({
         )}
       </AnimatePresence>
 
-      {/* Alertas anti-trampa */}
+      {/* Alertas anti-trampa - Sistema antiguo (deshabilitado temporalmente)
       {alertasActivas.length > 0 && (
         <div className="fixed bottom-4 right-4 z-40">
           <div className="bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-lg max-w-sm">
             <div className="flex items-center">
-              <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-3" />
+              <AlertTriangle className="h-5 w-5 text-red-500 mr-3" />
               <div>
                 <p className="font-medium text-red-800 dark:text-red-200">
                   Sistema de Seguridad Activo
@@ -582,6 +661,40 @@ export function TomadorExamen({
             </div>
           </div>
         </div>
+      )}
+      */}
+
+      {/* Componentes de Proctoring */}
+      {estado === 'en_progreso' && monitoreoActivo && (
+        <>
+          {configuracionProctoring.habilitarCamera && (
+            <ProctoringCamera
+              configuracion={configuracionProctoring}
+              activo={monitoreoActivo}
+              onAlerta={handleAlertaProctoring}
+              onSnapshot={handleSnapshotProctoring}
+            />
+          )}
+          
+          {configuracionProctoring.habilitarMicrofono && (
+            <ProctoringAudio
+              configuracion={configuracionProctoring}
+              activo={monitoreoActivo}
+              onAlerta={handleAlertaProctoring}
+              onEventoAudio={handleEventoAudio}
+            />
+          )}
+          
+          <AlertasProctoring
+            alertas={alertasProctoring}
+            onResolverAlerta={(id) => {
+              setAlertasProctoring(prev => 
+                prev.map(a => a.id === id ? { ...a, resuelta: true } : a)
+              );
+            }}
+            onAlertaCritica={handleAlertaCritica}
+          />
+        </>
       )}
 
       {/* Confirm Dialog */}

@@ -1,8 +1,10 @@
-from sqlalchemy.orm import Session
-from ..base import CRUDBase
 from uuid import UUID
-from ...models.academic.material_curso import MaterialCurso
-from ...schemas.academic.material_curso import MaterialCursoCreate, MaterialCursoUpdate
+
+from sqlalchemy.orm import Session
+
+from src.crud.base import CRUDBase
+from src.models.academic.material_curso import MaterialCurso
+from src.schemas.academic.material_curso import MaterialCursoCreate, MaterialCursoUpdate
 
 
 class CRUDMaterialCurso(

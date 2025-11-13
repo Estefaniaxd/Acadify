@@ -14,7 +14,7 @@ async def test_frontend_backend_connection():
     print("=" * 55)
     
     # URLs a probar
-    backend_url = "http://localhost:8000/api/v1/academic/cursos/public"
+    backend_url = "http://localhost:8000/api/v1/academic/cursos/public",
     frontend_url = "http://localhost:5174"
     
     async with aiohttp.ClientSession() as session:
@@ -22,7 +22,7 @@ async def test_frontend_backend_connection():
         try:
             print("🔄 1. Probando backend directo...")
             async with session.get(backend_url) as response:
-                if response.status == 200:
+                if response.status == 200:,
                     data = await response.json()
                     print(f"✅ Backend: {response.status} OK")
                     print(f"📊 Total cursos: {data.get('total', 0)}")

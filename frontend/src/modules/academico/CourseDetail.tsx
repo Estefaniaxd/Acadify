@@ -1,44 +1,12 @@
 import { EmojiReactions } from '../../components/EmojiReactions';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FiArrowLeft,
-  FiUsers,
-  FiMessageCircle,
-  FiBookOpen,
-  FiCalendar,
-  FiSettings,
-  FiPlus,
-  FiSearch,
-  FiMoreVertical,
-  FiPaperclip,
-  FiSend,
-  FiLoader,
-  FiAlertCircle,
-  FiUser,
-  FiMail,
-  FiPhone,
-  FiEye,
-  FiFileText,
-  FiVideo,
-  FiSave,
-  FiX,
-  FiBell,
-  FiShield,
-  FiStar,
-  FiCheck,
-  FiBook,
-  FiHome,
-  FiImage,
-  FiFile,
-  FiClipboard,
-  FiSmile,
-  FiDownload
-} from 'react-icons/fi';
+;
 import { useNavigate } from 'react-router-dom';
 import { UserAvatar } from '../../utils/avatarHelpers';
 
 import courseService from './services/courseService';
+import { AlertCircle, ArrowLeft, Bell, Book, BookOpen, Calendar, Check, Clipboard, Download, Eye, File, FileText, Home, Image, Loader2, Mail, MessageCircle, MoreVertical, Paperclip, Phone, Plus, Save, Search, Send, Settings, Shield, Star, User, Users, Video, X } from 'lucide-react';
 
 // Base URL para archivos estáticos
 const API_BASE_URL = 'http://localhost:8000';
@@ -393,16 +361,17 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
       const loadTime = performance.now() - startTime;
       console.log(`⏱️ Tiempo de carga total: ${loadTime.toFixed(2)}ms`);
       
-      if (courseResponse.success) {
-        const courseData = courseResponse.data;
+      // El backend devuelve directamente el objeto del curso
+      if (courseResponse && courseResponse.curso_id) {
+        const courseData = courseResponse;
         
         const course: Course = {
-          id: courseData.id,
+          id: courseData.curso_id,
           nombre: courseData.nombre,
-          codigo: courseData.codigo,
-          profesor: courseData.profesor,
-          descripcion: courseData.descripcion,
-          estudiantes: courseData.estudiantes,
+          codigo: courseData.codigo_acceso || '',
+          profesor: courseData.institucion_nombre || 'Sin asignar',
+          descripcion: courseData.descripcion || '',
+          estudiantes: 0,
           estado: courseData.estado,
           fechaInicio: courseData.fecha_inicio || courseData.fecha_creacion?.split('T')[0] || '2025-01-15',
           fechaFin: courseData.fecha_fin || '2025-06-15',
@@ -645,10 +614,10 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
 
   const getEventTypeIcon = (tipo: string) => {
     switch (tipo) {
-      case 'evaluacion': return <FiAlertCircle className="w-4 h-4" />;
-      case 'entrega': return <FiSend className="w-4 h-4" />;
-      case 'clase': return <FiBook className="w-4 h-4" />;
-      default: return <FiCalendar className="w-4 h-4" />;
+      case 'evaluacion': return <AlertCircle className="w-4 h-4" />;
+      case 'entrega': return <Send className="w-4 h-4" />;
+      case 'clase': return <Book className="w-4 h-4" />;
+      default: return <Calendar className="w-4 h-4" />;
     }
   };
 
@@ -943,7 +912,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <FiLoader className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Cargando curso...</p>
         </div>
       </div>
@@ -954,7 +923,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-md">
-          <FiAlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button
             onClick={onBack}
@@ -994,7 +963,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 onClick={onBack}
                 className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
-                <FiArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -1011,7 +980,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 title="Configuración del curso"
               >
-                <FiSettings className="w-5 h-5" />
+                <Settings className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -1028,14 +997,14 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                   <div className="flex items-center space-x-2 mb-3">
                     <div className="bg-emerald-600/30 px-3 py-1 rounded-full">
                       <span className="text-emerald-100 text-sm font-medium">
-                        <FiBook className="w-4 h-4 mr-2 text-blue-600" />
+                        <Book className="w-4 h-4 mr-2 text-blue-600" />
                         {course.programa.codigo} - {course.programa.nombre}
                       </span>
                     </div>
                     {course.programa.facultad && (
                       <div className="bg-emerald-700/30 px-3 py-1 rounded-full">
                         <span className="text-emerald-200 text-xs">
-                          <FiHome className="w-4 h-4 mr-2 text-purple-600" />
+                          <Home className="w-4 h-4 mr-2 text-purple-600" />
                           {course.programa.facultad}
                         </span>
                       </div>
@@ -1046,13 +1015,13 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 <div className="flex items-center space-x-2 mb-3">
                   <div className="bg-emerald-600/30 px-3 py-1 rounded-full">
                     <span className="text-emerald-100 text-sm font-medium">
-                      <FiBook className="w-4 h-4 mr-2 text-blue-600" />
+                      <Book className="w-4 h-4 mr-2 text-blue-600" />
                       ISYS - Ingeniería de Sistemas
                     </span>
                   </div>
                   <div className="bg-emerald-700/30 px-3 py-1 rounded-full">
                     <span className="text-emerald-200 text-xs">
-                      <FiHome className="w-4 h-4 mr-2 text-purple-600" />
+                      <Home className="w-4 h-4 mr-2 text-purple-600" />
                       Facultad de Ingeniería
                     </span>
                   </div>
@@ -1064,11 +1033,11 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               </p>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
-                  <FiUsers className="w-5 h-5" />
+                  <Users className="w-5 h-5" />
                   <span>{course.estudiantes} estudiantes</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <FiCalendar className="w-5 h-5" />
+                  <Calendar className="w-5 h-5" />
                   <span>{course.fechaInicio} - {course.fechaFin}</span>
                 </div>
               </div>
@@ -1076,7 +1045,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
             <div className="flex justify-center items-center">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-2">
-                  <FiBook className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  <Book className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <p className="text-emerald-100">Estado: {course.estado}</p>
               </div>
@@ -1090,10 +1059,10 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex space-x-8">
             {[
-              { key: 'stream', label: 'Stream', icon: FiMessageCircle },
-              { key: 'classwork', label: 'Trabajos', icon: FiBookOpen },
-              { key: 'people', label: 'Personas', icon: FiUsers },
-              { key: 'calendar', label: 'Calendario', icon: FiCalendar }
+              { key: 'stream', label: 'Stream', icon: MessageCircle },
+              { key: 'classwork', label: 'Trabajos', icon: BookOpen },
+              { key: 'people', label: 'Personas', icon: Users },
+              { key: 'calendar', label: 'Calendario', icon: Calendar }
             ].map(tab => (
               <button
                 key={tab.key}
@@ -1154,9 +1123,9 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                           <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-600 rounded border">
                             <div className="flex items-center space-x-2">
                               <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900 rounded flex items-center justify-center">
-                                {file.type.startsWith('image/') ? <FiImage className="w-4 h-4 text-emerald-600" /> : 
-                                 file.type.startsWith('video/') ? <FiVideo className="w-4 h-4 text-emerald-600" /> : 
-                                 file.type.includes('pdf') ? <FiFile className="w-4 h-4 text-emerald-600" /> : <FiPaperclip className="w-4 h-4 text-emerald-600" />}
+                                {file.type.startsWith('image/') ? <Image className="w-4 h-4 text-emerald-600" /> : 
+                                 file.type.startsWith('video/') ? <Video className="w-4 h-4 text-emerald-600" /> : 
+                                 file.type.includes('pdf') ? <File className="w-4 h-4 text-emerald-600" /> : <Paperclip className="w-4 h-4 text-emerald-600" />}
                               </div>
                               <div>
                                 <p className="text-sm font-medium text-gray-900 dark:text-white">{file.name}</p>
@@ -1167,7 +1136,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                               onClick={() => removeFile(index)}
                               className="text-red-500 hover:text-red-700 p-1"
                             >
-                              <FiX className="w-4 h-4" />
+                              <X className="w-4 h-4" />
                             </button>
                           </div>
                         ))}
@@ -1190,7 +1159,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                         disabled={uploadingFiles}
                         className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
                       >
-                        <FiPaperclip className="w-5 h-5" />
+                        <Paperclip className="w-5 h-5" />
                         <span>Adjuntar archivo</span>
                       </button>
                     </div>
@@ -1201,12 +1170,12 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                     >
                       {creatingPost ? (
                         <>
-                          <FiLoader className="w-5 h-5 animate-spin" />
+                          <Loader2 className="w-5 h-5 animate-spin" />
                           <span>Publicando...</span>
                         </>
                       ) : (
                         <>
-                          <FiSend className="w-5 h-5" />
+                          <Send className="w-5 h-5" />
                           <span>Publicar</span>
                         </>
                       )}
@@ -1219,7 +1188,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
             {/* Posts */}
             {streamPosts.length === 0 ? (
               <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
-                <FiMessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400">No hay publicaciones aún</p>
                 <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
                   Sé el primero en publicar algo en este curso
@@ -1239,9 +1208,9 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       post.tipo === 'anuncio' ? 'bg-blue-600' :
                       post.tipo === 'tarea' ? 'bg-orange-600' : 'bg-green-600'
                     }`}>
-                      {post.tipo === 'anuncio' ? <FiBell className="w-4 h-4" /> : 
-                       post.tipo === 'tarea' ? <FiClipboard className="w-4 h-4" /> : 
-                       <FiFile className="w-4 h-4" />}
+                      {post.tipo === 'anuncio' ? <Bell className="w-4 h-4" /> : 
+                       post.tipo === 'tarea' ? <Clipboard className="w-4 h-4" /> : 
+                       <File className="w-4 h-4" />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
@@ -1254,7 +1223,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                           </p>
                         </div>
                         <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                          <FiMoreVertical className="w-5 h-5" />
+                          <MoreVertical className="w-5 h-5" />
                         </button>
                       </div>
                       
@@ -1266,7 +1235,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       {post.archivos && post.archivos.length > 0 && (
                         <div className="space-y-2 mb-4">
                           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                            <FiPaperclip className="w-4 h-4 mr-2" />
+                            <Paperclip className="w-4 h-4 mr-2" />
                             Archivos adjuntos ({post.archivos.length})
                           </h4>
                           {post.archivos.map((archivo) => (
@@ -1279,13 +1248,13 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                               <div className="flex items-center space-x-3 flex-1">
                                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
                                   {(archivo.tipo || archivo.type)?.includes('image') ? (
-                                    <FiImage className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                    <Image className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                   ) : (archivo.tipo || archivo.type)?.includes('pdf') ? (
-                                    <FiFile className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                    <File className="w-5 h-5 text-red-600 dark:text-red-400" />
                                   ) : (archivo.tipo || archivo.type)?.includes('video') ? (
-                                    <FiVideo className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                    <Video className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                   ) : (
-                                    <FiPaperclip className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                    <Paperclip className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                                   )}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -1323,7 +1292,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                                     className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                                     title="Vista previa"
                                   >
-                                    <FiEye className="w-4 h-4" />
+                                    <Eye className="w-4 h-4" />
                                   </button>
                                 )}
                                 <button
@@ -1361,7 +1330,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                                   className="p-2 text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
                                   title="Descargar archivo"
                                 >
-                                  <FiDownload className="w-4 h-4" />
+                                  <Download className="w-4 h-4" />
                                 </button>
                               </div>
                             </motion.div>
@@ -1375,7 +1344,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                             onClick={() => toggleComments(post.id)}
                             className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-200"
                           >
-                            <FiMessageCircle className="w-4 h-4" />
+                            <MessageCircle className="w-4 h-4" />
                             <span>
                               {(post.respuestas?.length || 0) + (postComments[post.id]?.length || 0)} comentarios
                             </span>
@@ -1424,7 +1393,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                                       <div className="mt-2 space-y-1">
                                         {respuesta.archivos.map((archivo: any, archivoIndex: number) => (
                                           <div key={archivoIndex} className="flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-400">
-                                            <FiPaperclip className="w-3 h-3" />
+                                            <Paperclip className="w-3 h-3" />
                                             <span>{archivo.nombre || archivo.name || 'Archivo adjunto'}</span>
                                           </div>
                                         ))}
@@ -1517,7 +1486,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                     onClick={() => setShowCreateTask(true)}
                     className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                   >
-                    <FiPlus className="w-4 h-4" />
+                    <Plus className="w-4 h-4" />
                     <span>Nueva Tarea</span>
                   </button>
                 )}
@@ -1565,22 +1534,22 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
 
                         <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center space-x-1">
-                            <FiCalendar className="w-4 h-4" />
+                            <Calendar className="w-4 h-4" />
                             <span>Vence: {formatDate(task.fechaVencimiento)}</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <FiStar className="w-4 h-4" />
+                            <Star className="w-4 h-4" />
                             <span>{task.puntos} puntos</span>
                           </div>
                           {task.archivos && task.archivos.length > 0 && (
                             <div className="flex items-center space-x-1">
-                              <FiPaperclip className="w-4 h-4" />
+                              <Paperclip className="w-4 h-4" />
                               <span>{task.archivos.length} archivo{task.archivos.length > 1 ? 's' : ''}</span>
                             </div>
                           )}
                           {task.entrega?.calificacion !== undefined && (
                             <div className="flex items-center space-x-1">
-                              <FiCheck className="w-4 h-4 text-green-600" />
+                              <Check className="w-4 h-4 text-green-600" />
                               <span className="text-green-600 font-medium">
                                 {task.entrega.calificacion}/{task.puntos}
                               </span>
@@ -1601,7 +1570,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               </div>
             ) : (
               <div className="text-center py-20">
-                <FiBookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400 text-lg">
                   No hay tareas asignadas aún
                 </p>
@@ -1623,7 +1592,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-                          <FiUsers className="w-5 h-5 mr-2 text-emerald-600" />
+                          <Users className="w-5 h-5 mr-2 text-emerald-600" />
                           Profesores
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1690,7 +1659,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                               }}
                               className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                             >
-                              <FiMoreVertical className="w-4 h-4" />
+                              <MoreVertical className="w-4 h-4" />
                             </button>
                             
                             {/* Menú desplegable para profesor */}
@@ -1701,21 +1670,21 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                                     onClick={(e) => handleViewProfile(profesor, e)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                                   >
-                                    <FiUser className="w-4 h-4 mr-2" />
+                                    <User className="w-4 h-4 mr-2" />
                                     Ver perfil
                                   </button>
                                   <button
                                     onClick={() => handleSendEmail(profesor)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                                   >
-                                    <FiMail className="w-4 h-4 mr-2" />
+                                    <Mail className="w-4 h-4 mr-2" />
                                     Enviar email
                                   </button>
                                   <button
                                     onClick={() => handleSendMessage(profesor)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                                   >
-                                    <FiMessageCircle className="w-4 h-4 mr-2" />
+                                    <MessageCircle className="w-4 h-4 mr-2" />
                                     Enviar mensaje
                                   </button>
                                 </div>
@@ -1734,7 +1703,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-                          <FiUsers className="w-5 h-5 mr-2 text-blue-600" />
+                          <Users className="w-5 h-5 mr-2 text-blue-600" />
                           Estudiantes
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1743,7 +1712,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="relative">
-                          <FiSearch className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                           <input
                             type="text"
                             placeholder="Buscar estudiante..."
@@ -1758,7 +1727,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                     {/* Mensaje cuando no hay resultados de búsqueda */}
                     {searchTerm && filteredStudents.length === 0 && (
                       <div className="text-center py-8">
-                        <FiSearch className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-500 dark:text-gray-400">
                           No se encontraron estudiantes con el término "{searchTerm}"
                         </p>
@@ -1820,7 +1789,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                               }}
                               className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                             >
-                              <FiMoreVertical className="w-4 h-4" />
+                              <MoreVertical className="w-4 h-4" />
                             </button>
                             
                             {/* Menú desplegable para estudiante */}
@@ -1831,21 +1800,21 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                                     onClick={(e) => handleViewProfile(estudiante, e)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                                   >
-                                    <FiUser className="w-4 h-4 mr-2" />
+                                    <User className="w-4 h-4 mr-2" />
                                     Ver perfil
                                   </button>
                                   <button
                                     onClick={() => handleSendEmail(estudiante)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                                   >
-                                    <FiMail className="w-4 h-4 mr-2" />
+                                    <Mail className="w-4 h-4 mr-2" />
                                     Enviar email
                                   </button>
                                   <button
                                     onClick={() => handleSendMessage(estudiante)}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                                   >
-                                    <FiMessageCircle className="w-4 h-4 mr-2" />
+                                    <MessageCircle className="w-4 h-4 mr-2" />
                                     Enviar mensaje
                                   </button>
                                 </div>
@@ -1886,7 +1855,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 {/* Empty State */}
                 {(!course.personas.profesores.length && !course.personas.estudiantes.length) && (
                   <div className="text-center py-20">
-                    <FiUsers className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400 text-lg">
                       No hay personas inscritas en este curso
                     </p>
@@ -1898,7 +1867,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               </>
             ) : (
               <div className="text-center py-20">
-                <FiLoader className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-spin" />
+                <Loader2 className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-spin" />
                 <p className="text-gray-600 dark:text-gray-400 text-lg">
                   Cargando información de personas...
                 </p>
@@ -1917,7 +1886,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 </h2>
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                    <FiCalendar className="w-4 h-4" />
+                    <Calendar className="w-4 h-4" />
                     <span>{course.fechaInicio} - {course.fechaFin}</span>
                   </div>
                   {isCurrentUserProfessor() && (
@@ -1925,7 +1894,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       onClick={() => setShowCreateEvent(true)}
                       className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
                     >
-                      <FiPlus className="w-4 h-4" />
+                      <Plus className="w-4 h-4" />
                       <span>Agregar Evento</span>
                     </button>
                   )}
@@ -1942,7 +1911,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                   {/* Start Date */}
                   <div className="flex items-center space-x-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
                     <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 dark:bg-emerald-800 rounded-lg flex items-center justify-center">
-                      <FiCalendar className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                      <Calendar className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200">
@@ -1957,7 +1926,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                   {/* End Date */}
                   <div className="flex items-center space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center">
-                      <FiCalendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
@@ -2076,7 +2045,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                   
                   {tasks.filter(task => new Date(task.fechaVencimiento) >= new Date()).length === 0 && (
                     <div className="text-center py-8">
-                      <FiCalendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-gray-500 dark:text-gray-400">
                         No hay tareas próximas
                       </p>
@@ -2164,14 +2133,14 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
             {/* Header del Modal */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                <FiSettings className="w-6 h-6 mr-3 text-blue-600" />
+                <Settings className="w-6 h-6 mr-3 text-blue-600" />
                 Configuración del Curso
               </h2>
               <button
                 onClick={() => setShowCourseSettings(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <FiX className="w-5 h-5" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -2180,7 +2149,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               {/* Notificaciones */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                  <FiBell className="w-5 h-5 mr-2 text-blue-600" />
+                  <Bell className="w-5 h-5 mr-2 text-blue-600" />
                   Notificaciones
                 </h3>
                 
@@ -2223,7 +2192,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               {/* Privacidad */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                  <FiShield className="w-5 h-5 mr-2 text-green-600" />
+                  <Shield className="w-5 h-5 mr-2 text-green-600" />
                   Privacidad
                 </h3>
                 
@@ -2255,7 +2224,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               {/* Preferencias de Visualización */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                  <FiEye className="w-5 h-5 mr-2 text-purple-600" />
+                  <Eye className="w-5 h-5 mr-2 text-purple-600" />
                   Visualización
                 </h3>
                 
@@ -2301,7 +2270,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
               >
-                <FiSave className="w-4 h-4 mr-2" />
+                <Save className="w-4 h-4 mr-2" />
                 Guardar Cambios
               </button>
             </div>
@@ -2342,7 +2311,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 onClick={() => setShowTaskDetail(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               >
-                <FiX className="w-6 h-6" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
@@ -2389,7 +2358,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       <div key={archivo.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                            {archivo.type.includes('pdf') ? <FiFile className="w-5 h-5 text-blue-600" /> : <FiPaperclip className="w-5 h-5 text-blue-600" />}
+                            {archivo.type.includes('pdf') ? <File className="w-5 h-5 text-blue-600" /> : <Paperclip className="w-5 h-5 text-blue-600" />}
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-white">{archivo.name}</p>
@@ -2437,7 +2406,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                         </h4>
                         {selectedTask.entrega.archivos.map((archivo, index) => (
                           <div key={index} className="flex items-center space-x-2 text-sm">
-                            <FiPaperclip className="w-4 h-4 text-gray-500" />
+                            <Paperclip className="w-4 h-4 text-gray-500" />
                             <span className="text-blue-600 dark:text-blue-400">{archivo.name}</span>
                           </div>
                         ))}
@@ -2455,7 +2424,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       Guardar Borrador
                     </button>
                     <button className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
-                      <FiSend className="w-4 h-4 mr-2" />
+                      <Send className="w-4 h-4 mr-2" />
                       Entregar Tarea
                     </button>
                   </div>
@@ -2484,7 +2453,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 onClick={() => setShowCreateTask(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
-                <FiX className="w-6 h-6" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
@@ -2522,7 +2491,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    <FiCalendar className="w-4 h-4 inline mr-2" />
+                    <Calendar className="w-4 h-4 inline mr-2" />
                     Fecha límite
                   </label>
                   <div className="relative">
@@ -2534,7 +2503,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                       min={new Date().toISOString().slice(0, 16)}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <FiCalendar className="w-5 h-5 text-gray-400" />
+                      <Calendar className="w-5 h-5 text-gray-400" />
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -2544,7 +2513,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    <FiStar className="w-4 h-4 inline mr-2" />
+                    <Star className="w-4 h-4 inline mr-2" />
                     Puntos totales
                   </label>
                   <div className="relative">
@@ -2613,7 +2582,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
                 onClick={() => setShowCreateEvent(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
-                <FiX className="w-6 h-6" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 

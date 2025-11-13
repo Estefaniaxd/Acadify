@@ -1,42 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiArrowLeft, 
-  FiUser, 
-  FiMail, 
-  FiPhone, 
-  FiCalendar, 
-  FiMapPin,
-  FiEdit3,
-  FiCamera,
-  FiBook,
-  FiAward,
-  FiActivity,
-  FiSettings,
-  FiShield,
-  FiGlobe,
-  FiClock,
-  FiTrendingUp,
-  FiTarget,
-  FiStar,
-  FiBookOpen,
-  FiUsers,
-  FiMessageCircle,
-  FiHeart,
-  FiCheck,
-  FiX,
-  FiSave,
-  FiUpload,
-  FiEye,
-  FiEyeOff,
-  FiLock,
-  FiBell,
-  FiGrid,
-  FiList,
-  FiBarChart,
-  FiPieChart
-} from 'react-icons/fi';
+import { Activity, ArrowLeft, Award, BarChart, Bell, Book, BookOpen, Calendar, Camera, Check, Clock, Edit3, Eye, EyeOff, Globe, Grid, Heart, List, Lock, Mail, MapPin, MessageCircle, Phone, PieChart, Save, Settings, Shield, Star, Target, TrendingUp, Upload, User, Users, X } from 'lucide-react';
+;
 
 interface UserProfile {
   id: string;
@@ -213,11 +179,11 @@ export default function ProfilePage(): JSX.Element {
 
   const getActivityIcon = (tipo: string) => {
     switch (tipo) {
-      case 'curso': return <FiBookOpen className="w-4 h-4" />;
-      case 'tarea': return <FiEdit3 className="w-4 h-4" />;
-      case 'examen': return <FiTarget className="w-4 h-4" />;
-      case 'logro': return <FiAward className="w-4 h-4" />;
-      default: return <FiActivity className="w-4 h-4" />;
+      case 'curso': return <BookOpen className="w-4 h-4" />;
+      case 'tarea': return <Edit3 className="w-4 h-4" />;
+      case 'examen': return <Target className="w-4 h-4" />;
+      case 'logro': return <Award className="w-4 h-4" />;
+      default: return <Activity className="w-4 h-4" />;
     }
   };
 
@@ -253,10 +219,10 @@ export default function ProfilePage(): JSX.Element {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Resumen', icon: FiUser },
-    { id: 'stats', label: 'Estadísticas', icon: FiBarChart },
-    { id: 'activity', label: 'Actividad', icon: FiActivity },
-    { id: 'settings', label: 'Configuración', icon: FiSettings }
+    { id: 'overview', label: 'Resumen', icon: User },
+    { id: 'stats', label: 'Estadísticas', icon: BarChart },
+    { id: 'activity', label: 'Actividad', icon: Activity },
+    { id: 'settings', label: 'Configuración', icon: Settings }
   ];
 
   if (loading) {
@@ -274,7 +240,7 @@ export default function ProfilePage(): JSX.Element {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <FiUser className="w-20 h-20 text-gray-400 mx-auto mb-4" />
+          <User className="w-20 h-20 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Error al cargar el perfil
           </h2>
@@ -302,7 +268,7 @@ export default function ProfilePage(): JSX.Element {
               onClick={() => navigate(-1)}
               className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors group"
             >
-              <FiArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
               Volver
             </button>
             
@@ -327,7 +293,7 @@ export default function ProfilePage(): JSX.Element {
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="absolute top-4 right-4">
               <button className="p-2 bg-black/30 backdrop-blur-sm rounded-lg text-white hover:bg-black/50 transition-colors">
-                <FiCamera className="w-5 h-5" />
+                <Camera className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -361,7 +327,7 @@ export default function ProfilePage(): JSX.Element {
                   </div>
                   
                   <button className="absolute bottom-0 right-8 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-lg">
-                    <FiCamera className="w-4 h-4" />
+                    <Camera className="w-4 h-4" />
                   </button>
                 </div>
 
@@ -385,7 +351,7 @@ export default function ProfilePage(): JSX.Element {
                     </span>
                     {profile.email_verified && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        <FiCheck className="w-3 h-3 mr-1" />
+                        <Check className="w-3 h-3 mr-1" />
                         Verificado
                       </span>
                     )}
@@ -402,18 +368,18 @@ export default function ProfilePage(): JSX.Element {
                   onClick={() => setIsEditing(!isEditing)}
                   className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
-                  <FiEdit3 className="w-4 h-4 mr-2" />
+                  <Edit3 className="w-4 h-4 mr-2" />
                   {isEditing ? 'Cancelar' : 'Editar'}
                 </button>
                 <button
                   onClick={() => window.open(`mailto:${profile.correo_institucional}`, '_blank')}
                   className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
                 >
-                  <FiMail className="w-4 h-4 mr-2" />
+                  <Mail className="w-4 h-4 mr-2" />
                   Email
                 </button>
                 <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium">
-                  <FiMessageCircle className="w-4 h-4 mr-2" />
+                  <MessageCircle className="w-4 h-4 mr-2" />
                   Mensaje
                 </button>
               </div>
@@ -469,7 +435,7 @@ export default function ProfilePage(): JSX.Element {
                           onClick={() => setIsEditing(true)}
                           className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                         >
-                          <FiEdit3 className="w-4 h-4" />
+                          <Edit3 className="w-4 h-4" />
                         </button>
                       )}
                     </div>
@@ -527,14 +493,14 @@ export default function ProfilePage(): JSX.Element {
                             onClick={handleSaveProfile}
                             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                           >
-                            <FiSave className="w-4 h-4 mr-2" />
+                            <Save className="w-4 h-4 mr-2" />
                             Guardar
                           </button>
                           <button
                             onClick={() => setIsEditing(false)}
                             className="flex items-center px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                           >
-                            <FiX className="w-4 h-4 mr-2" />
+                            <X className="w-4 h-4 mr-2" />
                             Cancelar
                           </button>
                         </div>
@@ -543,7 +509,7 @@ export default function ProfilePage(): JSX.Element {
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="flex items-center">
-                            <FiMail className="w-5 h-5 text-gray-400 mr-3" />
+                            <Mail className="w-5 h-5 text-gray-400 mr-3" />
                             <div>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                               <p className="text-gray-900 dark:text-white font-medium">{profile.correo_institucional}</p>
@@ -552,7 +518,7 @@ export default function ProfilePage(): JSX.Element {
                           
                           {profile.telefono && (
                             <div className="flex items-center">
-                              <FiPhone className="w-5 h-5 text-gray-400 mr-3" />
+                              <Phone className="w-5 h-5 text-gray-400 mr-3" />
                               <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Teléfono</p>
                                 <p className="text-gray-900 dark:text-white font-medium">{profile.telefono}</p>
@@ -561,7 +527,7 @@ export default function ProfilePage(): JSX.Element {
                           )}
                           
                           <div className="flex items-center">
-                            <FiCalendar className="w-5 h-5 text-gray-400 mr-3" />
+                            <Calendar className="w-5 h-5 text-gray-400 mr-3" />
                             <div>
                               <p className="text-sm text-gray-500 dark:text-gray-400">Miembro desde</p>
                               <p className="text-gray-900 dark:text-white font-medium">{formatDate(profile.fecha_creacion)}</p>
@@ -570,7 +536,7 @@ export default function ProfilePage(): JSX.Element {
                           
                           {profile.ultimo_acceso && (
                             <div className="flex items-center">
-                              <FiActivity className="w-5 h-5 text-gray-400 mr-3" />
+                              <Activity className="w-5 h-5 text-gray-400 mr-3" />
                               <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Último acceso</p>
                                 <p className="text-gray-900 dark:text-white font-medium">
@@ -599,7 +565,7 @@ export default function ProfilePage(): JSX.Element {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
-                              <FiBookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{stats.cursos_activos}</p>
@@ -611,7 +577,7 @@ export default function ProfilePage(): JSX.Element {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
-                              <FiCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+                              <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{stats.cursos_completados}</p>
@@ -623,7 +589,7 @@ export default function ProfilePage(): JSX.Element {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mr-3">
-                              <FiStar className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                              <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{stats.promedio_calificaciones}</p>
@@ -635,7 +601,7 @@ export default function ProfilePage(): JSX.Element {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-3">
-                              <FiAward className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                              <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{stats.logros_obtenidos}</p>
@@ -656,9 +622,9 @@ export default function ProfilePage(): JSX.Element {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                      <FiBookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <FiTrendingUp className="w-5 h-5 text-green-500" />
+                    <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.cursos_completados}</h3>
                   <p className="text-gray-600 dark:text-gray-400">Cursos Completados</p>
@@ -670,9 +636,9 @@ export default function ProfilePage(): JSX.Element {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                      <FiStar className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      <Star className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
-                    <FiTrendingUp className="w-5 h-5 text-green-500" />
+                    <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.promedio_calificaciones}</h3>
                   <p className="text-gray-600 dark:text-gray-400">Promedio General</p>
@@ -684,9 +650,9 @@ export default function ProfilePage(): JSX.Element {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                      <FiClock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                      <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <FiTrendingUp className="w-5 h-5 text-green-500" />
+                    <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total_horas_estudio}</h3>
                   <p className="text-gray-600 dark:text-gray-400">Horas de Estudio</p>
@@ -698,9 +664,9 @@ export default function ProfilePage(): JSX.Element {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-                      <FiAward className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                      <Award className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <FiTrendingUp className="w-5 h-5 text-green-500" />
+                    <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.logros_obtenidos}</h3>
                   <p className="text-gray-600 dark:text-gray-400">Logros Obtenidos</p>
@@ -735,7 +701,7 @@ export default function ProfilePage(): JSX.Element {
                   </h3>
                   <div className="flex items-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center mr-4">
-                      <FiAward className="w-8 h-8 text-white" />
+                      <Award className="w-8 h-8 text-white" />
                     </div>
                     <div>
                       <h4 className="text-xl font-bold text-gray-900 dark:text-white">{stats.rango_actual}</h4>
@@ -762,13 +728,13 @@ export default function ProfilePage(): JSX.Element {
                           <h4 className="font-medium text-gray-900 dark:text-white">{activity.titulo}</h4>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{activity.descripcion}</p>
                           <div className="flex items-center mt-2">
-                            <FiClock className="w-4 h-4 text-gray-400 mr-1" />
+                            <Clock className="w-4 h-4 text-gray-400 mr-1" />
                             <span className="text-sm text-gray-500 dark:text-gray-400">
                               {formatTime(activity.fecha)}
                             </span>
                             {activity.calificacion && (
                               <div className="ml-auto flex items-center">
-                                <FiStar className="w-4 h-4 text-yellow-500 mr-1" />
+                                <Star className="w-4 h-4 text-yellow-500 mr-1" />
                                 <span className="text-sm font-medium text-gray-900 dark:text-white">
                                   {activity.calificacion}
                                 </span>
@@ -793,7 +759,7 @@ export default function ProfilePage(): JSX.Element {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <FiShield className="w-5 h-5 text-gray-400 mr-3" />
+                        <Shield className="w-5 h-5 text-gray-400 mr-3" />
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Autenticación de dos factores</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -812,7 +778,7 @@ export default function ProfilePage(): JSX.Element {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <FiLock className="w-5 h-5 text-gray-400 mr-3" />
+                        <Lock className="w-5 h-5 text-gray-400 mr-3" />
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Cambiar contraseña</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Actualiza tu contraseña</p>
@@ -833,7 +799,7 @@ export default function ProfilePage(): JSX.Element {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <FiBell className="w-5 h-5 text-gray-400 mr-3" />
+                        <Bell className="w-5 h-5 text-gray-400 mr-3" />
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Notificaciones por email</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Recibir actualizaciones por correo</p>
@@ -847,7 +813,7 @@ export default function ProfilePage(): JSX.Element {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <FiMessageCircle className="w-5 h-5 text-gray-400 mr-3" />
+                        <MessageCircle className="w-5 h-5 text-gray-400 mr-3" />
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Notificaciones push</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Notificaciones en el navegador</p>

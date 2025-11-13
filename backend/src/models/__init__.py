@@ -16,19 +16,20 @@ from src.models.academic.material_clase import MaterialClase
 from src.models.academic.material_curso import MaterialCurso
 from src.models.academic.material_educativo import MaterialEducativo
 from src.models.academic.programa import Programa
-from src.models.academic.tarea import Tarea as TareaAcademica, EntregaTarea, Rubrica
+# TEMPORAL: Comentado para evitar conflicto con /classes/tarea.py
+# from src.models.academic.tarea import Tarea as TareaAcademica, EntregaTarea, Rubrica
 
 # Sistema de comunicación y chat
 from src.models.communication.chat import (
-    SalaChat, ParticipanteSala, MensajeChat, LecturaMensaje, 
+    SalaChat, ParticipanteSala, LecturaMensaje,
     Notificacion, ConfiguracionNotificaciones
 )
-
-from src.models.communication.archivo_chat import ArchivoChat
-from src.models.communication.chat_bot import ChatBot
-from src.models.communication.chat_grupo import ChatGrupo
-from src.models.communication.faq_bot import FAQBot
 from src.models.communication.mensaje import Mensaje
+
+# from src.models.communication.archivo_chat import ArchivoChat  # DESHABILITADO: referencia tabla inexistente ChatGrupo
+from src.models.communication.chat_bot import ChatBot
+from src.models.communication.faq_bot import FAQBot
+# LEGACY ELIMINADOS: ChatGrupo, Mensaje (usar SalaChat, MensajeChat del sistema moderno)
 from src.models.communication.comentario import Comentario
 
 from src.models.gamification.historial_puntos import HistorialPuntos
@@ -45,9 +46,9 @@ from src.models.assessment.escala_calificacion import EscalaCalificacion
 from src.models.assessment.valor_calificacion import ValorCalificacion
 
 from src.models.classes.asistencia import Asistencia
-from src.models.classes.clase import Clase
-from src.models.classes.entregar_tarea import EntregarTarea
-from src.models.classes.tarea import Tarea as TareaClase
+# from src.models.classes.clase import Clase  # Duplicado - usar academic.clase
+# from src.models.classes.entregar_tarea import EntregarTarea
+# from src.models.classes.tarea import Tarea as TareaClase
 
 from src.models.classes.plataforma import Plataforma
 
@@ -58,6 +59,6 @@ from src.models.avatar.user_avatar import UserAvatar
 # Sistema de evaluaciones y exámenes
 from src.models.evaluaciones.examen import (
     TipoExamen, EstadoExamen, TipoPregunta, DificultadPregunta, EstadoIntento,
-    Examen, PreguntaExamen, BancoPregunta, IntentoExamen, RespuestaEstudiante,
+    Examen, PreguntaExamen, BancoPregunta, IntentoExamen,
     ConfiguracionEvaluaciones, EstadisticaExamen
 )

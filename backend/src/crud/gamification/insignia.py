@@ -1,7 +1,7 @@
 import uuid
-from typing import List, Optional
+
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, desc
 
 from ...models.gamification.insignia import Insignia
 from ...models.gamification.usuario_insignia import UsuarioInsignia
@@ -13,14 +13,14 @@ from ...schemas.gamification.insignia import (
 )
 
 
-def get_insignia(db: Session, insignia_id: uuid.UUID) -> Optional[Insignia]:
+def get_insignia(db: Session, insignia_id: uuid.UUID) -> Insignia | None:
     """Obtener una insignia por su ID."""
     return db.query(Insignia).filter(Insignia.insignia_id == insignia_id).first()
 
 
 def get_insignias(
     db: Session, skip: int = 0, limit: int = 100, activas_solo: bool = False
-) -> List[Insignia]:
+) -> list[Insignia]:
     """Obtener lista de insignias."""
     query = db.query(Insignia)
 
@@ -44,7 +44,7 @@ def create_insignia(db: Session, insignia: InsigniaCreate) -> Insignia:
 
 def update_insignia(
     db: Session, insignia_id: uuid.UUID, insignia_update: InsigniaUpdate
-) -> Optional[Insignia]:
+) -> Insignia | None:
     """Actualizar una insignia existente."""
     db_insignia = get_insignia(db, insignia_id)
     if not db_insignia:
@@ -72,7 +72,7 @@ def delete_insignia(db: Session, insignia_id: uuid.UUID) -> bool:
 
 def get_usuario_insignia(
     db: Session, usuario_id: uuid.UUID, insignia_id: uuid.UUID
-) -> Optional[UsuarioInsignia]:
+) -> UsuarioInsignia | None:
     """Verificar si un usuario tiene una insignia específica."""
     return (
         db.query(UsuarioInsignia)
@@ -86,7 +86,7 @@ def get_usuario_insignia(
 
 def get_insignias_usuario(
     db: Session, usuario_id: uuid.UUID, skip: int = 0, limit: int = 100
-) -> List[UsuarioInsignia]:
+) -> list[UsuarioInsignia]:
     """Obtener todas las insignias de un usuario."""
     return (
         db.query(UsuarioInsignia)
@@ -104,13 +104,15 @@ def otorgar_insignia(db: Session, request: OtorgarInsigniaRequest) -> UsuarioIns
     # Verificar que la insignia existe
     insignia = get_insignia(db, request.insignia_id)
     if not insignia:
-        raise ValueError("La insignia no existe")
+        msg = "La insignia no existe"
+        raise ValueError(msg)
 
     # Verificar si el usuario ya tiene la insignia
     if insignia.es_unica:
         existing = get_usuario_insignia(db, request.usuario_id, request.insignia_id)
         if existing:
-            raise ValueError("El usuario ya tiene esta insignia única")
+            msg = "El usuario ya tiene esta insignia única"
+            raise ValueError(msg)
 
     # Crear la asignación
     db_usuario_insignia = UsuarioInsignia(
@@ -139,7 +141,7 @@ def revocar_insignia(
     return True
 
 
-def get_insignias_con_estadisticas(db: Session) -> List[dict]:
+def get_insignias_con_estadisticas(db: Session) -> list[dict]:
     """Obtener insignias con estadísticas de uso."""
     query = (
         db.query(
@@ -173,7 +175,7 @@ def get_insignias_con_estadisticas(db: Session) -> List[dict]:
 
 def get_usuarios_con_insignia(
     db: Session, insignia_id: uuid.UUID, skip: int = 0, limit: int = 100
-) -> List[UsuarioInsignia]:
+) -> list[UsuarioInsignia]:
     """Obtener usuarios que tienen una insignia específica."""
     return (
         db.query(UsuarioInsignia)

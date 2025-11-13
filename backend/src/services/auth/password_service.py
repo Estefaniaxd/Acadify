@@ -1,12 +1,14 @@
-from src.core.config import settings
 import re
+
 from passlib.context import CryptContext
+
+from src.core.config import settings
 
 
 class PasswordService:
-    """Servicio para hashing y validación de contraseñas"""
+    """Servicio para hashing y validación de contraseñas."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Usar bcrypt con rounds configurables (por defecto 12)
         self.pwd_context = CryptContext(
             schemes=["bcrypt"],
@@ -15,16 +17,15 @@ class PasswordService:
         )
 
     def hash_password(self, password: str) -> str:
-        """Hashear contraseña con bcrypt"""
+        """Hashear contraseña con bcrypt."""
         return self.pwd_context.hash(password)
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """Verificar contraseña contra hash"""
+        """Verificar contraseña contra hash."""
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def validate_password_policy(self, password: str) -> tuple[bool, list[str]]:
-        """
-        Validar que la contraseña cumple con las políticas de seguridad
+        """Validar que la contraseña cumple con las políticas de seguridad.
 
         Returns:
             tuple: (is_valid, errors_list)
@@ -71,9 +72,7 @@ class PasswordService:
         return len(errors) == 0, errors
 
     def generate_password_strength_score(self, password: str) -> int:
-        """
-        Generar score de fortaleza de contraseña (0-100)
-        """
+        """Generar score de fortaleza de contraseña (0-100)."""
         score = 0
 
         # Longitud (máximo 25 puntos)
@@ -101,4 +100,3 @@ class PasswordService:
             score += 10
 
         return min(100, score)
-

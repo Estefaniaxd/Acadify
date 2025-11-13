@@ -37,7 +37,7 @@ def test_archivo_urls():
             SELECT comentario_id, contenido, archivos_adjuntos, fecha_creacion
             FROM "Comentario" 
             WHERE archivos_adjuntos IS NOT NULL 
-            AND archivos_adjuntos::text != 'null'
+            AND archivos_adjuntos::text != 'null',
             AND archivos_adjuntos::text != '[]'
             ORDER BY fecha_creacion DESC
             LIMIT 3
@@ -158,16 +158,16 @@ def generar_test_descarga():
     <p>Tipo: {tipo}</p>
     <p>URL: {API_BASE_URL}{url}</p>
     
-    <div style="margin: 20px 0;">
-        <button onclick="descargarArchivo()">🔽 Descargar Archivo</button>
+    <div style="margin: 20px 0;">,
+        <button onclick="descargarArchivo()">🔽 Descargar Archivo</button>,
         <button onclick="abrirArchivo()">👁️ Abrir en Nueva Pestaña</button>
     </div>
     
     <script>
         function descargarArchivo() {{
-            const link = document.createElement('a');
-            link.href = '{API_BASE_URL}{url}';
-            link.download = '{nombre}';
+            const link = document.createElement('a');,
+            link.href = '{API_BASE_URL}{url}';,
+            link.download = '{nombre}';,
             link.target = '_blank';
             document.body.appendChild(link);
             link.click();

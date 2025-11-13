@@ -1,0 +1,66 @@
+# .ruffignore
+# Archivos y directorios que Ruff debe ignorar completamente
+
+# Directorios de entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Directorios de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Directorios de cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Alembic migrations (generados automáticamente)
+alembic/versions/
+
+# Backups y archivos temporales
+BACKUP_LEGACY/
+*.backup
+*.bak
+*.tmp
+*~
+
+# Test files (solo si no quieres lintearlos)
+TEST/
+test_*.py
+
+# Documentación
+Docs/
+docs/_build/
+
+# Configuración IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Notebooks
+*.ipynb_checkpoints/
+
+# Otros
+.DS_Store
+*.log

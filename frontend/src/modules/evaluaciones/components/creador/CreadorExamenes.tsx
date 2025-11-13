@@ -1,14 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  PlusIcon,
-  DocumentDuplicateIcon,
-  EyeIcon,
-  PlayIcon,
-  Cog6ToothIcon,
-  BookOpenIcon,
-  ChartBarIcon
-} from '@heroicons/react/24/outline';
+;
 import { Card, CardHeader, CardContent, Grid, EmptyState } from '../common/LayoutComponents';
 import { LoadingSpinner, CardSkeleton } from '../common/LoadingComponents';
 import { useToast } from '../common/AlertComponents';
@@ -17,6 +9,7 @@ import { TIPO_EXAMEN_LABELS, ESTADO_EXAMEN_LABELS, obtenerColorEstado, obtenerCo
 import { Examen, TipoExamen, EstadoExamen } from '../../types';
 import { FormularioExamen } from './FormularioExamen';
 import { EditorPreguntas } from './EditorPreguntas';
+import { BarChart, BookOpen, Eye, Plus } from 'lucide-react';
 
 interface CreadorExamenesProps {
   className?: string;
@@ -204,7 +197,7 @@ export function CreadorExamenes({ className = '' }: CreadorExamenesProps) {
               onClick={manejarCrearExamen}
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg"
             >
-              <PlusIcon className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
               <span>Nuevo Examen</span>
             </motion.button>
           )}
@@ -373,7 +366,7 @@ function ListaExamenes({
         </Grid>
       ) : examenes.length === 0 ? (
         <EmptyState
-          icon={<BookOpenIcon className="w-12 h-12" />}
+          icon={<BookOpen className="w-12 h-12" />}
           title="No hay exámenes"
           description="Crea tu primer examen para comenzar a evaluar a tus estudiantes"
           action={

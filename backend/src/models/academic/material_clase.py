@@ -1,6 +1,7 @@
-from ...db.base_class import Base
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+
+from src.db.base_class import Base
 
 
 class MaterialClase(Base):

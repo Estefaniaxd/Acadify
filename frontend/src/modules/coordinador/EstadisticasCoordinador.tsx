@@ -1,15 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FiUsers, 
-  FiBookOpen, 
-  FiAward, 
-  FiTrendingUp, 
-  FiCalendar,
-  FiTarget,
-  FiBarChart,
-  FiActivity
-} from 'react-icons/fi';
+import { Activity, Award, BarChart, BookOpen, Calendar, Target, TrendingUp, Users } from 'lucide-react';
+;
 
 // Datos mock para desarrollo
 const estadisticasMock = {
@@ -46,7 +38,7 @@ export default function EstadisticasCoordinador() {
     {
       title: 'Profesores',
       value: resumen.profesores,
-      icon: FiUsers,
+      icon: Users,
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
       change: '+2 este mes'
@@ -54,7 +46,7 @@ export default function EstadisticasCoordinador() {
     {
       title: 'Estudiantes',
       value: resumen.estudiantes,
-      icon: FiUsers,
+      icon: Users,
       color: 'from-emerald-500 to-emerald-600',
       bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
       change: '+5 este mes'
@@ -62,7 +54,7 @@ export default function EstadisticasCoordinador() {
     {
       title: 'Clases Activas',
       value: resumen.clasesActivas,
-      icon: FiBookOpen,
+      icon: BookOpen,
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50 dark:bg-purple-900/20',
       change: '+1 esta semana'
@@ -70,7 +62,7 @@ export default function EstadisticasCoordinador() {
     {
       title: 'Puntos Otorgados',
       value: resumen.puntosOtorgados.toLocaleString(),
-      icon: FiAward,
+      icon: Award,
       color: 'from-yellow-500 to-yellow-600',
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
       change: '+250 esta semana'
@@ -82,28 +74,28 @@ export default function EstadisticasCoordinador() {
       label: 'Promedio General',
       value: rendimiento.promedioGeneral,
       max: 100,
-      icon: FiTrendingUp,
+      icon: TrendingUp,
       color: 'bg-blue-500'
     },
     {
       label: 'Tasa de Aprobación',
       value: rendimiento.aprobacion,
       max: 100,
-      icon: FiTarget,
+      icon: Target,
       color: 'bg-green-500'
     },
     {
       label: 'Participación',
       value: rendimiento.participacion,
       max: 100,
-      icon: FiActivity,
+      icon: Activity,
       color: 'bg-orange-500'
     },
     {
       label: 'Satisfacción',
       value: rendimiento.satisfaccion,
       max: 100,
-      icon: FiAward,
+      icon: Award,
       color: 'bg-purple-500'
     }
   ];
@@ -112,19 +104,19 @@ export default function EstadisticasCoordinador() {
     {
       label: 'Sesiones Activas',
       value: actividad.sesionesActivas,
-      icon: FiActivity,
+      icon: Activity,
       color: 'text-green-600'
     },
     {
       label: 'Tareas Pendientes',
       value: actividad.tareasPendientes,
-      icon: FiBookOpen,
+      icon: BookOpen,
       color: 'text-orange-600'
     },
     {
       label: 'Exámenes Programados',
       value: actividad.examenesProgramados,
-      icon: FiCalendar,
+      icon: Calendar,
       color: 'text-blue-600'
     }
   ];
@@ -142,7 +134,7 @@ export default function EstadisticasCoordinador() {
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <FiBarChart className="w-6 h-6 text-blue-600" />
+            <BarChart className="w-6 h-6 text-blue-600" />
             <span className="text-sm text-gray-500">Actualizado hace 5 min</span>
           </div>
         </div>

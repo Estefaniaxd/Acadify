@@ -1,15 +1,17 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from uuid import UUID
-from typing import List
-from src.crud.classes import asistencia
+
 from src.api.deps import get_db
+from src.crud.classes import asistencia
+from src.enums.classes.asistencia_enums import EstadoAsistencia
 from src.schemas.classes.asistencia import (
     Asistencia,
     AsistenciaCreate,
-    AsistenciaUpdate
+    AsistenciaUpdate,
 )
-from src.enums.classes.asistencia_enums import EstadoAsistencia
+
 
 router = APIRouter()
 
@@ -23,9 +25,7 @@ def create_asistencia(
     db: Session = Depends(get_db),
     asistencia_in: AsistenciaCreate,
 ):
-    """
-    Crear una nueva asistencia.
-    """
+    """Crear una nueva asistencia."""
     # Verificar si ya existe una asistencia para ese estudiante en esa clase
     existing = asistencia.get_by_clase_and_estudiante(
         db=db,
@@ -47,9 +47,7 @@ def read_asistencia(
     asistencia_id: UUID,
     db: Session = Depends(get_db),
 ):
-    """
-    Obtener asistencia por ID.
-    """
+    """Obtener asistencia por ID."""
     db_asistencia = asistencia.get(db=db, asistencia_id=asistencia_id)
     if not db_asistencia:
         raise HTTPException(status_code=404, detail=ASISTENCIA_NOT_FOUND)
@@ -57,7 +55,7 @@ def read_asistencia(
 
 
 # Obtener múltiples asistencias con paginación
-@router.get("/", response_model=List[Asistencia])
+@router.get("/", response_model=list[Asistencia])
 def read_asistencias(
     skip: int = Query(0, ge=0, description="Número de registros a omitir"),
     limit: int = Query(
@@ -65,64 +63,48 @@ def read_asistencias(
     ),
     db: Session = Depends(get_db),
 ):
-    """
-    Obtener lista de asistencias con paginación.
-    """
-    asistencias = asistencia.get_multi(db=db, skip=skip, limit=limit)
-    return asistencias
+    """Obtener lista de asistencias con paginación."""
+    return asistencia.get_multi(db=db, skip=skip, limit=limit)
 
 
 # Obtener asistencias por clase
-@router.get("/clase/{clase_id}", response_model=List[Asistencia])
+@router.get("/clase/{clase_id}", response_model=list[Asistencia])
 def read_asistencias_by_clase(
     clase_id: UUID,
     db: Session = Depends(get_db),
 ):
-    """
-    Obtener todas las asistencias de una clase específica.
-    """
-    asistencias = asistencia.get_by_clase(db=db, clase_id=clase_id)
-    return asistencias
+    """Obtener todas las asistencias de una clase específica."""
+    return asistencia.get_by_clase(db=db, clase_id=clase_id)
 
 
 # Obtener asistencias por estudiante
-@router.get("/estudiante/{estudiante_id}", response_model=List[Asistencia])
+@router.get("/estudiante/{estudiante_id}", response_model=list[Asistencia])
 def read_asistencias_by_estudiante(
     estudiante_id: UUID,
     db: Session = Depends(get_db),
 ):
-    """
-    Obtener todas las asistencias de un estudiante específico.
-    """
-    asistencias = asistencia.get_by_estudiante(db=db, estudiante_id=estudiante_id)
-    return asistencias
+    """Obtener todas las asistencias de un estudiante específico."""
+    return asistencia.get_by_estudiante(db=db, estudiante_id=estudiante_id)
 
 
 # Obtener asistencias por estado
-@router.get("/estado/{estado}", response_model=List[Asistencia])
+@router.get("/estado/{estado}", response_model=list[Asistencia])
 def read_asistencias_by_estado(
     estado: EstadoAsistencia,
     db: Session = Depends(get_db),
 ):
-    """
-    Obtener asistencias filtradas por estado.
-    """
-    asistencias = asistencia.get_by_estado(db=db, estado=estado)
-    return asistencias
+    """Obtener asistencias filtradas por estado."""
+    return asistencia.get_by_estado(db=db, estado=estado)
 
 
 # Obtener asistencia específica de estudiante en clase
-@router.get(
-    "/clase/{clase_id}/estudiante/{estudiante_id}", response_model=Asistencia
-)
+@router.get("/clase/{clase_id}/estudiante/{estudiante_id}", response_model=Asistencia)
 def read_asistencia_by_clase_and_estudiante(
     clase_id: UUID,
     estudiante_id: UUID,
     db: Session = Depends(get_db),
 ):
-    """
-    Obtener la asistencia de un estudiante específico en una clase específica.
-    """
+    """Obtener la asistencia de un estudiante específico en una clase específica."""
     db_asistencia = asistencia.get_by_clase_and_estudiante(
         db=db, clase_id=clase_id, estudiante_id=estudiante_id
     )
@@ -141,9 +123,7 @@ def update_asistencia(
     asistencia_in: AsistenciaUpdate,
     db: Session = Depends(get_db),
 ):
-    """
-    Actualizar una asistencia existente.
-    """
+    """Actualizar una asistencia existente."""
     db_asistencia = asistencia.get(db=db, asistencia_id=asistencia_id)
     if not db_asistencia:
         raise HTTPException(status_code=404, detail=ASISTENCIA_NOT_FOUND)
@@ -158,9 +138,7 @@ def update_estado_asistencia(
     estado: EstadoAsistencia,
     db: Session = Depends(get_db),
 ):
-    """
-    Actualizar solo el estado de una asistencia.
-    """
+    """Actualizar solo el estado de una asistencia."""
     db_asistencia = asistencia.get(db=db, asistencia_id=asistencia_id)
     if not db_asistencia:
         raise HTTPException(status_code=404, detail=ASISTENCIA_NOT_FOUND)
@@ -174,27 +152,24 @@ def update_estado_asistencia(
 def delete_asistencia(
     asistencia_id: UUID,
     db: Session = Depends(get_db),
-):
-    """
-    Eliminar una asistencia.
-    """
+) -> None:
+    """Eliminar una asistencia."""
     db_asistencia = asistencia.remove(db=db, asistencia_id=asistencia_id)
     if not db_asistencia:
         raise HTTPException(status_code=404, detail=ASISTENCIA_NOT_FOUND)
 
 
 # Endpoint para registrar asistencia masiva (útil para tomar asistencia de toda una clase)
-@router.post("/clase/{clase_id}/masiva", response_model=List[Asistencia])
+@router.post("/clase/{clase_id}/masiva", response_model=list[Asistencia])
 def create_asistencia_masiva(
     clase_id: UUID,
-    asistencias_data: List[
+    asistencias_data: list[
         dict
     ],  # [{"estudiante_id": UUID, "estado": EstadoAsistencia}]
     db: Session = Depends(get_db),
 ):
-    """
-    Crear múltiples asistencias para una clase específica.
-    Formato esperado: [{"estudiante_id": "uuid", "estado": "PRESENTE|AUSENTE|TARDANZA"}]
+    """Crear múltiples asistencias para una clase específica.
+    Formato esperado: [{"estudiante_id": "uuid", "estado": "PRESENTE|AUSENTE|TARDANZA"}].
     """
     created_asistencias = []
 
@@ -225,7 +200,7 @@ def create_asistencia_masiva(
         except Exception as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Error procesando estudiante {item.get('estudiante_id')}: {str(e)}",
-            )
+                detail=f"Error procesando estudiante {item.get('estudiante_id')}: {e!s}",
+            ) from e
 
     return created_asistencias

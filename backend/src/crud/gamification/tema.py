@@ -1,23 +1,23 @@
 import uuid
-from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from ...models.gamification.tema import Tema
-from ...models.gamification.tema_predefinido import TemaPredefinido
 from ...models.gamification.tema_personalizado import TemaPersonalizado
+from ...models.gamification.tema_predefinido import TemaPredefinido
 from ...schemas.gamification.tema import (
+    AsignarTemaPersonalizadoRequest,
     TemaCreate,
     TemaUpdate,
-    AsignarTemaPersonalizadoRequest,
 )
 
 
-def get_tema(db: Session, tema_id: uuid.UUID) -> Optional[Tema]:
+def get_tema(db: Session, tema_id: uuid.UUID) -> Tema | None:
     """Obtener un tema por su ID."""
     return db.query(Tema).filter(Tema.tema_id == tema_id).first()
 
 
-def get_temas(db: Session, skip: int = 0, limit: int = 100) -> List[Tema]:
+def get_temas(db: Session, skip: int = 0, limit: int = 100) -> list[Tema]:
     """Obtener lista de todos los temas."""
     return db.query(Tema).order_by(Tema.nombre).offset(skip).limit(limit).all()
 
@@ -33,7 +33,7 @@ def create_tema(db: Session, tema: TemaCreate) -> Tema:
 
 def update_tema(
     db: Session, tema_id: uuid.UUID, tema_update: TemaUpdate
-) -> Optional[Tema]:
+) -> Tema | None:
     """Actualizar un tema existente."""
     db_tema = get_tema(db, tema_id)
     if not db_tema:
@@ -59,7 +59,7 @@ def delete_tema(db: Session, tema_id: uuid.UUID) -> bool:
     return True
 
 
-def get_temas_predefinidos(db: Session) -> List[Tema]:
+def get_temas_predefinidos(db: Session) -> list[Tema]:
     """Obtener todos los temas predefinidos."""
     return (
         db.query(Tema)
@@ -74,7 +74,8 @@ def create_tema_predefinido(db: Session, tema_id: uuid.UUID) -> TemaPredefinido:
     # Verificar que el tema existe
     tema = get_tema(db, tema_id)
     if not tema:
-        raise ValueError("El tema no existe")
+        msg = "El tema no existe"
+        raise ValueError(msg)
 
     # Verificar que no esté ya marcado como predefinido
     existing = (
@@ -82,7 +83,8 @@ def create_tema_predefinido(db: Session, tema_id: uuid.UUID) -> TemaPredefinido:
     )
 
     if existing:
-        raise ValueError("El tema ya está marcado como predefinido")
+        msg = "El tema ya está marcado como predefinido"
+        raise ValueError(msg)
 
     db_tema_predefinido = TemaPredefinido(tema_id=tema_id)
     db.add(db_tema_predefinido)
@@ -107,7 +109,7 @@ def remove_tema_predefinido(db: Session, tema_id: uuid.UUID) -> bool:
 
 def get_temas_personalizados_usuario(
     db: Session, usuario_id: uuid.UUID
-) -> List[TemaPersonalizado]:
+) -> list[TemaPersonalizado]:
     """Obtener temas personalizados de un usuario."""
     return (
         db.query(TemaPersonalizado)
@@ -140,7 +142,8 @@ def asignar_tema_personalizado(
     # Verificar que el tema existe
     tema = get_tema(db, request.tema_id)
     if not tema:
-        raise ValueError("El tema no existe")
+        msg = "El tema no existe"
+        raise ValueError(msg)
 
     # Verificar que no esté ya asignado al usuario
     existing = (
@@ -153,7 +156,8 @@ def asignar_tema_personalizado(
     )
 
     if existing:
-        raise ValueError("El usuario ya tiene este tema personalizado")
+        msg = "El usuario ya tiene este tema personalizado"
+        raise ValueError(msg)
 
     # Verificar que no sea un tema predefinido
     es_predefinido = (
@@ -163,7 +167,8 @@ def asignar_tema_personalizado(
     )
 
     if es_predefinido:
-        raise ValueError("No se puede asignar un tema predefinido como personalizado")
+        msg = "No se puede asignar un tema predefinido como personalizado"
+        raise ValueError(msg)
 
     db_tema_personalizado = TemaPersonalizado(
         usuario_id=request.usuario_id, tema_id=request.tema_id

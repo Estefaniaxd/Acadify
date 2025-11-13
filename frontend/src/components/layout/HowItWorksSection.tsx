@@ -1,59 +1,67 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  FiUserPlus, FiPlay, FiTrendingUp, FiAward, 
-  FiArrowRight, FiCheckCircle, FiZap, FiStar 
-} from 'react-icons/fi';
-
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Award,
+  CheckCircle,
+  Play,
+  Star,
+  TrendingUp,
+  UserPlus,
+  Zap,
+} from "lucide-react";
 const steps = [
   {
-    title: 'Regístrate gratis',
-    description: 'Únete a nuestra comunidad en segundos y comienza tu aventura educativa inmediatamente.',
-    icon: FiUserPlus,
-    color: 'from-emerald-500 to-teal-600',
-    bgPattern: 'emerald',
-    number: '01'
+    title: "Regístrate gratis",
+    description:
+      "Únete a nuestra comunidad en segundos y comienza tu aventura educativa inmediatamente.",
+    icon: UserPlus,
+    color: "from-emerald-500 to-teal-600",
+    bgPattern: "emerald",
+    number: "01",
   },
   {
-    title: 'Explora y aprende',
-    description: 'Sumérgete en contenido interactivo diseñado específicamente para tu nivel y objetivos.',
-    icon: FiPlay,
-    color: 'from-blue-500 to-indigo-600',
-    bgPattern: 'blue',
-    number: '02'
+    title: "Explora y aprende",
+    description:
+      "Sumérgete en contenido interactivo diseñado específicamente para tu nivel y objetivos.",
+    icon: Play,
+    color: "from-blue-500 to-indigo-600",
+    bgPattern: "blue",
+    number: "02",
   },
   {
-    title: 'Gana y crece',
-    description: 'Completa retos emocionantes, acumula puntos y ve cómo tus habilidades evolucionan.',
-    icon: FiTrendingUp,
-    color: 'from-violet-500 to-purple-600',
-    bgPattern: 'violet',
-    number: '03'
+    title: "Gana y crece",
+    description:
+      "Completa retos emocionantes, acumula puntos y ve cómo tus habilidades evolucionan.",
+    icon: TrendingUp,
+    color: "from-violet-500 to-purple-600",
+    bgPattern: "violet",
+    number: "03",
   },
   {
-    title: 'Certifícate',
-    description: 'Recibe reconocimientos oficiales y certificados que validen tu progreso profesional.',
-    icon: FiAward,
-    color: 'from-yellow-500 to-orange-600',
-    bgPattern: 'yellow',
-    number: '04'
+    title: "Certifícate",
+    description:
+      "Recibe reconocimientos oficiales y certificados que validen tu progreso profesional.",
+    icon: Award,
+    color: "from-yellow-500 to-orange-600",
+    bgPattern: "yellow",
+    number: "04",
   },
 ];
 
 export default function HowItWorksSection() {
   return (
-  <section className="relative w-full py-24 bg-gradient-to-b from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-900/40 dark:to-violet-900/30 overflow-hidden">
+    <section className="relative w-full py-24 bg-gradient-to-b from-gray-50 via-white to-violet-50/30 dark:from-gray-900 dark:via-gray-900/40 dark:to-violet-900/30 overflow-hidden">
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-violet-200/20 to-purple-300/20 dark:from-violet-900/20 dark:to-purple-900/20 blur-3xl"
           animate={{ scale: [1, 1.3, 1], x: [0, 50, 0], y: [0, -30, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-indigo-300/20 dark:from-blue-900/20 dark:to-indigo-900/20 blur-3xl"
           animate={{ scale: [1.3, 1, 1.3], x: [0, -40, 0], y: [0, 40, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -73,21 +81,21 @@ export default function HowItWorksSection() {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 text-violet-700 font-medium text-sm mb-6"
           >
-            <FiZap className="w-4 h-4" />
+            <Zap className="w-4 h-4" />
             Proceso simple y efectivo
           </motion.div>
-          
+
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6">
-            ¿Cómo funciona{' '}
+            ¿Cómo funciona{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600">
               Acadify
             </span>
             ?
           </h2>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Únete a miles de estudiantes que ya han transformado su manera de aprender 
-            con nuestro revolucionario sistema en solo 4 pasos.
+            Únete a miles de estudiantes que ya han transformado su manera de aprender con nuestro
+            revolucionario sistema en solo 4 pasos.
           </p>
         </motion.div>
 
@@ -134,17 +142,25 @@ export default function HowItWorksSection() {
                   <motion.div
                     className={`absolute inset-0 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500`}
                     style={{
-                      background: `radial-gradient(circle at 30% 30%, ${step.color.includes('emerald') ? '#10b981' : step.color.includes('blue') ? '#3b82f6' : step.color.includes('violet') ? '#8b5cf6' : '#f59e0b'} 0%, transparent 50%)`
+                      background: `radial-gradient(circle at 30% 30%, ${
+                        step.color.includes("emerald")
+                          ? "#10b981"
+                          : step.color.includes("blue")
+                          ? "#3b82f6"
+                          : step.color.includes("violet")
+                          ? "#8b5cf6"
+                          : "#f59e0b"
+                      } 0%, transparent 50%)`,
                     }}
                   />
 
                   {/* Icono principal */}
                   <motion.div
                     className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg mb-6 mx-auto relative overflow-hidden`}
-                    whileHover={{ 
-                      scale: 1.15, 
+                    whileHover={{
+                      scale: 1.15,
                       rotate: [0, -10, 10, 0],
-                      boxShadow: "0 25px 50px -12px rgba(139, 92, 246, 0.4)"
+                      boxShadow: "0 25px 50px -12px rgba(139, 92, 246, 0.4)",
                     }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
@@ -168,8 +184,10 @@ export default function HowItWorksSection() {
                     initial={{ y: 10 }}
                     whileHover={{ y: 0 }}
                   >
-                    <FiCheckCircle className="w-4 h-4 text-emerald-500" />
-                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Completado</span>
+                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      Completado
+                    </span>
                   </motion.div>
 
                   {/* Elementos decorativos */}
@@ -184,10 +202,10 @@ export default function HowItWorksSection() {
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.8 + (0.2 * idx), duration: 0.6 }}
+                    transition={{ delay: 0.8 + 0.2 * idx, duration: 0.6 }}
                   >
                     <div className="w-6 h-6 rounded-full bg-white border-2 border-violet-300 flex items-center justify-center shadow-lg">
-                      <FiArrowRight className="w-3 h-3 text-violet-600" />
+                      <ArrowRight className="w-3 h-3 text-violet-600" />
                     </div>
                   </motion.div>
                 )}
@@ -209,7 +227,7 @@ export default function HowItWorksSection() {
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FiStar className="w-5 h-5" />
+            <Star className="w-5 h-5" />
             <span>Comienza tu transformación ahora</span>
           </motion.div>
         </motion.div>

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from ..enums.academic.tareas import EstadoTarea, TipoTarea, PrioridadTarea, EstadoEntrega
+from src.enums.academic.tareas import EstadoTarea, TipoTarea, PrioridadTarea, EstadoEntrega
 
 # Schemas para Tarea
 class TareaBase(BaseModel):
@@ -9,9 +9,8 @@ class TareaBase(BaseModel):
     descripcion: Optional[str] = None
     instrucciones: Optional[str] = None
     objetivos: Optional[str] = None
-    tipo_tarea: TipoTarea = TipoTarea.ENSAYO
+    tipo: Optional[str] = Field(None, max_length=13)  # Campo real en BD (VARCHAR(13))
     prioridad: PrioridadTarea = PrioridadTarea.MEDIA
-    categoria: Optional[str] = None
     tags: Optional[str] = None
     fecha_limite: datetime
     fecha_inicio_disponible: Optional[datetime] = None
@@ -40,9 +39,8 @@ class TareaUpdate(BaseModel):
     descripcion: Optional[str] = None
     instrucciones: Optional[str] = None
     objetivos: Optional[str] = None
-    tipo_tarea: Optional[TipoTarea] = None
+    tipo: Optional[str] = Field(None, max_length=13)  # Campo real en BD (VARCHAR(13))
     prioridad: Optional[PrioridadTarea] = None
-    categoria: Optional[str] = None
     tags: Optional[str] = None
     fecha_limite: Optional[datetime] = None
     fecha_inicio_disponible: Optional[datetime] = None
@@ -215,7 +213,7 @@ class RubricaDetallada(RubricaResponse):
 class FiltrosTarea(BaseModel):
     grupo_id: Optional[str] = None
     docente_id: Optional[str] = None
-    tipo_tarea: Optional[TipoTarea] = None
+    tipo: Optional[str] = Field(None, max_length=13)  # Campo real en BD (VARCHAR(13))
     estado: Optional[EstadoTarea] = None
     prioridad: Optional[PrioridadTarea] = None
     es_grupal: Optional[bool] = None

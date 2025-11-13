@@ -1,20 +1,21 @@
 # crud/faq_bot.py
-from typing import List, Optional
-from ..base import CRUDBase
+from datetime import UTC, datetime
 from uuid import UUID
-from datetime import datetime
+
 from sqlalchemy.orm import Session
-from ...models.communication.faq_bot import FAQBot
-from ...schemas.communication.faq_bot import FAQBotCreate, FAQBotUpdate
+
+from src.crud.base import CRUDBase
+from src.models.communication.faq_bot import FAQBot
+from src.schemas.communication.faq_bot import FAQBotCreate, FAQBotUpdate
 
 
 class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
     def create(self, db: Session, *, obj_in: FAQBotCreate) -> FAQBot:
-        """Crear nueva FAQ"""
+        """Crear nueva FAQ."""
         # Establecer timestamp de actualización si no se proporciona
         faq_data = obj_in.model_dump()
         if not faq_data.get("ultima_actualizacion"):
-            faq_data["ultima_actualizacion"] = datetime.now()
+            faq_data["ultima_actualizacion"] = datetime.now(UTC)
 
         db_obj = FAQBot(**faq_data)
         db.add(db_obj)
@@ -22,35 +23,35 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    def get(self, db: Session, faq_id: UUID) -> Optional[FAQBot]:
-        """Obtener FAQ por ID"""
+    def get(self, db: Session, faq_id: UUID) -> FAQBot | None:
+        """Obtener FAQ por ID."""
         return db.query(FAQBot).filter(FAQBot.faq_id == faq_id).first()
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[FAQBot]:
-        """Obtener múltiples FAQs con paginación"""
+    ) -> list[FAQBot]:
+        """Obtener múltiples FAQs con paginación."""
         return db.query(FAQBot).offset(skip).limit(limit).all()
 
-    def get_by_categoria(self, db: Session, categoria: str) -> List[FAQBot]:
-        """Obtener FAQs por categoría"""
+    def get_by_categoria(self, db: Session, categoria: str) -> list[FAQBot]:
+        """Obtener FAQs por categoría."""
         return db.query(FAQBot).filter(FAQBot.categoria == categoria).all()
 
-    def get_all_categorias(self, db: Session) -> List[str]:
-        """Obtener todas las categorías únicas"""
+    def get_all_categorias(self, db: Session) -> list[str]:
+        """Obtener todas las categorías únicas."""
         categorias = db.query(FAQBot.categoria).distinct().all()
         return [cat[0] for cat in categorias]
 
-    def search_by_pregunta(self, db: Session, search_term: str) -> List[FAQBot]:
-        """Buscar FAQs por pregunta"""
+    def search_by_pregunta(self, db: Session, search_term: str) -> list[FAQBot]:
+        """Buscar FAQs por pregunta."""
         return db.query(FAQBot).filter(FAQBot.pregunta.ilike(f"%{search_term}%")).all()
 
-    def search_by_respuesta(self, db: Session, search_term: str) -> List[FAQBot]:
-        """Buscar FAQs por respuesta"""
+    def search_by_respuesta(self, db: Session, search_term: str) -> list[FAQBot]:
+        """Buscar FAQs por respuesta."""
         return db.query(FAQBot).filter(FAQBot.respuesta.ilike(f"%{search_term}%")).all()
 
-    def search_in_content(self, db: Session, search_term: str) -> List[FAQBot]:
-        """Buscar FAQs en pregunta o respuesta"""
+    def search_in_content(self, db: Session, search_term: str) -> list[FAQBot]:
+        """Buscar FAQs en pregunta o respuesta."""
         return (
             db.query(FAQBot)
             .filter(
@@ -60,8 +61,8 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
             .all()
         )
 
-    def get_recent_updates(self, db: Session, limit: int = 10) -> List[FAQBot]:
-        """Obtener FAQs actualizadas recientemente"""
+    def get_recent_updates(self, db: Session, limit: int = 10) -> list[FAQBot]:
+        """Obtener FAQs actualizadas recientemente."""
         return (
             db.query(FAQBot)
             .filter(FAQBot.ultima_actualizacion.is_not(None))
@@ -72,8 +73,8 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
 
     def get_by_date_range(
         self, db: Session, start_date: datetime, end_date: datetime
-    ) -> List[FAQBot]:
-        """Obtener FAQs actualizadas en un rango de fechas"""
+    ) -> list[FAQBot]:
+        """Obtener FAQs actualizadas en un rango de fechas."""
         return (
             db.query(FAQBot)
             .filter(
@@ -85,7 +86,7 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
         )
 
     def get_faqs_grouped_by_categoria(self, db: Session) -> dict:
-        """Obtener FAQs agrupadas por categoría"""
+        """Obtener FAQs agrupadas por categoría."""
         faqs = db.query(FAQBot).all()
         grouped = {}
         for faq in faqs:
@@ -95,7 +96,7 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
         return grouped
 
     def count_by_categoria(self, db: Session) -> dict:
-        """Contar FAQs por categoría"""
+        """Contar FAQs por categoría."""
         from sqlalchemy import func
 
         results = (
@@ -104,14 +105,14 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
             .all()
         )
 
-        return {categoria: count for categoria, count in results}
+        return dict(results)
 
     def update(self, db: Session, *, db_obj: FAQBot, obj_in: FAQBotUpdate) -> FAQBot:
-        """Actualizar FAQ"""
+        """Actualizar FAQ."""
         update_data = obj_in.model_dump(exclude_unset=True)
 
         # Actualizar timestamp de modificación
-        update_data["ultima_actualizacion"] = datetime.now()
+        update_data["ultima_actualizacion"] = datetime.now(UTC)
 
         for field, value in update_data.items():
             setattr(db_obj, field, value)
@@ -121,8 +122,8 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    def remove(self, db: Session, *, faq_id: UUID) -> Optional[FAQBot]:
-        """Eliminar FAQ"""
+    def remove(self, db: Session, *, faq_id: UUID) -> FAQBot | None:
+        """Eliminar FAQ."""
         obj = db.query(FAQBot).filter(FAQBot.faq_id == faq_id).first()
         if obj:
             db.delete(obj)
@@ -132,14 +133,14 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
     def bulk_update_categoria(
         self, db: Session, *, old_categoria: str, new_categoria: str
     ) -> int:
-        """Actualizar categoría en lote"""
+        """Actualizar categoría en lote."""
         updated_count = (
             db.query(FAQBot)
             .filter(FAQBot.categoria == old_categoria)
             .update(
                 {
                     FAQBot.categoria: new_categoria,
-                    FAQBot.ultima_actualizacion: datetime.now(),
+                    FAQBot.ultima_actualizacion: datetime.now(UTC),
                 }
             )
         )
@@ -147,9 +148,9 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
         return updated_count
 
     def duplicate_faq(
-        self, db: Session, *, faq_id: UUID, new_categoria: str = None
-    ) -> Optional[FAQBot]:
-        """Duplicar FAQ existente"""
+        self, db: Session, *, faq_id: UUID, new_categoria: str | None = None
+    ) -> FAQBot | None:
+        """Duplicar FAQ existente."""
         original_faq = self.get(db, faq_id)
         if not original_faq:
             return None
@@ -159,9 +160,10 @@ class CRUDFAQBot(CRUDBase[FAQBot, FAQBotCreate, FAQBotUpdate]):
             pregunta=f"[Copia] {original_faq.pregunta}",
             respuesta=original_faq.respuesta,
             categoria=new_categoria or original_faq.categoria,
-            ultima_actualizacion=datetime.now(),
+            ultima_actualizacion=datetime.now(UTC),
         )
 
         return self.create(db=db, obj_in=new_faq_data)
+
 
 faq_bot = CRUDFAQBot(FAQBot)

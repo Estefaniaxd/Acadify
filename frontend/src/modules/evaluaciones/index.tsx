@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiFileText, 
-  FiEdit3, 
-  FiPlay, 
-  FiBarChart,
-  FiPlus,
-  FiSearch,
-  FiFilter
-} from 'react-icons/fi';
+;
 
 // Importar componentes del módulo
 import { BancoPreguntas } from './components/banco/BancoPreguntas';
 import { CreadorPregunta } from './components/banco/CreadorPregunta';
 import { FormularioExamen } from './components/creador/FormularioExamen';
 import { TomadorExamen } from './components/tomador/TomadorExamen';
+import { BarChart, Edit3, FileText, Filter, Play, Plus, Search } from 'lucide-react';
 
 interface Evaluacion {
   id: string;
@@ -85,10 +78,10 @@ export default function ModuloEvaluaciones() {
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo) {
-      case 'examen': return FiFileText;
-      case 'quiz': return FiPlay;
-      case 'tarea': return FiEdit3;
-      default: return FiFileText;
+      case 'examen': return FileText;
+      case 'quiz': return Play;
+      case 'tarea': return Edit3;
+      default: return FileText;
     }
   };
 
@@ -108,10 +101,10 @@ export default function ModuloEvaluaciones() {
         {/* Navigation Tabs */}
         <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl p-2 mb-6 border border-gray-200 dark:border-gray-700">
           {[
-            { key: 'lista', label: 'Evaluaciones', icon: FiFileText },
-            { key: 'banco', label: 'Banco de Preguntas', icon: FiEdit3 },
-            { key: 'crear', label: 'Crear Evaluación', icon: FiPlus },
-            { key: 'tomador', label: 'Tomar Evaluación', icon: FiPlay }
+            { key: 'lista', label: 'Evaluaciones', icon: FileText },
+            { key: 'banco', label: 'Banco de Preguntas', icon: Edit3 },
+            { key: 'crear', label: 'Crear Evaluación', icon: Plus },
+            { key: 'tomador', label: 'Tomar Evaluación', icon: Play }
           ].map((tab) => (
             <button
               key={tab.key}
@@ -145,7 +138,7 @@ export default function ModuloEvaluaciones() {
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
-                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
                       placeholder="Buscar evaluaciones..."
@@ -156,7 +149,7 @@ export default function ModuloEvaluaciones() {
                   </div>
                   
                   <div className="relative">
-                    <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <select
                       value={filterTipo}
                       onChange={(e) => setFilterTipo(e.target.value as any)}
@@ -228,7 +221,7 @@ export default function ModuloEvaluaciones() {
                           {evaluacion.estado === 'draft' ? 'Editar' : 'Ver'}
                         </button>
                         <button className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                          <FiBarChart className="w-4 h-4" />
+                          <BarChart className="w-4 h-4" />
                         </button>
                       </div>
                     </motion.div>
@@ -238,7 +231,7 @@ export default function ModuloEvaluaciones() {
 
               {evaluacionesFiltradas.length === 0 && (
                 <div className="text-center py-12">
-                  <FiFileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500 dark:text-gray-400">No se encontraron evaluaciones</p>
                 </div>
               )}
@@ -287,7 +280,7 @@ export default function ModuloEvaluaciones() {
               className="space-y-6"
             >
               <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700 text-center">
-                <FiPlay className="w-16 h-16 text-indigo-500 mx-auto mb-4" />
+                <Play className="w-16 h-16 text-indigo-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Seleccionar Evaluación
                 </h3>

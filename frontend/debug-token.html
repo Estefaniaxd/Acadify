@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug JWT Token - Acadify</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .token-info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .token-info h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .token-info pre {
+            background: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+        }
+        .role {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .role.admin {
+            background: #667eea;
+            color: white;
+        }
+        .role.profesor {
+            background: #48bb78;
+            color: white;
+        }
+        .role.coordinador {
+            background: #ed8936;
+            color: white;
+        }
+        .role.estudiante {
+            background: #4299e1;
+            color: white;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .alert.error {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #c53030;
+        }
+        .alert.success {
+            background: #c6f6d5;
+            border: 1px solid #68d391;
+            color: #22543d;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        button.secondary {
+            background: #718096;
+        }
+        button.secondary:hover {
+            background: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug JWT Token - Acadify</h1>
+        
+        <div id="content">
+            <p>Analizando el token almacenado en localStorage...</p>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button onclick="location.reload()">🔄 Recargar</button>
+            <button class="secondary" onclick="clearTokens()">🗑️ Limpiar Tokens</button>
+        </div>
+    </div>
+
+    <script>
+        function decodeToken(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length < 2) return null;
+                
+                const payload = parts[1];
+                const json = decodeURIComponent(
+                    Array.prototype.map.call(
+                        atob(payload),
+                        c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                    ).join('')
+                );
+                
+                return JSON.parse(json);
+            } catch (error) {
+                console.error('Error decodificando token:', error);
+                return null;
+            }
+        }
+
+        function clearTokens() {
+            if (confirm('¿Estás seguro de que quieres limpiar los tokens? Tendrás que iniciar sesión nuevamente.')) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                alert('Tokens eliminados. Recargando...');
+                location.reload();
+            }
+        }
+
+        function analyzeToken() {
+            const accessToken = localStorage.getItem('access_token');
+            const refreshToken = localStorage.getItem('refresh_token');
+            
+            const contentDiv = document.getElementById('content');
+            
+            if (!accessToken) {
+                contentDiv.innerHTML = `
+                    <div class="alert error">
+                        <strong>❌ No se encontró token de acceso</strong>
+                        <p>No hay un access_token en localStorage. Debes iniciar sesión primero.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const decoded = decodeToken(accessToken);
+            
+            if (!decoded) {
+                contentDiv.innerHTML = `
+                    <div class="alert error">
+                        <strong>❌ Error al decodificar el token</strong>
+                        <p>El token no pudo ser decodificado. Puede estar corrupto.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Extraer rol
+            const role = decoded.role || decoded.rol || decoded.perfil || 'No definido';
+            const roleClass = role.toLowerCase();
+
+            // Información del usuario
+            const userId = decoded.sub || decoded.user_id || 'No definido';
+            const username = decoded.username || 'No definido';
+            const email = decoded.email || decoded.correo_institucional || 'No definido';
+
+            // Fechas
+            const iat = decoded.iat ? new Date(decoded.iat * 1000).toLocaleString('es-ES') : 'No definido';
+            const exp = decoded.exp ? new Date(decoded.exp * 1000).toLocaleString('es-ES') : 'No definido';
+            const isExpired = decoded.exp && Date.now() > decoded.exp * 1000;
+
+            contentDiv.innerHTML = `
+                <div class="alert success">
+                    <strong>✅ Token encontrado y decodificado</strong>
+                </div>
+
+                <div class="token-info">
+                    <h3>👤 Información del Usuario</h3>
+                    <p><strong>ID:</strong> ${userId}</p>
+                    <p><strong>Username:</strong> ${username}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Rol:</strong> <span class="role ${roleClass}">${role}</span></p>
+                </div>
+
+                <div class="token-info">
+                    <h3>⏰ Información del Token</h3>
+                    <p><strong>Emitido:</strong> ${iat}</p>
+                    <p><strong>Expira:</strong> ${exp}</p>
+                    <p><strong>Estado:</strong> ${isExpired ? '❌ Expirado' : '✅ Válido'}</p>
+                </div>
+
+                <div class="token-info">
+                    <h3>📦 Payload Completo</h3>
+                    <pre>${JSON.stringify(decoded, null, 2)}</pre>
+                </div>
+
+                ${refreshToken ? `
+                    <div class="token-info">
+                        <h3>🔄 Refresh Token</h3>
+                        <p>✅ Refresh token presente en localStorage</p>
+                    </div>
+                ` : `
+                    <div class="alert error">
+                        <strong>⚠️ No hay refresh token</strong>
+                        <p>No se encontró un refresh_token en localStorage.</p>
+                    </div>
+                `}
+
+                ${role !== 'admin' && role !== 'coordinador' && role !== 'profesor' && role !== 'estudiante' ? `
+                    <div class="alert error">
+                        <strong>⚠️ Rol no reconocido</strong>
+                        <p>El rol "${role}" no coincide con los roles esperados: admin, coordinador, profesor, estudiante</p>
+                        <p><strong>Verifica que el backend esté enviando el rol correcto.</strong></p>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Ejecutar al cargar la página
+        analyzeToken();
+    </script>
+</body>
+</html>

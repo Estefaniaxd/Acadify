@@ -1,8 +1,9 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, String, ForeignKey, text
-from sqlalchemy.dialects.postgresql import UUID, ENUM, DATE, SMALLINT
-from src.enums.users.docente_enums import TipoVinculacionDocente
+from sqlalchemy import Column, ForeignKey, String, text
+from sqlalchemy.dialects.postgresql import DATE, ENUM, SMALLINT, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
+from src.enums.users.docente_enums import TipoVinculacionDocente
 
 
 class Docente(Base):

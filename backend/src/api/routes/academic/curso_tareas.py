@@ -75,8 +75,33 @@ async def calificar_entrega(
     current_user: Usuario = Depends(deps.get_current_user),
     db: Session = Depends(deps.get_db)
 ):
+    """
+    Califica una entrega de tarea con gamificación completa integrada.
+    
+    **Funcionalidades:**
+    - Registra calificación del docente
+    - Otorga puntos según calidad (calificación)
+    - Otorga bonos por rapidez (entrega temprana)
+    - Penaliza entregas tardías
+    - Verifica y actualiza racha diaria del estudiante
+    - Otorga recompensas de racha (10-50 pts/día según ciclo semanal)
+    - Verifica milestones de racha (7, 30, 100, 365 días)
+    
+    **Desglose de puntos:**
+    - Puntos base: Configurados en la tarea (default 50)
+    - Bono calidad: Si calificación >= 90 (excelente)
+    - Bono rapidez: 5-15 pts si entregó en primera mitad del plazo
+    - Penalización tardía: -10 pts
+    - Penalización intentos: -5 pts por reenvío adicional
+    
+    **Respuesta incluye:**
+    - Calificación registrada
+    - Puntos otorgados (con desglose detallado)
+    - Racha actualizada (días actuales, puntos de racha)
+    - Milestones alcanzados (si aplica)
+    """
     logger.info(f"POST calificar entrega {entrega_id} - Usuario: {current_user.usuario_id}")
-    return tarea_service.calificar_entrega(
+    return await tarea_service.calificar_entrega(
         db=db, entrega_id=entrega_id, calificacion=calificacion,
-        comentarios=comentarios, usuario=current_user
+        retroalimentacion=comentarios, usuario=current_user
     )

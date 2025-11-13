@@ -1,0 +1,413 @@
+/**
+ * Tests para el servicio de instituciones
+ * Pruebas unitarias de todas las operaciones CRUD
+ */
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import axios from 'axios';
+import { institucionService } from '../services/institucionService';
+import type { CrearInstitucionDTO, ActualizarInstitucionDTO } from '../types';
+
+// Mock de axios
+vi.mock('axios', () => {
+  return {
+    default: {
+      create: vi.fn(() => ({
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
+        interceptors: {
+          request: { use: vi.fn(), eject: vi.fn() },
+          response: { use: vi.fn(), eject: vi.fn() },
+        },
+      })),
+    },
+  };
+});
+
+const mockedAxios = axios as any;
+
+describe('InstitucionService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Mock de localStorage
+    global.localStorage = {
+      getItem: vi.fn(() => 'fake-token'),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      length: 0,
+      key: vi.fn(),
+    };
+  });
+
+  describe('getAll', () => {
+    it('debe obtener todas las instituciones sin filtros', async () => {
+      const mockData = {
+        items: [
+          { id: '1', nombre: 'Universidad A', activo: true },
+          { id: '2', nombre: 'Universidad B', activo: true },
+        ],
+        total: 2,
+        pagina: 1,
+        limite: 10,
+        totalPaginas: 1,
+      };
+
+      mockedAxios.create.mockReturnValue({
+        get: vi.fn().mockResolvedValue({ data: mockData }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      });
+
+      const result = await institucionService.getAll();
+      expect(result.items).toHaveLength(2);
+      expect(result.total).toBe(2);
+    });
+
+    it('debe aplicar filtros correctamente', async () => {
+      const mockData = {
+        items: [{ id: '1', nombre: 'Universidad Activa', activo: true }],
+        total: 1,
+        pagina: 1,
+        limite: 10,
+        totalPaginas: 1,
+      };
+
+      const apiClient = {
+        get: vi.fn().mockResolvedValue({ data: mockData }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await institucionService.getAll({
+        busqueda: 'Universidad',
+        activo: true,
+        pagina: 1,
+        limite: 10,
+      });
+
+      // Verificar que se llamó con los parámetros correctos
+      expect(apiClient.get).toHaveBeenCalled();
+    });
+  });
+
+  describe('getById', () => {
+    it('debe obtener una institución por ID', async () => {
+      const mockInstitucion = {
+        id: '1',
+        nombre: 'Universidad Test',
+        descripcion: 'Descripción test',
+        activo: true,
+        fechaCreacion: '2025-10-31',
+      };
+
+      const apiClient = {
+        get: vi.fn().mockResolvedValue({ data: mockInstitucion }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.getById('1');
+      expect(result.id).toBe('1');
+      expect(result.nombre).toBe('Universidad Test');
+    });
+
+    it('debe lanzar error si la institución no existe', async () => {
+      const apiClient = {
+        get: vi.fn().mockRejectedValue({
+          response: { status: 404, data: { message: 'No encontrada' } },
+        }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.getById('999')).rejects.toThrow();
+    });
+  });
+
+  describe('create', () => {
+    it('debe crear una nueva institución', async () => {
+      const nuevaInstitucion: CrearInstitucionDTO = {
+        nombre: 'Nueva Universidad',
+        descripcion: 'Descripción de prueba',
+        email: 'test@universidad.edu',
+        colorPrimario: '#3B82F6',
+        colorSecundario: '#8B5CF6',
+      };
+
+      const mockResponse = {
+        id: '1',
+        ...nuevaInstitucion,
+        activo: true,
+        fechaCreacion: '2025-10-31',
+      };
+
+      const apiClient = {
+        post: vi.fn().mockResolvedValue({ data: mockResponse }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.create(nuevaInstitucion);
+      expect(result.nombre).toBe('Nueva Universidad');
+      expect(result.id).toBeDefined();
+    });
+
+    it('debe validar datos requeridos', async () => {
+      const datosInvalidos: any = {
+        descripcion: 'Sin nombre',
+      };
+
+      const apiClient = {
+        post: vi.fn().mockRejectedValue({
+          response: { status: 400, data: { message: 'Nombre requerido' } },
+        }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.create(datosInvalidos)).rejects.toThrow();
+    });
+  });
+
+  describe('update', () => {
+    it('debe actualizar una institución existente', async () => {
+      const datosActualizacion: ActualizarInstitucionDTO = {
+        nombre: 'Universidad Actualizada',
+        descripcion: 'Nueva descripción',
+      };
+
+      const mockResponse = {
+        id: '1',
+        nombre: 'Universidad Actualizada',
+        descripcion: 'Nueva descripción',
+        activo: true,
+        fechaCreacion: '2025-10-31',
+        fechaActualizacion: '2025-10-31',
+      };
+
+      const apiClient = {
+        put: vi.fn().mockResolvedValue({ data: mockResponse }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.update('1', datosActualizacion);
+      expect(result.nombre).toBe('Universidad Actualizada');
+      expect(result.fechaActualizacion).toBeDefined();
+    });
+  });
+
+  describe('delete', () => {
+    it('debe eliminar una institución', async () => {
+      const apiClient = {
+        delete: vi.fn().mockResolvedValue({ data: { message: 'Eliminada' } }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.delete('1')).resolves.not.toThrow();
+    });
+
+    it('debe lanzar error 403 si no tiene permisos', async () => {
+      const apiClient = {
+        delete: vi.fn().mockRejectedValue({
+          response: { status: 403, data: { message: 'Sin permisos' } },
+        }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.delete('1')).rejects.toThrow('No tienes permisos');
+    });
+  });
+
+  describe('toggleActivo', () => {
+    it('debe activar una institución inactiva', async () => {
+      const mockResponse = {
+        id: '1',
+        nombre: 'Universidad',
+        activo: true,
+        fechaCreacion: '2025-10-31',
+      };
+
+      const apiClient = {
+        put: vi.fn().mockResolvedValue({ data: mockResponse }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.toggleActivo('1', true);
+      expect(result.activo).toBe(true);
+    });
+
+    it('debe desactivar una institución activa', async () => {
+      const mockResponse = {
+        id: '1',
+        nombre: 'Universidad',
+        activo: false,
+        fechaCreacion: '2025-10-31',
+      };
+
+      const apiClient = {
+        put: vi.fn().mockResolvedValue({ data: mockResponse }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.toggleActivo('1', false);
+      expect(result.activo).toBe(false);
+    });
+  });
+
+  describe('search', () => {
+    it('debe buscar instituciones por término', async () => {
+      const mockResults = [
+        { id: '1', nombre: 'Universidad Nacional', activo: true },
+        { id: '2', nombre: 'Universidad Nacional Abierta', activo: true },
+      ];
+
+      const apiClient = {
+        get: vi.fn().mockResolvedValue({ data: mockResults }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.search('Nacional');
+      expect(result).toHaveLength(2);
+      expect(result[0].nombre).toContain('Nacional');
+    });
+
+    it('debe retornar array vacío si no hay resultados', async () => {
+      const apiClient = {
+        get: vi.fn().mockResolvedValue({ data: [] }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.search('XYZ123');
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getEstadisticas', () => {
+    it('debe obtener estadísticas de una institución', async () => {
+      const mockEstadisticas = {
+        totalProgramas: 5,
+        totalCursos: 20,
+        totalCoordinadores: 3,
+        totalProfesores: 15,
+        totalEstudiantes: 500,
+        cursosActivos: 18,
+        estudiantesActivos: 480,
+      };
+
+      const apiClient = {
+        get: vi.fn().mockResolvedValue({ data: mockEstadisticas }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      const result = await institucionService.getEstadisticas('1');
+      expect(result.totalEstudiantes).toBe(500);
+      expect(result.totalCursos).toBe(20);
+    });
+  });
+
+  describe('Manejo de errores', () => {
+    it('debe manejar error 401 (no autorizado)', async () => {
+      const apiClient = {
+        get: vi.fn().mockRejectedValue({
+          response: { status: 401, data: { message: 'Token inválido' } },
+        }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.getAll()).rejects.toThrow(
+        'No autorizado. Por favor inicia sesión.'
+      );
+    });
+
+    it('debe manejar error de red', async () => {
+      const apiClient = {
+        get: vi.fn().mockRejectedValue({
+          request: {},
+          message: 'Network Error',
+        }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.getAll()).rejects.toThrow(
+        'No se pudo conectar con el servidor'
+      );
+    });
+
+    it('debe manejar error 500 (servidor)', async () => {
+      const apiClient = {
+        get: vi.fn().mockRejectedValue({
+          response: { status: 500, data: {} },
+        }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+      mockedAxios.create.mockReturnValue(apiClient);
+
+      await expect(institucionService.getAll()).rejects.toThrow(
+        'Error interno del servidor'
+      );
+    });
+  });
+});

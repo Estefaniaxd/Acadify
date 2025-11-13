@@ -1,50 +1,47 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FiTarget, FiZap, FiUsers, FiAward, FiTrendingUp, FiStar,
-  FiBookOpen, FiHeart, FiShield, FiGlobe, FiCpu, FiGift
-} from 'react-icons/fi';
+import { Award, Globe, Heart, Star, Target, TrendingUp, Cpu, Gift } from 'lucide-react';
 
 const features = [
   {
     title: 'Gamificación Avanzada',
     description: 'Sistema de puntos, logros y retos que convierten cada lección en una aventura emocionante.',
-    icon: FiTarget,
+    icon: Target,
     color: 'from-violet-500 to-purple-600',
     bgColor: 'from-violet-50 to-purple-50',
   },
   {
     title: 'IA Personalizada',
     description: 'Inteligencia artificial que adapta el contenido a tu ritmo y estilo de aprendizaje único.',
-    icon: FiCpu,
+    icon: Cpu,
     color: 'from-blue-500 to-indigo-600',
     bgColor: 'from-blue-50 to-indigo-50',
   },
   {
     title: 'Comunidad Global',
     description: 'Conecta con estudiantes de todo el mundo y forma equipos para proyectos colaborativos.',
-    icon: FiGlobe,
+    icon: Globe,
     color: 'from-emerald-500 to-teal-600',
     bgColor: 'from-emerald-50 to-teal-50',
   },
   {
     title: 'Certificaciones',
     description: 'Obtén certificados reconocidos internacionalmente y badges digitales para tu perfil.',
-    icon: FiAward,
+    icon: Award,
     color: 'from-yellow-500 to-orange-600',
     bgColor: 'from-yellow-50 to-orange-50',
   },
   {
     title: 'Mascota Virtual',
     description: 'Tu compañero de aprendizaje que evoluciona contigo y te motiva en cada paso.',
-    icon: FiHeart,
+    icon: Heart,
     color: 'from-pink-500 to-rose-600',
     bgColor: 'from-pink-50 to-rose-50',
   },
   {
     title: 'Progreso Visual',
     description: 'Dashboards interactivos que muestran tu evolución y áreas de mejora en tiempo real.',
-    icon: FiTrendingUp,
+    icon: TrendingUp,
     color: 'from-cyan-500 to-blue-600',
     bgColor: 'from-cyan-50 to-blue-50',
   },
@@ -83,7 +80,7 @@ export default function FeaturesSection() {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 text-violet-700 font-medium text-sm mb-6"
           >
-            <FiStar className="w-4 h-4" />
+            <Star className="w-4 h-4" />
             Características únicas
           </motion.div>
           
@@ -171,7 +168,7 @@ export default function FeaturesSection() {
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >
-            <FiGift className="w-5 h-5" />
+            <Gift className="w-5 h-5" />
             <span>Empieza tu aventura gratis</span>
           </motion.a>
         </motion.div>

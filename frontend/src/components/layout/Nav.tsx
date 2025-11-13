@@ -1,188 +1,82 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  FiHome, FiBook, FiTrendingUp, FiInfo, FiMenu, FiX,
-  FiSettings, FiUsers, FiBarChart, FiUserCheck,
-  FiPlus, FiShoppingBag, FiAward, FiUser, FiMessageSquare
-  } from 'react-icons/fi';
-import { HiOutlineOfficeBuilding } from 'react-icons/hi';
-import { avatarAPI } from '../avatar/avatarAPI';
+import { Menu, X } from 'lucide-react';
+import { getMainNavItems, getSidebarItems, type UserRole } from '../../config/navigation';
+import NotificationCenter from '../../modules/invitaciones/components/NotificationCenter';
+import NotificacionBadge from '../notificaciones/NotificacionBadge';
 
-const getLinksByRole = (role?: string) => {
-  if (role === 'admin') {
-    return [
-      { label: 'Panel Admin', href: '/admin', icon: FiSettings },
-      { label: 'Cursos', href: '/cursos', icon: FiBook },
-      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
-      { label: 'Comunicación', href: '/comunicacion', icon: FiUsers },
-      { label: 'Instituciones', href: '/admin/instituciones', icon: HiOutlineOfficeBuilding },
-    ];
-  }
-  if (role === 'coordinador') {
-    return [
-      { label: 'Panel Coordinador', href: '/coordinador', icon: FiSettings },
-      { label: 'Cursos', href: '/cursos', icon: FiBook },
-      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
-      { label: 'Comunicación', href: '/comunicacion', icon: FiUsers },
-      { label: 'Profesores', href: '/coordinador/profesores', icon: FiUserCheck },
-    ];
-  }
-  if (role === 'profesor' || role === 'docente') {
-    return [
-      { label: 'Panel Profesor', href: '/dashboard-teacher', icon: FiSettings },
-      { label: 'Cursos', href: '/cursos', icon: FiBook },
-      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
-      { label: 'Salas', href: '/comunicacion', icon: FiUsers },
-      { label: 'Comunicación', href: '/mensajes', icon: FiMessageSquare },
-      { label: 'Mis clases', href: '/dashboard-teacher', icon: FiPlus },
-    ];
-  }
-  if (role === 'estudiante') {
-    return [
-      { label: 'Cursos', href: '/cursos', icon: FiBook },
-      { label: 'Evaluaciones', href: '/evaluaciones', icon: FiBarChart },
-      { label: 'Comunicación', href: '/comunicacion', icon: FiUsers },
-      { label: 'Mis clases', href: '/mis-clases', icon: FiPlus },
-      { label: 'Tienda', href: '/tienda', icon: FiShoppingBag },
-      { label: 'Avatar', href: '/avatar', icon: FiUser },
-    ];
-  }
-  // No autenticado o rol desconocido
-  return [
-    { label: 'Inicio', href: '/', icon: FiHome },
-    { label: 'Características', href: '/#features', icon: FiBook },
-    { label: 'Cómo funciona', href: '/#how', icon: FiTrendingUp },
-    { label: 'Open Source', href: '/#opensource', icon: FiInfo },
-    { label: 'Testimonios', href: '/#testimonials', icon: FiUserCheck },
-    { label: 'Instituciones', href: '/#institutions', icon: HiOutlineOfficeBuilding },
-    { label: 'Roadmap', href: '/#roadmap', icon: FiBarChart },
-    { label: 'Contacto', href: '/#cta', icon: FiAward }
-  ];
-};
-
-export default function Nav() {
+function Nav() {
   const { isAuthenticated, user } = useAuth();
-  const role = user?.role || (isAuthenticated ? 'estudiante' : undefined);
-  const LINKS = getLinksByRole(role);
+  const role = (user?.role || (isAuthenticated ? 'estudiante' : 'guest')) as UserRole;
+  
+  // Memoizar navegación basada en rol (solo recalcula si cambia el rol)
+  // Aumentado a 8 para mostrar todos los items importantes del admin
+  const mainNavLinks = useMemo(() => getMainNavItems(role, 8), [role]);
+  const allLinks = useMemo(() => getSidebarItems(role), [role]);
+  
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
-  const [loadingAvatar, setLoadingAvatar] = useState(true);
   const location = useLocation();
+
+  // Callbacks estables
+  const handleToggle = useCallback(() => setOpen(prev => !prev), []);
+  const handleClose = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') handleClose();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    globalThis.window.addEventListener('keydown', onKey);
+    return () => globalThis.window.removeEventListener('keydown', onKey);
+  }, [handleClose]);
 
+  // Optimizar scroll listener con requestAnimationFrame (evita jank)
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(globalThis.window.scrollY > 8);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     onScroll();
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    globalThis.window.addEventListener('scroll', onScroll, { passive: true });
+    return () => globalThis.window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Cargar avatar del usuario
-  useEffect(() => {
-    const loadUserAvatar = async () => {
-      if (!user || !isAuthenticated) {
-        console.log('🔍 Nav: No user or not authenticated');
-        setLoadingAvatar(false);
-        return;
-      }
+  // Detectar modo oscuro del sistema (comentado - no se usa actualmente)
+  // const [isDark, setIsDark] = useState(
+  //   globalThis.window?.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false
+  // );
 
-      console.log('🔍 Nav: Loading avatar for user:', user.username);
-
-      // Verificar si hay token de autenticación
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        console.log('🔍 Nav: No auth token found, skipping avatar load');
-        setLoadingAvatar(false);
-        return;
-      }
-
-      try {
-        const avatars = await avatarAPI.getMyAvatars();
-        console.log('🔍 Nav: Avatars response:', avatars);
-        
-        const activeAvatar = avatars.avatars.find(avatar => avatar.is_active);
-        console.log('🔍 Nav: Active avatar:', activeAvatar);
-        
-        if (activeAvatar && activeAvatar.image_url) {
-          console.log('🔍 Nav: Setting avatar URL:', activeAvatar.image_url);
-          setUserAvatarUrl(activeAvatar.image_url);
-        }
-      } catch (error) {
-        console.error('🔍 Nav: Error loading user avatar:', error);
-      } finally {
-        setLoadingAvatar(false);
-      }
-    };
-
-    loadUserAvatar();
-  }, [user, isAuthenticated]);
-
-  // Escuchar actualizaciones de avatar
-  useEffect(() => {
-    const handleAvatarUpdate = (event: CustomEvent) => {
-      console.log('🔍 Nav: Avatar update event received:', event.detail);
-      const avatarData = event.detail;
-      if (avatarData && avatarData.image_url) {
-        console.log('🔍 Nav: Updating avatar URL from event:', avatarData.image_url);
-        setUserAvatarUrl(avatarData.image_url);
-      }
-    };
-
-    window.addEventListener('avatar-updated', handleAvatarUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('avatar-updated', handleAvatarUpdate as EventListener);
-    };
-  }, []);
-
-  // Detectar modo oscuro
-  const isDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const darkBg = scrolled
-    ? 'rgba(24, 16, 48, 0.92)'
-    : 'rgba(24, 16, 48, 0.80)';
-  const lightBg = scrolled
-    ? 'rgba(255, 255, 255, 0.85)'
-    : 'rgba(255, 255, 255, 0.65)';
-  const headerBg = isDark ? darkBg : lightBg;
-  const borderColor = isDark
-    ? (scrolled ? '1px solid rgba(139, 92, 246, 0.35)' : '1px solid rgba(40, 20, 80, 0.25)')
-    : (scrolled ? '1px solid rgba(139, 92, 246, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)');
-  const boxShadow = isDark
-    ? (scrolled ? '0 8px 32px rgba(139, 92, 246, 0.18)' : '0 4px 20px rgba(40, 20, 80, 0.10)')
-    : (scrolled ? '0 8px 32px rgba(139, 92, 246, 0.12)' : '0 4px 20px rgba(0, 0, 0, 0.05)');
+  // useEffect(() => {
+  //   const mediaQuery = globalThis.window?.matchMedia('(prefers-color-scheme: dark)');
+  //   const handleChange = (e: MediaQueryListEvent) => setIsDark(e.matches);
+  //   mediaQuery?.addEventListener('change', handleChange);
+  //   return () => mediaQuery?.removeEventListener('change', handleChange);
+  // }, []);
 
   return (
     <motion.header
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed left-0 right-0 top-0 z-[100] transition-all duration-500"
+      className={`fixed left-0 right-0 top-0 z-[100] transition-all duration-500 ${
+        scrolled 
+          ? 'bg-white/90 dark:bg-neutral-950/90 border-b border-neutral-200 dark:border-neutral-800 shadow-lg'
+          : 'bg-white/70 dark:bg-neutral-950/70 border-b border-white/20 dark:border-neutral-900/20'
+      }`}
       style={{
-        background: headerBg,
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: borderColor,
-        boxShadow: boxShadow,
       }}
     >
-      <div 
-        className="mx-auto px-4 lg:px-8"
-        style={{
-          background: isDark
-            ? 'linear-gradient(90deg, rgba(40, 20, 80, 0.10) 0%, rgba(139, 92, 246, 0.10) 50%, rgba(40, 20, 80, 0.10) 100%)'
-            : 'linear-gradient(90deg, rgba(139, 92, 246, 0.03) 0%, rgba(124, 58, 237, 0.06) 50%, rgba(139, 92, 246, 0.03) 100%)',
-        }}
-      >
+      <div className="mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo con efecto 3D y animaciones */}
           <motion.div
@@ -199,19 +93,21 @@ export default function Nav() {
                 <img 
                   src="/rutilio_read.png" 
                   alt="Rutilio" 
-                  className="w-16 h-16 rounded-2xl object-cover shadow-lg"
+                  className="w-16 h-16 object-contain"
+                  style={{ mixBlendMode: 'multiply' }}
                 />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
+                className="flex flex-col"
               >
-                <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-purple-600 to-purple-700 tracking-tight">
+                <span className="text-2xl font-black bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-400 dark:to-fuchsia-400 bg-clip-text text-transparent tracking-tight">
                   Acadify
                 </span>
                 <motion.div 
-                  className="h-0.5 bg-gradient-to-r from-violet-600 to-purple-600 rounded-full"
+                  className="h-0.5 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-400 dark:to-fuchsia-400 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{ delay: 0.8, duration: 0.8 }}
@@ -222,7 +118,7 @@ export default function Nav() {
 
           {/* Navegación principal - Desktop */}
           <nav className="hidden lg:flex items-center gap-2">
-            {LINKS.slice(0, 5).map((link, index) => {
+            {mainNavLinks.map((link, index) => {
               const active = location.pathname === link.href;
               const Icon = link.icon;
               return (
@@ -234,33 +130,30 @@ export default function Nav() {
                 >
                   <Link
                     to={link.href}
-                    className={`relative group flex items-center gap-2 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm ${
-                      active 
-                        ? 'text-white shadow-lg' 
-                        : 'text-neutral-800 hover:text-purple-700 dark:text-neutral-200 dark:hover:text-purple-300'
-                    }`}
-                    style={{
-                      background: active 
-                        ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' 
-                        : 'transparent'
+                    onClick={(e) => {
+                      // Manejar scroll suave para secciones del home
+                      if (link.href.startsWith('/#')) {
+                        e.preventDefault();
+                        const sectionId = link.href.substring(2);
+                        const element = document.getElementById(sectionId);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }
                     }}
+                    className={`relative group flex items-center gap-2 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-sm ${
+                      active 
+                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-500 dark:to-purple-500 text-white shadow-lg shadow-violet-500/30' 
+                        : 'text-neutral-700 dark:text-neutral-300 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:text-violet-700 dark:hover:text-violet-300'
+                    }`}
+                    title={link.description}
                   >
-                    {/* Efecto hover de fondo */}
-                    <motion.div
-                      className="absolute inset-0 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/10 dark:to-purple-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      whileHover={{ scale: 1.02 }}
-                    />
-                    
-                    {/* Indicador activo */}
+                    {/* Indicador activo animado */}
                     {active && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute inset-0 rounded-2xl"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%)',
-                          border: '1px solid rgba(139, 92, 246, 0.3)'
-                        }}
-                        transition={{ type: "spring", duration: 0.6 }}
+                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-500 dark:to-purple-500"
+                        transition={{ type: "spring", duration: 0.6, bounce: 0.2 }}
                       />
                     )}
                     
@@ -271,9 +164,12 @@ export default function Nav() {
                     >
                       <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-current'}`} />
                       <span>{link.label}</span>
+                      {link.badge && (
+                        <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-white/20 text-white font-bold">
+                          {link.badge}
+                        </span>
+                      )}
                     </motion.div>
-                    
-                    {/* Efecto de brillo eliminado por feedback */}
                   </Link>
                 </motion.div>
               );
@@ -282,7 +178,20 @@ export default function Nav() {
 
           {/* Botones de acción */}
           <div className="hidden lg:flex items-center gap-3">
-            {!isAuthenticated ? (
+            {isAuthenticated ? (
+              <motion.div
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                {/* Badge de notificaciones del sistema de comunicación */}
+                <NotificacionBadge />
+                
+                {/* Centro de notificaciones de invitaciones */}
+                <NotificationCenter />
+              </motion.div>
+            ) : (
               <motion.div 
                 className="flex items-center gap-3"
                 initial={{ opacity: 0, x: 20 }}
@@ -291,7 +200,7 @@ export default function Nav() {
               >
                 <Link to="/login">
                   <motion.button 
-                    className="px-6 py-2.5 rounded-xl border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 bg-white/80 dark:bg-black/20 font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-300 backdrop-blur-sm"
+                    className="px-6 py-2.5 rounded-xl border-2 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 bg-white dark:bg-neutral-900 font-medium hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-300 dark:hover:border-violet-700 transition-all duration-300"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -300,37 +209,45 @@ export default function Nav() {
                 </Link>
                 <Link to="/register">
                   <motion.button 
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl relative overflow-hidden"
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-500 dark:via-purple-500 dark:to-fuchsia-500 text-white font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 relative overflow-hidden"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <span className="relative z-10">Crear cuenta</span>
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-500 opacity-0 hover:opacity-100 transition-opacity duration-300"
+                      className="absolute inset-0 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500"
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
                     />
                   </motion.button>
                 </Link>
               </motion.div>
-            ) : (
-              loadingAvatar ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : <></>
             )}
           </div>
 
-          {/* Botón hamburguesa móvil */}
-          <motion.button
-            className="lg:hidden p-2 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-sm border border-purple-200 dark:border-purple-700"
-            onClick={() => setOpen(!open)}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: open ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
+          {/* Botón hamburguesa móvil mejorado */}
+          <div className="flex items-center gap-2 lg:hidden">
+            {isAuthenticated && (
+              <>
+                {/* Badge de notificaciones en móvil */}
+                <NotificacionBadge />
+              </>
+            )}
+            <motion.button
+              onClick={handleToggle}
+              className="p-2 rounded-xl hover:bg-violet-500/10 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
-              {open ? <FiX className="w-6 h-6 text-purple-700" /> : <FiMenu className="w-6 h-6 text-purple-700" />}
-            </motion.div>
-          </motion.button>
+              {open ? (
+                <X className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+              ) : (
+                <Menu className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+              )}
+            </motion.button>
+          </div>
         </div>
       </div>
 
@@ -339,7 +256,7 @@ export default function Nav() {
         {open && (
           <>
             <motion.div 
-              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden" 
+              className="fixed inset-0 z-40 bg-black/40 dark:bg-black/60 backdrop-blur-sm lg:hidden" 
               onClick={() => setOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -351,16 +268,11 @@ export default function Nav() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -50, scale: 0.95 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="lg:hidden fixed left-4 right-4 top-20 z-50 rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
-              style={{
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(25px)',
-                WebkitBackdropFilter: 'blur(25px)',
-              }}
+              className="lg:hidden fixed left-4 right-4 top-24 z-50 rounded-2xl shadow-2xl border-2 border-violet-200 dark:border-violet-800 overflow-hidden bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl"
             >
               <div className="p-6">
                 <div className="grid gap-2">
-                  {LINKS.map((link, index) => {
+                  {allLinks.map((link, index) => {
                     const Icon = link.icon;
                     return (
                       <motion.div
@@ -371,18 +283,42 @@ export default function Nav() {
                       >
                         <Link 
                           to={link.href} 
-                          onClick={() => setOpen(false)} 
-                          className="flex items-center gap-4 px-5 py-4 rounded-2xl hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 text-neutral-800 dark:text-neutral-200 font-medium transition-all duration-300 group border border-transparent hover:border-purple-200 dark:hover:text-purple-300"
+                          onClick={(e) => {
+                            setOpen(false);
+                            // Manejar scroll suave para secciones del home
+                            if (link.href.startsWith('/#')) {
+                              e.preventDefault();
+                              const sectionId = link.href.substring(2);
+                              const element = document.getElementById(sectionId);
+                              if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            }
+                          }}
+                          className="flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-violet-50 dark:hover:bg-violet-950/30 text-neutral-800 dark:text-neutral-200 font-medium transition-all duration-300 group border border-transparent hover:border-violet-200 dark:hover:border-violet-800"
+                          title={link.description}
                         >
                           <motion.div
-                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center group-hover:from-violet-200 group-hover:to-purple-200 transition-all duration-300"
+                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 flex items-center justify-center group-hover:from-violet-200 group-hover:to-purple-200 dark:group-hover:from-violet-800/50 dark:group-hover:to-purple-800/50 transition-all duration-300"
                             whileHover={{ scale: 1.1, rotate: 5 }}
                           >
-                            <Icon className="w-5 h-5 text-purple-600" />
+                            <Icon className="w-5 h-5 text-violet-600 dark:text-violet-400" />
                           </motion.div>
-                          <span className="group-hover:translate-x-1 transition-transform duration-300 text-lg">
-                            {link.label}
-                          </span>
+                          <div className="flex-1">
+                            <span className="group-hover:translate-x-1 transition-transform duration-300 text-base block font-semibold">
+                              {link.label}
+                            </span>
+                            {link.description && (
+                              <span className="text-xs text-neutral-500 dark:text-neutral-400 block mt-0.5">
+                                {link.description}
+                              </span>
+                            )}
+                          </div>
+                          {link.badge && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-bold">
+                              {link.badge}
+                            </span>
+                          )}
                         </Link>
                       </motion.div>
                     )
@@ -390,14 +326,14 @@ export default function Nav() {
                   
                   {!isAuthenticated && (
                     <motion.div 
-                      className="pt-4 mt-4 border-t border-purple-100 space-y-3"
+                      className="pt-4 mt-4 border-t-2 border-violet-100 dark:border-violet-900 space-y-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.4 }}
                     >
                       <Link to="/login" onClick={() => setOpen(false)}>
                         <motion.button 
-                          className="w-full px-5 py-4 rounded-2xl border border-purple-200 text-purple-700 bg-white font-medium hover:bg-purple-50 transition-all duration-300"
+                          className="w-full px-5 py-4 rounded-xl border-2 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 bg-white dark:bg-neutral-900 font-semibold hover:bg-violet-50 dark:hover:bg-violet-950/50 transition-all duration-300"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -406,7 +342,7 @@ export default function Nav() {
                       </Link>
                       <Link to="/register" onClick={() => setOpen(false)}>
                         <motion.button 
-                          className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold shadow-lg"
+                          className="w-full px-5 py-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-500 dark:via-purple-500 dark:to-fuchsia-500 text-white font-semibold shadow-lg shadow-violet-500/30"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -424,3 +360,6 @@ export default function Nav() {
     </motion.header>
   );
 }
+
+// Memoizar componente para evitar re-renders innecesarios
+export default memo(Nav);

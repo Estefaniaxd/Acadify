@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  DocumentTextIcon,
-  ChartBarIcon,
-  StarIcon,
-  TrophyIcon,
-  ArrowRightIcon
-} from '@heroicons/react/24/outline';
+;
 import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
 import { ProgressBar } from '../common/LoadingComponents';
 import { IntentoExamen, Examen } from '../../types';
 import { formatearTiempo, formatearFecha } from '../../utils';
+import { ArrowRight, BarChart, CheckCircle, FileText } from 'lucide-react';
 
 interface ResumenFinalProps {
   intento: IntentoExamen;
@@ -77,7 +69,7 @@ export function ResumenFinal({
     const porcentaje = calcularPorcentaje(puntuacion, puntuacionMaxima);
     if (porcentaje >= 90) return <TrophyIcon className="h-12 w-12 text-yellow-500" />;
     if (porcentaje >= 80) return <StarIcon className="h-12 w-12 text-blue-500" />;
-    if (porcentaje >= 60) return <CheckCircleIcon className="h-12 w-12 text-green-500" />;
+    if (porcentaje >= 60) return <CheckCircle className="h-12 w-12 text-green-500" />;
     return <XCircleIcon className="h-12 w-12 text-red-500" />;
   };
 
@@ -195,7 +187,7 @@ export function ResumenFinal({
                 {/* Estado */}
                 <div className="text-center">
                   <div className="mb-4">
-                    <CheckCircleIcon className="h-16 w-16 mx-auto text-green-500 mb-2" />
+                    <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-2" />
                     <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                       COMPLETADO
                     </div>
@@ -240,7 +232,7 @@ export function ResumenFinal({
                     animate={{ rotate: mostrarDetalles ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <ArrowRightIcon className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4" />
                   </motion.div>
                 </button>
               </div>
@@ -367,7 +359,7 @@ export function ResumenFinal({
                 onClick={onSalir}
                 className="flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
-                <DocumentTextIcon className="h-5 w-5" />
+                <FileText className="h-5 w-5" />
                 <span>Regresar al Dashboard</span>
               </button>
               
@@ -375,7 +367,7 @@ export function ResumenFinal({
                 onClick={() => window.print()}
                 className="flex items-center justify-center space-x-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
               >
-                <ChartBarIcon className="h-5 w-5" />
+                <BarChart className="h-5 w-5" />
                 <span>Imprimir Resultados</span>
               </button>
             </div>

@@ -23,11 +23,10 @@ type Mensaje = {
 };
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiSend, FiPaperclip, FiSmile, FiMoreVertical, FiHeart, FiUsers, FiSearch, FiFilter, FiEdit3, FiTrash2, FiEye, FiImage, FiFile, FiDownload
-} from 'react-icons/fi';
-import { BiReply, BiPin } from 'react-icons/bi';
-import { HiOutlineEmojiHappy } from 'react-icons/hi';
+import { Download, Edit3, Eye, File, Filter, Heart, Image, MoreVertical, Search, Send, Trash2, Users } from 'lucide-react';
+;
+;
+;
 
 // Mock data para mensajes del chat tipo classroom
 const mockMensajes: Mensaje[] = [
@@ -252,7 +251,7 @@ export default function ChatClasePage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <FiUsers className="w-6 h-6 text-white" />
+              <Users className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -267,7 +266,7 @@ export default function ChatClasePage() {
           {/* Controles de búsqueda y filtros */}
           <div className="flex items-center gap-3">
             <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Buscar mensajes..."
@@ -362,7 +361,7 @@ export default function ChatClasePage() {
                       </div>
 
                       <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                        <FiMoreVertical className="w-4 h-4" />
+                        <MoreVertical className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -378,13 +377,13 @@ export default function ChatClasePage() {
                       <div className="mb-4 space-y-2">
                         {mensaje.archivos.map((archivo, idx) => (
                           <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <FiFile className="w-5 h-5 text-gray-500" />
+                            <File className="w-5 h-5 text-gray-500" />
                             <div className="flex-1">
                               <p className="font-medium text-gray-900 dark:text-white">{archivo.nombre}</p>
                               <p className="text-sm text-gray-500">{archivo.tamaño}</p>
                             </div>
                             <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                              <FiDownload className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                              <Download className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                             </button>
                           </div>
                         ))}
@@ -470,7 +469,7 @@ export default function ChatClasePage() {
 
         {mensajesOrdenados.length === 0 && (
           <div className="text-center py-12">
-            <FiUsers className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
               No hay mensajes
             </h3>
@@ -545,7 +544,7 @@ export default function ChatClasePage() {
             whileHover={{ scale: nuevoMensaje.trim() ? 1.05 : 1 }}
             whileTap={{ scale: nuevoMensaje.trim() ? 0.95 : 1 }}
           >
-            <FiSend className="w-4 h-4" />
+            <Send className="w-4 h-4" />
             Enviar
           </motion.button>
         </div>

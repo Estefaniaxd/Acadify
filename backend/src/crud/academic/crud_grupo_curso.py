@@ -1,8 +1,10 @@
-from sqlalchemy.orm import Session
-from ..base import CRUDBase
-from ...models.academic.grupo_curso import GrupoCurso
-from ...schemas.academic.grupo_curso import GrupoCursoCreate, GrupoCursoUpdate
 from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from src.crud.base import CRUDBase
+from src.models.academic.grupo_curso import GrupoCurso
+from src.schemas.academic.grupo_curso import GrupoCursoCreate, GrupoCursoUpdate
 
 
 class CRUDGrupoCurso(CRUDBase[GrupoCurso, GrupoCursoCreate, GrupoCursoUpdate]):

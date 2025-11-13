@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { buildURL, getAuthToken, API_ENDPOINTS, API_BASE_URL } from '../config/api.config';
 
 interface Mensaje {
   id: string;
@@ -48,15 +49,26 @@ export const useWebSocket = (endpoint: string, usuarioId: string) => {
   useEffect(() => {
     if (!endpoint || !usuarioId) return;
 
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
+    
+    if (!token) {
+      console.error('❌ No hay token de autenticación disponible');
+      return;
+    }
+    
+    // Construir URL de WebSocket - endpoint ya incluye /chat/{sala_id}
+    const wsUrl = `${API_BASE_URL}${endpoint}`;
     
     // Crear conexión WebSocket
-    const newSocket = io(`http://localhost:8000${endpoint}`, {
+    const newSocket = io(wsUrl, {
       auth: {
         token: token,
         usuario_id: usuarioId,
       },
       transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
     });
 
     // Event listeners
@@ -155,11 +167,12 @@ export const useWebSocket = (endpoint: string, usuarioId: string) => {
           formData.append(`archivo_${index}`, archivo);
         });
 
-        const response = await fetch('/api/comunicacion/upload', {
+        const token = getAuthToken();
+        const response = await fetch(buildURL(API_ENDPOINTS.CHAT.UPLOAD), {
           method: 'POST',
           body: formData,
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 

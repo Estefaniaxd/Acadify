@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FiEdit3, 
-  FiSave, 
-  FiX, 
-  FiMapPin, 
-  FiPhone, 
-  FiMail, 
-  FiUsers, 
-  FiCalendar,
-  FiSettings,
-  FiImage,
-  FiUpload
-} from 'react-icons/fi';
+import { Calendar, Edit3, Image, Mail, MapPin, Phone, Save, Settings, Upload, Users, X } from 'lucide-react';
+;
 
 // Datos mock de la institución
 const institucionMock = {
@@ -105,7 +94,7 @@ export default function InstitucionCoordinador() {
                   onClick={handleEdit}
                   className="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-opacity-30 transition-all"
                 >
-                  <FiEdit3 className="w-4 h-4" />
+                  <Edit3 className="w-4 h-4" />
                   <span>Editar</span>
                 </motion.button>
               ) : (
@@ -116,7 +105,7 @@ export default function InstitucionCoordinador() {
                     onClick={handleSave}
                     className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600 transition-colors"
                   >
-                    <FiSave className="w-4 h-4" />
+                    <Save className="w-4 h-4" />
                     <span>Guardar</span>
                   </motion.button>
                   <motion.button
@@ -125,7 +114,7 @@ export default function InstitucionCoordinador() {
                     onClick={handleCancel}
                     className="bg-red-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-red-600 transition-colors"
                   >
-                    <FiX className="w-4 h-4" />
+                    <X className="w-4 h-4" />
                     <span>Cancelar</span>
                   </motion.button>
                 </div>
@@ -142,7 +131,7 @@ export default function InstitucionCoordinador() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <FiSettings className="w-5 h-5 mr-2" />
+                  <Settings className="w-5 h-5 mr-2" />
                   Información General
                 </h2>
                 
@@ -182,7 +171,7 @@ export default function InstitucionCoordinador() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <FiMapPin className="w-4 h-4 inline mr-1" />
+                        <MapPin className="w-4 h-4 inline mr-1" />
                         Dirección
                       </label>
                       {isEditing ? (
@@ -199,7 +188,7 @@ export default function InstitucionCoordinador() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <FiCalendar className="w-4 h-4 inline mr-1" />
+                        <Calendar className="w-4 h-4 inline mr-1" />
                         Fecha de Fundación
                       </label>
                       {isEditing ? (
@@ -220,7 +209,7 @@ export default function InstitucionCoordinador() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <FiPhone className="w-4 h-4 inline mr-1" />
+                        <Phone className="w-4 h-4 inline mr-1" />
                         Teléfono
                       </label>
                       {isEditing ? (
@@ -237,7 +226,7 @@ export default function InstitucionCoordinador() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <FiMail className="w-4 h-4 inline mr-1" />
+                        <Mail className="w-4 h-4 inline mr-1" />
                         Email
                       </label>
                       {isEditing ? (
@@ -259,7 +248,7 @@ export default function InstitucionCoordinador() {
               {isEditing && (
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                    <FiImage className="w-5 h-5 mr-2" />
+                    <Image className="w-5 h-5 mr-2" />
                     Logo de la Institución
                   </h3>
                   <div className="flex items-center space-x-4">
@@ -269,7 +258,7 @@ export default function InstitucionCoordinador() {
                       className="w-20 h-20 rounded-lg object-cover border border-gray-300"
                     />
                     <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                      <FiUpload className="w-4 h-4 mr-2" />
+                      <Upload className="w-4 h-4 mr-2" />
                       Cambiar Logo
                     </button>
                   </div>
@@ -283,7 +272,7 @@ export default function InstitucionCoordinador() {
               {/* Estadísticas */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <FiUsers className="w-5 h-5 mr-2" />
+                  <Users className="w-5 h-5 mr-2" />
                   Estadísticas
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
@@ -309,7 +298,7 @@ export default function InstitucionCoordinador() {
               {/* Configuración */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <FiSettings className="w-5 h-5 mr-2" />
+                  <Settings className="w-5 h-5 mr-2" />
                   Configuración Académica
                 </h2>
                 <div className="space-y-4">

@@ -1,12 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircleIcon, 
-  ExclamationCircleIcon, 
-  InformationCircleIcon,
-  XMarkIcon,
-  XCircleIcon
-} from '@heroicons/react/24/outline';
+import { AlertCircle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 
 export type AlertType = 'success' | 'error' | 'warning' | 'info';
 
@@ -53,10 +47,10 @@ const alertStyles = {
 };
 
 const iconMap = {
-  success: CheckCircleIcon,
-  error: XCircleIcon,
-  warning: ExclamationCircleIcon,
-  info: InformationCircleIcon
+  success: CheckCircle,
+  error: XCircle,
+  warning: AlertCircle,
+  info: Info
 };
 
 export function Alert({
@@ -73,6 +67,13 @@ export function Alert({
   const styles = alertStyles[type];
   const IconComponent = iconMap[type];
 
+  const handleClose = React.useCallback(() => {
+    setVisible(false);
+    setTimeout(() => {
+      onClose?.();
+    }, 150); // Esperar a que termine la animación
+  }, [onClose]);
+
   React.useEffect(() => {
     if (autoClose && autoCloseDelay > 0) {
       const timer = setTimeout(() => {
@@ -81,14 +82,7 @@ export function Alert({
 
       return () => clearTimeout(timer);
     }
-  }, [autoClose, autoCloseDelay]);
-
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(() => {
-      onClose?.();
-    }, 150); // Esperar a que termine la animación
-  };
+  }, [autoClose, autoCloseDelay, handleClose]);
 
   if (!visible) return null;
 
@@ -132,7 +126,7 @@ export function Alert({
               ${styles.closeButton}
             `}
           >
-            <XMarkIcon className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>
@@ -146,7 +140,7 @@ interface ToastProps extends Omit<AlertProps, 'className'> {
 }
 
 export function Toast({
-  id,
+  id: _id,
   type,
   title,
   message,
@@ -154,7 +148,7 @@ export function Toast({
   autoClose = true,
   autoCloseDelay = 5000,
   actions,
-  position = 'top-right'
+  position: _position = 'top-right'
 }: ToastProps) {
   return (
     <Alert
@@ -207,6 +201,10 @@ interface UseToastReturn {
 export function useToast(): UseToastReturn {
   const [toasts, setToasts] = React.useState<ToastProps[]>([]);
 
+  const hideToast = React.useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
   const showToast = React.useCallback((toast: Omit<ToastProps, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: ToastProps = {
@@ -217,11 +215,7 @@ export function useToast(): UseToastReturn {
 
     setToasts(prev => [...prev, newToast]);
     return id;
-  }, []);
-
-  const hideToast = React.useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  }, [hideToast]);
 
   const hideAllToasts = React.useCallback(() => {
     setToasts([]);

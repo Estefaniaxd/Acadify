@@ -1,26 +1,26 @@
 import uuid
-from typing import List, Optional
+
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, desc
 
 from ...models.gamification.recompensa import Recompensa
-from ...models.gamification.usuario_recompensa import UsuarioRecompensa
 from ...models.gamification.usuario_puntos import UsuarioPuntos
+from ...models.gamification.usuario_recompensa import UsuarioRecompensa
 from ...schemas.gamification.recompensa import (
+    CanjearRecompensaRequest,
     RecompensaCreate,
     RecompensaUpdate,
-    CanjearRecompensaRequest,
 )
 
 
-def get_recompensa(db: Session, recompensa_id: uuid.UUID) -> Optional[Recompensa]:
+def get_recompensa(db: Session, recompensa_id: uuid.UUID) -> Recompensa | None:
     """Obtener una recompensa por su ID."""
     return (
         db.query(Recompensa).filter(Recompensa.recompensa_id == recompensa_id).first()
     )
 
 
-def get_recompensas(db: Session, skip: int = 0, limit: int = 100) -> List[Recompensa]:
+def get_recompensas(db: Session, skip: int = 0, limit: int = 100) -> list[Recompensa]:
     """Obtener lista de recompensas."""
     return (
         db.query(Recompensa)
@@ -34,6 +34,7 @@ def get_recompensas(db: Session, skip: int = 0, limit: int = 100) -> List[Recomp
 def create_recompensa(db: Session, recompensa: RecompensaCreate) -> Recompensa:
     """Crear una nueva recompensa."""
     db_recompensa = Recompensa(
+        recompensa_id=uuid.uuid4(),  # Generate UUID explicitly for SQLite compatibility
         nombre=recompensa.nombre,
         descripcion=recompensa.descripcion,
         costo_puntos=recompensa.costo_puntos,
@@ -47,7 +48,7 @@ def create_recompensa(db: Session, recompensa: RecompensaCreate) -> Recompensa:
 
 def update_recompensa(
     db: Session, recompensa_id: uuid.UUID, recompensa_update: RecompensaUpdate
-) -> Optional[Recompensa]:
+) -> Recompensa | None:
     """Actualizar una recompensa existente."""
     db_recompensa = get_recompensa(db, recompensa_id)
     if not db_recompensa:
@@ -75,7 +76,7 @@ def delete_recompensa(db: Session, recompensa_id: uuid.UUID) -> bool:
 
 def get_recompensas_disponibles_usuario(
     db: Session, usuario_id: uuid.UUID
-) -> List[dict]:
+) -> list[dict]:
     """Obtener recompensas disponibles para un usuario con su estado de disponibilidad."""
     # Obtener puntos del usuario
     usuario_puntos = (
@@ -110,7 +111,8 @@ def canjear_recompensa(
     # Verificar que la recompensa existe
     recompensa = get_recompensa(db, request.recompensa_id)
     if not recompensa:
-        raise ValueError("La recompensa no existe")
+        msg = "La recompensa no existe"
+        raise ValueError(msg)
 
     # Verificar que el usuario tiene suficientes puntos
     usuario_puntos = (
@@ -120,14 +122,17 @@ def canjear_recompensa(
     )
 
     if not usuario_puntos or usuario_puntos.puntos_acumulados < recompensa.costo_puntos:
-        raise ValueError("Puntos insuficientes para canjear esta recompensa")
+        msg = "Puntos insuficientes para canjear esta recompensa"
+        raise ValueError(msg)
 
     # Descontar puntos
     usuario_puntos.puntos_acumulados -= recompensa.costo_puntos
 
     # Crear registro de canje
     db_usuario_recompensa = UsuarioRecompensa(
-        usuario_id=request.usuario_id, recompensa_id=request.recompensa_id
+        usuario_recompensa_id=uuid.uuid4(),  # Generate UUID explicitly for SQLite compatibility
+        usuario_id=request.usuario_id, 
+        recompensa_id=request.recompensa_id
     )
 
     db.add(db_usuario_recompensa)
@@ -139,7 +144,7 @@ def canjear_recompensa(
 
 def get_canjes_usuario(
     db: Session, usuario_id: uuid.UUID, skip: int = 0, limit: int = 100
-) -> List[UsuarioRecompensa]:
+) -> list[UsuarioRecompensa]:
     """Obtener historial de canjes de un usuario."""
     return (
         db.query(UsuarioRecompensa)
@@ -171,7 +176,7 @@ def get_estadisticas_canjes_usuario(db: Session, usuario_id: uuid.UUID) -> dict:
     }
 
 
-def get_recompensas_con_estadisticas(db: Session) -> List[dict]:
+def get_recompensas_con_estadisticas(db: Session) -> list[dict]:
     """Obtener recompensas con estadísticas de canjes."""
     query = (
         db.query(

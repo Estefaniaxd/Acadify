@@ -264,7 +264,7 @@ class UserCurrentResponse(BaseModel):
     """Schema para respuesta de usuario actual (/auth/me)"""
 
     usuario_id: UUID
-    correo_institucional: EmailStr | None = None
+    correo_institucional: str | None = None  # Cambiado de EmailStr a str para permitir .local
     username: str | None = None
     nombres: str
     apellidos: str

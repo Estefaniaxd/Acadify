@@ -1,8 +1,7 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, ForeignKey, CheckConstraint, func
-from sqlalchemy.dialects.postgresql import UUID, INTEGER, TEXT, TIMESTAMP
-from sqlalchemy.orm import relationship
-from sqlalchemy import func
+from sqlalchemy import CheckConstraint, Column, ForeignKey, func, text
+from sqlalchemy.dialects.postgresql import INTEGER, TEXT, TIMESTAMP, UUID
+
+from src.db.base_class import Base
 
 
 class UsuarioPuntos(Base):

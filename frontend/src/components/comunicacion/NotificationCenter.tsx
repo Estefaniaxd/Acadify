@@ -1,19 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { 
-  BellIcon,
-  XMarkIcon,
-  CheckIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  ChatBubbleLeftIcon,
-  DocumentTextIcon,
-  UserGroupIcon,
-  Cog6ToothIcon,
-  EyeSlashIcon
-} from '@heroicons/react/24/outline';
-import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
+import React, { useState, useEffect, useRef } from 'react';
+import { formatRelativeTime } from '../../utils/dateUtils';
+import { AlertTriangle, Bell, Check, EyeOff, FileText, Info, MessageSquare, Settings, Users, X } from 'lucide-react';
 
 interface Notificacion {
   id: string;
@@ -174,19 +161,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       case 'mensaje_directo':
       case 'mencion':
       case 'respuesta_hilo':
-        return <ChatBubbleLeftIcon className="h-5 w-5" />;
+        return <MessageSquare className="h-5 w-5" />;
       case 'tarea_nueva':
       case 'tarea_vencimiento':
       case 'tarea_calificada':
-        return <DocumentTextIcon className="h-5 w-5" />;
+        return <FileText className="h-5 w-5" />;
       case 'usuario_unido':
-        return <UserGroupIcon className="h-5 w-5" />;
+        return <Users className="h-5 w-5" />;
       case 'sistema':
-        return <Cog6ToothIcon className="h-5 w-5" />;
-      case 'advertencia':
-        return <ExclamationTriangleIcon className="h-5 w-5" />;
+        return <Settings className="h-5 w-5" />;
+      case 'error':
+        return <AlertTriangle className="h-5 w-5" />;
       default:
-        return <InformationCircleIcon className="h-5 w-5" />;
+        return <Info className="h-5 w-5" />;
     }
   };
 
@@ -241,7 +228,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       <div className="p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <BellIconSolid className="h-5 w-5 text-blue-600 mr-2" />
+            <Bell className="h-5 w-5 text-blue-600 mr-2 fill-current" />
             <h3 className="text-lg font-semibold text-gray-900">Notificaciones</h3>
             {unreadCount > 0 && (
               <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -253,7 +240,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 rounded-full p-1 hover:bg-gray-200"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -297,12 +284,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       <div className="max-h-64 overflow-y-auto">
         {error ? (
           <div className="p-4 text-center">
-            <ExclamationTriangleIcon className="h-8 w-8 text-red-400 mx-auto mb-2" />
+            <AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" />
             <p className="text-sm text-red-600">{error}</p>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center">
-            <BellIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+            <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
             <p className="text-sm text-gray-500">
               {filter === 'no_leidas' ? 'No tienes notificaciones sin leer' : 'No hay notificaciones'}
             </p>
@@ -339,7 +326,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                           }}
                           className="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <XMarkIcon className="h-4 w-4" />
+                          <X className="h-4 w-4" />
                         </button>
                       </div>
                       
@@ -361,10 +348,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                       
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(notification.fecha_creacion), {
-                            addSuffix: true,
-                            locale: es,
-                          })}
+                          {formatRelativeTime(notification.fecha_creacion)}
                         </span>
                         
                         {!notification.leida && (
@@ -376,7 +360,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                             title="Marcar como leída"
                           >
-                            <CheckIcon className="h-4 w-4" />
+                            <Check className="h-4 w-4" />
                           </button>
                         )}
                       </div>

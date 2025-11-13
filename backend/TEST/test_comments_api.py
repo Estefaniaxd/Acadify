@@ -30,7 +30,7 @@ def test_get_comments():
         print(f"Status: {response.status_code}")
         print(f"Response: {response.text}")
         
-        if response.status_code == 200:
+        if response.status_code == 200:,
             data = response.json()
             print(f"✅ Comentarios obtenidos: {len(data.get('data', []))}")
             for comment in data.get('data', []):

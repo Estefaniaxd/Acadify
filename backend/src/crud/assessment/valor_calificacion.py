@@ -1,20 +1,23 @@
 # src/crud/crud_valor_calificacion.py
-from typing import List, Optional
-from ..base import CRUDBase
 from uuid import UUID
-from sqlalchemy.orm import Session
+
 from sqlalchemy import asc
+from sqlalchemy.orm import Session
+
 from ...models.assessment.valor_calificacion import ValorCalificacion
 from ...schemas.assessment.valor_calificacion import (
     ValorCalificacionCreate,
     ValorCalificacionUpdate,
 )
+from ..base import CRUDBase
 
 
-class CRUDValorCalificacion(CRUDBase[ValorCalificacion, ValorCalificacionCreate, ValorCalificacionUpdate]):
+class CRUDValorCalificacion(
+    CRUDBase[ValorCalificacion, ValorCalificacionCreate, ValorCalificacionUpdate]
+):
     def get_by_escala(
         self, db: Session, *, escala_id: UUID, skip: int = 0, limit: int = 100
-    ) -> List[ValorCalificacion]:
+    ) -> list[ValorCalificacion]:
         """Obtiene todos los valores de calificación de una escala específica ordenados por orden."""
         return (
             db.query(self.model)
@@ -27,7 +30,7 @@ class CRUDValorCalificacion(CRUDBase[ValorCalificacion, ValorCalificacionCreate,
 
     def get_by_valor_and_escala(
         self, db: Session, *, valor: str, escala_id: UUID
-    ) -> Optional[ValorCalificacion]:
+    ) -> ValorCalificacion | None:
         """Obtiene un valor de calificación por valor y escala."""
         return (
             db.query(self.model)
@@ -40,7 +43,7 @@ class CRUDValorCalificacion(CRUDBase[ValorCalificacion, ValorCalificacionCreate,
 
     def get_by_orden_and_escala(
         self, db: Session, *, orden: int, escala_id: UUID
-    ) -> Optional[ValorCalificacion]:
+    ) -> ValorCalificacion | None:
         """Obtiene un valor de calificación por orden y escala."""
         return (
             db.query(self.model)
@@ -51,7 +54,7 @@ class CRUDValorCalificacion(CRUDBase[ValorCalificacion, ValorCalificacionCreate,
             .first()
         )
 
-    def get_max_orden_by_escala(self, db: Session, *, escala_id: UUID) -> Optional[int]:
+    def get_max_orden_by_escala(self, db: Session, *, escala_id: UUID) -> int | None:
         """Obtiene el mayor orden de una escala específica."""
         result = (
             db.query(db.func.max(ValorCalificacion.orden))

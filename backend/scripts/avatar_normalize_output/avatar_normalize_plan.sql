@@ -1,0 +1,2 @@
+-- Dry-run SQL plan to normalize filenames. Review before applying.
+-- Backup DB before applying: pg_dump -Fc -f /path/to/backup.dump acadify_db

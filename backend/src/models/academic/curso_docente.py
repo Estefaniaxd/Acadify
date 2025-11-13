@@ -1,7 +1,8 @@
-from src.db.base_class import Base
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, DATE
+from sqlalchemy.dialects.postgresql import DATE, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
 
 
 class CursoDocente(Base):
@@ -20,6 +21,6 @@ class CursoDocente(Base):
         nullable=False,
     )
     fecha_asignacion = Column(DATE)
-    
+
     curso = relationship("Curso", back_populates="curso_docentes")
     docente = relationship("Docente", back_populates="curso_docentes")

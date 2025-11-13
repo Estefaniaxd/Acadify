@@ -1,8 +1,10 @@
-from sqlalchemy.orm import Session
-from ..base import CRUDBase
 from uuid import UUID
-from ...models.academic.programa import Programa
-from ...schemas.academic.programa import ProgramaCreate, ProgramaUpdate
+
+from sqlalchemy.orm import Session
+
+from src.crud.base import CRUDBase
+from src.models.academic.programa import Programa
+from src.schemas.academic.programa import ProgramaCreate, ProgramaUpdate
 
 
 class CRUDPrograma(CRUDBase[Programa, ProgramaCreate, ProgramaUpdate]):

@@ -135,9 +135,9 @@ export const courseService = {
   async getCourses(): Promise<CourseResponse> {
     try {
       console.log('🔄 Obteniendo cursos desde API...');
-      console.log('🌐 URL de request:', `${API_BASE_URL}/academic/cursos/`);
+      console.log('🌐 URL de request:', `${API_BASE_URL}/api/cursos/`);
       
-      const response = await academicAPI.get<CourseResponse>('/academic/cursos/');
+      const response = await academicAPI.get<CourseResponse>('/api/cursos/');
       console.log('✅ Respuesta API cursos:', response.data);
       
       // Asegurar que tenga la estructura correcta
@@ -185,7 +185,8 @@ export const courseService = {
         };
       }
 
-      const response = await academicAPI.get<CourseResponse>('/academic/cursos/mis-cursos', {
+      // Usar el endpoint correcto de mis cursos
+      const response = await academicAPI.get<CourseResponse>('/api/cursos/mis-cursos', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -199,6 +200,11 @@ export const courseService = {
       };
     } catch (error: any) {
       console.error('❌ Error obteniendo mis cursos:', error);
+      console.error('📊 Error details:', {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message
+      });
       
       // Distinguir tipos de error
       if (error?.response?.status === 401) {
@@ -228,6 +234,19 @@ export const courseService = {
           empty_message: "No tienes permisos para acceder a esta sección"
         };
       }
+
+      if (error?.response?.status === 405) {
+        console.warn('⚠️ Método HTTP no permitido - El endpoint podría no existir o estar deshabilitado');
+        return {
+          success: true,
+          data: [],
+          total: 0,
+          message: "Este endpoint no está disponible actualmente",
+          source: "endpoint_error",
+          empty_state: true,
+          empty_message: "El sistema de cursos está en mantenimiento. Intenta más tarde."
+        };
+      }
       
       // Error de conexión o servidor
       return {
@@ -252,8 +271,8 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
 
-      const response = await academicAPI.post('/academic/cursos/inscribir', 
-        { codigo_curso: codigo }, 
+      const response = await academicAPI.post('/api/cursos/inscripciones/inscribir', 
+        { codigo_acceso: codigo }, 
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -265,10 +284,25 @@ export const courseService = {
       return response.data;
     } catch (error: any) {
       console.error('❌ Error en inscripción:', error);
+      console.error('📊 Detalles completos:', error?.response?.data);
       
-      const errorMessage = error?.response?.data?.detail || 
-                          error?.message || 
-                          'Error desconocido al inscribirse';
+      // Manejar diferentes tipos de errores
+      let errorMessage = 'Error desconocido al inscribirse';
+      
+      if (error?.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        
+        // Si es un array de errores de validación
+        if (Array.isArray(detail)) {
+          errorMessage = detail.map((err: any) => err.msg || JSON.stringify(err)).join(', ');
+        } else if (typeof detail === 'string') {
+          errorMessage = detail;
+        } else {
+          errorMessage = JSON.stringify(detail);
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
       
       return {
         success: false,
@@ -281,9 +315,9 @@ export const courseService = {
   async getGroups(): Promise<GroupsResponse> {
     try {
       console.log('🔄 Obteniendo grupos desde API...');
-      console.log('🌐 URL de request:', `${API_BASE_URL}/academic/cursos/disponibles`);
+      console.log('🌐 URL de request:', `${API_BASE_URL}/api/cursos/disponibles`);
       
-      const response = await academicAPI.get<GroupsResponse>('/academic/cursos/disponibles');
+      const response = await academicAPI.get<GroupsResponse>('/api/cursos/disponibles');
       console.log('✅ Respuesta API grupos:', response.data);
       
       return {
@@ -308,7 +342,7 @@ export const courseService = {
   async getCourseById(id: string): Promise<CourseDetailResponse> {
     try {
       console.log(`🔄 Obteniendo curso ${id}...`);
-      console.log(`🌐 URL de request: ${API_BASE_URL}/academic/cursos/${id}`);
+      console.log(`🌐 URL de request: ${API_BASE_URL}/api/cursos/${id}`);
       
       // Agregar token de autenticación
       const token = localStorage.getItem('access_token');
@@ -317,7 +351,7 @@ export const courseService = {
       }
       console.log(`🔑 Token presente: ${token ? 'SÍ' : 'NO'}`);
 
-      const response = await academicAPI.get<CourseDetailResponse>(`/academic/cursos/${id}`, {
+      const response = await academicAPI.get<CourseDetailResponse>(`/api/cursos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -354,7 +388,7 @@ export const courseService = {
         };
       }
 
-      const response = await academicAPI.get<CommentsResponse>(`/academic/cursos/${courseId}/comentarios`, {
+      const response = await academicAPI.get<CommentsResponse>(`/api/cursos/${courseId}/comentarios`, {
         params: { limit, offset },
         headers: {
           Authorization: `Bearer ${token}`
@@ -385,7 +419,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.post(`/academic/cursos/${courseId}/comentarios`, commentData, {
+      const response = await academicAPI.post(`/api/cursos/${courseId}/comentarios`, commentData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
@@ -428,7 +462,7 @@ export const courseService = {
         };
       }
 
-      const response = await academicAPI.get<TasksResponse>(`/academic/cursos/${courseId}/tareas`, {
+      const response = await academicAPI.get<TasksResponse>(`/api/cursos/${courseId}/tareas`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -465,7 +499,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
 
-      const response = await academicAPI.post('/academic/cursos/auto-vincular-estudiante', {}, {
+      const response = await academicAPI.post('/api/cursos/auto-vincular-estudiante', {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -505,7 +539,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
 
-      const response = await academicAPI.post('/academic/cursos/vincular-por-codigo', {
+      const response = await academicAPI.post('/api/cursos/vincular-por-codigo', {
         codigo_invitacion: invitationCode
       }, {
         headers: {
@@ -551,7 +585,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
 
-      const response = await academicAPI.post('/academic/cursos/generar-codigo-invitacion', {
+      const response = await academicAPI.post('/api/cursos/generar-codigo-invitacion', {
         programa_id: programaId,
         descripcion
       }, {
@@ -589,7 +623,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.post(`/academic/cursos/${courseId}/tareas`, {
+      const response = await academicAPI.post(`/api/cursos/${courseId}/tareas`, {
         curso_id: courseId,
         ...taskData
       }, {
@@ -622,10 +656,10 @@ export const courseService = {
       }
       
       const formData = new FormData();
-      formData.append('file', file);  // El endpoint /academic/cursos/{curso_id}/subir-archivo espera 'file'
+      formData.append('file', file);  // El endpoint /api/cursos/{curso_id}/subir-archivo espera 'file'
       formData.append('tipo', tipo);
       
-      const response = await academicAPI.post(`/academic/cursos/${courseId}/subir-archivo`, formData, {
+      const response = await academicAPI.post(`/api/cursos/${courseId}/subir-archivo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`
@@ -654,7 +688,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.post(`/academic/cursos/comentarios/${comentarioId}/reacciones`, {
+      const response = await academicAPI.post(`/api/cursos/comentarios/${comentarioId}/reacciones`, {
         emoji,
         tipo
       }, {
@@ -691,7 +725,7 @@ export const courseService = {
         };
       }
 
-      const response = await academicAPI.get(`/academic/cursos/comentarios/${comentarioId}/reacciones`, {
+      const response = await academicAPI.get(`/api/cursos/comentarios/${comentarioId}/reacciones`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -720,7 +754,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.delete(`/academic/cursos/reacciones/${reaccionId}`, {
+      const response = await academicAPI.delete(`/api/cursos/reacciones/${reaccionId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -750,7 +784,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.post(`/academic/cursos/comentarios/${comentarioId}/respuestas`, replyData, {
+      const response = await academicAPI.post(`/api/cursos/comentarios/${comentarioId}/respuestas`, replyData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
@@ -784,7 +818,7 @@ export const courseService = {
         };
       }
 
-      const response = await academicAPI.get(`/academic/cursos/comentarios/${comentarioId}/respuestas`, {
+      const response = await academicAPI.get(`/api/cursos/comentarios/${comentarioId}/respuestas`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -813,7 +847,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.put(`/academic/cursos/comentarios/${comentarioId}`, commentData, {
+      const response = await academicAPI.put(`/api/cursos/comentarios/${comentarioId}`, commentData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
@@ -842,7 +876,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.delete(`/academic/cursos/comentarios/${comentarioId}`, {
+      const response = await academicAPI.delete(`/api/cursos/comentarios/${comentarioId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -870,7 +904,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.put(`/academic/cursos/respuestas/${respuestaId}`, replyData, {
+      const response = await academicAPI.put(`/api/cursos/respuestas/${respuestaId}`, replyData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
@@ -899,7 +933,7 @@ export const courseService = {
         throw new Error('No hay token de autenticación');
       }
       
-      const response = await academicAPI.delete(`/academic/cursos/respuestas/${respuestaId}`, {
+      const response = await academicAPI.delete(`/api/cursos/respuestas/${respuestaId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

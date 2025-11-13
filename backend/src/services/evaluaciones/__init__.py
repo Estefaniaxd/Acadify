@@ -1,19 +1,18 @@
-"""
-Archivo de inicialización para los servicios de evaluaciones
-"""
+"""Archivo de inicialización para los servicios de evaluaciones."""
 
-from .calificador import calificador_automatico, CalificadorAutomatico
-from .anti_trampa import detector_anti_trampa, DetectorAntiTrampa
-from .estadisticas import servicio_estadisticas, ServicioEstadisticas
-from .integracion import servicio_integracion, ServicioIntegracionExamenes
+from .anti_trampa import DetectorAntiTrampa, detector_anti_trampa
+from .calificador import CalificadorAutomatico, calificador_automatico
+from .estadisticas import ServicioEstadisticas, servicio_estadisticas
+from .integracion import ServicioIntegracionExamenes, servicio_integracion
+
 
 __all__ = [
-    "calificador_automatico",
     "CalificadorAutomatico",
-    "detector_anti_trampa",
     "DetectorAntiTrampa",
-    "servicio_estadisticas",
     "ServicioEstadisticas",
+    "ServicioIntegracionExamenes",
+    "calificador_automatico",
+    "detector_anti_trampa",
+    "servicio_estadisticas",
     "servicio_integracion",
-    "ServicioIntegracionExamenes"
 ]

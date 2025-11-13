@@ -92,3 +92,18 @@ pydantic-settings==2.10.1
 passlib==1.7.4
 fastapi==0.116.1
 setuptools==65.5.0
+# Testing dependencies
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+faker==20.1.0
+factory-boy==3.3.0
+freezegun==1.4.0
+pytest-mock==3.12.0
+
+# ==================== AI Services ====================
+google-generativeai==0.8.3  # Google Gemini API
+PyPDF2==3.0.1  # Procesamiento de PDFs
+python-docx==1.1.2  # Procesamiento de Word (.docx)
+openpyxl==3.1.5  # Procesamiento de Excel (.xlsx)
+python-pptx==1.0.2  # Procesamiento de PowerPoint (.pptx)

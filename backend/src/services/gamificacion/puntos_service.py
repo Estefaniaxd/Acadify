@@ -1,16 +1,18 @@
-from sqlalchemy.orm import Session
 from uuid import UUID
-from src.models.gamification.usuario_puntos import UsuarioPuntos
+
+from sqlalchemy.orm import Session
+
 from src.models.gamification.historial_puntos import HistorialPuntos
 from src.models.gamification.racha_usuario import RachaUsuario
+from src.models.gamification.usuario_puntos import UsuarioPuntos
 
 
 class PuntosService:
     @staticmethod
-    def asignar_puntos(db: Session, usuario_id: UUID, puntos: int, motivo: str = None):
-        """
-        Suma puntos al usuario, registra historial y actualiza racha.
-        """
+    def asignar_puntos(
+        db: Session, usuario_id: UUID, puntos: int, motivo: str | None = None
+    ):
+        """Suma puntos al usuario, registra historial y actualiza racha."""
         usuario_puntos = (
             db.query(UsuarioPuntos).filter_by(usuario_id=usuario_id).first()
         )
@@ -26,16 +28,15 @@ class PuntosService:
 
     @staticmethod
     def descontar_puntos(
-        db: Session, usuario_id: UUID, puntos: int, motivo: str = None
+        db: Session, usuario_id: UUID, puntos: int, motivo: str | None = None
     ):
-        """
-        Resta puntos al usuario, registra historial.
-        """
+        """Resta puntos al usuario, registra historial."""
         usuario_puntos = (
             db.query(UsuarioPuntos).filter_by(usuario_id=usuario_id).first()
         )
         if not usuario_puntos or usuario_puntos.puntos_acumulados < puntos:
-            raise ValueError("El usuario no tiene suficientes puntos")
+            msg = "El usuario no tiene suficientes puntos"
+            raise ValueError(msg)
         usuario_puntos.puntos_acumulados -= puntos
         db.add(HistorialPuntos(usuario_id=usuario_id, cambio=-puntos, motivo=motivo))
         db.commit()
@@ -44,9 +45,7 @@ class PuntosService:
 
     @staticmethod
     def actualizar_racha(db: Session, usuario_id: UUID):
-        """
-        Actualiza la racha diaria del usuario. Si el usuario ya participó hoy, no suma. Si es día consecutivo, suma. Si no, reinicia.
-        """
+        """Actualiza la racha diaria del usuario. Si el usuario ya participó hoy, no suma. Si es día consecutivo, suma. Si no, reinicia."""
         from datetime import date, timedelta
 
         hoy = date.today()
@@ -61,8 +60,8 @@ class PuntosService:
             db.add(racha)
         else:
             if racha.fecha_ultimo_dia == hoy:
-                return  # Ya se contó hoy
-            elif racha.fecha_ultimo_dia == hoy - timedelta(days=1):
+                return None  # Ya se contó hoy
+            if racha.fecha_ultimo_dia == hoy - timedelta(days=1):
                 racha.racha_actual += 1
             else:
                 racha.racha_actual = 1

@@ -1,0 +1,50 @@
+# Configuración de EditorConfig para consistencia entre editores
+# https://editorconfig.org
+
+root = true
+
+# Configuración por defecto para todos los archivos
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# YAML
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# JSON
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# SQL
+[*.sql]
+indent_style = space
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# Makefiles
+[Makefile]
+indent_style = tab
+
+# Configuración específica de archivos
+[requirements*.txt]
+insert_final_newline = false

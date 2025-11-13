@@ -1,13 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import src.crud.gamification.insignia as crud_insignias
-from src.schemas.gamification.insignia import (
-    InsigniaResponse, InsigniaCreate, InsigniaUpdate,
-    UsuarioInsigniasResponse
-)
-from src.api.deps import get_db
+
 from src.api.dependencies import get_current_user
+from src.api.deps import get_db
+import src.crud.gamification.insignia as crud_insignias
 from src.models.users.usuario import Usuario
+from src.schemas.gamification.insignia import (
+    InsigniaCreate,
+    InsigniaResponse,
+    InsigniaUpdate,
+    UsuarioInsigniasResponse,
+)
+
 
 router = APIRouter()
 
@@ -25,9 +29,7 @@ def get_my_insignias(
     skip: int = 0,
     limit: int = 100,
 ):
-    """
-    Obtiene todas las insignias obtenidas por el usuario autenticado.
-    """
+    """Obtiene todas las insignias obtenidas por el usuario autenticado."""
     insignias = crud_insignias.get_insignias_usuario(
         db, current_user.usuario_id, skip=skip, limit=limit
     )
@@ -59,9 +61,7 @@ def list_insignias(db: Session = Depends(get_db)):
     summary="Crear una insignia",
     tags=["Insignias"],
 )
-def create_insignia(
-    insignia: InsigniaCreate, db: Session = Depends(get_db)
-):
+def create_insignia(insignia: InsigniaCreate, db: Session = Depends(get_db)):
     return crud_insignias.create_insignia(db, insignia)
 
 
@@ -88,8 +88,7 @@ def update_insignia(
     summary="Eliminar una insignia",
     tags=["Insignias"],
 )
-def delete_insignia(insignia_id: str, db: Session = Depends(get_db)):
+def delete_insignia(insignia_id: str, db: Session = Depends(get_db)) -> None:
     ok = crud_insignias.delete_insignia(db, insignia_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Insignia no encontrada")
-    return None

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiMail, FiPhone, FiPlus, FiEdit3, FiTrash2, FiSearch } from 'react-icons/fi';
+import { Edit3, Mail, Phone, Plus, Search, Trash2, User } from 'lucide-react';
+;
 
 interface Profesor {
   id: string;
@@ -87,14 +88,14 @@ export default function ProfesoresCoordinador() {
           onClick={() => setShowAddForm(true)}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <FiPlus className="w-4 h-4" />
+          <Plus className="w-4 h-4" />
           <span>Agregar Profesor</span>
         </button>
       </div>
 
       {/* Search Bar */}
       <div className="relative mb-6">
-        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
           placeholder="Buscar por nombre o materia..."
@@ -166,7 +167,7 @@ export default function ProfesoresCoordinador() {
       <div className="space-y-4">
         {filteredProfesores.length === 0 ? (
           <div className="text-center py-8">
-            <FiUser className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+            <User className="w-12 h-12 text-gray-400 mx-auto mb-2" />
             <p className="text-gray-500 dark:text-gray-400">
               {searchTerm ? 'No se encontraron profesores' : 'No hay profesores registrados'}
             </p>
@@ -182,7 +183,7 @@ export default function ProfesoresCoordinador() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                    <FiUser className="w-6 h-6 text-white" />
+                    <User className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -191,12 +192,12 @@ export default function ProfesoresCoordinador() {
                     <p className="text-gray-600 dark:text-gray-400">{profesor.materia}</p>
                     <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
-                        <FiMail className="w-4 h-4" />
+                        <Mail className="w-4 h-4" />
                         <span>{profesor.email}</span>
                       </div>
                       {profesor.telefono && (
                         <div className="flex items-center space-x-1">
-                          <FiPhone className="w-4 h-4" />
+                          <Phone className="w-4 h-4" />
                           <span>{profesor.telefono}</span>
                         </div>
                       )}
@@ -214,13 +215,13 @@ export default function ProfesoresCoordinador() {
                     {profesor.estado}
                   </span>
                   <button className="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400">
-                    <FiEdit3 className="w-4 h-4" />
+                    <Edit3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteProfesor(profesor.id)}
                     className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400"
                   >
-                    <FiTrash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>

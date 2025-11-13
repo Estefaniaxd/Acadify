@@ -1,5 +1,5 @@
 // API client para avatars
-import { API_BASE_URL } from '../../utils/api';
+import { API_BASE_URL } from "../../utils/api";
 
 export interface LayerItem {
   category: string;
@@ -61,37 +61,34 @@ export class AvatarAPI {
     this.baseURL = `${API_BASE_URL}/avatar`;
   }
 
-  private async request<T>(
-    endpoint: string, 
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // Para endpoints públicos como /assets, no incluir credenciales
-    const isPublicEndpoint = endpoint.startsWith('/assets');
-    
+    const isPublicEndpoint = endpoint.startsWith("/assets");
+
     // Obtener token de localStorage
-    const token = localStorage.getItem('access_token');
-    
+    const token = localStorage.getItem("access_token");
+
     // Si no es endpoint público y no hay token, lanzar error específico
     if (!isPublicEndpoint && !token) {
-      throw new Error('No estás autenticado. Por favor, inicia sesión primero.');
+      throw new Error("No estás autenticado. Por favor, inicia sesión primero.");
     }
-    
+
     const defaultOptions: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         // Agregar Authorization header si hay token y no es endpoint público
-        ...(token && !isPublicEndpoint ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...(token && !isPublicEndpoint ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
     };
 
     console.log(`🔗 Fetching: ${url}`);
     console.log(`🔧 Public endpoint: ${isPublicEndpoint}`);
-    console.log(`🔑 Token exists: ${token ? 'YES' : 'NO'}`);
-    console.log(`🔒 Authorization header: ${token && !isPublicEndpoint ? 'SENT' : 'NOT_SENT'}`);
-    
+    console.log(`🔑 Token exists: ${token ? "YES" : "NO"}`);
+    console.log(`🔒 Authorization header: ${token && !isPublicEndpoint ? "SENT" : "NOT_SENT"}`);
+
     const response = await fetch(url, { ...defaultOptions, ...options });
 
     console.log(`📊 Response status: ${response.status}`);
@@ -101,27 +98,27 @@ export class AvatarAPI {
       // Manejo especial para errores de autenticación
       if (response.status === 401) {
         // Intentar refresh automático
-        const refreshToken = localStorage.getItem('refresh_token');
+        const refreshToken = localStorage.getItem("refresh_token");
         if (refreshToken) {
           try {
             const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
-              method: 'POST',
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({ refresh_token: refreshToken }),
             });
             if (refreshRes.ok) {
               const refreshData = await refreshRes.json();
               if (refreshData.access_token) {
-                localStorage.setItem('access_token', refreshData.access_token);
+                localStorage.setItem("access_token", refreshData.access_token);
                 // Reintentar la petición original con el nuevo token
                 const retryOptions = {
                   ...defaultOptions,
                   headers: {
                     ...defaultOptions.headers,
-                    'Authorization': `Bearer ${refreshData.access_token}`
-                  }
+                    Authorization: `Bearer ${refreshData.access_token}`,
+                  },
                 };
                 const retryResponse = await fetch(url, { ...retryOptions, ...options });
                 if (retryResponse.ok) {
@@ -129,89 +126,125 @@ export class AvatarAPI {
                   return retryData;
                 } else {
                   // Si sigue fallando, limpiar tokens y disparar logout
-                  localStorage.removeItem('access_token');
-                  localStorage.removeItem('refresh_token');
-                  window.dispatchEvent(new CustomEvent('auth-token-expired'));
-                  throw new Error('No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.');
+                  localStorage.removeItem("access_token");
+                  localStorage.removeItem("refresh_token");
+                  window.dispatchEvent(new CustomEvent("auth-token-expired"));
+                  throw new Error(
+                    "No se pudo renovar la sesión. Por favor, inicia sesión nuevamente."
+                  );
                 }
               }
             } else {
               // Refresh falló
-              localStorage.removeItem('access_token');
-              localStorage.removeItem('refresh_token');
-              window.dispatchEvent(new CustomEvent('auth-token-expired'));
-              throw new Error('No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.');
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+              window.dispatchEvent(new CustomEvent("auth-token-expired"));
+              throw new Error("No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.");
             }
           } catch (refreshErr) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            window.dispatchEvent(new CustomEvent('auth-token-expired'));
-            throw new Error('No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.');
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            window.dispatchEvent(new CustomEvent("auth-token-expired"));
+            throw new Error("No se pudo renovar la sesión. Por favor, inicia sesión nuevamente.");
           }
         } else {
           // No hay refresh token, cerrar sesión
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.dispatchEvent(new CustomEvent('auth-token-expired'));
-          throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          window.dispatchEvent(new CustomEvent("auth-token-expired"));
+          throw new Error("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
         }
       }
-      const errorData = await response.json().catch(() => ({ 
-        detail: `Network error: ${response.status} ${response.statusText}` 
+      const errorData = await response.json().catch(() => ({
+        detail: `Network error: ${response.status} ${response.statusText}`,
       }));
-      console.error('❌ API Error:', errorData);
+      console.error("❌ API Error:", errorData);
       throw new Error(`HTTP ${response.status}: ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
-    console.log('✅ API Success:', { endpoint, dataKeys: Object.keys(data) });
+    console.log("✅ API Success:", { endpoint, dataKeys: Object.keys(data) });
     return data;
   }
 
   /**
    * Obtiene el manifest de assets disponibles
    */
-  async getAssetsManifest(gender?: 'male' | 'female'): Promise<ManifestResponse> {
-    const params = gender ? `?gender=${gender}` : '';
+  async getAssetsManifest(gender?: "male" | "female"): Promise<ManifestResponse> {
+    const params = gender ? `?gender=${gender}` : "";
     return this.request<ManifestResponse>(`/assets${params}`);
   }
 
   /**
-   * Genera avatar directamente como blob para preview
+   * Genera avatar directamente como blob para preview (OPTIMIZADO)
    */
-  async generateAvatar(layers: LayerItem[], baseGender: 'male' | 'female'): Promise<Blob> {
-    const url = `${this.baseURL}/generate`;
-    
-    console.log(`🖼️ Generating avatar with layers:`, layers);
-    
+  async generateAvatar(layers: LayerItem[], baseGender: "male" | "female"): Promise<Blob> {
+    const url = `${this.baseURL}/preview`;
+
+    console.log(`🖼️ Generating avatar preview with ${layers.length} layers`);
+    const startTime = performance.now();
+
     // Convertir el formato de layers
-    const requestLayers = layers.map(layer => ({
+    // Normalizar: if filename is a basename (no '/'), prepend category so backend receives category/path
+    const requestLayers = layers.map((layer) => ({
       category: layer.category,
-      file: layer.filename
+      file: layer.filename.includes("/") ? layer.filename : `${layer.category}/${layer.filename}`,
     }));
-    
+
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         base_gender: baseGender,
-        layers: requestLayers
+        layers: requestLayers,
       }),
     });
 
-    console.log(`📊 Generate response status: ${response.status}`);
-
     if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error');
-      console.error('❌ Generate Error:', errorText);
+      const errorText = await response.text().catch(() => "Unknown error");
+      console.error("❌ Preview Error:", errorText);
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
-    const blob = await response.blob();
-    console.log('✅ Avatar generated successfully, blob size:', blob.size);
-    return blob;
+    // El endpoint devuelve JSON con preview_url
+    const data = await response.json();
+
+    // OPTIMIZACIÓN: Retornar URL directamente sin segundo fetch
+    // Crear blob URL desde la preview_url del servidor
+    const fullUrl = data.preview_url.startsWith("http")
+      ? data.preview_url
+      : `http://localhost:8000${data.preview_url}`;
+
+    // Fetch paralelo con señal de abort para cancelar si tarda mucho
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+    try {
+      const imageResponse = await fetch(fullUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to fetch preview image: ${imageResponse.status}`);
+      }
+
+      const blob = await imageResponse.blob();
+      const elapsed = performance.now() - startTime;
+      console.log(
+        `✅ Preview generated in ${elapsed.toFixed(0)}ms (${blob.size} bytes, cached: ${
+          data.from_cache
+        })`
+      );
+      return blob;
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (err.name === "AbortError") {
+        console.error("❌ Preview timeout after 5s");
+        throw new Error("Preview generation timeout");
+      }
+      throw err;
+    }
   }
 
   /**
@@ -219,63 +252,67 @@ export class AvatarAPI {
    */
   async saveAvatar(
     name: string,
-    baseGender: 'male' | 'female',
+    baseGender: "male" | "female",
     layers: LayerItem[],
     isActive: boolean = false,
     isPublic: boolean = true
   ): Promise<UserAvatar> {
     console.log(`💾 Saving avatar with layers:`, layers);
-    
+
     // Verificar que todas las capas tengan filename
-    const invalidLayers = layers.filter(layer => !layer.filename);
+    const invalidLayers = layers.filter((layer) => !layer.filename);
     if (invalidLayers.length > 0) {
-      console.error('❌ Layers without filename:', invalidLayers);
-      throw new Error('Some layers are missing filename property');
+      console.error("❌ Layers without filename:", invalidLayers);
+      throw new Error("Some layers are missing filename property");
     }
-    
+
     // Verificar token antes de proceder
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
     if (!token) {
-      throw new Error('No estás autenticado. Por favor, inicia sesión primero.');
+      throw new Error("No estás autenticado. Por favor, inicia sesión primero.");
     }
-    
+
     // Forzar que solo se envíen {category, file} (nunca filename)
     // Limpiar cualquier propiedad extra: solo category y file
-    const backendLayers = layers.map(layer => {
+    const backendLayers = layers.map((layer) => {
       console.log(`📝 Mapping layer:`, layer);
+      // Ensure backend always receives category-prefixed path
       return {
         category: layer.category,
-        file: layer.filename
+        file: layer.filename.includes("/") ? layer.filename : `${layer.category}/${layer.filename}`,
       };
     });
-    
+
     console.log(`💾 Backend layers format:`, backendLayers);
-    
-    // Crear query parameters (el backend los espera así)
-    const params = new URLSearchParams({
+
+    // Crear el body JSON (el backend espera POST con body, NO query params)
+    const requestBody = {
       name: name,
       base_gender: baseGender,
-      layers: JSON.stringify(backendLayers),
-      is_active: isActive.toString(),
-      is_public: isPublic.toString()
-    });
-    
-    const url = `${this.baseURL}/save?${params.toString()}`;
-    
-    console.log('🔑 Token from localStorage:', token ? 'TOKEN_PRESENT' : 'NO_TOKEN');
-    console.log('🔑 Token preview:', token ? token.substring(0, 20) + '...' : 'N/A');
-    
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      layers: backendLayers,
+      is_active: isActive,
+      is_public: isPublic,
     };
-    
-    console.log('✅ Authorization header set');
-    
+
+    const url = `${this.baseURL}/save`;
+
+    console.log("🔗 Save URL:", url);
+    console.log("📦 Request body:", JSON.stringify(requestBody, null, 2));
+    console.log("🔑 Token from localStorage:", token ? "TOKEN_PRESENT" : "NO_TOKEN");
+    console.log("🔑 Token preview:", token ? token.substring(0, 20) + "..." : "N/A");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+
+    console.log("✅ Authorization header set");
+
     let response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers,
-      credentials: 'include',
+      body: JSON.stringify(requestBody),
+      credentials: "include",
     });
 
     console.log(`📊 Save response status: ${response.status}`);
@@ -284,54 +321,55 @@ export class AvatarAPI {
       // Manejo especial para errores de autenticación
       if (response.status === 401) {
         // Intentar refresh automático antes de forzar logout
-        const refreshToken = localStorage.getItem('refresh_token');
+        const refreshToken = localStorage.getItem("refresh_token");
         if (refreshToken) {
           try {
             const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
-              method: 'POST',
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({ refresh_token: refreshToken }),
             });
             if (refreshRes.ok) {
               const refreshData = await refreshRes.json();
               if (refreshData.access_token) {
-                localStorage.setItem('access_token', refreshData.access_token);
+                localStorage.setItem("access_token", refreshData.access_token);
                 // Reintentar la petición original con el nuevo token
                 const retryHeaders = {
                   ...headers,
-                  'Authorization': `Bearer ${refreshData.access_token}`
+                  Authorization: `Bearer ${refreshData.access_token}`,
                 };
                 response = await fetch(url, {
-                  method: 'POST',
+                  method: "POST",
                   headers: retryHeaders,
-                  credentials: 'include',
+                  body: JSON.stringify(requestBody),
+                  credentials: "include",
                 });
                 if (response.ok) {
                   const data = await response.json();
-                  console.log('✅ Avatar saved successfully after token refresh:', data);
+                  console.log("✅ Avatar saved successfully after token refresh:", data);
                   return data;
                 }
               }
             }
           } catch (refreshErr) {
-            console.error('❌ Error refreshing token during avatar save:', refreshErr);
+            console.error("❌ Error refreshing token during avatar save:", refreshErr);
           }
         }
         // Si el refresh falla, forzar logout
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        window.dispatchEvent(new CustomEvent('auth-token-expired'));
-        throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.dispatchEvent(new CustomEvent("auth-token-expired"));
+        throw new Error("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
       }
-      const errorText = await response.text().catch(() => 'Unknown error');
-      console.error('❌ Save Error:', errorText);
+      const errorText = await response.text().catch(() => "Unknown error");
+      console.error("❌ Save Error:", errorText);
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('✅ Avatar saved successfully:', data);
+    console.log("✅ Avatar saved successfully:", data);
     return data;
   }
 
@@ -350,8 +388,8 @@ export class AvatarAPI {
    * Obtiene avatars de un usuario específico (solo para el usuario actual)
    */
   async getUserAvatars(
-    userId: string, 
-    skip: number = 0, 
+    userId: string,
+    skip: number = 0,
     limit: number = 100
   ): Promise<UserAvatarListResponse> {
     // Para avatars, solo podemos obtener los propios
@@ -375,7 +413,7 @@ export class AvatarAPI {
     }
   ): Promise<UserAvatar> {
     return this.request<UserAvatar>(`/${avatarId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(updates),
     });
   }
@@ -385,7 +423,7 @@ export class AvatarAPI {
    */
   async deleteAvatar(avatarId: string): Promise<void> {
     await this.request<void>(`/${avatarId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
@@ -399,7 +437,7 @@ export class AvatarAPI {
     has_active_avatar: boolean;
     active_avatar_id?: string;
   }> {
-    return this.request('/stats/user');
+    return this.request("/stats/user");
   }
 
   /**
@@ -424,9 +462,9 @@ export class AvatarAPI {
     // TODO: Implementar endpoint específico para avatars públicos en el backend
     try {
       const response = await this.getMyAvatars(skip, limit);
-      return response.avatars.filter(avatar => avatar.is_public);
+      return response.avatars.filter((avatar) => avatar.is_public);
     } catch (error) {
-      console.warn('Error fetching public avatars, using mock data:', error);
+      console.warn("Error fetching public avatars, using mock data:", error);
       return [];
     }
   }

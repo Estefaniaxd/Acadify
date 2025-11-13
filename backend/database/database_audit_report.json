@@ -1,0 +1,1084 @@
+{
+  "tables": {
+    "Usuario": {
+      "columns": {
+        "usuario_id": "UUID",
+        "correo_institucional": "VARCHAR(100)",
+        "username": "VARCHAR(50)",
+        "nombres": "VARCHAR(100)",
+        "apellidos": "VARCHAR(100)",
+        "tipo_documento": "VARCHAR(2)",
+        "numero_documento": "VARCHAR(20)",
+        "rol": "VARCHAR(13)",
+        "password_hash": "VARCHAR(255)",
+        "estado_cuenta": "VARCHAR(10)",
+        "fecha_creacion": "TIMESTAMP",
+        "ultimo_acceso": "TIMESTAMP",
+        "perfil_url": "TEXT",
+        "portada_url": "TEXT",
+        "telefono": "VARCHAR(20)",
+        "descripcion": "TEXT",
+        "email_verified": "BOOLEAN",
+        "failed_login_attempts": "SMALLINT",
+        "locked_until": "TIMESTAMP",
+        "twofa_enabled": "BOOLEAN",
+        "twofa_secret": "VARCHAR(32)",
+        "foto_perfil_custom_url": "TEXT",
+        "usa_foto_custom": "BOOLEAN",
+        "banner_url": "TEXT",
+        "banner_activo_id": "UUID",
+        "marco_perfil_id": "UUID"
+      },
+      "primary_keys": [
+        "usuario_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_usuario_banner_tienda",
+          "constrained_columns": [
+            "banner_activo_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "tienda_item",
+          "referred_columns": [
+            "item_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        },
+        {
+          "name": "fk_usuario_marco_tienda",
+          "constrained_columns": [
+            "marco_perfil_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "tienda_item",
+          "referred_columns": [
+            "item_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 26,
+      "exists": true
+    },
+    "Estudiante": {
+      "columns": {
+        "estudiante_id": "UUID",
+        "programa_id": "UUID",
+        "fecha_ingreso": "DATE",
+        "creditos_aprobados": "SMALLINT",
+        "etapa_formativa": "VARCHAR(4)",
+        "promedio_acumulado": "NUMERIC(3, 2)"
+      },
+      "primary_keys": [
+        "estudiante_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "Estudiante_estudiante_id_fkey",
+          "constrained_columns": [
+            "estudiante_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "Estudiante_programa_id_fkey",
+          "constrained_columns": [
+            "programa_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Programa",
+          "referred_columns": [
+            "programa_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 6,
+      "exists": true
+    },
+    "Curso": {
+      "columns": {
+        "curso_id": "UUID",
+        "institucion_id": "UUID",
+        "coordinador_id": "UUID",
+        "programa_id": "UUID",
+        "nombre": "VARCHAR(50)",
+        "descripcion": "TEXT",
+        "modalidad": "VARCHAR(13)",
+        "fecha_inicio": "DATE",
+        "fecha_fin": "DATE",
+        "objetivos": "TEXT",
+        "codigo_curso": "VARCHAR(20)",
+        "codigo_acceso": "VARCHAR(10)",
+        "creditos": "INTEGER",
+        "horas_academicas": "INTEGER",
+        "activo": "BOOLEAN",
+        "permite_inscripcion": "BOOLEAN",
+        "maximo_estudiantes": "INTEGER",
+        "minimo_estudiantes": "INTEGER",
+        "permite_material_estudiantes": "BOOLEAN",
+        "requiere_aprobacion_material": "BOOLEAN",
+        "horas_teoricas": "INTEGER",
+        "horas_practicas": "INTEGER",
+        "horas_laboratorio": "INTEGER",
+        "horas_autonomas": "INTEGER",
+        "nivel_dificultad": "VARCHAR(10)",
+        "tipo_curso": "VARCHAR(20)",
+        "categoria_curso": "VARCHAR(14)",
+        "estado": "VARCHAR(22)",
+        "idioma": "VARCHAR(9)",
+        "fecha_limite_inscripcion": "DATE",
+        "fecha_inicio_retiro": "DATE",
+        "fecha_limite_retiro": "DATE",
+        "cupos_disponibles": "INTEGER",
+        "permite_lista_espera": "BOOLEAN",
+        "maximo_lista_espera": "INTEGER",
+        "prerequisitos_ids": "JSON",
+        "correquisitos_ids": "JSON",
+        "requiere_nivelacion": "BOOLEAN",
+        "creditos_minimos_requeridos": "INTEGER",
+        "promedio_minimo_requerido": "NUMERIC(3, 2)",
+        "tiene_costo": "BOOLEAN",
+        "costo_matricula": "NUMERIC(12, 2)",
+        "costo_mensual": "NUMERIC(12, 2)",
+        "costo_total": "NUMERIC(12, 2)",
+        "permite_becas": "BOOLEAN",
+        "porcentaje_descuento": "NUMERIC(5, 2)",
+        "calificacion_minima_aprobacion": "NUMERIC(3, 2)",
+        "porcentaje_asistencia_minimo": "NUMERIC(5, 2)",
+        "permite_recuperacion": "BOOLEAN",
+        "permite_habilitacion": "BOOLEAN",
+        "numero_maximo_faltas": "INTEGER",
+        "permite_foros": "BOOLEAN",
+        "permite_comentarios": "BOOLEAN",
+        "permite_calificacion_entre_pares": "BOOLEAN",
+        "genera_certificado": "BOOLEAN",
+        "requiere_trabajo_final": "BOOLEAN",
+        "tipo_trabajo_final": "VARCHAR(50)",
+        "syllabus_url": "VARCHAR(500)",
+        "bibliografia": "TEXT",
+        "recursos_adicionales": "JSON",
+        "tags": "JSON",
+        "imagen_url": "VARCHAR(500)",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_actualizacion": "TIMESTAMP"
+      },
+      "primary_keys": [
+        "curso_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "Curso_coordinador_id_fkey",
+          "constrained_columns": [
+            "coordinador_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Coordinador",
+          "referred_columns": [
+            "coordinador_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        },
+        {
+          "name": "Curso_institucion_id_fkey",
+          "constrained_columns": [
+            "institucion_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Institucion",
+          "referred_columns": [
+            "institucion_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "Curso_programa_id_fkey",
+          "constrained_columns": [
+            "programa_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Programa",
+          "referred_columns": [
+            "programa_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 64,
+      "exists": true
+    },
+    "Grupo": {
+      "columns": {
+        "grupo_id": "UUID",
+        "programa_id": "UUID",
+        "docente_tutor_id": "UUID",
+        "nombre": "VARCHAR(50)",
+        "jornada": "VARCHAR(8)",
+        "periodo_academico_id": "INTEGER",
+        "codigo_grupo": "VARCHAR(50)",
+        "nivel_academico": "INTEGER",
+        "seccion": "VARCHAR(10)",
+        "descripcion": "TEXT",
+        "estado": "VARCHAR(22)",
+        "tipo_grupo": "VARCHAR(12)",
+        "modalidad_asistencia": "VARCHAR(11)",
+        "formato_evaluacion": "VARCHAR(13)",
+        "hora_inicio": "TIME",
+        "hora_fin": "TIME",
+        "dias_semana": "JSON",
+        "salon": "VARCHAR(50)",
+        "edificio": "VARCHAR(100)",
+        "ubicacion_virtual": "VARCHAR(500)",
+        "capacidad_maxima": "INTEGER",
+        "capacidad_minima": "INTEGER",
+        "cupos_disponibles": "INTEGER",
+        "permite_lista_espera": "BOOLEAN",
+        "maximo_lista_espera": "INTEGER",
+        "fecha_inicio": "DATE",
+        "fecha_fin": "DATE",
+        "fecha_inicio_inscripciones": "DATE",
+        "fecha_fin_inscripciones": "DATE",
+        "creditos": "INTEGER",
+        "horas_semanales": "INTEGER",
+        "porcentaje_asistencia_minimo": "NUMERIC(5, 2)",
+        "calificacion_minima_aprobacion": "NUMERIC(3, 2)",
+        "permite_recuperacion": "BOOLEAN",
+        "numero_maximo_faltas": "INTEGER",
+        "tiene_costo_adicional": "BOOLEAN",
+        "costo_adicional": "NUMERIC(12, 2)",
+        "activo": "BOOLEAN",
+        "permite_inscripcion": "BOOLEAN",
+        "requiere_aprobacion_inscripcion": "BOOLEAN",
+        "es_visible": "BOOLEAN",
+        "permite_autoregistro": "BOOLEAN",
+        "codigo_acceso": "VARCHAR(20)",
+        "permite_chat": "BOOLEAN",
+        "permite_foro": "BOOLEAN",
+        "permite_comentarios": "BOOLEAN",
+        "permite_material_estudiantes": "BOOLEAN",
+        "objetivos": "TEXT",
+        "notas_internas": "TEXT",
+        "recursos_adicionales": "JSON",
+        "tags": "JSON",
+        "imagen_url": "VARCHAR(500)",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_actualizacion": "TIMESTAMP",
+        "creado_por_id": "UUID",
+        "modificado_por_id": "UUID"
+      },
+      "primary_keys": [
+        "grupo_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "Grupo_docente_tutor_id_fkey",
+          "constrained_columns": [
+            "docente_tutor_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Docente",
+          "referred_columns": [
+            "docente_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        },
+        {
+          "name": "Grupo_programa_id_fkey",
+          "constrained_columns": [
+            "programa_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Programa",
+          "referred_columns": [
+            "programa_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "fk_grupo_creado_por",
+          "constrained_columns": [
+            "creado_por_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        },
+        {
+          "name": "fk_grupo_modificado_por",
+          "constrained_columns": [
+            "modificado_por_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        },
+        {
+          "name": "fk_grupo_periodo",
+          "constrained_columns": [
+            "periodo_academico_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "periodos_academicos",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 56,
+      "exists": true
+    },
+    "tareas": {
+      "columns": {
+        "tarea_id": "VARCHAR",
+        "docente_id": "UUID",
+        "titulo": "VARCHAR(200)",
+        "descripcion": "TEXT",
+        "instrucciones": "TEXT",
+        "objetivos": "TEXT",
+        "tipo": "VARCHAR(13)",
+        "prioridad": "VARCHAR(7)",
+        "grupo_id": "UUID",
+        "tags": "VARCHAR(500)",
+        "fecha_asignacion": "TIMESTAMP",
+        "fecha_limite": "TIMESTAMP",
+        "fecha_inicio_disponible": "TIMESTAMP",
+        "tiempo_estimado": "INTEGER",
+        "permite_entrega_tardia": "BOOLEAN",
+        "penalizacion_tardia": "DOUBLE PRECISION",
+        "intentos_maximos": "INTEGER",
+        "formato_entrega": "VARCHAR(200)",
+        "tamano_maximo_mb": "DOUBLE PRECISION",
+        "puntuacion_maxima": "DOUBLE PRECISION",
+        "peso_evaluacion": "DOUBLE PRECISION",
+        "rubrica_id": "VARCHAR",
+        "estado": "VARCHAR(11)",
+        "es_grupal": "BOOLEAN",
+        "es_publica": "BOOLEAN",
+        "requiere_aprobacion": "BOOLEAN",
+        "configuracion_json": "JSON",
+        "recursos_necesarios": "TEXT",
+        "criterios_evaluacion": "TEXT",
+        "activa": "BOOLEAN",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_actualizacion": "TIMESTAMP",
+        "creado_por": "UUID",
+        "actualizado_por": "UUID",
+        "puntos_base": "INTEGER",
+        "puntos_bonificacion": "INTEGER",
+        "peso_calificacion": "NUMERIC(5, 2)",
+        "rubrica": "JSONB",
+        "restricciones_archivo": "JSONB",
+        "habilitar_retroalimentacion_ia": "BOOLEAN",
+        "prompt_ia_personalizado": "TEXT",
+        "archivo_adjunto": "VARCHAR(500)",
+        "clase_id": "UUID",
+        "permite_entregas_tardias": "BOOLEAN",
+        "fecha_modificacion": "TIMESTAMP"
+      },
+      "primary_keys": [
+        "tarea_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "tareas_actualizado_por_fkey",
+          "constrained_columns": [
+            "actualizado_por"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {},
+          "comment": null
+        },
+        {
+          "name": "tareas_creado_por_fkey",
+          "constrained_columns": [
+            "creado_por"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {},
+          "comment": null
+        },
+        {
+          "name": "tareas_docente_id_fkey",
+          "constrained_columns": [
+            "docente_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "tareas_grupo_id_fkey",
+          "constrained_columns": [
+            "grupo_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Grupo",
+          "referred_columns": [
+            "grupo_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "tareas_rubrica_id_fkey",
+          "constrained_columns": [
+            "rubrica_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "rubricas",
+          "referred_columns": [
+            "rubrica_id"
+          ],
+          "options": {},
+          "comment": null
+        }
+      ],
+      "column_count": 45,
+      "exists": true
+    },
+    "entregas_tareas": {
+      "columns": {
+        "entrega_id": "VARCHAR",
+        "tarea_id": "VARCHAR",
+        "estudiante_id": "UUID",
+        "titulo_entrega": "VARCHAR(200)",
+        "descripcion_entrega": "TEXT",
+        "comentarios_estudiante": "TEXT",
+        "archivo_url": "VARCHAR(500)",
+        "archivos_adicionales": "JSON",
+        "contenido_texto": "TEXT",
+        "enlaces_externos": "JSON",
+        "fecha_entrega": "TIMESTAMP",
+        "fecha_limite_original": "TIMESTAMP",
+        "numero_intento": "INTEGER",
+        "es_entrega_tardia": "BOOLEAN",
+        "calificacion": "DOUBLE PRECISION",
+        "calificacion_letras": "VARCHAR(5)",
+        "comentarios_docente": "TEXT",
+        "rubrica_calificacion": "JSON",
+        "estado": "VARCHAR(50)",
+        "es_final": "BOOLEAN",
+        "requiere_revision": "BOOLEAN",
+        "tiempo_empleado": "INTEGER",
+        "dificultad_percibida": "INTEGER",
+        "satisfaccion_estudiante": "INTEGER",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_actualizacion": "TIMESTAMP",
+        "calificado_por": "UUID",
+        "fecha_calificacion": "TIMESTAMP",
+        "intentos": "INTEGER",
+        "es_tardia": "BOOLEAN",
+        "archivo_metadata": "JSONB",
+        "calificacion_preliminar_ia": "NUMERIC(3, 1)",
+        "retroalimentacion_docente": "TEXT",
+        "retroalimentacion_ia": "JSONB",
+        "comentarios_privados": "TEXT",
+        "puntos_otorgados": "INTEGER"
+      },
+      "primary_keys": [
+        "entrega_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "entregas_tareas_calificado_por_fkey",
+          "constrained_columns": [
+            "calificado_por"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {},
+          "comment": null
+        },
+        {
+          "name": "entregas_tareas_estudiante_id_fkey",
+          "constrained_columns": [
+            "estudiante_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "entregas_tareas_tarea_id_fkey",
+          "constrained_columns": [
+            "tarea_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "tareas",
+          "referred_columns": [
+            "tarea_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 36,
+      "exists": true
+    },
+    "evaluaciones": {
+      "columns": {
+        "id": "VARCHAR",
+        "titulo": "VARCHAR(200)",
+        "descripcion": "TEXT",
+        "tipo_examen": "VARCHAR(50)",
+        "estado_examen": "VARCHAR(50)",
+        "tiempo_limite_minutos": "INTEGER",
+        "fecha_inicio": "TIMESTAMP",
+        "fecha_limite": "TIMESTAMP",
+        "intentos_permitidos": "INTEGER",
+        "requiere_contrase\u00f1a": "BOOLEAN",
+        "contrase\u00f1a_acceso": "VARCHAR(100)",
+        "randomizar_preguntas": "BOOLEAN",
+        "mostrar_resultados_inmediatos": "BOOLEAN",
+        "permitir_revision": "BOOLEAN",
+        "mostrar_respuestas_correctas": "BOOLEAN",
+        "modo_pantalla_completa": "BOOLEAN",
+        "bloquear_navegacion": "BOOLEAN",
+        "detectar_cambio_pestana": "BOOLEAN",
+        "tiempo_maximo_inactividad": "INTEGER",
+        "puntuacion_total": "DOUBLE PRECISION",
+        "puntuacion_minima_aprobacion": "DOUBLE PRECISION",
+        "calificacion_automatica": "BOOLEAN",
+        "curso_id": "VARCHAR",
+        "grupo_id": "VARCHAR",
+        "creador_id": "VARCHAR",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_modificacion": "TIMESTAMP",
+        "configuracion_avanzada": "JSON",
+        "instrucciones": "TEXT",
+        "total_preguntas": "INTEGER",
+        "total_intentos": "INTEGER",
+        "promedio_calificacion": "DOUBLE PRECISION",
+        "tipo_evaluacion": "VARCHAR(50)",
+        "visibilidad": "VARCHAR(50)",
+        "modo_evaluacion": "VARCHAR(50)",
+        "estado": "VARCHAR(50)",
+        "fecha_apertura": "TIMESTAMP",
+        "fecha_cierre": "TIMESTAMP",
+        "fecha_publicacion": "TIMESTAMP",
+        "fecha_publicacion_resultados": "TIMESTAMP",
+        "num_preguntas_mostrar": "INTEGER",
+        "randomizar_opciones": "BOOLEAN",
+        "una_pregunta_por_vez": "BOOLEAN",
+        "permitir_navegar_atras": "BOOLEAN",
+        "mostrar_progreso": "BOOLEAN",
+        "permitir_pausar": "BOOLEAN",
+        "max_pausas": "INTEGER",
+        "tiempo_entre_intentos_minutos": "INTEGER",
+        "advertencia_tiempo_restante": "BOOLEAN",
+        "minutos_advertencia": "INTEGER",
+        "codigo_acceso": "VARCHAR(20)",
+        "contrasena": "VARCHAR(255)",
+        "configuracion_antitrampa_id": "VARCHAR(36)",
+        "tipo_calificacion": "VARCHAR(50)",
+        "usar_ia_calificacion": "BOOLEAN",
+        "rubrica_ia": "JSON",
+        "generar_feedback_ia": "BOOLEAN",
+        "feedback_personalizado": "BOOLEAN",
+        "requerir_camara": "BOOLEAN",
+        "grabar_camara_continuo": "BOOLEAN",
+        "verificar_identidad_facial": "BOOLEAN",
+        "requerir_microfono": "BOOLEAN",
+        "grabar_audio_continuo": "BOOLEAN",
+        "permitir_grabacion_pantalla": "BOOLEAN",
+        "otorga_puntos": "BOOLEAN",
+        "puntos_base": "INTEGER",
+        "puntos_por_acierto": "INTEGER",
+        "puntos_por_tiempo": "BOOLEAN",
+        "multiplicador_puntos": "DOUBLE PRECISION",
+        "otorga_insignia": "BOOLEAN",
+        "insignia_id": "VARCHAR(36)",
+        "es_adaptativa": "BOOLEAN",
+        "nivel_dificultad_inicial": "VARCHAR(50)",
+        "es_colaborativa": "BOOLEAN",
+        "max_miembros_equipo": "INTEGER",
+        "permitir_peer_review": "BOOLEAN",
+        "num_peer_reviews_requeridos": "INTEGER",
+        "total_completados": "INTEGER",
+        "tasa_completacion": "DOUBLE PRECISION",
+        "tasa_aprobacion": "DOUBLE PRECISION",
+        "tiempo_promedio_minutos": "DOUBLE PRECISION",
+        "distribucion_calificaciones": "JSON"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_evaluaciones_configuracion_antitrampa",
+          "constrained_columns": [
+            "configuracion_antitrampa_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "configuraciones_antitrampa",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {
+            "ondelete": "SET NULL"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 82,
+      "exists": true
+    },
+    "intentos_evaluacion": {
+      "columns": {
+        "id": "VARCHAR",
+        "evaluacion_id": "VARCHAR",
+        "estudiante_id": "VARCHAR",
+        "numero_intento": "INTEGER",
+        "estado_intento": "VARCHAR(50)",
+        "fecha_inicio": "TIMESTAMP",
+        "fecha_fin": "TIMESTAMP",
+        "tiempo_total_segundos": "INTEGER",
+        "tiempo_limite_vencido": "BOOLEAN",
+        "puntuacion_obtenida": "DOUBLE PRECISION",
+        "puntuacion_maxima": "DOUBLE PRECISION",
+        "porcentaje": "DOUBLE PRECISION",
+        "aprobado": "BOOLEAN",
+        "preguntas_respondidas": "INTEGER",
+        "total_preguntas": "INTEGER",
+        "pregunta_actual_orden": "INTEGER",
+        "cambios_pestana_detectados": "INTEGER",
+        "tiempo_inactividad_total": "INTEGER",
+        "ip_address": "VARCHAR(45)",
+        "user_agent": "TEXT",
+        "eventos_sospechosos": "JSON",
+        "orden_preguntas": "JSON",
+        "configuracion_intento": "JSON",
+        "finalizado_por": "VARCHAR(50)",
+        "comentarios_finalizacion": "TEXT",
+        "fecha_revision": "TIMESTAMP",
+        "revisado_por": "VARCHAR",
+        "comentarios_profesor": "TEXT",
+        "progreso_actual": "DOUBLE PRECISION",
+        "tiempo_activo_segundos": "INTEGER",
+        "tiempo_pausado_segundos": "INTEGER",
+        "numero_pausas": "INTEGER",
+        "requiere_revision_manual": "BOOLEAN",
+        "calificado_por_ia": "BOOLEAN",
+        "feedback_ia": "TEXT",
+        "feedback_manual": "TEXT",
+        "confianza_calificacion_ia": "DOUBLE PRECISION",
+        "recomendaciones_ia": "JSON",
+        "nivel_riesgo": "VARCHAR(50)",
+        "puntuacion_riesgo": "DOUBLE PRECISION",
+        "total_eventos_antitrampa": "INTEGER",
+        "detecciones_ia": "INTEGER",
+        "detecciones_plagio": "INTEGER",
+        "eventos_detallados": "JSON",
+        "bloqueado_automaticamente": "BOOLEAN",
+        "razon_bloqueo": "TEXT",
+        "sesion_grabacion_id": "VARCHAR(100)",
+        "total_capturas_webcam": "INTEGER",
+        "capturas_con_anomalias": "INTEGER",
+        "verificacion_identidad_exitosa": "BOOLEAN",
+        "url_grabacion_video": "VARCHAR(500)",
+        "url_grabacion_audio": "VARCHAR(500)",
+        "capturas_urls": "JSON",
+        "puntos_ganados": "INTEGER",
+        "multiplicador_aplicado": "DOUBLE PRECISION",
+        "bonus_tiempo": "INTEGER",
+        "bonus_precision": "INTEGER",
+        "insignias_ganadas": "JSON",
+        "logros_desbloqueados": "JSON",
+        "posicion_ranking": "INTEGER",
+        "dificultad_inicial": "VARCHAR(50)",
+        "dificultad_actual": "VARCHAR(50)",
+        "ajustes_dificultad": "JSON",
+        "nivel_habilidad_estimado": "DOUBLE PRECISION",
+        "equipo_id": "VARCHAR(36)",
+        "equipo_ids": "JSON",
+        "es_lider_equipo": "BOOLEAN",
+        "contribucion_equipo": "JSON"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "intentos_examen_examen_id_fkey",
+          "constrained_columns": [
+            "evaluacion_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "evaluaciones",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 68,
+      "exists": true
+    },
+    "preguntas_evaluacion": {
+      "columns": {
+        "id": "VARCHAR",
+        "evaluacion_id": "VARCHAR",
+        "titulo": "TEXT",
+        "descripcion": "TEXT",
+        "tipo_pregunta": "VARCHAR(50)",
+        "orden": "INTEGER",
+        "puntuacion": "DOUBLE PRECISION",
+        "es_obligatoria": "BOOLEAN",
+        "tiempo_limite_segundos": "INTEGER",
+        "opciones_respuesta": "JSON",
+        "respuesta_correcta": "JSON",
+        "explicacion": "TEXT",
+        "puntos_respuesta_parcial": "BOOLEAN",
+        "dificultad": "VARCHAR(50)",
+        "imagen_url": "VARCHAR(500)",
+        "audio_url": "VARCHAR(500)",
+        "video_url": "VARCHAR(500)",
+        "archivos_adjuntos": "JSON",
+        "banco_pregunta_id": "VARCHAR",
+        "tags": "JSON",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_actualizacion": "TIMESTAMP",
+        "veces_utilizada": "INTEGER",
+        "promedio_aciertos": "DOUBLE PRECISION",
+        "tiempo_promedio_respuesta": "DOUBLE PRECISION",
+        "enunciado": "TEXT",
+        "respuestas_alternativas": "JSON",
+        "configuracion_ia": "JSON",
+        "criterios_evaluacion_ia": "JSON",
+        "lenguaje_codigo": "VARCHAR(50)",
+        "plantilla_codigo": "TEXT",
+        "tests_unitarios": "JSON",
+        "solucion_referencia": "TEXT",
+        "formula_latex": "TEXT",
+        "variables_formula": "JSON",
+        "tolerancia_numerica": "DOUBLE PRECISION",
+        "configuracion_interactiva": "JSON",
+        "tipo_interaccion": "VARCHAR(50)",
+        "etiquetas": "JSON",
+        "feedback_correcto": "TEXT",
+        "feedback_incorrecto": "TEXT",
+        "metadata": "JSON"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_preguntas_examen_banco_pregunta_id",
+          "constrained_columns": [
+            "banco_pregunta_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "banco_preguntas",
+          "referred_columns": [
+            "pregunta_id"
+          ],
+          "options": {},
+          "comment": null
+        },
+        {
+          "name": "preguntas_examen_examen_id_fkey",
+          "constrained_columns": [
+            "evaluacion_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "evaluaciones",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 42,
+      "exists": true
+    },
+    "respuestas_estudiante": {
+      "columns": {
+        "id": "VARCHAR",
+        "intento_id": "VARCHAR",
+        "pregunta_id": "VARCHAR",
+        "respuesta_estudiante": "JSON",
+        "texto_respuesta": "TEXT",
+        "puntuacion_obtenida": "DOUBLE PRECISION",
+        "puntuacion_maxima": "DOUBLE PRECISION",
+        "es_correcta": "BOOLEAN",
+        "calificada_automaticamente": "BOOLEAN",
+        "fecha_respuesta": "TIMESTAMP",
+        "tiempo_respuesta_segundos": "INTEGER",
+        "fecha_ultima_modificacion": "TIMESTAMP",
+        "historial_respuestas": "JSON",
+        "numero_modificaciones": "INTEGER",
+        "feedback_automatico": "TEXT",
+        "feedback_profesor": "TEXT",
+        "mostrar_respuesta_correcta": "BOOLEAN",
+        "palabras_clave_encontradas": "JSON",
+        "similitud_respuesta_correcta": "DOUBLE PRECISION",
+        "version_pregunta": "VARCHAR(50)",
+        "metadata_respuesta": "JSON",
+        "feedback": "TEXT",
+        "feedback_ia": "TEXT",
+        "feedback_manual": "TEXT",
+        "explicacion": "TEXT",
+        "sugerencias_mejora": "TEXT",
+        "fue_detectada_ia": "BOOLEAN",
+        "probabilidad_ia": "DOUBLE PRECISION",
+        "indicadores_ia": "JSON",
+        "modelo_ia_usado": "VARCHAR(100)",
+        "fue_detectado_plagio": "BOOLEAN",
+        "similitud_plagio": "DOUBLE PRECISION",
+        "fuentes_plagio": "JSON",
+        "tipo_plagio": "VARCHAR(50)",
+        "requiere_revision_manual": "BOOLEAN",
+        "revisado_por_id": "VARCHAR(36)",
+        "fecha_revision": "TIMESTAMP",
+        "notas_revision": "TEXT",
+        "codigo_ejecutado": "TEXT",
+        "resultado_ejecucion": "JSON",
+        "tests_pasados": "INTEGER",
+        "tests_fallados": "INTEGER",
+        "cobertura_codigo": "DOUBLE PRECISION",
+        "audio_url": "VARCHAR(500)",
+        "video_url": "VARCHAR(500)",
+        "archivo_url": "VARCHAR(500)",
+        "dibujo_url": "VARCHAR(500)"
+      },
+      "primary_keys": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "respuestas_estudiante_intento_id_fkey",
+          "constrained_columns": [
+            "intento_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "intentos_evaluacion",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "respuestas_estudiante_pregunta_id_fkey",
+          "constrained_columns": [
+            "pregunta_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "preguntas_evaluacion",
+          "referred_columns": [
+            "id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 47,
+      "exists": true
+    },
+    "Comentario": {
+      "columns": {
+        "comentario_id": "UUID",
+        "curso_id": "UUID",
+        "autor_id": "UUID",
+        "contenido": "TEXT",
+        "tipo": "VARCHAR(10)",
+        "archivos_adjuntos": "JSON",
+        "comentario_padre_id": "UUID",
+        "fecha_creacion": "TIMESTAMP",
+        "fecha_actualizacion": "TIMESTAMP",
+        "fecha_eliminacion": "TIMESTAMP",
+        "esta_eliminado": "BOOLEAN",
+        "editado": "BOOLEAN",
+        "activo": "BOOLEAN"
+      },
+      "primary_keys": [
+        "comentario_id"
+      ],
+      "foreign_keys": [
+        {
+          "name": "Comentario_autor_id_fkey",
+          "constrained_columns": [
+            "autor_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Usuario",
+          "referred_columns": [
+            "usuario_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "Comentario_comentario_padre_id_fkey",
+          "constrained_columns": [
+            "comentario_padre_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Comentario",
+          "referred_columns": [
+            "comentario_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        },
+        {
+          "name": "Comentario_curso_id_fkey",
+          "constrained_columns": [
+            "curso_id"
+          ],
+          "referred_schema": null,
+          "referred_table": "Curso",
+          "referred_columns": [
+            "curso_id"
+          ],
+          "options": {
+            "ondelete": "CASCADE"
+          },
+          "comment": null
+        }
+      ],
+      "column_count": 13,
+      "exists": true
+    },
+    "estudiantes_grupos": {
+      "exists": false,
+      "error": "estudiantes_grupos"
+    }
+  },
+  "inconsistencies": [
+    {
+      "table": "Curso",
+      "found": "nombre",
+      "expected": "nombres",
+      "type": "VARCHAR(50)",
+      "severity": "high"
+    },
+    {
+      "table": "Grupo",
+      "found": "nombre",
+      "expected": "nombres",
+      "type": "VARCHAR(50)",
+      "severity": "high"
+    },
+    {
+      "table": "respuestas_estudiante",
+      "found": "intento_id",
+      "expected": "id",
+      "type": "VARCHAR",
+      "severity": "high"
+    }
+  ],
+  "recommended_replacements": [
+    {
+      "pattern": "u.nombre || ' ' || u.apellido",
+      "replacement": "u.nombres || ' ' || u.apellidos",
+      "reason": "Usuario usa nombres/apellidos (plural)"
+    },
+    {
+      "pattern": "u.correo_electronico",
+      "replacement": "u.correo_institucional",
+      "reason": "Usuario usa correo_institucional"
+    },
+    {
+      "pattern": "calificacion_obtenida",
+      "replacement": "puntuacion_obtenida",
+      "reason": "intentos_evaluacion usa puntuacion_obtenida"
+    },
+    {
+      "pattern": "ie.intento_id",
+      "replacement": "ie.id",
+      "reason": "intentos_evaluacion usa id como PK"
+    }
+  ]
+}

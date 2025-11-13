@@ -1,22 +1,37 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useMemo, memo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+;
+import { useClickOutside, useDebounce, useKeyPress } from '../../hooks';
+import { X } from 'lucide-react';
 
-interface EmojiPickerProps {
+/* ==========================================================================
+   😀 EMOJI PICKER COMPONENT PROFESIONAL
+   ========================================================================== */
+
+export interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void;
   isOpen: boolean;
   onClose: () => void;
   position?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
+  recentEmojis?: string[];
 }
 
-// Lista de emojis categorizada estilo Discord moderna
-const emojiCategories = {
-  'Frecuentes': {
+interface EmojiCategory {
+  icon: string;
+  label: string;
+  emojis: string[];
+}
+
+const EMOJI_CATEGORIES: Record<string, EmojiCategory> = {
+  frecuentes: {
     icon: '⭐',
+    label: 'Frecuentes',
     emojis: ['😀', '😂', '😍', '😭', '😊', '🤔', '😎', '🔥', '👍', '👏', '❤️', '💀', '😢', '🙄', '😤', '😳', '🤪', '😅', '🥺', '👀']
   },
-  'Emociones': {
+  emociones: {
     icon: '😊',
+    label: 'Emociones',
     emojis: [
       '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
       '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '�',
@@ -26,8 +41,9 @@ const emojiCategories = {
       '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓'
     ]
   },
-  'Gestos': {
+  gestos: {
     icon: '👋',
+    label: 'Gestos',
     emojis: [
       '�', '🤚', '�️', '✋', '�', '�👌', '🤏', '✌️', '🤞', '🤟',
       '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '�', '👎',
@@ -35,8 +51,9 @@ const emojiCategories = {
       '�', '🤳', '�', '�', '🦿', '🦵', '🦶', '�', '🦻', '�'
     ]
   },
-  'Personas': {
+  personas: {
     icon: '👥',
+    label: 'Personas',
     emojis: [
       '👶', '🧒', '👦', '👧', '🧑', '👨', '👩', '🧓', '👴', '👵',
       '👱‍♂️', '👱‍♀️', '🧔', '👨‍🦰', '👨‍🦱', '👨‍🦳', '👨‍🦲', '👩‍🦰', '👩‍🦱', '👩‍🦳',
@@ -44,8 +61,9 @@ const emojiCategories = {
       '🦹‍♂️', '🦹‍♀️', '🧙‍♂️', '🧙‍♀️', '🧚‍♂️', '🧚‍♀️', '🧛‍♂️', '🧛‍♀️', '🧜‍♂️', '🧜‍♀️'
     ]
   },
-  'Animales': {
+  animales: {
     icon: '🐶',
+    label: 'Animales',
     emojis: [
       '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
       '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
@@ -53,8 +71,9 @@ const emojiCategories = {
       '🦆', '🦢', '🦉', '🦩', '🦚', '🦜', '�', '�', '🐤', '🐣'
     ]
   },
-  'Comida': {
+  comida: {
     icon: '🍕',
+    label: 'Comida',
     emojis: [
       '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈',
       '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦',
@@ -62,24 +81,27 @@ const emojiCategories = {
       '🍠', '🥐', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '�', '�'
     ]
   },
-  'Actividades': {
+  actividades: {
     icon: '⚽',
+    label: 'Actividades',
     emojis: [
       '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱',
       '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🪃', '🥅', '⛳',
       '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷'
     ]
   },
-  'Objetos': {
+  objetos: {
     icon: '💎',
+    label: 'Objetos',
     emojis: [
       '⌚', '📱', '📲', '💻', '⌨️', '🖥️', '🖨️', '🖱️', '🖲️', '🕹️',
       '🗜️', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥',
       '📽️', '🎞️', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙️', '🎚️'
     ]
   },
-  'Símbolos': {
+  simbolos: {
     icon: '❤️',
+    label: 'Símbolos',
     emojis: [
       '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
       '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️',
@@ -89,45 +111,56 @@ const emojiCategories = {
   }
 };
 
-export const EmojiPicker: React.FC<EmojiPickerProps> = ({
+const POSITION_CLASSES = {
+  top: 'bottom-full mb-2',
+  bottom: 'top-full mt-2',
+  left: 'right-full mr-2',
+  right: 'left-full ml-2',
+};
+
+export const EmojiPicker = memo<EmojiPickerProps>(({
   onEmojiSelect,
   isOpen,
   onClose,
   position = 'bottom',
-  className = ''
+  className = '',
+  recentEmojis,
 }) => {
-  const [activeCategory, setActiveCategory] = useState('Frecuentes');
+  const [activeCategory, setActiveCategory] = useState('frecuentes');
   const [searchTerm, setSearchTerm] = useState('');
   const pickerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Cerrar cuando se hace click fuera
+  useClickOutside(pickerRef, onClose, isOpen);
+  useKeyPress('Escape', onClose, { enabled: isOpen });
+  
+  const debouncedSearch = useDebounce(searchTerm, 200);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
     }
+  }, [isOpen]);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
+  const filteredEmojis = useMemo(() => {
+    if (debouncedSearch) {
+      return Object.values(EMOJI_CATEGORIES)
+        .flatMap((cat: EmojiCategory) => cat.emojis)
+        .filter((emoji: string) => emoji.includes(debouncedSearch.toLowerCase()));
+    }
+    
+    const category = EMOJI_CATEGORIES[activeCategory];
+    if (activeCategory === 'frecuentes' && recentEmojis) {
+      return recentEmojis;
+    }
+    
+    return category?.emojis || [];
+  }, [debouncedSearch, activeCategory, recentEmojis]);
 
-  // Filtrar emojis por búsqueda
-  const filteredEmojis = searchTerm ? 
-    Object.values(emojiCategories).flatMap(cat => cat.emojis).filter(emoji => 
-      emoji.includes(searchTerm.toLowerCase())
-    ) : 
-    emojiCategories[activeCategory as keyof typeof emojiCategories]?.emojis || [];
-
-  const handleEmojiClick = (emoji: string) => {
+  const handleEmojiClick = useCallback((emoji: string) => {
     onEmojiSelect(emoji);
     onClose();
-  };
+  }, [onEmojiSelect, onClose]);
 
   if (!isOpen) return null;
 
@@ -155,102 +188,108 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         `}
         style={{ width: '350px', height: '420px' }}
       >
-        {/* Header elegante con gradiente */}
-        <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <div className="p-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-lg">Emojis</h3>
             <button
               onClick={onClose}
-              className="text-white/80 hover:text-white transition-colors p-1"
+              className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+              aria-label="Cerrar"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
           </div>
+          
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Buscar emojis..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 text-sm rounded-xl border-0 
-                     focus:outline-none focus:ring-2 focus:ring-white/30
-                     bg-white/20 backdrop-blur-sm placeholder-white/60 text-white"
+            className="
+              w-full px-4 py-2 text-sm rounded-xl
+              bg-white/20 backdrop-blur-sm
+              border-0 placeholder-white/70 text-white
+              focus:outline-none focus:ring-2 focus:ring-white/40
+            "
           />
         </div>
 
-        <div className="flex h-full">
-          {/* Categorías con iconos */}
-          {!searchTerm && (
-            <div className="w-16 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-600 overflow-y-auto">
-              {Object.entries(emojiCategories).map(([category, data]) => (
+        <div className="flex h-[calc(100%-120px)]">
+          {!debouncedSearch && (
+            <div className="w-16 bg-neutral-50 dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 overflow-y-auto scrollbar-thin">
+              {Object.entries(EMOJI_CATEGORIES).map(([key, cat]) => (
                 <motion.button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
+                  key={key}
+                  onClick={() => setActiveCategory(key)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   className={`
-                    w-full p-3 text-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200
-                    ${activeCategory === category 
-                      ? 'bg-blue-100 dark:bg-blue-900 border-r-2 border-blue-500' 
-                      : 'text-gray-600 dark:text-gray-400'
+                    w-full p-3 text-xl transition-colors
+                    ${activeCategory === key 
+                      ? 'bg-primary-100 dark:bg-primary-900/50 border-r-2 border-primary-600' 
+                      : 'hover:bg-neutral-100 dark:hover:bg-neutral-700'
                     }
                   `}
-                  title={category}
+                  title={cat.label}
+                  aria-label={cat.label}
                 >
-                  {data.icon}
+                  {cat.icon}
                 </motion.button>
               ))}
             </div>
           )}
 
-          {/* Grid de emojis mejorado */}
-          <div className="flex-1 p-4 overflow-y-auto bg-gray-50/50 dark:bg-gray-800/50">
-            {searchTerm && (
-              <div className="mb-3 text-sm text-gray-500 dark:text-gray-400 font-medium">
-                {filteredEmojis.length} resultados para "{searchTerm}"
+          <div className="flex-1 p-4 overflow-y-auto scrollbar-thin">
+            {debouncedSearch && (
+              <div className="mb-3 text-sm text-neutral-600 dark:text-neutral-400 font-medium">
+                {filteredEmojis.length} resultados
               </div>
             )}
             
             <div className="grid grid-cols-8 gap-2">
-              {filteredEmojis.map((emoji, index) => (
+              {filteredEmojis.map((emoji: string, index: number) => (
                 <motion.button
                   key={`${emoji}-${index}`}
                   onClick={() => handleEmojiClick(emoji)}
-                  whileHover={{ scale: 1.2, rotate: 5 }}
+                  whileHover={{ scale: 1.3, rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
-                  className="w-8 h-8 flex items-center justify-center text-xl 
-                           hover:bg-white dark:hover:bg-gray-700 rounded-lg
-                           transition-all duration-150 cursor-pointer
-                           hover:shadow-md active:shadow-sm"
+                  className="
+                    w-8 h-8 flex items-center justify-center text-2xl
+                    hover:bg-neutral-100 dark:hover:bg-neutral-800 
+                    rounded-lg transition-colors
+                  "
                   title={emoji}
+                  aria-label={`Seleccionar emoji ${emoji}`}
                 >
                   {emoji}
                 </motion.button>
               ))}
             </div>
 
-            {filteredEmojis.length === 0 && searchTerm && (
+            {filteredEmojis.length === 0 && debouncedSearch && (
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-12 text-gray-500 dark:text-gray-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12 text-neutral-500 dark:text-neutral-400"
               >
-                <div className="text-4xl mb-3">�</div>
+                <div className="text-4xl mb-3">😕</div>
                 <div className="font-medium">No se encontraron emojis</div>
-                <div className="text-sm mt-1">Intenta con otra búsqueda</div>
               </motion.div>
             )}
           </div>
         </div>
 
-        {/* Footer con información */}
-        <div className="p-2 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
-          <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Haz clic en un emoji para reaccionar
+        <div className="p-2 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="text-xs text-neutral-500 dark:text-neutral-400 text-center">
+            Haz clic en un emoji para agregarlo
           </div>
         </div>
       </motion.div>
     </AnimatePresence>
   );
-};
+});
+
+EmojiPicker.displayName = 'EmojiPicker';
 
 export default EmojiPicker;

@@ -55,30 +55,9 @@ class UsuarioUpdate(BaseModel):
     portada_url: str | None = None
     telefono: str | None = None
     descripcion: str | None = None
-
-    @field_validator("username", mode="before")
-    def validar_admin(cls, v, info):
-        rol = info.data.get("rol")
-        if rol == RolUsuario.administrador:
-            if not v:
-                raise ValueError("El administrador debe tener username")
-        else:
-            if v:
-                raise ValueError("Solo el administrador puede tener username")
-        return v
-
-    @field_validator("correo_institucional", mode="before")
-    def validar_no_admin(cls, v, info):
-        rol = info.data.get("rol")
-        if rol != RolUsuario.administrador:
-            if not v:
-                raise ValueError(
-                    "El correo institucional es obligatorio para roles distintos a administrador"
-                )
-        else:
-            if v:
-                raise ValueError("El administrador no debe tener correo institucional")
-        return v
+    # Se eliminan las validaciones que restringían username/correo por rol.
+    # Ahora la política es que los usuarios pueden tener ambos campos y las
+    # reglas de negocio sobre uso para login deben aplicarse en el servicio.
 
 
 class UsuarioInDBBase(UsuarioBase):

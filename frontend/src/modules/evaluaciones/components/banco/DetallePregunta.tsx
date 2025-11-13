@@ -1,15 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  PencilIcon,
-  DocumentDuplicateIcon,
-  TrashIcon,
-  XMarkIcon,
-  TagIcon,
-  ClockIcon,
-  StarIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline';
+import { Clock, Copy, Star, Tag } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
 import { BancoPregunta } from '../../types';
 import { 
@@ -46,28 +37,28 @@ export function DetallePregunta({
                 onClick={onEditar}
                 className="flex items-center space-x-2 px-3 py-2 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
               >
-                <PencilIcon className="h-4 w-4" />
+                <Edit className="h-4 w-4" />
                 <span>Editar</span>
               </button>
               <button
                 onClick={onDuplicar}
                 className="flex items-center space-x-2 px-3 py-2 text-green-600 dark:text-green-400 border border-green-300 dark:border-green-600 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
               >
-                <DocumentDuplicateIcon className="h-4 w-4" />
+                <Copy className="h-4 w-4" />
                 <span>Duplicar</span>
               </button>
               <button
                 onClick={onEliminar}
                 className="flex items-center space-x-2 px-3 py-2 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
-                <TrashIcon className="h-4 w-4" />
+                <Trash className="h-4 w-4" />
                 <span>Eliminar</span>
               </button>
               <button
                 onClick={onCerrar}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           }
@@ -102,7 +93,7 @@ export function DetallePregunta({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <StarIcon className="h-5 w-5 text-yellow-500" />
+                    <Star className="h-5 w-5 text-yellow-500" />
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {pregunta.puntuacion_sugerida}
@@ -112,7 +103,7 @@ export function DetallePregunta({
                 
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <EyeIcon className="h-5 w-5 text-blue-500" />
+                    <Eye className="h-5 w-5 text-blue-500" />
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {pregunta.veces_utilizada}
@@ -122,7 +113,7 @@ export function DetallePregunta({
                 
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <ClockIcon className="h-5 w-5 text-green-500" />
+                    <Clock className="h-5 w-5 text-green-500" />
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {pregunta.tiempo_estimado_segundos ? Math.round(pregunta.tiempo_estimado_segundos / 60) : '-'}
@@ -368,7 +359,7 @@ export function DetallePregunta({
                       key={index}
                       className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm"
                     >
-                      <TagIcon className="h-3 w-3 mr-1" />
+                      <Tag className="h-3 w-3 mr-1" />
                       {tag}
                     </span>
                   ))}

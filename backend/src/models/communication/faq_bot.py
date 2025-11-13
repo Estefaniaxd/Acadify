@@ -1,6 +1,7 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, String
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT
+from sqlalchemy import Column, String, text
+from sqlalchemy.dialects.postgresql import TEXT, TIMESTAMP, UUID
+
+from src.db.base_class import Base
 
 
 class FAQBot(Base):

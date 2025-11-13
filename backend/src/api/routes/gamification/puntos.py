@@ -1,14 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-import src.crud.gamification.historial_puntos as crud_puntos
-from src.schemas.gamification.historial_puntos import (
-    UsuarioPuntosResponse, HistorialPuntosResponse, AsignarPuntosRequest,
-    RankingUsuarioResponse
-)
-from src.api.deps import get_db
+
 from src.api.dependencies import get_current_user
+from src.api.deps import get_db
+import src.crud.gamification.historial_puntos as crud_puntos
 from src.models.users.usuario import Usuario
+from src.schemas.gamification.historial_puntos import (
+    AsignarPuntosRequest,
+    HistorialPuntosResponse,
+    RankingUsuarioResponse,
+    UsuarioPuntosResponse,
+)
+
 
 router = APIRouter()
 
@@ -50,13 +53,12 @@ def create_usuario_puntos(usuario_id: str, db: Session = Depends(get_db)):
     summary="Eliminar registro de puntos de usuario",
     tags=["Puntos"],
 )
-def delete_usuario_puntos(usuario_id: str, db: Session = Depends(get_db)):
+def delete_usuario_puntos(usuario_id: str, db: Session = Depends(get_db)) -> None:
     puntos = crud_puntos.get_usuario_puntos(db, usuario_id)
     if not puntos:
         raise HTTPException(status_code=404, detail="UsuarioPuntos no encontrado")
     db.delete(puntos)
     db.commit()
-    return None
 
 
 # Asignar y descontar puntos
@@ -66,16 +68,14 @@ def delete_usuario_puntos(usuario_id: str, db: Session = Depends(get_db)):
     summary="Asignar puntos a un usuario",
     tags=["Puntos"],
 )
-def asignar_puntos(
-    request: AsignarPuntosRequest, db: Session = Depends(get_db)
-):
+def asignar_puntos(request: AsignarPuntosRequest, db: Session = Depends(get_db)):
     return crud_puntos.asignar_puntos(db, request)
 
 
 # Historial y ranking
 @router.get(
     "/historial",
-    response_model=List[HistorialPuntosResponse],
+    response_model=list[HistorialPuntosResponse],
     summary="Obtener mi historial de puntos",
     tags=["Puntos"],
 )
@@ -92,7 +92,7 @@ def get_my_point_history(
 
 @router.get(
     "/ranking",
-    response_model=List[RankingUsuarioResponse],
+    response_model=list[RankingUsuarioResponse],
     summary="Obtener el ranking de usuarios",
     tags=["Puntos"],
 )

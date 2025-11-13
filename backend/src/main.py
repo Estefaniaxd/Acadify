@@ -1,19 +1,17 @@
+import logging
+import os
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import logging
-import sys
-import os
-from pathlib import Path
+
 
 # Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("api_debug.log")
-    ]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("api_debug.log")],
 )
 
 # Reducir logs de bibliotecas externas para una consola más limpia
@@ -29,8 +27,9 @@ logger = logging.getLogger("acadify-api")
 
 # Importa los routers
 from src.api.routes import routers
-from src.services.auth.redis_service import RedisService
 from src.core.config import settings
+from src.services.auth.redis_service import RedisService
+
 
 # Inicializa la app FastAPI
 app = FastAPI(
@@ -39,7 +38,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
 )
 
 # Configurar archivos estáticos para avatars
@@ -55,15 +54,15 @@ cors_origins = settings.BACKEND_CORS_ORIGINS
 if not cors_origins:
     # Si no hay orígenes configurados, usar los más comunes para desarrollo
     cors_origins = [
-        "http://localhost:3000",      # Create React App default
-        "http://localhost:5173",      # Vite default 
-        "http://localhost:5174",      # Vite alternative
-        "http://127.0.0.1:5173",      # Localhost variante
-        "http://localhost:8080",      # Vue/otros
+        "http://localhost:3000",  # Create React App default
+        "http://localhost:5173",  # Vite default
+        "http://localhost:5174",  # Vite alternative
+        "http://127.0.0.1:5173",  # Localhost variante
+        "http://localhost:8080",  # Vue/otros
     ]
 else:
     # Convertir URLs de Pydantic a strings sin barras finales
-    cors_origins = [str(url).rstrip('/') for url in cors_origins]
+    cors_origins = [str(url).rstrip("/") for url in cors_origins]
 
 logger.info(f"🌐 CORS Origins configurados: {cors_origins}")
 
@@ -71,41 +70,42 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
     allow_headers=["*"],
+    expose_headers=["Content-Length", "Content-Range", "X-Total-Count"],
 )
 
 # Servicio Redis
 redis_service = RedisService()
 
-# Ruta completa para avatars con composición de imágenes
-import sys
-sys.path.append(str(Path(__file__).parent.parent))
-from src.api.routes.avatar_service_complete import router as avatar_complete_router
-app.include_router(avatar_complete_router, prefix="/avatar", tags=["avatars-complete"])
+# ⚠️ DEPRECADO: avatar_service_complete.py eliminado - ahora usamos avatar.py
+# El router avatar.py (con UserAvatar, cache Redis, etc.) se registra desde routes.py
+# Si necesitas el router antiguo para testing, muévelo a TEST/ y úsalo manualmente
 
 # ROUTER DE PRUEBA TEMPORAL para verificar autenticación
-try:
-    sys.path.append(str(Path(__file__).parent.parent))
-    from test_simple_auth import test_router
-    app.include_router(test_router, prefix="/api", tags=["test"])
-    logger.info("✅ Router de prueba agregado en /api/test")
-except Exception as e:
-    logger.warning(f"⚠️ No se pudo cargar router de prueba: {e}")
+# COMENTADO: Ya no necesitamos este router temporal
+# try:
+#     sys.path.append(str(Path(__file__).parent.parent))
+#     from test_simple_auth import test_router
+#     app.include_router(test_router, prefix="/api", tags=["test"])
+#     logger.info("✅ Router de prueba agregado en /api/test")
+# except Exception as e:
+#     logger.warning(f"⚠️ No se pudo cargar router de prueba: {e}")
 
 # ROUTER TEMPORAL para comentarios SIN Redis
-try:
-    import sys
-    import os
-    backend_path = os.path.join(os.path.dirname(__file__), "..")
-    sys.path.insert(0, backend_path)
-    from temp_comments_api import temp_router
-    app.include_router(temp_router, prefix="/temp", tags=["temp-comments"])
-    logger.info("✅ Router temporal de comentarios agregado en /temp")
-except Exception as e:
-    logger.warning(f"⚠️ No se pudo cargar router temporal de comentarios: {e}")
-    import traceback
-    traceback.print_exc()
+# COMENTADO: Ya no necesitamos este router temporal
+# try:
+#     import sys
+#     import os
+#     backend_path = os.path.join(os.path.dirname(__file__), "..")
+#     sys.path.insert(0, backend_path)
+#     from temp_comments_api import temp_router
+#     app.include_router(temp_router, prefix="/temp", tags=["temp-comments"])
+#     logger.info("✅ Router temporal de comentarios agregado en /temp")
+# except Exception as e:
+#     logger.warning(f"⚠️ No se pudo cargar router temporal de comentarios: {e}")
+#     import traceback
+#     traceback.print_exc()
 
 # ⚠️ DEPRECADO: Router monolítico curso.py eliminado - ahora usamos routers modularizados
 # Los routers refactorizados se registran automáticamente desde routes.py:
@@ -120,15 +120,16 @@ except Exception as e:
 
 # Incluir todos los routers desde el archivo de configuración
 for router, prefix, tags in routers:
-    # Saltar el router de avatar porque ya incluimos avatar_service_complete
-    if prefix not in ["/avatar"]:
-        app.include_router(router, prefix=prefix, tags=tags)
+    app.include_router(router, prefix=prefix, tags=tags)
+    logger.info(f"✅ Router incluido: {prefix} - {tags}")
+
 
 # Handler específico para peticiones OPTIONS (CORS preflight)
 @app.options("/{path:path}")
 async def options_handler(path: str):
-    """Maneja las peticiones OPTIONS para CORS preflight"""
+    """Maneja las peticiones OPTIONS para CORS preflight."""
     return {"message": "OK"}
+
 
 # Ruta raíz con información del sistema
 @app.get("/")
@@ -143,41 +144,44 @@ def root():
             "endpoints_reorganized": True,
             "new_structure": {
                 "core": "/auth (login, register, logout, profile)",
-                "passwords": "/auth/forgot-password, /auth/reset-password, /auth/change-password", 
+                "passwords": "/auth/forgot-password, /auth/reset-password, /auth/change-password",
                 "2fa": "/auth/2fa/* (setup, verify, disable, status)",
                 "admin_users": "/auth/users/* (CRUD operations)",
                 "account_mgmt": "/auth/users/{id}/* (activate, deactivate, unlock)",
-                "health": "/auth/health"
-            }
-        }
+                "health": "/auth/health",
+            },
+        },
     }
+
 
 # Eventos de inicio y cierre
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     try:
         redis_service.connect()
         logger.info("🚀 Acadify API iniciada exitosamente")
         logger.info("📚 Documentación disponible en: http://127.0.0.1:8000/docs")
         logger.info("🔐 Endpoints de autenticación reorganizados y optimizados")
-        
+
         # Información del sistema
         import platform
         import sys
+
         logger.debug(f"Python: {sys.version}")
         logger.debug(f"Platform: {platform.platform()}")
         logger.debug(f"Redis host: {settings.REDIS_HOST}")
         logger.debug(f"Redis port: {settings.REDIS_PORT}")
         logger.debug(f"CORS origins: {settings.BACKEND_CORS_ORIGINS}")
         logger.debug(f"JWT Algorithm: {settings.ALGORITHM}")
-        logger.debug(f"Access token expire minutes: {settings.ACCESS_TOKEN_EXPIRE_MINUTES}")
-        
+        logger.debug(
+            f"Access token expire minutes: {settings.ACCESS_TOKEN_EXPIRE_MINUTES}"
+        )
+
     except Exception as e:
-        logger.error(f"Error en startup: {e}")
-        raise e
+        logger.exception(f"Error en startup: {e}")
+        raise
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     redis_service.disconnect()
-    print("👋 Acadify API desconectada")

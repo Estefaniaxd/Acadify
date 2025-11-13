@@ -1,7 +1,8 @@
-from ...db.base_class import Base
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, DATE
+from sqlalchemy.dialects.postgresql import DATE, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
 
 
 class EstudianteGrupo(Base):

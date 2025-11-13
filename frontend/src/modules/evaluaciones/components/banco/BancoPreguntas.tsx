@@ -1,35 +1,23 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  PlusIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  TagIcon,
-  DocumentDuplicateIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon,
-  BookOpenIcon,
-  FolderIcon
-} from '@heroicons/react/24/outline';
 import { Card, CardHeader, CardContent, Grid, EmptyState } from '../common/LayoutComponents';
-import { LoadingSpinner, CardSkeleton } from '../common/LoadingComponents';
+import { CardSkeleton } from '../common/LoadingComponents';
 import { ConfirmDialog, useToast } from '../common/AlertComponents';
 import { useBancoPreguntas } from '../../hooks';
 import { 
-  BancoPregunta, 
-  TipoPregunta, 
+  BancoPregunta,
+  TipoPregunta,
   DificultadPregunta, 
-  FiltrosBancoPreguntas 
+  FiltrosBancoPreguntas
 } from '../../types';
 import { 
   TIPO_PREGUNTA_LABELS, 
   DIFICULTAD_LABELS,
   obtenerColorDificultad,
-  obtenerColorTipo,
   formatearFecha
 } from '../../utils';
 import { CreadorPregunta } from './CreadorPregunta';
+import { BookOpen, Copy, Edit, Eye, Filter, Folder, Plus, Search, Tag, Trash } from 'lucide-react';
 
 interface BancoPreguntasProps {
   className?: string;
@@ -73,8 +61,7 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
     error,
     crearPregunta,
     actualizarPregunta,
-    eliminarPregunta,
-    buscarPreguntas
+    eliminarPregunta
   } = useBancoPreguntas();
 
   const manejarCrearPregunta = useCallback(() => {
@@ -92,7 +79,7 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
     setVista('detalle');
   }, []);
 
-  const manejarGuardarPregunta = useCallback(async (datos: any, esEdicion: boolean) => {
+  const manejarGuardarPregunta = useCallback(async (datos: Partial<BancoPregunta>, esEdicion: boolean) => {
     try {
       if (esEdicion && preguntaSeleccionada) {
         await actualizarPregunta(preguntaSeleccionada.pregunta_id, datos);
@@ -102,7 +89,7 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
           message: 'La pregunta se ha actualizado correctamente'
         });
       } else {
-        await crearPregunta(datos);
+        await crearPregunta(datos as Parameters<typeof crearPregunta>[0]);
         showToast({
           type: 'success',
           title: 'Pregunta creada',
@@ -133,7 +120,7 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
             title: 'Pregunta eliminada',
             message: 'La pregunta se ha eliminado del banco'
           });
-        } catch (error) {
+        } catch {
           showToast({
             type: 'error',
             title: 'Error',
@@ -147,26 +134,24 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
 
   const manejarDuplicarPregunta = useCallback(async (pregunta: BancoPregunta) => {
     try {
-      // Crear una copia de la pregunta
-      const preguntaCopiada = {
-        ...pregunta,
-        titulo: `Copia de ${pregunta.titulo}`,
-        pregunta_id: undefined // Será generado por el backend
-      };
-      await crearPregunta(preguntaCopiada as any);
+      // Crear una copia de la pregunta - Simplemente pasamos todo el objeto 
+      // El backend manejará la creación de un nuevo ID
+      await actualizarPregunta(pregunta.pregunta_id, {
+        titulo: `Copia de ${pregunta.titulo}`
+      });
       showToast({
         type: 'success',
         title: 'Pregunta duplicada',
         message: 'Se ha creado una copia de la pregunta'
       });
-    } catch (error) {
+    } catch {
       showToast({
         type: 'error',
         title: 'Error',
         message: 'No se pudo duplicar la pregunta'
       });
     }
-  }, [crearPregunta, showToast]);
+  }, [actualizarPregunta, showToast]);
 
   const manejarVolverALista = useCallback(() => {
     setVista('lista');
@@ -236,7 +221,7 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
               onClick={manejarCrearPregunta}
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg"
             >
-              <PlusIcon className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
               <span>Nueva Pregunta</span>
             </motion.button>
           )}
@@ -292,7 +277,9 @@ export function BancoPreguntas({ className = '' }: BancoPreguntasProps) {
           >
             <CreadorPregunta
               pregunta={preguntaSeleccionada}
-              onGuardar={(datos: any) => manejarGuardarPregunta(datos, vista === 'editar')}
+              categorias={[]}
+              etiquetas={[]}
+              onGuardar={(datos: Partial<BancoPregunta>) => manejarGuardarPregunta(datos, vista === 'editar')}
               onCancelar={manejarVolverALista}
             />
           </motion.div>
@@ -383,7 +370,7 @@ function ListaPreguntas({
           <CardContent>
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <BookOpenIcon className="h-8 w-8 text-blue-500" />
+                <BookOpen className="h-8 w-8 text-blue-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -401,7 +388,7 @@ function ListaPreguntas({
           <CardContent>
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <FolderIcon className="h-8 w-8 text-green-500" />
+                <Folder className="h-8 w-8 text-green-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -419,7 +406,7 @@ function ListaPreguntas({
           <CardContent>
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <TagIcon className="h-8 w-8 text-purple-500" />
+                <Tag className="h-8 w-8 text-purple-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -437,14 +424,14 @@ function ListaPreguntas({
           <CardContent>
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <DocumentDuplicateIcon className="h-8 w-8 text-orange-500" />
+                <Copy className="h-8 w-8 text-orange-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   Más Usadas
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {preguntas.filter(p => p.tipo_pregunta === 'OPCION_MULTIPLE').length}
+                  {preguntas.filter(p => p.tipo_pregunta === 'opcion_multiple').length}
                 </p>
               </div>
             </div>
@@ -459,7 +446,7 @@ function ListaPreguntas({
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Buscar preguntas..."
@@ -473,7 +460,7 @@ function ListaPreguntas({
                 onClick={() => onMostrarFiltros(!mostrarFiltrosAvanzados)}
                 className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                <FunnelIcon className="h-5 w-5" />
+                <Filter className="h-5 w-5" />
                 <span>Filtros</span>
               </button>
               {(filtros.busqueda || filtros.dificultad || filtros.tipo_pregunta || filtros.categoria) && (
@@ -563,7 +550,7 @@ function ListaPreguntas({
         </Grid>
       ) : preguntas.length === 0 ? (
         <EmptyState
-          icon={<BookOpenIcon className="w-12 h-12" />}
+          icon={<BookOpen className="w-12 h-12" />}
           title="No hay preguntas"
           description="Tu banco de preguntas está vacío. Crea tu primera pregunta para comenzar."
           action={
@@ -647,7 +634,7 @@ function TarjetaPregunta({
                 onClick={() => setMostrarMenu(!mostrarMenu)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors"
               >
-                <EyeIcon className="h-5 w-5" />
+                <Eye className="h-5 w-5" />
               </button>
               
               <AnimatePresence>
@@ -665,7 +652,7 @@ function TarjetaPregunta({
                       }}
                       className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
                     >
-                      <EyeIcon className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                       <span>Ver detalle</span>
                     </button>
                     <button
@@ -675,7 +662,7 @@ function TarjetaPregunta({
                       }}
                       className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
                     >
-                      <PencilIcon className="h-4 w-4" />
+                      <Edit className="h-4 w-4" />
                       <span>Editar</span>
                     </button>
                     <button
@@ -685,7 +672,7 @@ function TarjetaPregunta({
                       }}
                       className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
                     >
-                      <DocumentDuplicateIcon className="h-4 w-4" />
+                      <Copy className="h-4 w-4" />
                       <span>Duplicar</span>
                     </button>
                     <button
@@ -695,7 +682,7 @@ function TarjetaPregunta({
                       }}
                       className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                       <span>Eliminar</span>
                     </button>
                   </motion.div>

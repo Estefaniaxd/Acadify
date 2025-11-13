@@ -1,0 +1,803 @@
+{
+  "base": [
+    {
+      "filename": "167 sin título_20250922233558.png",
+      "gender": "male",
+      "source": "backend/static/assets/base/base-man/167 sin título_20250922233558.png"
+    },
+    {
+      "filename": "167 sin título_20250923002615.png",
+      "gender": "male",
+      "source": "backend/static/assets/base/base-man/167 sin título_20250923002615.png"
+    },
+    {
+      "filename": "167 sin título_20250923002534.png",
+      "gender": "male",
+      "source": "backend/static/assets/base/base-woman/167 sin título_20250923002534.png"
+    },
+    {
+      "filename": "167 sin título_20250922233650.png",
+      "gender": "male",
+      "source": "backend/static/assets/base/base-woman/167 sin título_20250922233650.png"
+    },
+    {
+      "filename": "167 sin título_20250922233558.png",
+      "gender": "male",
+      "source": "avatares/base/base-man/167 sin título_20250922233558.png"
+    },
+    {
+      "filename": "167 sin título_20250923002615.png",
+      "gender": "male",
+      "source": "avatares/base/base-man/167 sin título_20250923002615.png"
+    },
+    {
+      "filename": "167 sin título_20250923002534.png",
+      "gender": "male",
+      "source": "avatares/base/base-woman/167 sin título_20250923002534.png"
+    },
+    {
+      "filename": "167 sin título_20250922233650.png",
+      "gender": "male",
+      "source": "avatares/base/base-woman/167 sin título_20250922233650.png"
+    }
+  ],
+  "eyes": [
+    {
+      "filename": "ojos_1.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/eyes/unisex/ojos_1.png"
+    },
+    {
+      "filename": "ojos_cerrados_3.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/eyes/unisex/ojos_cerrados_3.png"
+    },
+    {
+      "filename": "ojos_2.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/eyes/unisex/ojos_2.png"
+    },
+    {
+      "filename": "ojos_cerrados_2.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/eyes/unisex/ojos_cerrados_2.png"
+    },
+    {
+      "filename": "ojos_cerrados_1.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/eyes/unisex/ojos_cerrados_1.png"
+    },
+    {
+      "filename": "ojos_3.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/eyes/unisex/ojos_3.png"
+    },
+    {
+      "filename": "ojos_6.png",
+      "gender": "male",
+      "source": "backend/static/assets/eyes/female/ojos_6.png"
+    },
+    {
+      "filename": "ojos_5.png",
+      "gender": "male",
+      "source": "backend/static/assets/eyes/female/ojos_5.png"
+    },
+    {
+      "filename": "ojos_4.png",
+      "gender": "male",
+      "source": "backend/static/assets/eyes/female/ojos_4.png"
+    },
+    {
+      "filename": "ojos_1.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_1.png"
+    },
+    {
+      "filename": "ojos_cerrados_3.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_cerrados_3.png"
+    },
+    {
+      "filename": "ojos_6.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_6.png"
+    },
+    {
+      "filename": "ojos_2.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_2.png"
+    },
+    {
+      "filename": "ojos_5.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_5.png"
+    },
+    {
+      "filename": "ojos_cerrados_2.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_cerrados_2.png"
+    },
+    {
+      "filename": "ojos_cerrados_1.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_cerrados_1.png"
+    },
+    {
+      "filename": "ojos_3.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_3.png"
+    },
+    {
+      "filename": "ojos_4.png",
+      "gender": "unisex",
+      "source": "avatares/eyes/ojos_4.png"
+    }
+  ],
+  "clothes": [
+    {
+      "filename": "medias_negras.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/medias_negras.png"
+    },
+    {
+      "filename": "chaqueta_y2k.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/chaqueta_y2k.png"
+    },
+    {
+      "filename": "zapatos.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/zapatos.png"
+    },
+    {
+      "filename": "pantaloneta_morada.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/pantaloneta_morada.png"
+    },
+    {
+      "filename": "camisa_cafe_mujer.png",
+      "gender": "female",
+      "source": "backend/static/assets/clothes/unisex/camisa_cafe_mujer.png"
+    },
+    {
+      "filename": "Smoking_fuck_news.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/Smoking_fuck_news.png"
+    },
+    {
+      "filename": "Fuck_news_pantalon.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/Fuck_news_pantalon.png"
+    },
+    {
+      "filename": "camisa_verde_juan.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/camisa_verde_juan.png"
+    },
+    {
+      "filename": "pantalon.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/pantalon.png"
+    },
+    {
+      "filename": "Saco_tortuga.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/clothes/unisex/Saco_tortuga.png"
+    },
+    {
+      "filename": "Medias_maya.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/Medias_maya.png"
+    },
+    {
+      "filename": "camisa_miku.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/camisa_miku.png"
+    },
+    {
+      "filename": "vestido.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/vestido.png"
+    },
+    {
+      "filename": "Camisa_morada_mujer.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/Camisa_morada_mujer.png"
+    },
+    {
+      "filename": "zapatos_beige.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/zapatos_beige.png"
+    },
+    {
+      "filename": "Camisa_verde_mujer.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/Camisa_verde_mujer.png"
+    },
+    {
+      "filename": "Corset_rojo.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/Corset_rojo.png"
+    },
+    {
+      "filename": "esqueleto_azul.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/esqueleto_azul.png"
+    },
+    {
+      "filename": "falda_miku.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/falda_miku.png"
+    },
+    {
+      "filename": "falda_2.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/falda_2.png"
+    },
+    {
+      "filename": "camisa_cafe.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/camisa_cafe.png"
+    },
+    {
+      "filename": "esqueleto_blanco_mujer.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/esqueleto_blanco_mujer.png"
+    },
+    {
+      "filename": "zapatos_rosados.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/zapatos_rosados.png"
+    },
+    {
+      "filename": "calentadoras.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/calentadoras.png"
+    },
+    {
+      "filename": "Camisa_roja_mujer.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/Camisa_roja_mujer.png"
+    },
+    {
+      "filename": "Camisa_negra_mujer.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/Camisa_negra_mujer.png"
+    },
+    {
+      "filename": "camisa_elegante_mujer.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/camisa_elegante_mujer.png"
+    },
+    {
+      "filename": "falda_blanca.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/female/falda_blanca.png"
+    },
+    {
+      "filename": "camisa_colombia_2.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/camisa_colombia_2.png"
+    },
+    {
+      "filename": "pantalon_rojo.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/pantalon_rojo.png"
+    },
+    {
+      "filename": "pantalon_blanco.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/pantalon_blanco.png"
+    },
+    {
+      "filename": "pantalon_azul.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/pantalon_azul.png"
+    },
+    {
+      "filename": "camisa_colombia.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/camisa_colombia.png"
+    },
+    {
+      "filename": "real_madrid.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/real_madrid.png"
+    },
+    {
+      "filename": "pantalon_cafe.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/pantalon_cafe.png"
+    },
+    {
+      "filename": "camisa_elegante_blanca.png",
+      "gender": "male",
+      "source": "backend/static/assets/clothes/male/camisa_elegante_blanca.png"
+    },
+    {
+      "filename": "medias_negras.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/medias_negras.png"
+    },
+    {
+      "filename": "camisa_colombia_2.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/camisa_colombia_2.png"
+    },
+    {
+      "filename": "chaqueta_y2k.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/chaqueta_y2k.png"
+    },
+    {
+      "filename": "zapatos.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/zapatos.png"
+    },
+    {
+      "filename": "pantalon_rojo.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/pantalon_rojo.png"
+    },
+    {
+      "filename": "Medias_maya.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/Medias_maya.png"
+    },
+    {
+      "filename": "pantalon_blanco.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/pantalon_blanco.png"
+    },
+    {
+      "filename": "camisa_miku.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/camisa_miku.png"
+    },
+    {
+      "filename": "pantaloneta_morada.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/pantaloneta_morada.png"
+    },
+    {
+      "filename": "vestido.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/vestido.png"
+    },
+    {
+      "filename": "camisa_cafe_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/camisa_cafe_mujer.png"
+    },
+    {
+      "filename": "Camisa_morada_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/Camisa_morada_mujer.png"
+    },
+    {
+      "filename": "zapatos_beige.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/zapatos_beige.png"
+    },
+    {
+      "filename": "Camisa_verde_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/Camisa_verde_mujer.png"
+    },
+    {
+      "filename": "pantalon_azul.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/pantalon_azul.png"
+    },
+    {
+      "filename": "Corset_rojo.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/Corset_rojo.png"
+    },
+    {
+      "filename": "esqueleto_azul.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/esqueleto_azul.png"
+    },
+    {
+      "filename": "Smoking_fuck_news.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/Smoking_fuck_news.png"
+    },
+    {
+      "filename": "falda_miku.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/falda_miku.png"
+    },
+    {
+      "filename": "falda_2.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/falda_2.png"
+    },
+    {
+      "filename": "Fuck_news_pantalon.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/Fuck_news_pantalon.png"
+    },
+    {
+      "filename": "camisa_cafe.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/camisa_cafe.png"
+    },
+    {
+      "filename": "camisa_colombia.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/camisa_colombia.png"
+    },
+    {
+      "filename": "esqueleto_blanco_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/esqueleto_blanco_mujer.png"
+    },
+    {
+      "filename": "real_madrid.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/real_madrid.png"
+    },
+    {
+      "filename": "zapatos_rosados.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/zapatos_rosados.png"
+    },
+    {
+      "filename": "calentadoras.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/calentadoras.png"
+    },
+    {
+      "filename": "camisa_verde_juan.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/camisa_verde_juan.png"
+    },
+    {
+      "filename": "pantalon.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/pantalon.png"
+    },
+    {
+      "filename": "pantalon_cafe.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/pantalon_cafe.png"
+    },
+    {
+      "filename": "Camisa_roja_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/Camisa_roja_mujer.png"
+    },
+    {
+      "filename": "Camisa_negra_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/Camisa_negra_mujer.png"
+    },
+    {
+      "filename": "Saco_tortuga.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/Saco_tortuga.png"
+    },
+    {
+      "filename": "camisa_elegante_mujer.png",
+      "gender": "female",
+      "source": "avatares/clothes/camisa_elegante_mujer.png"
+    },
+    {
+      "filename": "camisa_elegante_blanca.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/camisa_elegante_blanca.png"
+    },
+    {
+      "filename": "falda_blanca.png",
+      "gender": "unisex",
+      "source": "avatares/clothes/falda_blanca.png"
+    }
+  ],
+  "backgrounds": [
+    {
+      "filename": "bg_002.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/backgrounds/bg_002.png"
+    }
+  ],
+  "hair": [
+    {
+      "filename": "hair_4.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/female/hair_4.png"
+    },
+    {
+      "filename": "hair_2.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/female/hair_2.png"
+    },
+    {
+      "filename": "hair_1.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/female/hair_1.png"
+    },
+    {
+      "filename": "hair_3.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/female/hair_3.png"
+    },
+    {
+      "filename": "hair_6.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/male/hair_6.png"
+    },
+    {
+      "filename": "hair_5.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/male/hair_5.png"
+    },
+    {
+      "filename": "hair_7.png",
+      "gender": "male",
+      "source": "backend/static/assets/hair/male/hair_7.png"
+    },
+    {
+      "filename": "hair_6.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_6.png"
+    },
+    {
+      "filename": "hair_5.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_5.png"
+    },
+    {
+      "filename": "hair_4.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_4.png"
+    },
+    {
+      "filename": "hair_7.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_7.png"
+    },
+    {
+      "filename": "hair_2.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_2.png"
+    },
+    {
+      "filename": "hair_1.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_1.png"
+    },
+    {
+      "filename": "hair_3.png",
+      "gender": "unisex",
+      "source": "avatares/hair/hair_3.png"
+    }
+  ],
+  "accessories": [
+    {
+      "filename": "piercing_ceja.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/accessories/unisex/piercing_ceja.png"
+    },
+    {
+      "filename": "curitas.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/accessories/unisex/curitas.png"
+    },
+    {
+      "filename": "collar_3.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/accessories/unisex/collar_3.png"
+    },
+    {
+      "filename": "gafas_1.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/accessories/unisex/gafas_1.png"
+    },
+    {
+      "filename": "collar_2.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/accessories/unisex/collar_2.png"
+    },
+    {
+      "filename": "manilla_1.png",
+      "gender": "male",
+      "source": "backend/static/assets/accessories/unisex/manilla_1.png"
+    },
+    {
+      "filename": "collar_1.png",
+      "gender": "male",
+      "source": "backend/static/assets/accessories/female/collar_1.png"
+    },
+    {
+      "filename": "manilla_2.png",
+      "gender": "male",
+      "source": "backend/static/assets/accessories/female/manilla_2.png"
+    },
+    {
+      "filename": "moño.png",
+      "gender": "male",
+      "source": "backend/static/assets/accessories/female/moño.png"
+    },
+    {
+      "filename": "gafas_2.png",
+      "gender": "male",
+      "source": "backend/static/assets/accessories/female/gafas_2.png"
+    },
+    {
+      "filename": "orejas_gato.png",
+      "gender": "male",
+      "source": "backend/static/assets/accessories/female/orejas_gato.png"
+    },
+    {
+      "filename": "piercing_ceja.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/piercing_ceja.png"
+    },
+    {
+      "filename": "collar_1.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/collar_1.png"
+    },
+    {
+      "filename": "curitas.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/curitas.png"
+    },
+    {
+      "filename": "manilla_2.png",
+      "gender": "male",
+      "source": "avatares/accessories/manilla_2.png"
+    },
+    {
+      "filename": "collar_3.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/collar_3.png"
+    },
+    {
+      "filename": "moño.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/moño.png"
+    },
+    {
+      "filename": "gafas_1.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/gafas_1.png"
+    },
+    {
+      "filename": "gafas_2.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/gafas_2.png"
+    },
+    {
+      "filename": "orejas_gato.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/orejas_gato.png"
+    },
+    {
+      "filename": "collar_2.png",
+      "gender": "unisex",
+      "source": "avatares/accessories/collar_2.png"
+    },
+    {
+      "filename": "manilla_1.png",
+      "gender": "male",
+      "source": "avatares/accessories/manilla_1.png"
+    }
+  ],
+  "makeup": [
+    {
+      "filename": "gotic_makeup.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/makeup/unisex/gotic_makeup.png"
+    },
+    {
+      "filename": "rubor.png",
+      "gender": "male",
+      "source": "backend/static/assets/makeup/female/rubor.png"
+    },
+    {
+      "filename": "ahumado_morado.png",
+      "gender": "male",
+      "source": "backend/static/assets/makeup/female/ahumado_morado.png"
+    },
+    {
+      "filename": "ahumado_negro.png",
+      "gender": "male",
+      "source": "backend/static/assets/makeup/female/ahumado_negro.png"
+    },
+    {
+      "filename": "remolino_rubor.png",
+      "gender": "male",
+      "source": "backend/static/assets/makeup/female/remolino_rubor.png"
+    },
+    {
+      "filename": "gotic_makeup.png",
+      "gender": "unisex",
+      "source": "avatares/makeup/gotic_makeup.png"
+    },
+    {
+      "filename": "rubor.png",
+      "gender": "unisex",
+      "source": "avatares/makeup/rubor.png"
+    },
+    {
+      "filename": "ahumado_morado.png",
+      "gender": "unisex",
+      "source": "avatares/makeup/ahumado_morado.png"
+    },
+    {
+      "filename": "ahumado_negro.png",
+      "gender": "unisex",
+      "source": "avatares/makeup/ahumado_negro.png"
+    },
+    {
+      "filename": "remolino_rubor.png",
+      "gender": "unisex",
+      "source": "avatares/makeup/remolino_rubor.png"
+    }
+  ],
+  "mouth": [
+    {
+      "filename": "boca_base.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/mouth/unisex/boca_base.png"
+    },
+    {
+      "filename": "boca_2.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/mouth/unisex/boca_2.png"
+    },
+    {
+      "filename": "boca_5.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/mouth/unisex/boca_5.png"
+    },
+    {
+      "filename": "boca_1.png",
+      "gender": "unisex",
+      "source": "backend/static/assets/mouth/unisex/boca_1.png"
+    },
+    {
+      "filename": "boca_3.png",
+      "gender": "male",
+      "source": "backend/static/assets/mouth/female/boca_3.png"
+    },
+    {
+      "filename": "boca_4.png",
+      "gender": "male",
+      "source": "backend/static/assets/mouth/male/boca_4.png"
+    },
+    {
+      "filename": "boca_base.png",
+      "gender": "unisex",
+      "source": "avatares/mounth/boca_base.png"
+    },
+    {
+      "filename": "boca_4.png",
+      "gender": "unisex",
+      "source": "avatares/mounth/boca_4.png"
+    },
+    {
+      "filename": "boca_2.png",
+      "gender": "unisex",
+      "source": "avatares/mounth/boca_2.png"
+    },
+    {
+      "filename": "boca_5.png",
+      "gender": "unisex",
+      "source": "avatares/mounth/boca_5.png"
+    },
+    {
+      "filename": "boca_1.png",
+      "gender": "unisex",
+      "source": "avatares/mounth/boca_1.png"
+    },
+    {
+      "filename": "boca_3.png",
+      "gender": "unisex",
+      "source": "avatares/mounth/boca_3.png"
+    }
+  ]
+}

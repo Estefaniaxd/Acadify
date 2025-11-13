@@ -1,26 +1,27 @@
-import jwt
-import uuid
 from datetime import timedelta
-from src.services.auth.datetime_utils import utcnow_aware
-from typing import Optional, Dict, Any
+from typing import Any
+import uuid
+
 from jose import JWTError
+import jwt
+
 from src.core.config import settings
+from src.services.auth.datetime_utils import utcnow_aware
 from src.services.auth.redis_service import RedisService
 
 
 class TokenService:
-    """Servicio centralizado para operaciones con tokens JWT"""
+    """Servicio centralizado para operaciones con tokens JWT."""
 
-    def __init__(self, redis_service: RedisService):
+    def __init__(self, redis_service: RedisService) -> None:
         self.redis_service = redis_service
         self.algorithm = settings.ALGORITHM
         self.secret_key = settings.SECRET_KEY
 
     def create_access_token(
-        self, user_id: str, roles: list[str], expires_delta: Optional[timedelta] = None
+        self, user_id: str, roles: list[str], expires_delta: timedelta | None = None
     ) -> tuple[str, str]:
-        """
-        Crear access token JWT
+        """Crear access token JWT.
 
         Returns:
             tuple: (token, jti) - token y su identificador único
@@ -37,21 +38,20 @@ class TokenService:
 
         payload = {
             "sub": str(user_id),  # Subject: usuario
-            "exp": int(expire.timestamp()),        # Expiration time
+            "exp": int(expire.timestamp()),  # Expiration time
             "iat": int(utcnow_aware().timestamp()),  # Issued at
-            "jti": jti,          # JWT ID para revocación
-            "roles": roles,      # Roles del usuario
-            "type": "access"     # Tipo de token
+            "jti": jti,  # JWT ID para revocación
+            "roles": roles,  # Roles del usuario
+            "type": "access",  # Tipo de token
         }
 
         token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
         return token, jti
 
     def create_refresh_token(
-        self, user_id: str, expires_delta: Optional[timedelta] = None
+        self, user_id: str, expires_delta: timedelta | None = None
     ) -> tuple[str, str]:
-        """
-        Crear refresh token JWT
+        """Crear refresh token JWT.
 
         Returns:
             tuple: (token, jti) - token y su identificador único
@@ -73,79 +73,77 @@ class TokenService:
 
         token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
         return token, jti
-    
-    async def decode_token(self, token: str) -> Dict[str, Any]:
-        """
-        Decodificar y validar token JWT de acceso
-        
+
+    async def decode_token(self, token: str) -> dict[str, Any]:
+        """Decodificar y validar token JWT de acceso.
+
         Raises:
             JWTError: Si el token es inválido, expiró o está revocado
         """
         try:
-            payload = jwt.decode(
-                token, 
-                self.secret_key, 
-                algorithms=[self.algorithm]
-            )
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             # Verificar si el token está revocado
             jti = payload.get("jti")
             if jti and await self.is_token_revoked(jti):
-                raise JWTError("El token ha sido revocado")
+                msg = "El token ha sido revocado"
+                raise JWTError(msg)
             if payload.get("type") != "access":
-                raise JWTError("El token no es de tipo acceso")
+                msg = "El token no es de tipo acceso"
+                raise JWTError(msg)
             return payload
         except jwt.ExpiredSignatureError:
-            raise JWTError("El token ha expirado")
+            msg = "El token ha expirado"
+            raise JWTError(msg) from None
         except jwt.InvalidTokenError:
-            raise JWTError("El token es inválido")
+            msg = "El token es inválido"
+            raise JWTError(msg) from None
 
     async def decode_refresh_token(self, token: str) -> str:
-        """
-        Decodificar y validar token JWT de refresco
-        
+        """Decodificar y validar token JWT de refresco.
+
         Returns:
             str: user_id (sub)
+
         Raises:
             JWTError: Si el token es inválido, expiró o está revocado
         """
         try:
-            payload = jwt.decode(
-                token,
-                self.secret_key,
-                algorithms=[self.algorithm]
-            )
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             jti = payload.get("jti")
             if jti and await self.is_token_revoked(jti):
-                raise JWTError("El token de refresco ha sido revocado")
+                msg = "El token de refresco ha sido revocado"
+                raise JWTError(msg)
             if payload.get("type") != "refresh":
-                raise JWTError("El token no es de tipo refresco")
+                msg = "El token no es de tipo refresco"
+                raise JWTError(msg)
             return payload.get("sub")
         except jwt.ExpiredSignatureError:
-            raise JWTError("El token de refresco ha expirado")
+            msg = "El token de refresco ha expirado"
+            raise JWTError(msg) from None
         except jwt.InvalidTokenError:
-            raise JWTError("El token de refresco es inválido")
-    
+            msg = "El token de refresco es inválido"
+            raise JWTError(msg) from None
+
     async def is_token_revoked(self, jti: str) -> bool:
-        """Verificar si un token está en la blacklist de Redis"""
+        """Verificar si un token está en la blacklist de Redis."""
         return await self.redis_service.is_token_blacklisted(jti)
-    
+
     def revoke_token(self, jti: str, ttl_seconds: int) -> None:
-        """Agregar token a la blacklist de Redis"""
+        """Agregar token a la blacklist de Redis."""
         self.redis_service.blacklist_token(jti, ttl_seconds)
 
     def revoke_all_user_tokens(self, user_id: str) -> None:
-        """Revocar todos los refresh tokens de un usuario"""
+        """Revocar todos los refresh tokens de un usuario."""
         self.redis_service.revoke_all_user_refresh_tokens(str(user_id))
 
     def store_refresh_token(self, user_id: str, jti: str, ttl_seconds: int) -> None:
-        """Almacenar refresh token activo en Redis"""
+        """Almacenar refresh token activo en Redis."""
         self.redis_service.store_active_refresh_token(str(user_id), jti, ttl_seconds)
 
     def get_token_ttl(self, token_type: str) -> int:
-        """Obtener TTL en segundos según el tipo de token"""
+        """Obtener TTL en segundos según el tipo de token."""
         if token_type == "access":
             return settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-        elif token_type == "refresh":
+        if token_type == "refresh":
             return settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-        else:
-            return 3600
+        return 3600

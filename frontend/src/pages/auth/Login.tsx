@@ -5,8 +5,9 @@ import { useToast } from '../../context/ToastContext'
 import { useNavigate } from 'react-router-dom'
 import formatApiError from '../../utils/formatApiError'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiEye, FiEyeOff, FiUser, FiLock, FiShield, FiCheckCircle, FiAlertCircle, FiMail, FiArrowRight } from 'react-icons/fi'
-import { HiSparkles } from 'react-icons/hi'
+import { AlertCircle, ArrowRight, CheckCircle, Eye, EyeOff, Lock, Mail, Shield, Sparkles, User } from 'lucide-react';
+
+
 
 export default function Login() {
   const { login } = useAuth()
@@ -131,9 +132,12 @@ export default function Login() {
   }
 
   return (
-  <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 pt-16 pb-16 md:pt-24 md:pb-24">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden py-20 md:py-24">
+      {/* Fondo de página completo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-100 dark:from-neutral-950 dark:via-violet-950/30 dark:to-purple-950/20" />
+      
       {/* Elementos decorativos de fondo */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full"
           style={{
@@ -207,7 +211,7 @@ export default function Login() {
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <HiSparkles className="w-8 h-8 text-white" />
+            <Sparkles className="w-8 h-8 text-white" />
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
               animate={{
@@ -241,8 +245,8 @@ export default function Login() {
           variants={itemVariants}
           className="relative"
         >
-          {/* Contenedor del formulario con glassmorphism */}
-          <div className="relative p-8 rounded-3xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/50 dark:border-gray-700/50 shadow-2xl overflow-hidden">
+          {/* Contenedor del formulario con glassmorphism mejorado */}
+          <div className="relative p-8 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border-2 border-violet-200/50 dark:border-violet-800/50 shadow-2xl overflow-hidden">
             {/* Efectos de fondo del formulario */}
             <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-purple-600/5 to-transparent dark:from-violet-400/10 dark:via-purple-400/10" />
             
@@ -264,7 +268,7 @@ export default function Login() {
                       }}
                       transition={{ duration: 0.2 }}
                     >
-                      <FiUser className="w-5 h-5" />
+                      <User className="w-5 h-5" />
                     </motion.div>
                   </div>
                   <input
@@ -297,7 +301,7 @@ export default function Login() {
                         exit={{ opacity: 0, scale: 0 }}
                         className="absolute inset-y-0 right-4 flex items-center"
                       >
-                        <FiCheckCircle className="w-5 h-5 text-emerald-500" />
+                        <CheckCircle className="w-5 h-5 text-emerald-500" />
                       </motion.div>
                     )}
                     {touched.identifier && !identifier && (
@@ -307,7 +311,7 @@ export default function Login() {
                         exit={{ opacity: 0, scale: 0 }}
                         className="absolute inset-y-0 right-4 flex items-center"
                       >
-                        <FiAlertCircle className="w-5 h-5 text-red-500" />
+                        <AlertCircle className="w-5 h-5 text-red-500" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -331,7 +335,7 @@ export default function Login() {
                       }}
                       transition={{ duration: 0.2 }}
                     >
-                      <FiLock className="w-5 h-5" />
+                      <Lock className="w-5 h-5" />
                     </motion.div>
                   </div>
                   <input
@@ -362,7 +366,7 @@ export default function Login() {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </motion.button>
                   {/* Indicador de validación */}
                   <AnimatePresence>
@@ -373,7 +377,7 @@ export default function Login() {
                         exit={{ opacity: 0, scale: 0 }}
                         className="absolute inset-y-0 right-12 flex items-center"
                       >
-                        <FiCheckCircle className="w-5 h-5 text-emerald-500" />
+                        <CheckCircle className="w-5 h-5 text-emerald-500" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -394,7 +398,7 @@ export default function Login() {
                     </label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <FiShield className="w-5 h-5 text-violet-500" />
+                        <Shield className="w-5 h-5 text-violet-500" />
                       </div>
                       <input
                         id="otp"
@@ -415,7 +419,7 @@ export default function Login() {
                         animate={{ opacity: 1 }}
                         className="text-sm text-violet-600 dark:text-violet-400 mt-2 flex items-center gap-2"
                       >
-                        <FiMail className="w-4 h-4" />
+                        <Mail className="w-4 h-4" />
                         {otpMessage}
                       </motion.p>
                     )}
@@ -456,7 +460,7 @@ export default function Login() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0 }}
                           >
-                            <FiCheckCircle className="w-3 h-3" />
+                            <CheckCircle className="w-3 h-3" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -508,7 +512,7 @@ export default function Login() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0 }}
                           >
-                            <FiCheckCircle className="w-2.5 h-2.5" />
+                            <CheckCircle className="w-2.5 h-2.5" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -538,7 +542,7 @@ export default function Login() {
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium flex items-center gap-3"
                   >
-                    <FiAlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
                     <span>{error}</span>
                   </motion.div>
                 )}
@@ -594,7 +598,7 @@ export default function Login() {
                         <motion.div
                           className="group-hover:translate-x-1 transition-transform duration-200"
                         >
-                          <FiArrowRight className="w-5 h-5" />
+                          <ArrowRight className="w-5 h-5" />
                         </motion.div>
                       </>
                     )}

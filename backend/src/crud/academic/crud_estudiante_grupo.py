@@ -1,15 +1,18 @@
-from sqlalchemy.orm import Session
-from ..base import CRUDBase
 from uuid import UUID
 
-from ...models.academic.estudiante_grupo import EstudianteGrupo
-from ...schemas.academic.estudiante_grupo import (
+from sqlalchemy.orm import Session
+
+from src.crud.base import CRUDBase
+from src.models.academic.estudiante_grupo import EstudianteGrupo
+from src.schemas.academic.estudiante_grupo import (
     EstudianteGrupoCreate,
     EstudianteGrupoUpdate,
 )
 
 
-class CRUDEstudianteGrupo(CRUDBase[EstudianteGrupo, EstudianteGrupoCreate, EstudianteGrupoUpdate]):
+class CRUDEstudianteGrupo(
+    CRUDBase[EstudianteGrupo, EstudianteGrupoCreate, EstudianteGrupoUpdate]
+):
     def get(self, db: Session, grupo_id: UUID, estudiante_id: UUID):
         return (
             db.query(EstudianteGrupo)

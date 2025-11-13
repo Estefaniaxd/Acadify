@@ -1,30 +1,34 @@
 # src/api/api_v1/endpoints/valor_calificacion.py
-from typing import Any, List
+from typing import Any
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import src.crud.assessment.valor_calificacion as crud_valor_calificacion
-import src.crud.assessment.escala_calificacion as crud_escala_calificacion
-from src.schemas.assessment.valor_calificacion import (
-    ValorCalificacion, ValorCalificacionCreate, ValorCalificacionUpdate
-)
+
 from src.api.deps import get_db
+import src.crud.assessment.escala_calificacion as crud_escala_calificacion
+import src.crud.assessment.valor_calificacion as crud_valor_calificacion
+from src.schemas.assessment.valor_calificacion import (
+    ValorCalificacion,
+    ValorCalificacionCreate,
+    ValorCalificacionUpdate,
+)
+
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[ValorCalificacion])
+@router.get("/", response_model=list[ValorCalificacion])
 def read_valores_calificacion(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
     """Obtener todos los valores de calificación."""
-    valores = crud_valor_calificacion.get_multi(db, skip=skip, limit=limit)
-    return valores
+    return crud_valor_calificacion.get_multi(db, skip=skip, limit=limit)
 
 
-@router.get("/escala/{escala_id}", response_model=List[ValorCalificacion])
+@router.get("/escala/{escala_id}", response_model=list[ValorCalificacion])
 def read_valores_by_escala(
     *,
     db: Session = Depends(get_db),
@@ -41,10 +45,9 @@ def read_valores_by_escala(
             detail="Escala de calificación no encontrada.",
         )
 
-    valores = crud_valor_calificacion.get_by_escala(
+    return crud_valor_calificacion.get_by_escala(
         db, escala_id=escala_id, skip=skip, limit=limit
     )
-    return valores
 
 
 @router.post("/", response_model=ValorCalificacion)
@@ -89,8 +92,7 @@ def create_valor_calificacion(
         )
         valor_in.orden = max_orden + 1
 
-    valor = crud_valor_calificacion.create(db, obj_in=valor_in)
-    return valor
+    return crud_valor_calificacion.create(db, obj_in=valor_in)
 
 
 @router.put("/{valor_id}", response_model=ValorCalificacion)
@@ -134,8 +136,7 @@ def update_valor_calificacion(
                 detail="Ya existe un valor con este orden en la escala de calificación.",
             )
 
-    valor = crud_valor_calificacion.update(db, db_obj=valor, obj_in=valor_in)
-    return valor
+    return crud_valor_calificacion.update(db, db_obj=valor, obj_in=valor_in)
 
 
 @router.get("/{valor_id}", response_model=ValorCalificacion)
@@ -168,5 +169,4 @@ def delete_valor_calificacion(
             detail="Valor de calificación no encontrado.",
         )
 
-    valor = crud_valor_calificacion.remove(db, id=valor_id)
-    return valor
+    return crud_valor_calificacion.remove(db, id=valor_id)

@@ -1,10 +1,10 @@
 import uuid
-from typing import List, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import desc, func
 
-from ...models.gamification.usuario_puntos import UsuarioPuntos
+from sqlalchemy import desc, func
+from sqlalchemy.orm import Session
+
 from ...models.gamification.historial_puntos import HistorialPuntos
+from ...models.gamification.usuario_puntos import UsuarioPuntos
 from ...models.users.usuario import Usuario
 from ...schemas.gamification.historial_puntos import (
     AsignarPuntosRequest,
@@ -12,7 +12,7 @@ from ...schemas.gamification.historial_puntos import (
 )
 
 
-def get_usuario_puntos(db: Session, usuario_id: uuid.UUID) -> Optional[UsuarioPuntos]:
+def get_usuario_puntos(db: Session, usuario_id: uuid.UUID) -> UsuarioPuntos | None:
     """Obtener los puntos de un usuario específico."""
     return (
         db.query(UsuarioPuntos).filter(UsuarioPuntos.usuario_id == usuario_id).first()
@@ -23,7 +23,12 @@ def create_usuario_puntos(
     db: Session, usuario_id: uuid.UUID, puntos_iniciales: int = 0
 ) -> UsuarioPuntos:
     """Crear registro inicial de puntos para un usuario."""
-    db_puntos = UsuarioPuntos(usuario_id=usuario_id, puntos_acumulados=puntos_iniciales)
+    db_puntos = UsuarioPuntos(
+        usuario_id=usuario_id,
+        puntos_acumulados=puntos_iniciales,
+        cambio=puntos_iniciales if puntos_iniciales != 0 else 1,  # cambio no puede ser 0 por constraint
+        motivo="Registro inicial de puntos"
+    )
     db.add(db_puntos)
     db.commit()
     db.refresh(db_puntos)
@@ -48,7 +53,10 @@ def asignar_puntos(db: Session, request: AsignarPuntosRequest) -> UsuarioPuntos:
 
     # Crear entrada en historial
     historial = HistorialPuntos(
-        usuario_id=request.usuario_id, cambio=request.puntos, motivo=request.motivo
+        historial_id=uuid.uuid4(),  # Generate UUID explicitly for SQLite compatibility
+        usuario_id=request.usuario_id, 
+        cambio=request.puntos, 
+        motivo=request.motivo
     )
 
     db.add(historial)
@@ -65,14 +73,18 @@ def descontar_puntos(db: Session, request: DescontarPuntosRequest) -> UsuarioPun
 
     # Verificar que tenga suficientes puntos
     if usuario_puntos.puntos_acumulados < request.puntos:
-        raise ValueError("El usuario no tiene suficientes puntos")
+        msg = "El usuario no tiene suficientes puntos"
+        raise ValueError(msg)
 
     # Descontar puntos
     usuario_puntos.puntos_acumulados -= request.puntos
 
     # Crear entrada en historial (cambio negativo)
     historial = HistorialPuntos(
-        usuario_id=request.usuario_id, cambio=-request.puntos, motivo=request.motivo
+        historial_id=uuid.uuid4(),  # Generate UUID explicitly for SQLite compatibility
+        usuario_id=request.usuario_id, 
+        cambio=-request.puntos, 
+        motivo=request.motivo
     )
 
     db.add(historial)
@@ -84,7 +96,7 @@ def descontar_puntos(db: Session, request: DescontarPuntosRequest) -> UsuarioPun
 
 def get_historial_puntos_usuario(
     db: Session, usuario_id: uuid.UUID, skip: int = 0, limit: int = 100
-) -> List[HistorialPuntos]:
+) -> list[HistorialPuntos]:
     """Obtener historial de puntos de un usuario."""
     return (
         db.query(HistorialPuntos)
@@ -96,7 +108,7 @@ def get_historial_puntos_usuario(
     )
 
 
-def get_ranking_usuarios(db: Session, skip: int = 0, limit: int = 50) -> List[dict]:
+def get_ranking_usuarios(db: Session, skip: int = 0, limit: int = 50) -> list[dict]:
     """Obtener ranking de usuarios por puntos."""
     query = (
         db.query(
@@ -141,7 +153,7 @@ def get_estadisticas_puntos(db: Session) -> dict:
     }
 
 
-def get_posicion_usuario_ranking(db: Session, usuario_id: uuid.UUID) -> Optional[int]:
+def get_posicion_usuario_ranking(db: Session, usuario_id: uuid.UUID) -> int | None:
     """Obtener la posición de un usuario en el ranking."""
     usuario_puntos = get_usuario_puntos(db, usuario_id)
     if not usuario_puntos:

@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 
-export default function Footer() {
+function Footer() {
   const currentYear = new Date().getFullYear()
   
   const socialLinks = [
@@ -240,3 +240,6 @@ export default function Footer() {
     </motion.footer>
   )
 }
+
+// Memoizar componente ya que no cambia frecuentemente
+export default memo(Footer);

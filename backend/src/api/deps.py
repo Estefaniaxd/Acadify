@@ -1,19 +1,21 @@
 # src/api/deps.py
 
-from typing import Generator, Optional
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
-from uuid import UUID
-import redis.asyncio as redis
+from collections.abc import Generator
 import logging
+from uuid import UUID
 
-from src.db.session import SessionLocal
-from src.models.users.usuario import Usuario
-from src.crud.user.usuario import usuario_crud
-from src.utils.security import security_manager, get_token_blacklist
-from src.enums.users.usuario_enums import EstadoCuentaUsuario, RolUsuario
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import redis.asyncio as redis
+from sqlalchemy.orm import Session
+
 from src.core.config import get_settings
+from src.crud.user.usuario import usuario_crud
+from src.db.session import SessionLocal
+from src.enums.users.usuario_enums import EstadoCuentaUsuario, RolUsuario
+from src.models.users.usuario import Usuario
+from src.utils.security import get_token_blacklist, security_manager
+
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
@@ -23,8 +25,9 @@ settings = get_settings()
 # Database Dependencies
 # ===============================
 
+
 def get_db() -> Generator:
-    """Dependency to get database session"""
+    """Dependency to get database session."""
     try:
         db = SessionLocal()
         yield db
@@ -33,26 +36,27 @@ def get_db() -> Generator:
 
 
 # ===============================
-# Redis Dependencies  
+# Redis Dependencies
 # ===============================
 
+
 async def get_redis_client() -> redis.Redis:
-    """Dependency to get Redis client"""
+    """Dependency to get Redis client."""
     try:
         # Create async Redis client using the connection string
         client = redis.from_url(
             f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}",
-            decode_responses=True
+            decode_responses=True,
         )
         # Test connection
         await client.ping()
         return client
     except Exception as e:
-        logger.error(f"Error creating Redis client: {e}")
+        logger.exception(f"Error creating Redis client: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error de conexión a Redis"
-        )
+            detail="Error de conexión a Redis",
+        ) from e
 
 
 # ===============================
@@ -63,8 +67,9 @@ async def get_redis_client() -> redis.Redis:
 # Token Validation Helpers
 # ===============================
 
+
 def _validate_token_format(token: str) -> None:
-    """Validate basic JWT token format"""
+    """Validate basic JWT token format."""
     if not token or len(token.strip()) == 0:
         logger.warning("Empty or missing token")
         raise HTTPException(
@@ -72,11 +77,13 @@ def _validate_token_format(token: str) -> None:
             detail="Token requerido - El encabezado de autorización está vacío",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Check if token has basic JWT structure (3 parts separated by dots)
-    token_parts = token.split('.')
+    token_parts = token.split(".")
     if len(token_parts) != 3:
-        logger.warning(f"Token inválido: Not enough segments. Token parts: {len(token_parts)}")
+        logger.warning(
+            f"Token inválido: Not enough segments. Token parts: {len(token_parts)}"
+        )
         logger.warning(f"Token recibido: {token[:10]}..." if token else "Token vacío")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -86,7 +93,7 @@ def _validate_token_format(token: str) -> None:
 
 
 def _validate_token_payload(payload: dict) -> None:
-    """Validate token payload structure"""
+    """Validate token payload structure."""
     if payload.get("type") != "access":
         logger.warning(f"Invalid token type: {payload.get('type')}")
         raise HTTPException(
@@ -94,7 +101,7 @@ def _validate_token_payload(payload: dict) -> None:
             detail="Token tipo inválido",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     user_id_str = payload.get("sub")
     if not user_id_str:
         logger.warning("Token missing 'sub' claim")
@@ -106,7 +113,7 @@ def _validate_token_payload(payload: dict) -> None:
 
 
 def _extract_user_id(payload: dict) -> UUID:
-    """Extract and validate user ID from token payload"""
+    """Extract and validate user ID from token payload."""
     user_id_str = payload.get("sub")
     try:
         return UUID(user_id_str)
@@ -116,17 +123,16 @@ def _extract_user_id(payload: dict) -> UUID:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="ID de usuario inválido",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 async def get_current_user_from_token(
     db: Session = Depends(get_db),
     redis_client: redis.Redis = Depends(get_redis_client),
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Usuario:
-    """
-    Extract and validate current user from JWT token.
-    
+    """Extract and validate current user from JWT token.
+
     Validates token, checks blacklist, and retrieves user from database.
     """
     # Comprobación de credenciales nulas
@@ -137,25 +143,29 @@ async def get_current_user_from_token(
             detail="No se proporcionaron credenciales de autorización",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     token = credentials.credentials
-    
+
     # Registro más detallado para debugging
     logger.debug(f"Validating token with length: {len(token) if token else 0}")
-    logger.debug(f"Token starts with: {token[:10] if token and len(token) >= 10 else 'N/A'}...")
+    logger.debug(
+        f"Token starts with: {token[:10] if token and len(token) >= 10 else 'N/A'}..."
+    )
     logger.debug(f"Token scheme: {credentials.scheme}")
-    
+
     # Basic token format validation
     _validate_token_format(token)
-    
+
     try:
         # Decode and validate token
         payload = security_manager.decode_token(token)
-        logger.debug(f"Token decoded successfully for user: {payload.get('sub', 'unknown')}")
-        
+        logger.debug(
+            f"Token decoded successfully for user: {payload.get('sub', 'unknown')}"
+        )
+
         # Validate payload structure
         _validate_token_payload(payload)
-        
+
         # Check token blacklist
         token_blacklist = get_token_blacklist(redis_client)
         if await token_blacklist.is_blacklisted(token):
@@ -165,10 +175,10 @@ async def get_current_user_from_token(
                 detail="Token revocado",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Extract user ID from token
         user_id = _extract_user_id(payload)
-        
+
         # Get user from database
         user = usuario_crud.get(db, id=user_id)
         if not user:
@@ -178,25 +188,31 @@ async def get_current_user_from_token(
                 detail="Usuario no encontrado",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
-        logger.debug(f"User authenticated successfully: {user.username or user.correo_institucional}")
+
+        logger.debug(
+            f"User authenticated successfully: {user.username or user.correo_institucional}"
+        )
         return user
-        
+
     except HTTPException:
         raise
     except Exception as e:
         # Log detallado del error para depuración
         error_str = str(e)
-        logger.error(f"Token inválido: {error_str}")
-        logger.error(f"Tipo de excepción: {type(e).__name__}")
-        
+        logger.exception(f"Token inválido: {error_str}")
+        logger.exception(f"Tipo de excepción: {type(e).__name__}")
+
         # Proporcionar mensaje de error más específico y útil
         error_detail = "Token inválido o expirado"
-        
+
         if "signature" in error_str.lower():
-            error_detail = "Token con firma inválida - Verifica que estés usando el token correcto"
+            error_detail = (
+                "Token con firma inválida - Verifica que estés usando el token correcto"
+            )
         elif "expired" in error_str.lower():
-            error_detail = "Token expirado - La sesión ha caducado, vuelve a iniciar sesión"
+            error_detail = (
+                "Token expirado - La sesión ha caducado, vuelve a iniciar sesión"
+            )
         elif "not enough segments" in error_str.lower():
             error_detail = "Token malformado - No tiene el formato correcto (debe tener 3 partes separadas por puntos)"
         elif "invalid audience" in error_str.lower():
@@ -207,54 +223,48 @@ async def get_current_user_from_token(
             error_detail = "Token revocado - Este token ya no es válido"
         elif "invalid token" in error_str.lower():
             error_detail = "Token inválido - El formato o contenido no es válido"
-        
-        logger.error(f"Mensaje detallado para el cliente: {error_detail}")
-        
+
+        logger.exception(f"Mensaje detallado para el cliente: {error_detail}")
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=error_detail,
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 def get_current_user(
-    current_user: Usuario = Depends(get_current_user_from_token)
+    current_user: Usuario = Depends(get_current_user_from_token),
 ) -> Usuario:
-    """
-    Dependency to get current authenticated user.
-    """
+    """Dependency to get current authenticated user."""
     return current_user
 
 
 def get_current_active_user(
-    current_user: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(get_current_user),
 ) -> Usuario:
-    """
-    Dependency to get current active user.
-    
+    """Dependency to get current active user.
+
     Ensures user account is in active state.
     """
     if current_user.estado_cuenta != EstadoCuentaUsuario.activo:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cuenta inactiva"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Cuenta inactiva"
         )
-    
+
     return current_user
 
 
 def get_current_admin_user(
-    current_user: Usuario = Depends(get_current_active_user)
+    current_user: Usuario = Depends(get_current_active_user),
 ) -> Usuario:
-    """
-    Dependency to ensure current user is an administrator.
-    """
+    """Dependency to ensure current user is an administrator."""
     if current_user.rol != RolUsuario.administrador:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de administrador"
+            detail="Se requieren permisos de administrador",
         )
-    
+
     return current_user
 
 
@@ -262,82 +272,73 @@ def get_current_admin_user(
 # Role-based Dependencies
 # ===============================
 
+
 def get_current_coordinador(
-    current_user: Usuario = Depends(get_current_active_user)
+    current_user: Usuario = Depends(get_current_active_user),
 ) -> Usuario:
-    """
-    Dependency to ensure current user is a coordinator.
-    """
+    """Dependency to ensure current user is a coordinator."""
     if current_user.rol != RolUsuario.coordinador:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de coordinador"
+            detail="Se requieren permisos de coordinador",
         )
-    
+
     return current_user
 
 
 def get_current_docente(
-    current_user: Usuario = Depends(get_current_active_user)
+    current_user: Usuario = Depends(get_current_active_user),
 ) -> Usuario:
-    """
-    Dependency to ensure current user is a teacher.
-    """
+    """Dependency to ensure current user is a teacher."""
     if current_user.rol != RolUsuario.docente:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de docente"
+            detail="Se requieren permisos de docente",
         )
-    
+
     return current_user
 
 
 def get_current_estudiante(
-    current_user: Usuario = Depends(get_current_active_user)
+    current_user: Usuario = Depends(get_current_active_user),
 ) -> Usuario:
-    """
-    Dependency to ensure current user is a student.
-    """
+    """Dependency to ensure current user is a student."""
     if current_user.rol != RolUsuario.estudiante:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de estudiante"
+            detail="Se requieren permisos de estudiante",
         )
-    
+
     return current_user
 
 
 def get_current_docente_or_coordinador(
-    current_user: Usuario = Depends(get_current_active_user)
+    current_user: Usuario = Depends(get_current_active_user),
 ) -> Usuario:
-    """
-    Dependency to ensure current user is either a teacher or coordinator.
-    """
+    """Dependency to ensure current user is either a teacher or coordinator."""
     allowed_roles = [RolUsuario.docente, RolUsuario.coordinador]
-    
+
     if current_user.rol not in allowed_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de docente o coordinador"
+            detail="Se requieren permisos de docente o coordinador",
         )
-    
+
     return current_user
 
 
 def get_current_admin_or_coordinador(
-    current_user: Usuario = Depends(get_current_active_user)
+    current_user: Usuario = Depends(get_current_active_user),
 ) -> Usuario:
-    """
-    Dependency to ensure current user is either an admin or coordinator.
-    """
+    """Dependency to ensure current user is either an admin or coordinator."""
     allowed_roles = [RolUsuario.administrador, RolUsuario.coordinador]
-    
+
     if current_user.rol not in allowed_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de administrador o coordinador"
+            detail="Se requieren permisos de administrador o coordinador",
         )
-    
+
     return current_user
 
 
@@ -345,22 +346,22 @@ def get_current_admin_or_coordinador(
 # Optional Authentication
 # ===============================
 
+
 async def get_current_user_optional(
     db: Session = Depends(get_db),
     redis_client: redis.Redis = Depends(get_redis_client),
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(
+    credentials: HTTPAuthorizationCredentials | None = Depends(
         HTTPBearer(auto_error=False)
-    )
-) -> Optional[Usuario]:
-    """
-    Dependency to optionally get current user.
-    
+    ),
+) -> Usuario | None:
+    """Dependency to optionally get current user.
+
     Returns user if valid token is provided, None otherwise.
     Useful for endpoints that work both authenticated and unauthenticated.
     """
     if not credentials:
         return None
-    
+
     try:
         return await get_current_user_from_token(db, redis_client, credentials)
     except HTTPException:
@@ -373,53 +374,55 @@ async def get_current_user_optional(
 # Custom Permission Dependencies
 # ===============================
 
+
 class RequireRoles:
-    """
-    Custom dependency class to check for specific roles.
-    
+    """Custom dependency class to check for specific roles.
+
     Usage:
         @router.get("/admin-only")
         def admin_endpoint(user: Usuario = Depends(RequireRoles([RolUsuario.administrador]))):
             pass
     """
-    
-    def __init__(self, allowed_roles: list[RolUsuario]):
+
+    def __init__(self, allowed_roles: list[RolUsuario]) -> None:
         self.allowed_roles = allowed_roles
-    
-    def __call__(self, current_user: Usuario = Depends(get_current_active_user)) -> Usuario:
+
+    def __call__(
+        self, current_user: Usuario = Depends(get_current_active_user)
+    ) -> Usuario:
         if current_user.rol not in self.allowed_roles:
             roles_str = ", ".join([role.value for role in self.allowed_roles])
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Se requiere uno de los siguientes roles: {roles_str}"
+                detail=f"Se requiere uno de los siguientes roles: {roles_str}",
             )
         return current_user
 
 
 class RequireVerifiedEmail:
-    """
-    Custom dependency to ensure user has verified email.
-    """
-    
-    def __call__(self, current_user: Usuario = Depends(get_current_active_user)) -> Usuario:
+    """Custom dependency to ensure user has verified email."""
+
+    def __call__(
+        self, current_user: Usuario = Depends(get_current_active_user)
+    ) -> Usuario:
         if not current_user.email_verified:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Se requiere email verificado"
+                detail="Se requiere email verificado",
             )
         return current_user
 
 
 class RequireTwoFA:
-    """
-    Custom dependency to ensure user has 2FA enabled.
-    """
-    
-    def __call__(self, current_user: Usuario = Depends(get_current_active_user)) -> Usuario:
+    """Custom dependency to ensure user has 2FA enabled."""
+
+    def __call__(
+        self, current_user: Usuario = Depends(get_current_active_user)
+    ) -> Usuario:
         if not current_user.twofa_enabled:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Se requiere autenticación de dos factores habilitada"
+                detail="Se requiere autenticación de dos factores habilitada",
             )
         return current_user
 
@@ -428,20 +431,19 @@ class RequireTwoFA:
 # Rate Limiting Dependencies
 # ===============================
 
+
 class RateLimitChecker:
-    """
-    Simple rate limiting dependency using Redis.
-    """
-    
-    def __init__(self, max_requests: int, window_seconds: int):
+    """Simple rate limiting dependency using Redis."""
+
+    def __init__(self, max_requests: int, window_seconds: int) -> None:
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-    
+
     async def __call__(
-        self, 
+        self,
         request,
         redis_client: redis.Redis = Depends(get_redis_client),
-        current_user: Optional[Usuario] = Depends(get_current_user_optional)
+        current_user: Usuario | None = Depends(get_current_user_optional),
     ):
         # Use user ID if authenticated, otherwise IP address
         if current_user:
@@ -449,10 +451,10 @@ class RateLimitChecker:
         else:
             client_ip = request.client.host
             identifier = f"rate_limit_ip:{client_ip}"
-        
+
         # Check current count
         current_count = await redis_client.get(identifier)
-        
+
         if current_count is None:
             # First request in window
             await redis_client.setex(identifier, self.window_seconds, 1)
@@ -461,10 +463,9 @@ class RateLimitChecker:
             if current_count >= self.max_requests:
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Too many requests"
+                    detail="Too many requests",
                 )
-            else:
-                await redis_client.incr(identifier)
+            await redis_client.incr(identifier)
 
 
 # ===============================

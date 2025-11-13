@@ -1,0 +1,16 @@
+5e1da7d91269d6423f02ab94910a091e
+  backend/static/assets/hair/female/hair_4.png
+  backend/static/assets/hair/male/hair_4.png
+
+45e61984f0e41ca0fcc464089f61e64d
+  backend/static/assets/hair/female/hair_2.png
+  backend/static/assets/hair/male/hair_2.png
+
+53e96e197b9bda50c3dac1338e39e235
+  backend/static/assets/hair/female/hair_1.png
+  backend/static/assets/hair/male/hair_1.png
+
+529209563c7932b52728320dfdc630a2
+  backend/static/assets/hair/female/hair_3.png
+  backend/static/assets/hair/male/hair_3.png
+

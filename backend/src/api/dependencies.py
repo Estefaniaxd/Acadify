@@ -1,16 +1,16 @@
-from typing import Optional, List
-from fastapi import Depends, HTTPException, status, Cookie, Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Cookie, Depends, Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
 
 from src.api.deps import get_db
-from src.models.users.usuario import Usuario
-from src.services.auth.token_service import TokenService
-from src.services.auth.redis_service import RedisService
-from src.services.auth.password_service import PasswordService
 from src.crud.auth.user_crud import UserCRUD
 from src.enums.users.usuario_enums import RolUsuario
+from src.models.users.usuario import Usuario
+from src.services.auth.password_service import PasswordService
+from src.services.auth.redis_service import RedisService
+from src.services.auth.token_service import TokenService
+
 
 # Instancias de servicios (idealmente inyectados por DI container)
 redis_service = RedisService()
@@ -22,24 +22,24 @@ security = HTTPBearer(auto_error=False)
 
 
 async def get_redis_service() -> RedisService:
-    """Dependency para obtener RedisService"""
+    """Dependency para obtener RedisService."""
     if not redis_service.redis:
         await redis_service.connect()
     return redis_service
 
 
 def get_token_service() -> TokenService:
-    """Dependency para obtener TokenService"""
+    """Dependency para obtener TokenService."""
     return token_service
 
 
 def get_password_service() -> PasswordService:
-    """Dependency para obtener PasswordService"""
+    """Dependency para obtener PasswordService."""
     return password_service
 
 
 def get_user_crud() -> UserCRUD:
-    """Dependency para obtener UserCRUD"""
+    """Dependency para obtener UserCRUD."""
     return user_crud
 
 
@@ -47,13 +47,12 @@ async def get_current_user(
     db: Session = Depends(get_db),
     token_service: TokenService = Depends(get_token_service),
     user_crud: UserCRUD = Depends(get_user_crud),
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-    access_token_cookie: Optional[str] = Cookie(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    access_token_cookie: str | None = Cookie(
         None, alias="access_token"
     ),  # Soportar cookie access_token
 ) -> Usuario:
-    """
-    Dependency para obtener usuario actual desde JWT token
+    """Dependency para obtener usuario actual desde JWT token.
 
     Soporta Authorization header y cookies
     """
@@ -103,8 +102,11 @@ async def get_current_user(
 
         # Verificar que la cuenta esté activa
         from src.enums.users.usuario_enums import EstadoCuentaUsuario
-        
-        if hasattr(user, "estado_cuenta") and user.estado_cuenta != EstadoCuentaUsuario.activo:
+
+        if (
+            hasattr(user, "estado_cuenta")
+            and user.estado_cuenta != EstadoCuentaUsuario.activo
+        ):
             logger.warning(
                 f"Usuario {user_id} no está activo: estado={user.estado_cuenta}"
             )
@@ -126,13 +128,12 @@ async def get_current_user(
         return user
 
     except JWTError as e:
-        logger.error(f"Error al decodificar token: {e}")
-        raise credentials_exception
+        logger.exception(f"Error al decodificar token: {e}")
+        raise credentials_exception from e
 
 
 def require_roles(*required_roles: RolUsuario):
-    """
-    Dependency factory para requerir roles específicos
+    """Dependency factory para requerir roles específicos.
 
     Usage:
         @app.get("/admin-only", dependencies=[Depends(require_roles(RolUsuario.administrador))])
@@ -149,17 +150,17 @@ def require_roles(*required_roles: RolUsuario):
 
 
 def require_admin():
-    """Dependency para requerir rol de administrador"""
+    """Dependency para requerir rol de administrador."""
     return require_roles(RolUsuario.administrador)
 
 
 def require_admin_or_coordinator():
-    """Dependency para requerir rol admin o coordinador"""
+    """Dependency para requerir rol admin o coordinador."""
     return require_roles(RolUsuario.administrador, RolUsuario.coordinador)
 
 
 def require_verified_email():
-    """Dependency para requerir email verificado"""
+    """Dependency para requerir email verificado."""
 
     def check_verified(current_user: Usuario = Depends(get_current_user)):
         if not current_user.email_verified:
@@ -173,14 +174,13 @@ def require_verified_email():
 
 
 async def rate_limit(
-    identifier: str = None,
+    identifier: str | None = None,
     endpoint: str = "general",
     max_requests: int = 60,
     window_seconds: int = 3600,
     redis_service: RedisService = Depends(get_redis_service),
-):
-    """
-    Dependency para rate limiting
+) -> None:
+    """Dependency para rate limiting.
 
     Args:
         identifier: Identificador único (IP, user_id, etc.)
@@ -211,7 +211,7 @@ async def rate_limit(
 
 # Rate limiting específico para login
 async def login_rate_limit(redis_service: RedisService = Depends(get_redis_service)):
-    """Rate limit específico para endpoint de login"""
+    """Rate limit específico para endpoint de login."""
     return await rate_limit(
         identifier="login_global",  # Se puede personalizar por IP
         endpoint="login",
@@ -221,8 +221,8 @@ async def login_rate_limit(redis_service: RedisService = Depends(get_redis_servi
     )
 
 
-def get_client_ip(x_forwarded_for: Optional[str] = Header(None)) -> str:
-    """Obtener IP del cliente considerando proxies"""
+def get_client_ip(x_forwarded_for: str | None = Header(None)) -> str:
+    """Obtener IP del cliente considerando proxies."""
     if x_forwarded_for:
         # Tomar la primera IP de la lista
         return x_forwarded_for.split(",")[0].strip()
@@ -231,11 +231,10 @@ def get_client_ip(x_forwarded_for: Optional[str] = Header(None)) -> str:
 
 # Validación CSRF para cookies
 def validate_csrf_token(
-    csrf_token: Optional[str] = Header(None, alias="X-CSRF-Token"),
-    csrf_cookie: Optional[str] = Cookie(None, alias="csrf_token"),
+    csrf_token: str | None = Header(None, alias="X-CSRF-Token"),
+    csrf_cookie: str | None = Cookie(None, alias="csrf_token"),
 ):
-    """
-    Validar token CSRF para requests que usan cookies
+    """Validar token CSRF para requests que usan cookies.
 
     Implementa double-submit cookie pattern
     """
@@ -250,3 +249,74 @@ def validate_csrf_token(
         )
 
     return csrf_token
+
+
+# ============================================================================
+# WebSocket Authentication
+# ============================================================================
+
+async def get_current_user_websocket(
+    token: str,
+    db: Session = Depends(get_db),
+    token_service: TokenService = Depends(get_token_service),
+    user_crud: UserCRUD = Depends(get_user_crud),
+) -> Usuario:
+    """
+    Dependency para autenticar usuario en WebSocket.
+    
+    Diferencia con get_current_user:
+    - Recibe token como parámetro directo (query param en WebSocket)
+    - No usa HTTPBearer (no disponible en WebSocket)
+    - Retorna Usuario o lanza excepción
+    
+    Args:
+        token: JWT token de acceso
+        db: Sesión de base de datos
+        token_service: Servicio de tokens
+        user_crud: CRUD de usuarios
+    
+    Returns:
+        Usuario autenticado
+    
+    Raises:
+        HTTPException: Si el token es inválido o el usuario no existe
+    """
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No token provided",
+        )
+    
+    try:
+        # Decodificar token
+        payload = token_service.decode_token(token)
+        usuario_id: str = payload.get("sub")
+        
+        if usuario_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload",
+            )
+        
+        # Buscar usuario
+        usuario = user_crud.get_by_id(db, usuario_id)
+        if usuario is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+            )
+        
+        # Verificar que el usuario esté activo
+        if not usuario.activo:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Inactive user",
+            )
+        
+        return usuario
+        
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Could not validate credentials: {str(e)}",
+        )

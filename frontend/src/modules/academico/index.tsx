@@ -1,24 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiBook, 
-  FiUsers, 
-  FiCalendar,
-  FiFileText,
-  FiPlus,
-  FiSearch,
-  FiFilter,
-  FiLoader,
-  FiAlertCircle,
-  FiRefreshCw,
-  FiUser
-} from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 // Importar API actualizada
 import courseService from './services/courseService';
 import CourseDetail from './CourseDetail';
-import type { Group } from './services/courseService';
-import { checkAuthStatus, clearAuth } from '../../utils/auth';
+import { AlertCircle, Book, Calendar, FileText, Filter, Loader2, Plus, RefreshCw, Search, User, Users } from 'lucide-react';
 
 // Tipos
 interface Curso {
@@ -67,54 +54,63 @@ export default function ModuloAcademico() {
   const [showInvitationModal, setShowInvitationModal] = useState(false);
   const [invitationCode, setInvitationCode] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [userDomain, setUserDomain] = useState('');
 
   // Cargar datos al montar el componente
   useEffect(() => {
-    console.log('🎯 Componente montado, token:', localStorage.getItem('access_token') ? 'EXISTE' : 'NO EXISTE');
     cargarDatos();
-  }, []);    const cargarDatos = async () => {
+  }, []);
+
+  const cargarDatos = async () => {
     try {
-      console.log('🔄 Iniciando cargarDatos()...');
       setLoading(true);
       setError(null);
       
       // Verificar autenticación antes de hacer la llamada
       const token = localStorage.getItem('access_token');
-      console.log('🔑 Token check:', token ? 'Token presente' : 'Sin token');
       
       if (!token) {
-        console.log('❌ Sin token, mostrando estado no autenticado');
-        if (!token) {
-          setEmptyMessage('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-        } else {
-          setEmptyMessage('Debes iniciar sesión para ver tus cursos inscritos.');
-        }
+        setEmptyMessage('Debes iniciar sesión para ver tus cursos inscritos.');
         setCursos([]);
         setError(null);
         setLoading(false);
         return;
       }
       
-      console.log('🌐 Llamando a courseService.getMyCourses()...');
       // Cargar cursos desde la API real
       const response = await courseService.getMyCourses();
       
       if (response.success) {
-        console.log(`✅ ${response.total} cursos cargados desde ${response.source}`);
-        
         // Verificar si hay un estado vacío específico
         if (response.empty_state && response.total === 0) {
-          console.log('📭 Usuario sin cursos asignados');
           setCursos([]);
           setError(null); // No es un error, solo no tiene cursos
           setEmptyMessage(response.empty_message || 'Aún no te has unido a ningún curso');
         } else {
           // Transformar datos de la API para el componente
-          const cursosTransformados: Curso[] = response.data.map((curso: any) => ({
-            id: curso.id,
-            nombre: curso.title || curso.nombre,
-            codigo: curso.codigo_acceso || curso.codigo,
+          interface CourseData {
+            id?: string | number;
+            curso_id?: string;
+            title?: string;
+            nombre?: string;
+            codigo_acceso?: string;
+            codigo?: string;
+            instructor?: string;
+            profesor?: string;
+            total_estudiantes?: number;
+            estudiantes?: number;
+            progress?: number;
+            progreso?: number;
+            estado?: string;
+            description?: string;
+            descripcion?: string;
+            fecha_inicio?: string;
+            fecha_fin?: string;
+          }
+          
+          const cursosTransformados: Curso[] = response.data.map((curso: CourseData) => ({
+            id: curso.curso_id || curso.id || '',
+            nombre: curso.title || curso.nombre || '',
+            codigo: curso.codigo_acceso || curso.codigo || '',
             profesor: curso.instructor || curso.profesor || 'Profesor Asignado',
             estudiantes: curso.total_estudiantes || curso.estudiantes || 0,
             progreso: curso.progress || curso.progreso || 0,
@@ -128,14 +124,6 @@ export default function ModuloAcademico() {
           setError(null);
           setEmptyMessage(null);
         }
-        
-        if (response.source === 'database') {
-          console.log('🎯 Datos obtenidos directamente de PostgreSQL');
-        } else if (response.source === 'auth_error' || response.source === 'auth_expired') {
-          console.log('🔑 Problema de autenticación detectado');
-        } else {
-          console.log('⚠️ Usando datos de fallback');
-        }
       } else {
         console.warn('❌ Error en respuesta API:', response.message);
         
@@ -146,7 +134,6 @@ export default function ModuloAcademico() {
           response.message.includes('vinculado a un programa') ||
           response.message.includes('vincular tu perfil')
         )) {
-          console.log('🎓 Usuario necesita vinculación de perfil de estudiante');
           setNeedsStudentProfile(true);
           setEmptyMessage('Necesitas vincular tu perfil de estudiante para ver tus cursos.');
         } else {
@@ -158,7 +145,6 @@ export default function ModuloAcademico() {
       }
       
       // Cargar grupos reales desde la API - TEMPORALMENTE DESACTIVADO
-      console.log('⚠️ Carga de grupos desactivada temporalmente');
       // Usar datos mock por ahora
       const gruposMock: Grupo[] = [
         {
@@ -232,32 +218,21 @@ export default function ModuloAcademico() {
   const handleAutoLinkStudentProfile = async () => {
     try {
       setLinkingProfile(true);
-      console.log('🔄 Intentando auto-vinculación inteligente...');
-      console.log('📊 Estado actual:', {
-        needsStudentProfile,
-        linkingProfile,
-        showInvitationModal
-      });
       
       // Verificar token antes de hacer la llamada
       const token = localStorage.getItem('access_token');
-      console.log('🔑 Token disponible:', !!token);
       if (!token) {
         alert('❌ No hay token de autenticación. Por favor, inicia sesión nuevamente.');
         return;
       }
       
-      console.log('📡 Llamando a courseService.autoLinkStudentProfile()...');
       const response = await courseService.autoLinkStudentProfile();
-      console.log('📥 Respuesta recibida:', response);
       
       if (response.success) {
-        console.log('✅ Auto-vinculación exitosa:', response);
         setNeedsStudentProfile(false);
         setShowInvitationModal(false);
         
         // Recargar datos después de vincular
-        console.log('🔄 Recargando datos después de vinculación...');
         await cargarDatos();
         
         // Mostrar mensaje específico según el método usado
@@ -268,11 +243,8 @@ export default function ModuloAcademico() {
         alert(mensaje);
         
       } else if (response.requires_invitation) {
-        console.log('📧 Se requiere código de invitación');
-        
         // Guardar datos del usuario para el modal
         setUserEmail(response.user_email || '');
-        setUserDomain(response.dominio || '');
         setShowInvitationModal(true);
         
         alert(`📧 ${response.message}\n\nTe mostraremos el formulario para ingresar tu código de invitación.`);
@@ -280,16 +252,11 @@ export default function ModuloAcademico() {
         console.error('❌ Error en auto-vinculación:', response.message);
         alert(`❌ Error: ${response.message}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; response?: { data?: unknown; status?: number } };
       console.error('❌ Error inesperado en auto-vinculación:', error);
-      console.error('📊 Detalles del error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      alert(`❌ Error: ${error.message || 'Error inesperado al auto-vincular perfil'}`);
+      alert(`❌ Error: ${err.message || 'Error inesperado al auto-vincular perfil'}`);
     } finally {
-      console.log('🏁 Finalizando auto-vinculación...');
       setLinkingProfile(false);
     }
   };
@@ -303,12 +270,10 @@ export default function ModuloAcademico() {
 
     try {
       setLinkingProfile(true);
-      console.log(`🔄 Vinculando con código: ${invitationCode}`);
       
       const response = await courseService.linkByInvitationCode(invitationCode);
       
       if (response.success) {
-        console.log('✅ Vinculación por código exitosa:', response);
         setNeedsStudentProfile(false);
         setShowInvitationModal(false);
         setInvitationCode('');
@@ -321,9 +286,10 @@ export default function ModuloAcademico() {
         console.error('❌ Error en vinculación por código:', response.message);
         alert(`❌ Error: ${response.message}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       console.error('❌ Error inesperado:', error);
-      alert(`❌ Error: ${error.message || 'Error inesperado al vincular con código'}`);
+      alert(`❌ Error: ${err.message || 'Error inesperado al vincular con código'}`);
     } finally {
       setLinkingProfile(false);
     }
@@ -427,10 +393,10 @@ export default function ModuloAcademico() {
         {/* Tabs */}
         <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl p-2 mb-6 border border-gray-200 dark:border-gray-700">
           {[
-            { key: 'cursos', label: 'Cursos', icon: FiBook },
-            { key: 'grupos', label: 'Grupos', icon: FiUsers },
-            { key: 'materiales', label: 'Materiales', icon: FiFileText },
-            { key: 'horarios', label: 'Horarios', icon: FiCalendar }
+            { key: 'cursos', label: 'Cursos', icon: Book },
+            { key: 'grupos', label: 'Grupos', icon: Users },
+            { key: 'materiales', label: 'Materiales', icon: FileText },
+            { key: 'horarios', label: 'Horarios', icon: Calendar }
           ].map(tab => (
             <button
               key={tab.key}
@@ -452,7 +418,7 @@ export default function ModuloAcademico() {
           {/* Búsqueda */}
           <div className="flex items-center space-x-4 flex-1">
             <div className="relative flex-1 max-w-md">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Buscar cursos, códigos..."
@@ -464,7 +430,7 @@ export default function ModuloAcademico() {
 
             {/* Filtros */}
             <div className="flex items-center space-x-2">
-              <FiFilter className="text-gray-400 w-5 h-5" />
+              <Filter className="text-gray-400 w-5 h-5" />
               <select
                 value={filterEstado}
                 onChange={(e) => setFilterEstado(e.target.value)}
@@ -485,7 +451,7 @@ export default function ModuloAcademico() {
               disabled={loading}
               className="flex items-center space-x-2 px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <FiRefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
               <span>Actualizar</span>
             </button>
 
@@ -493,7 +459,7 @@ export default function ModuloAcademico() {
               onClick={handleNewCourse}
               className="flex items-center space-x-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-lg"
             >
-              <FiPlus className="w-5 h-5" />
+              <Plus className="w-5 h-5" />
               <span>Nuevo {activeTab === 'cursos' ? 'Curso' : activeTab === 'grupos' ? 'Grupo' : 'Material'}</span>
             </button>
           </div>
@@ -509,7 +475,7 @@ export default function ModuloAcademico() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center py-20"
             >
-              <FiLoader className="w-12 h-12 text-emerald-600 animate-spin mb-4" />
+              <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mb-4" />
               <p className="text-gray-600 dark:text-gray-400 text-lg">
                 Cargando datos académicos...
               </p>
@@ -522,7 +488,7 @@ export default function ModuloAcademico() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center py-20"
             >
-              <FiAlertCircle className="w-12 h-12 text-red-500 mb-4" />
+              <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
               <p className="text-red-600 dark:text-red-400 text-lg mb-4">
                 {error}
               </p>
@@ -545,7 +511,7 @@ export default function ModuloAcademico() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {cursosFiltrados.length === 0 ? (
                     <div className="col-span-full text-center py-12">
-                      <FiBook className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <Book className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                       <div className="space-y-3">
                         <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">
                           {emptyMessage || (searchTerm ? 'No se encontraron cursos con los criterios de búsqueda' : 'No hay cursos disponibles')}
@@ -557,7 +523,7 @@ export default function ModuloAcademico() {
                                 onClick={() => window.location.href = '/login'}
                                 className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                               >
-                                <FiUser className="w-5 h-5 mr-2" />
+                                <User className="w-5 h-5 mr-2" />
                                 Iniciar Sesión
                               </button>
                             ) : (
@@ -565,7 +531,7 @@ export default function ModuloAcademico() {
                                 onClick={() => setShowJoinModal(true)}
                                 className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
                               >
-                                <FiPlus className="w-5 h-5 mr-2" />
+                                <Plus className="w-5 h-5 mr-2" />
                                 Unirme a un Curso
                               </button>
                             )}
@@ -581,7 +547,7 @@ export default function ModuloAcademico() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1, duration: 0.3 }}
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                        onClick={() => handleCourseSelect(curso.id.toString())}
+                        onClick={() => curso.id && handleCourseSelect(curso.id.toString())}
                       >
                         <div className="p-6">
                           <div className="flex items-start justify-between mb-4">
@@ -612,7 +578,7 @@ export default function ModuloAcademico() {
 
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                              <FiUsers className="w-4 h-4" />
+                              <Users className="w-4 h-4" />
                               <span>{curso.estudiantes} estudiantes</span>
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -659,11 +625,11 @@ export default function ModuloAcademico() {
                         
                         <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                           <div className="flex items-center space-x-2">
-                            <FiUsers className="w-4 h-4" />
+                            <Users className="w-4 h-4" />
                             <span>{grupo.estudiantes} estudiantes</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <FiCalendar className="w-4 h-4" />
+                            <Calendar className="w-4 h-4" />
                             <span>{grupo.horario}</span>
                           </div>
                           <div>
@@ -681,7 +647,7 @@ export default function ModuloAcademico() {
 
               {(activeTab === 'materiales' || activeTab === 'horarios') && (
                 <div className="text-center py-20">
-                  <FiFileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 dark:text-gray-400 text-lg">
                     Sección en desarrollo
                   </p>
@@ -714,9 +680,22 @@ export default function ModuloAcademico() {
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                   Unirse a un Curso
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Ingresa el código del curso al que te quieres inscribir
                 </p>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-6">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    ¿Aún no perteneces a una institución?{' '}
+                    <Link 
+                      to="/invitaciones/usar-codigo" 
+                      className="font-medium underline hover:text-blue-600 dark:hover:text-blue-300"
+                      onClick={() => setShowJoinModal(false)}
+                    >
+                      Usa un código de invitación aquí
+                    </Link>
+                  </p>
+                </div>
 
                 <div className="space-y-4">
                   <div>
@@ -786,7 +765,7 @@ export default function ModuloAcademico() {
 
                 <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 mb-6">
                   <div className="flex items-start space-x-3">
-                    <FiUser className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                     <div>
                       <h4 className="font-medium text-emerald-900 dark:text-emerald-100">
                         🚀 Vinculación Automática
@@ -849,7 +828,7 @@ export default function ModuloAcademico() {
 
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
                   <div className="flex items-start space-x-3">
-                    <FiAlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                     <div>
                       <h4 className="font-medium text-amber-900 dark:text-amber-100">
                         Ejemplos de códigos válidos:

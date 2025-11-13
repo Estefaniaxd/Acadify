@@ -1,0 +1,1258 @@
+[
+  {
+    "original_path": "backend/static/assets/base/base-man/167 sin título_20250922233558.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250922233558.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/base/base-man/167 sin título_20250923002615.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250923002615.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/base/base-woman/167 sin título_20250923002534.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250923002534.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/base/base-woman/167 sin título_20250922233650.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250922233650.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/unisex/ojos_1.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/unisex/ojos_cerrados_3.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_cerrados_3.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/unisex/ojos_2.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/unisex/ojos_cerrados_2.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_cerrados_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/unisex/ojos_cerrados_1.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_cerrados_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/unisex/ojos_3.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_3.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/female/ojos_6.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/eyes/male/ojos_6.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/female/ojos_5.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/eyes/male/ojos_5.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/eyes/female/ojos_4.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/eyes/male/ojos_4.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/medias_negras.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/medias_negras.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/chaqueta_y2k.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/chaqueta_y2k.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/zapatos.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/zapatos.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/pantaloneta_morada.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantaloneta_morada.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/camisa_cafe_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/camisa_cafe_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/Smoking_fuck_news.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Smoking_fuck_news.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/Fuck_news_pantalon.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Fuck_news_pantalon.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/camisa_verde_juan.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_verde_juan.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/pantalon.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantalon.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/unisex/Saco_tortuga.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Saco_tortuga.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/Medias_maya.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/Medias_maya.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/camisa_miku.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/camisa_miku.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/vestido.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/vestido.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/Camisa_morada_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/Camisa_morada_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/zapatos_beige.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/zapatos_beige.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/Camisa_verde_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/Camisa_verde_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/Corset_rojo.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/Corset_rojo.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/esqueleto_azul.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/esqueleto_azul.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/falda_miku.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/falda_miku.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/falda_2.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/falda_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/camisa_cafe.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/camisa_cafe.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/esqueleto_blanco_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/esqueleto_blanco_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/zapatos_rosados.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/zapatos_rosados.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/calentadoras.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/calentadoras.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/Camisa_roja_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/Camisa_roja_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/Camisa_negra_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/Camisa_negra_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/camisa_elegante_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/camisa_elegante_mujer.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/female/falda_blanca.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/falda_blanca.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/camisa_colombia_2.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/camisa_colombia_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/pantalon_rojo.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/pantalon_rojo.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/pantalon_blanco.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/pantalon_blanco.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/pantalon_azul.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/pantalon_azul.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/camisa_colombia.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/camisa_colombia.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/real_madrid.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/real_madrid.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/pantalon_cafe.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/pantalon_cafe.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/clothes/male/camisa_elegante_blanca.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/clothes/male/camisa_elegante_blanca.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/backgrounds/bg_002.png",
+    "proposed_category": "backgrounds",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/backgrounds/unisex/bg_002.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/female/hair_4.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_4.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/female/hair_2.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/female/hair_1.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_1.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/female/hair_3.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_3.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/male/hair_6.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_6.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/male/hair_5.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_5.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/hair/male/hair_7.png",
+    "proposed_category": "hair",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/hair/male/hair_7.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/unisex/piercing_ceja.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/piercing_ceja.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/unisex/curitas.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/curitas.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/unisex/collar_3.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/collar_3.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/unisex/gafas_1.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/gafas_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/unisex/collar_2.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/collar_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/unisex/manilla_1.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/manilla_1.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/female/collar_1.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/collar_1.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/female/manilla_2.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/manilla_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/female/moño.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/moño.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/female/gafas_2.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/gafas_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/accessories/female/orejas_gato.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/orejas_gato.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/makeup/unisex/gotic_makeup.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/makeup/unisex/gotic_makeup.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/makeup/female/rubor.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/makeup/male/rubor.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/makeup/female/ahumado_morado.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/makeup/male/ahumado_morado.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/makeup/female/ahumado_negro.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/makeup/male/ahumado_negro.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/makeup/female/remolino_rubor.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/makeup/male/remolino_rubor.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/mouth/unisex/boca_base.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_base.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/mouth/unisex/boca_2.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/mouth/unisex/boca_5.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_5.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/mouth/unisex/boca_1.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/mouth/female/boca_3.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/mouth/male/boca_3.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "backend/static/assets/mouth/male/boca_4.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/mouth/male/boca_4.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/base/base-man/167 sin título_20250922233558.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250922233558.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/base/base-man/167 sin título_20250923002615.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250923002615.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/base/base-woman/167 sin título_20250923002534.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250923002534.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/base/base-woman/167 sin título_20250922233650.png",
+    "proposed_category": "base",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/base/167 sin título_20250922233650.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_1.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_cerrados_3.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_cerrados_3.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_6.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_6.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_2.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_5.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_5.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_cerrados_2.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_cerrados_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_cerrados_1.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_cerrados_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_3.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_3.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/eyes/ojos_4.png",
+    "proposed_category": "eyes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/eyes/unisex/ojos_4.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/medias_negras.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/medias_negras.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_colombia_2.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_colombia_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/chaqueta_y2k.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/chaqueta_y2k.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/zapatos.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/zapatos.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/pantalon_rojo.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantalon_rojo.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Medias_maya.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Medias_maya.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/pantalon_blanco.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantalon_blanco.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_miku.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_miku.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/pantaloneta_morada.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantaloneta_morada.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/vestido.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/vestido.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_cafe_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/camisa_cafe_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Camisa_morada_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/Camisa_morada_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/zapatos_beige.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/zapatos_beige.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Camisa_verde_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/Camisa_verde_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/pantalon_azul.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantalon_azul.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Corset_rojo.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Corset_rojo.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/esqueleto_azul.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/esqueleto_azul.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Smoking_fuck_news.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Smoking_fuck_news.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/falda_miku.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/falda_miku.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/falda_2.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/falda_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Fuck_news_pantalon.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Fuck_news_pantalon.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_cafe.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_cafe.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_colombia.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_colombia.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/esqueleto_blanco_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/esqueleto_blanco_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/real_madrid.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/real_madrid.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/zapatos_rosados.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/zapatos_rosados.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/calentadoras.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/calentadoras.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_verde_juan.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_verde_juan.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/pantalon.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantalon.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/pantalon_cafe.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/pantalon_cafe.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Camisa_roja_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/Camisa_roja_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Camisa_negra_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/Camisa_negra_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/Saco_tortuga.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/Saco_tortuga.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_elegante_mujer.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "female",
+    "proposed_target": "backend/static/assets/clothes/female/camisa_elegante_mujer.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/camisa_elegante_blanca.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/camisa_elegante_blanca.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/clothes/falda_blanca.png",
+    "proposed_category": "clothes",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/clothes/unisex/falda_blanca.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_6.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_6.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_5.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_5.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_4.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_4.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_7.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_7.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_2.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_1.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_1.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/hair/hair_3.png",
+    "proposed_category": "hair",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/hair/unisex/hair_3.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/mounth/boca_base.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_base.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/mounth/boca_4.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_4.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/mounth/boca_2.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/mounth/boca_5.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_5.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/mounth/boca_1.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/mounth/boca_3.png",
+    "proposed_category": "mouth",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/mouth/unisex/boca_3.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/piercing_ceja.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/piercing_ceja.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/collar_1.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/collar_1.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/curitas.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/curitas.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/manilla_2.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/manilla_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/collar_3.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/collar_3.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/moño.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/moño.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/gafas_1.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/gafas_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/gafas_2.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/gafas_2.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/orejas_gato.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/orejas_gato.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/collar_2.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/accessories/unisex/collar_2.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/accessories/manilla_1.png",
+    "proposed_category": "accessories",
+    "proposed_gender": "male",
+    "proposed_target": "backend/static/assets/accessories/male/manilla_1.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/makeup/gotic_makeup.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/makeup/unisex/gotic_makeup.png",
+    "target_exists_already": true,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/makeup/rubor.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/makeup/unisex/rubor.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/makeup/ahumado_morado.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/makeup/unisex/ahumado_morado.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/makeup/ahumado_negro.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/makeup/unisex/ahumado_negro.png",
+    "target_exists_already": false,
+    "reason": "path"
+  },
+  {
+    "original_path": "avatares/makeup/remolino_rubor.png",
+    "proposed_category": "makeup",
+    "proposed_gender": "unisex",
+    "proposed_target": "backend/static/assets/makeup/unisex/remolino_rubor.png",
+    "target_exists_already": false,
+    "reason": "path"
+  }
+]

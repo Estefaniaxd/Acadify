@@ -1,15 +1,21 @@
-from sqlalchemy.orm import Session
-from ..base import CRUDBase
-from ...models.academic.curso_docente import CursoDocente
-from ...schemas.academic.curso_docente import CursoDocenteCreate, CursoDocenteUpdate
 from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from src.crud.base import CRUDBase
+from src.models.academic.curso_docente import CursoDocente
+from src.schemas.academic.curso_docente import CursoDocenteCreate, CursoDocenteUpdate
+
 
 class CRUDCursoDocente(CRUDBase[CursoDocente, CursoDocenteCreate, CursoDocenteUpdate]):
     def get(self, db: Session, curso_id: UUID, docente_id: UUID):
-        return db.query(CursoDocente).filter(
-            CursoDocente.curso_id == curso_id,
-            CursoDocente.docente_id == docente_id
-        ).first()
+        return (
+            db.query(CursoDocente)
+            .filter(
+                CursoDocente.curso_id == curso_id, CursoDocente.docente_id == docente_id
+            )
+            .first()
+        )
 
     def get_all(self, db: Session, skip: int = 0, limit: int = 100):
         return db.query(CursoDocente).offset(skip).limit(limit).all()
@@ -36,5 +42,6 @@ class CRUDCursoDocente(CRUDBase[CursoDocente, CursoDocenteCreate, CursoDocenteUp
             db.delete(obj)
             db.commit()
         return obj
+
 
 curso_docente = CRUDCursoDocente(CursoDocente)

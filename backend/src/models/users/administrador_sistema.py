@@ -1,7 +1,7 @@
-from ...db.base_class import Base
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
 
 
 class AdministradorSistema(Base):
@@ -12,4 +12,3 @@ class AdministradorSistema(Base):
         ForeignKey("Usuario.usuario_id", ondelete="CASCADE"),
         primary_key=True,
     )
-

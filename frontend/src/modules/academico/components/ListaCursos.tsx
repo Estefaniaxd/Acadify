@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  BookOpenIcon,
-  UsersIcon,
-  CalendarIcon,
-  EllipsisVerticalIcon
-} from '@heroicons/react/24/outline';
+;
 import { Card, CardHeader, CardContent } from '../../evaluaciones/components/common/LayoutComponents';
 import { LoadingSpinner } from '../../evaluaciones/components/common/LoadingComponents';
 import { Curso, EstadoCurso, FiltrosCurso } from '../types.js';
 import { formatearFecha } from '../../evaluaciones/utils';
 import courseService, { type Course } from '../services/courseService';
+import { BookOpen, Calendar, Plus, Search } from 'lucide-react';
 
 interface ListaCursosProps {
   onCursoSeleccionado?: (curso: Curso) => void;
@@ -214,7 +207,7 @@ const ListaCursos: React.FC<ListaCursosProps> = ({
             onClick={onCrearCurso}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
           >
-            <PlusIcon className="h-5 w-5" />
+            <Plus className="h-5 w-5" />
             <span>Nuevo Curso</span>
           </button>
         )}
@@ -223,7 +216,7 @@ const ListaCursos: React.FC<ListaCursosProps> = ({
       {/* Filtros y búsqueda */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <input
             type="text"
             placeholder="Buscar cursos..."
@@ -325,7 +318,7 @@ const ListaCursos: React.FC<ListaCursosProps> = ({
 
                   <div className="space-y-2">
                     <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <BookOpenIcon className="h-4 w-4 mr-2" />
+                      <BookOpen className="h-4 w-4 mr-2" />
                       <span>{curso.codigo_curso}</span>
                     </div>
                     
@@ -336,7 +329,7 @@ const ListaCursos: React.FC<ListaCursosProps> = ({
                     
                     {curso.fecha_inicio && (
                       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <CalendarIcon className="h-4 w-4 mr-2" />
+                        <Calendar className="h-4 w-4 mr-2" />
                         <span>Inicia: {formatearFecha(curso.fecha_inicio)}</span>
                       </div>
                     )}
@@ -362,7 +355,7 @@ const ListaCursos: React.FC<ListaCursosProps> = ({
       {/* Estado vacío */}
       {cursosFiltrados.length === 0 && (
         <div className="text-center py-12">
-          <BookOpenIcon className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <BookOpen className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             No hay cursos disponibles
           </h3>

@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  PhotoIcon,
-  SpeakerWaveIcon,
-  PlayIcon,
-  PauseIcon,
-  ArrowPathIcon
-} from '@heroicons/react/24/outline';
+;
 import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
 import { LoadingSpinner } from '../common/LoadingComponents';
 import { AlertMessage } from '../common/AlertComponents';

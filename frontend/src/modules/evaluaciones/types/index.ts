@@ -1,8 +1,23 @@
-export type TipoExamen = 'QUIZ' | 'EVALUACION' | 'PARCIAL' | 'FINAL' | 'PRACTICA';
-export type EstadoExamen = 'BORRADOR' | 'ACTIVO' | 'PAUSADO' | 'FINALIZADO' | 'ARCHIVADO';
-export type TipoPregunta = 'OPCION_MULTIPLE' | 'VERDADERO_FALSO' | 'ENSAYO' | 'COMPLETAR' | 'ORDENAR';
-export type DificultadPregunta = 'FACIL' | 'MEDIO' | 'DIFICIL';
-export type EstadoIntento = 'EN_PROGRESO' | 'FINALIZADO' | 'ABANDONADO' | 'EXPIRADO';
+export type TipoExamen = 'evaluacion' | 'prueba' | 'examen_final' | 'quiz' | 'simulacro' | 'diagnostico';
+export type EstadoExamen = 'borrador' | 'publicado' | 'activo' | 'finalizado' | 'archivado';
+export type TipoPregunta = 'opcion_multiple' | 'verdadero_falso' | 'ensayo' | 'respuesta_corta' | 'completar' | 'emparejamiento' | 'ordenamiento';
+export type DificultadPregunta = 'muy_facil' | 'facil' | 'medio' | 'dificil' | 'muy_dificil';
+export type EstadoIntento = 'en_progreso' | 'finalizado' | 'tiempo_agotado' | 'cancelado' | 'abandonado';
+export type TipoEvento = 
+  | 'cambio_pestana' 
+  | 'cambio_aplicacion' 
+  | 'clic_fuera_ventana' 
+  | 'tiempo_inactivo' 
+  | 'pantalla_completa_salida' 
+  | 'teclas_sospechosas' 
+  | 'multiple_sesion_ip' 
+  | 'patron_respuesta_sospechoso' 
+  | 'velocidad_respuesta_anomala'
+  | 'sin_rostro_detectado'
+  | 'multiples_rostros'
+  | 'rostro_desconocido'
+  | 'multiples_voces'
+  | 'audio_sospechoso';
 
 export interface ConfiguracionEvaluacion {
   config_id: string;
@@ -285,4 +300,64 @@ export interface DashboardEstadisticas {
   examenes_recientes: Examen[];
   estadisticas_generales: EstadisticaExamen[];
   alertas_integridad: EventoAntiTrampa[];
+}
+
+// ================================
+// TIPOS PARA PROCTORING (CÁMARA/MICRÓFONO)
+// ================================
+
+export interface ConfiguracionProctoring {
+  habilitarCamera: boolean;
+  habilitarMicrofono: boolean;
+  deteccionRostros: boolean;
+  deteccionMultiplesRostros: boolean;
+  deteccionAudio: boolean;
+  grabarVideo: boolean;
+  grabarAudio: boolean;
+  frecuenciaSnapshotsSegundos: number;
+  umbralConfianzaRostro: number;
+  alertarSinRostro: boolean;
+  alertarMultiplesRostros: boolean;
+  alertarRostroDesconocido: boolean;
+  alertarMultiplesVoces: boolean;
+}
+
+export interface EstadoProctoring {
+  cameraActiva: boolean;
+  microfonoActivo: boolean;
+  rostroDetectado: boolean;
+  numeroRostros: number;
+  nivelAudio: number;
+  ultimoSnapshot: string | null;
+  alertasActivas: AlertaProctoring[];
+}
+
+export interface AlertaProctoring {
+  id: string;
+  tipo: TipoEvento;
+  severidad: 'baja' | 'media' | 'alta' | 'critica';
+  mensaje: string;
+  timestamp: Date;
+  resuelta: boolean;
+  datos?: unknown;
+}
+
+export interface SnapshotProctoring {
+  timestamp: Date;
+  imagenBase64: string;
+  rostrosDetectados: number;
+  confianzaDeteccion?: number;
+  metadatos?: {
+    ancho: number;
+    alto: number;
+    calidad: number;
+  };
+}
+
+export interface EventoAudio {
+  timestamp: Date;
+  nivelAudio: number;
+  duracionMs: number;
+  frecuencias?: number[];
+  multiplesVoces?: boolean;
 }

@@ -1,7 +1,8 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID, DATE
+from sqlalchemy import Column, ForeignKey, UniqueConstraint, text
+from sqlalchemy.dialects.postgresql import DATE, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
 
 
 class GrupoCurso(Base):
@@ -10,7 +11,7 @@ class GrupoCurso(Base):
     __table_args__ = (UniqueConstraint("curso_id", "grupo_id", name="uq_grupo_curso"),)
 
     grupo_curso_id = Column(
-    UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()')
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     grupo_id = Column(ForeignKey("Grupo.grupo_id", ondelete="CASCADE"), nullable=False)
     curso_id = Column(ForeignKey("Curso.curso_id", ondelete="CASCADE"), nullable=False)

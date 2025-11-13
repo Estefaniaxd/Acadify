@@ -7,6 +7,7 @@ import {
   EntregaTareaDetallada,
   EntregaTareaCreate,
   CalificarEntrega,
+  CalificacionResponse,
   Rubrica,
   RubricaCreate,
   FiltrosTarea,
@@ -16,13 +17,13 @@ import {
 } from './types';
 
 // Configuración base del cliente API
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 class ApiClientTareas {
   private baseURL: string;
 
   constructor(baseURL: string = API_BASE_URL) {
-    this.baseURL = `${baseURL}/tareas`;
+    this.baseURL = `${baseURL}/api/cursos/tareas`;
     
     // Interceptor para agregar token de autenticación
     axios.interceptors.request.use((config) => {
@@ -45,18 +46,88 @@ class ApiClientTareas {
 
   // === MÉTODOS PARA TAREAS ===
 
-  async crearTarea(tareaData: TareaCreate): Promise<Tarea> {
-    const response: AxiosResponse<Tarea> = await axios.post(
-      `${this.baseURL}/`,
+  /**
+   * Obtener todas las tareas de un curso
+   * GET /api/cursos/tareas/{curso_id}/tareas
+   */
+  async obtenerTareasCurso(
+    cursoId: string,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<{ tareas: Tarea[]; total: number }> {
+    const response = await axios.get(
+      `${this.baseURL}/${cursoId}/tareas`,
+      { params: { limit, offset } }
+    );
+    return response.data;
+  }
+
+  /**
+   * Crear una nueva tarea en un curso
+   * POST /api/cursos/tareas/{curso_id}/tareas
+   */
+  async crearTarea(
+    cursoId: string,
+    tareaData: {
+      titulo: string;
+      descripcion: string;
+      fecha_limite: string;
+      puntos_max?: number;
+    }
+  ): Promise<Tarea> {
+    const response = await axios.post(
+      `${this.baseURL}/${cursoId}/tareas`,
       tareaData
     );
     return response.data;
   }
 
+  // === MÉTODOS PARA ENTREGAS ===
+
+  /**
+   * Entregar una tarea
+   * POST /api/cursos/tareas/tareas/{tarea_id}/entregar
+   */
+  async entregarTarea(
+    tareaId: string,
+    entregaData: {
+      contenido: string;
+      archivos?: string;
+    }
+  ): Promise<EntregaTarea> {
+    const response = await axios.post(
+      `${this.baseURL}/tareas/${tareaId}/entregar`,
+      entregaData
+    );
+    return response.data;
+  }
+
+  /**
+   * Calificar una entrega con gamificación completa
+   * POST /api/cursos/tareas/entregas/{entrega_id}/calificar
+   */
+  async calificarEntrega(
+    entregaId: string,
+    calificacionData: {
+      calificacion: number;
+      comentarios?: string;
+    }
+  ): Promise<CalificacionResponse> {
+    const response = await axios.post(
+      `${this.baseURL}/entregas/${entregaId}/calificar`,
+      calificacionData
+    );
+    return response.data;
+  }
+
+  // === MÉTODOS LEGACY (MANTENER COMPATIBILIDAD) ===
+
   async obtenerTareasGrupo(
     grupoId: string, 
     filtros?: Partial<FiltrosTarea>
   ): Promise<Tarea[]> {
+    // Por ahora redirigir a obtenerTareasCurso
+    // TODO: Implementar endpoint específico para grupos
     const params = new URLSearchParams();
     
     if (filtros) {
@@ -112,8 +183,8 @@ class ApiClientTareas {
     return response.data;
   }
 
-  async obtenerEstadisticasTarea(tareaId: string): Promise<any> {
-    const response: AxiosResponse<any> = await axios.get(
+  async obtenerEstadisticasTarea(tareaId: string): Promise<Record<string, unknown>> {
+    const response: AxiosResponse<Record<string, unknown>> = await axios.get(
       `${this.baseURL}/${tareaId}/estadisticas`
     );
     return response.data;
@@ -121,214 +192,6 @@ class ApiClientTareas {
 
   async eliminarTarea(tareaId: string): Promise<void> {
     await axios.delete(`${this.baseURL}/${tareaId}`);
-  }
-
-  // === MÉTODOS PARA ENTREGAS ===
-
-  async crearEntrega(
-    tareaId: string, 
-    entregaData: EntregaTareaCreate
-  ): Promise<EntregaTarea> {
-    const response: AxiosResponse<EntregaTarea> = await axios.post(
-      `${this.baseURL}/${tareaId}/entregas`,
-      entregaData
-    );
-    return response.data;
-  }
-
-  async subirArchivoEntrega(
-    entregaId: string, 
-    archivo: File
-  ): Promise<{ mensaje: string; archivo_url: string }> {
-    const formData = new FormData();
-    formData.append('archivo', archivo);
-
-    const response: AxiosResponse<{ mensaje: string; archivo_url: string }> = 
-      await axios.post(
-        `${this.baseURL}/entregas/${entregaId}/subir-archivo`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-    return response.data;
-  }
-
-  async entregarTarea(entregaId: string): Promise<EntregaTarea> {
-    const response: AxiosResponse<EntregaTarea> = await axios.patch(
-      `${this.baseURL}/entregas/${entregaId}/entregar`
-    );
-    return response.data;
-  }
-
-  async calificarEntrega(
-    entregaId: string, 
-    calificacionData: CalificarEntrega
-  ): Promise<EntregaTarea> {
-    const response: AxiosResponse<EntregaTarea> = await axios.patch(
-      `${this.baseURL}/entregas/${entregaId}/calificar`,
-      calificacionData
-    );
-    return response.data;
-  }
-
-  async obtenerEntregasTarea(
-    tareaId: string, 
-    filtros?: Partial<FiltrosEntrega>
-  ): Promise<EntregaTarea[]> {
-    const params = new URLSearchParams();
-    
-    if (filtros) {
-      Object.entries(filtros).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, String(value));
-        }
-      });
-    }
-
-    const response: AxiosResponse<EntregaTarea[]> = await axios.get(
-      `${this.baseURL}/${tareaId}/entregas?${params.toString()}`
-    );
-    return response.data;
-  }
-
-  async obtenerEntrega(entregaId: string): Promise<EntregaTareaDetallada> {
-    const response: AxiosResponse<EntregaTareaDetallada> = await axios.get(
-      `${this.baseURL}/entregas/${entregaId}`
-    );
-    return response.data;
-  }
-
-  // === MÉTODOS PARA RÚBRICAS ===
-
-  async crearRubrica(rubricaData: RubricaCreate): Promise<Rubrica> {
-    const response: AxiosResponse<Rubrica> = await axios.post(
-      `${this.baseURL}/rubricas`,
-      rubricaData
-    );
-    return response.data;
-  }
-
-  async obtenerRubricas(incluirPublicas: boolean = true): Promise<Rubrica[]> {
-    const response: AxiosResponse<Rubrica[]> = await axios.get(
-      `${this.baseURL}/rubricas?incluir_publicas=${incluirPublicas}`
-    );
-    return response.data;
-  }
-
-  async obtenerRubricasPublicas(): Promise<Rubrica[]> {
-    const response: AxiosResponse<Rubrica[]> = await axios.get(
-      `${this.baseURL}/rubricas/publicas`
-    );
-    return response.data;
-  }
-
-  async duplicarRubrica(
-    rubricaId: string, 
-    nuevoNombre: string
-  ): Promise<Rubrica> {
-    const response: AxiosResponse<Rubrica> = await axios.post(
-      `${this.baseURL}/rubricas/${rubricaId}/duplicar`,
-      { nuevo_nombre: nuevoNombre }
-    );
-    return response.data;
-  }
-
-  // === MÉTODOS DE UTILIDAD ===
-
-  async buscarTareas(
-    busqueda: string, 
-    grupoId?: string
-  ): Promise<Tarea[]> {
-    const filtros: Partial<FiltrosTarea> = {
-      busqueda,
-      grupo_id: grupoId,
-      solo_activas: true,
-    };
-
-    if (grupoId) {
-      return this.obtenerTareasGrupo(grupoId, filtros);
-    } else {
-      // Si no hay grupo específico, buscar en todas las tareas del docente actual
-      // Esto requeriría obtener el ID del docente desde el contexto de autenticación
-      throw new Error('Búsqueda global no implementada aún');
-    }
-  }
-
-  async obtenerTareasPorEstado(
-    estado: EstadoTarea, 
-    grupoId?: string
-  ): Promise<Tarea[]> {
-    const filtros: Partial<FiltrosTarea> = {
-      estado,
-      grupo_id: grupoId,
-      solo_activas: true,
-    };
-
-    if (grupoId) {
-      return this.obtenerTareasGrupo(grupoId, filtros);
-    } else {
-      throw new Error('Filtrado por estado global no implementado aún');
-    }
-  }
-
-  async obtenerEntregasPendientes(tareaId?: string): Promise<EntregaTarea[]> {
-    const filtros: Partial<FiltrosEntrega> = {
-      solo_pendientes: true,
-      tarea_id: tareaId,
-    };
-
-    if (tareaId) {
-      return this.obtenerEntregasTarea(tareaId, filtros);
-    } else {
-      throw new Error('Obtener entregas pendientes globales no implementado aún');
-    }
-  }
-
-  // === MÉTODOS PARA ESTADÍSTICAS ===
-
-  async obtenerResumenTareas(grupoId: string): Promise<{
-    total: number;
-    activas: number;
-    vencidas: number;
-    completadas: number;
-  }> {
-    try {
-      const tareas = await this.obtenerTareasGrupo(grupoId);
-      
-      const total = tareas.length;
-      const activas = tareas.filter(t => t.estado === EstadoTarea.PUBLICADA || t.estado === EstadoTarea.EN_PROGRESO).length;
-      const vencidas = tareas.filter(t => t.esta_vencida).length;
-      const completadas = tareas.filter(t => t.estado === EstadoTarea.CERRADA).length;
-
-      return { total, activas, vencidas, completadas };
-    } catch (error) {
-      console.error('Error obteniendo resumen de tareas:', error);
-      return { total: 0, activas: 0, vencidas: 0, completadas: 0 };
-    }
-  }
-
-  async obtenerResumenEntregas(tareaId: string): Promise<{
-    total: number;
-    calificadas: number;
-    pendientes: number;
-    tardias: number;
-  }> {
-    try {
-      const entregas = await this.obtenerEntregasTarea(tareaId);
-      
-      const total = entregas.filter(e => e.estado !== EstadoEntrega.BORRADOR).length;
-      const calificadas = entregas.filter(e => e.calificacion !== null && e.calificacion !== undefined).length;
-      const pendientes = entregas.filter(e => e.estado === EstadoEntrega.ENVIADA && !e.calificacion).length;
-      const tardias = entregas.filter(e => e.es_entrega_tardia).length;
-
-      return { total, calificadas, pendientes, tardias };
-    } catch (error) {
-      console.error('Error obteniendo resumen de entregas:', error);
-      return { total: 0, calificadas: 0, pendientes: 0, tardias: 0 };
-    }
   }
 }
 

@@ -1,6 +1,7 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID, SMALLINT
+from sqlalchemy import Column, ForeignKey, String, text
+from sqlalchemy.dialects.postgresql import SMALLINT, UUID
+
+from src.db.base_class import Base
 
 
 class ValorCalificacion(Base):

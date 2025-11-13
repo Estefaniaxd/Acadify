@@ -1,0 +1,642 @@
+{
+  "timestamp": "2025-11-05T16:19:35.599773",
+  "stats": {
+    "tables_audited": 17,
+    "columns_checked": 560,
+    "issues_found": 28,
+    "models_checked": 17,
+    "schemas_checked": 0
+  },
+  "results": [
+    {
+      "table_name": "Usuario",
+      "model": "Usuario",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 26,
+        "total_model_columns": 26,
+        "common_columns": 26,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 2,
+        "total_relationships": 17,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "Estudiante",
+      "model": "Estudiante",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 6,
+        "total_model_columns": 6,
+        "common_columns": 6,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 2,
+        "total_relationships": 5,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "Docente",
+      "model": "Docente",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 6,
+        "total_model_columns": 6,
+        "common_columns": 6,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 1,
+        "total_relationships": 3,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "Coordinador",
+      "model": "Coordinador",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 3,
+        "total_model_columns": 3,
+        "common_columns": 3,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 1,
+        "total_relationships": 4,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "AdministradorSistema",
+      "model": "AdministradorSistema",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 1,
+        "total_model_columns": 1,
+        "common_columns": 1,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 1,
+        "total_relationships": 0,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "Curso",
+      "model": "Curso",
+      "issues": [],
+      "warnings": [
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "permite_material_estudiantes",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'permite_material_estudiantes': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "programa_id",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'programa_id': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "requiere_aprobacion_material",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'requiere_aprobacion_material': DB=False, Model=True"
+        }
+      ],
+      "summary": {
+        "total_db_columns": 64,
+        "total_model_columns": 64,
+        "common_columns": 64,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 3,
+        "total_relationships": 8,
+        "total_issues": 0,
+        "total_warnings": 3
+      }
+    },
+    {
+      "table_name": "Grupo",
+      "model": "Grupo",
+      "issues": [],
+      "warnings": [
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "programa_id",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'programa_id': DB=False, Model=True"
+        }
+      ],
+      "summary": {
+        "total_db_columns": 56,
+        "total_model_columns": 56,
+        "common_columns": 56,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 5,
+        "total_relationships": 9,
+        "total_issues": 0,
+        "total_warnings": 1
+      }
+    },
+    {
+      "table_name": "GrupoCurso",
+      "model": "GrupoCurso",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 5,
+        "total_model_columns": 5,
+        "common_columns": 5,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 3,
+        "total_relationships": 2,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "EstudianteGrupo",
+      "model": "EstudianteGrupo",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 3,
+        "total_model_columns": 3,
+        "common_columns": 3,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 2,
+        "total_relationships": 2,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "Programa",
+      "model": "Programa",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 67,
+        "total_model_columns": 67,
+        "common_columns": 67,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 2,
+        "total_relationships": 5,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "PeriodoAcademico",
+      "error": "PeriodoAcademico"
+    },
+    {
+      "table_name": "Inscripcion",
+      "error": "Inscripcion"
+    },
+    {
+      "table_name": "tareas",
+      "model": "Tarea",
+      "issues": [
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "docente_id",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'docente_id': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "puntuacion_maxima",
+          "db_type": "DOUBLE PRECISION",
+          "model_type": "FLOAT",
+          "message": "Tipo incompatible en 'puntuacion_maxima': DB=DOUBLE PRECISION, Model=FLOAT"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "peso_evaluacion",
+          "db_type": "DOUBLE PRECISION",
+          "model_type": "FLOAT",
+          "message": "Tipo incompatible en 'peso_evaluacion': DB=DOUBLE PRECISION, Model=FLOAT"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_limite",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_limite': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "tamano_maximo_mb",
+          "db_type": "DOUBLE PRECISION",
+          "model_type": "FLOAT",
+          "message": "Tipo incompatible en 'tamano_maximo_mb': DB=DOUBLE PRECISION, Model=FLOAT"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_modificacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_modificacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "clase_id",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'clase_id': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "actualizado_por",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'actualizado_por': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "grupo_id",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'grupo_id': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "creado_por",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'creado_por': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_actualizacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_actualizacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_inicio_disponible",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_inicio_disponible': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "penalizacion_tardia",
+          "db_type": "DOUBLE PRECISION",
+          "model_type": "FLOAT",
+          "message": "Tipo incompatible en 'penalizacion_tardia': DB=DOUBLE PRECISION, Model=FLOAT"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_creacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_creacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_asignacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_asignacion': DB=TIMESTAMP, Model=DATETIME"
+        }
+      ],
+      "warnings": [
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "puntos_bonificacion",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'puntos_bonificacion': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "tipo",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'tipo': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "puntos_base",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'puntos_base': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "habilitar_retroalimentacion_ia",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'habilitar_retroalimentacion_ia': DB=False, Model=True"
+        }
+      ],
+      "summary": {
+        "total_db_columns": 45,
+        "total_model_columns": 45,
+        "common_columns": 45,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 5,
+        "total_relationships": 4,
+        "total_issues": 15,
+        "total_warnings": 4
+      }
+    },
+    {
+      "table_name": "entregas_tareas",
+      "model": "EntregaTarea",
+      "issues": [
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_limite_original",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_limite_original': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "calificado_por",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'calificado_por': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_calificacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_calificacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "estudiante_id",
+          "db_type": "UUID",
+          "model_type": "VARCHAR",
+          "message": "Tipo incompatible en 'estudiante_id': DB=UUID, Model=VARCHAR"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "calificacion",
+          "db_type": "DOUBLE PRECISION",
+          "model_type": "FLOAT",
+          "message": "Tipo incompatible en 'calificacion': DB=DOUBLE PRECISION, Model=FLOAT"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_actualizacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_actualizacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_entrega",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_entrega': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_creacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_creacion': DB=TIMESTAMP, Model=DATETIME"
+        }
+      ],
+      "warnings": [
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "intentos",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'intentos': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "es_tardia",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'es_tardia': DB=False, Model=True"
+        }
+      ],
+      "summary": {
+        "total_db_columns": 36,
+        "total_model_columns": 36,
+        "common_columns": 36,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 3,
+        "total_relationships": 3,
+        "total_issues": 8,
+        "total_warnings": 2
+      }
+    },
+    {
+      "table_name": "evaluaciones",
+      "model": "Evaluacion",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 82,
+        "total_model_columns": 82,
+        "common_columns": 82,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 1,
+        "total_relationships": 5,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "intentos_evaluacion",
+      "model": "IntentoEvaluacion",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 68,
+        "total_model_columns": 68,
+        "common_columns": 68,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 1,
+        "total_relationships": 3,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "preguntas_evaluacion",
+      "model": "PreguntaEvaluacion",
+      "issues": [
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "puntos_respuesta_parcial",
+          "db_type": "BOOLEAN",
+          "model_type": "DOUBLE PRECISION",
+          "message": "Tipo incompatible en 'puntos_respuesta_parcial': DB=BOOLEAN, Model=DOUBLE PRECISION"
+        }
+      ],
+      "warnings": [
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "titulo",
+          "db_nullable": false,
+          "model_nullable": true,
+          "message": "Nullable diferente en 'titulo': DB=False, Model=True"
+        },
+        {
+          "type": "NULLABLE_MISMATCH",
+          "severity": "WARNING",
+          "column": "enunciado",
+          "db_nullable": true,
+          "model_nullable": false,
+          "message": "Nullable diferente en 'enunciado': DB=True, Model=False"
+        }
+      ],
+      "summary": {
+        "total_db_columns": 42,
+        "total_model_columns": 42,
+        "common_columns": 42,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 2,
+        "total_relationships": 3,
+        "total_issues": 1,
+        "total_warnings": 2
+      }
+    },
+    {
+      "table_name": "Comentario",
+      "model": "Comentario",
+      "issues": [
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_actualizacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_actualizacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_eliminacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_eliminacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "fecha_creacion",
+          "db_type": "TIMESTAMP",
+          "model_type": "DATETIME",
+          "message": "Tipo incompatible en 'fecha_creacion': DB=TIMESTAMP, Model=DATETIME"
+        },
+        {
+          "type": "TYPE_MISMATCH",
+          "severity": "ERROR",
+          "column": "archivos_adjuntos",
+          "db_type": "JSON",
+          "model_type": "TEXT",
+          "message": "Tipo incompatible en 'archivos_adjuntos': DB=JSON, Model=TEXT"
+        }
+      ],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 13,
+        "total_model_columns": 13,
+        "common_columns": 13,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 3,
+        "total_relationships": 5,
+        "total_issues": 4,
+        "total_warnings": 0
+      }
+    },
+    {
+      "table_name": "Reaccion",
+      "error": "Reaccion"
+    },
+    {
+      "table_name": "Institucion",
+      "model": "Institucion",
+      "issues": [],
+      "warnings": [],
+      "summary": {
+        "total_db_columns": 37,
+        "total_model_columns": 37,
+        "common_columns": 37,
+        "extra_in_db": 0,
+        "missing_in_db": 0,
+        "total_foreign_keys": 1,
+        "total_relationships": 4,
+        "total_issues": 0,
+        "total_warnings": 0
+      }
+    }
+  ]
+}

@@ -1,131 +1,226 @@
-import React, { useEffect, forwardRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FiCheckCircle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi'
+import { useEffect, forwardRef, useMemo, memo, useCallback } from 'react';
+import { motion } from 'framer-motion';
+;
+import { IconType } from 'react-icons';
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
+
+/* ==========================================================================
+   🔔 TOAST COMPONENT
+   Toast notification profesional con animaciones y auto-dismiss
+   
+   Principios aplicados:
+   - Single Responsibility: Solo maneja notificaciones toast
+   - Open/Closed: Extensible vía configuración
+   - Liskov Substitution: Consistente con otros componentes de feedback
+   - Interface Segregation: Props específicas
+   ========================================================================== */
+
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
 
 export interface ToastProps {
-  id: string
-  type: 'success' | 'error' | 'info' | 'warning'
-  title: string
-  message?: string
-  duration?: number
-  onClose: (id: string) => void
+  /** ID único del toast */
+  id: string;
+  
+  /** Tipo de toast */
+  type: ToastType;
+  
+  /** Título del toast */
+  title: string;
+  
+  /** Mensaje opcional */
+  message?: string;
+  
+  /** Duración en ms (0 = no auto-close) */
+  duration?: number;
+  
+  /** Callback al cerrar */
+  onClose: (id: string) => void;
+  
+  /** Icono personalizado */
+  icon?: IconType;
+  
+  /** Acción opcional */
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
-const Toast = forwardRef<HTMLDivElement, ToastProps>(({
+/**
+ * Configuración de iconos por tipo
+ * Separado para mejor mantenibilidad (Open/Closed Principle)
+ */
+const TOAST_ICONS: Record<ToastType, IconType> = {
+  success: CheckCircle,
+  error: AlertCircle,
+  warning: AlertTriangle,
+  info: Info,
+} as const;
+
+/**
+ * Configuración de estilos por tipo
+ * Usando design system tokens
+ */
+const TOAST_STYLES: Record<ToastType, {
+  bg: string;
+  border: string;
+  icon: string;
+  progress: string;
+}> = {
+  success: {
+    bg: 'bg-success-light/90 dark:bg-success/20',
+    border: 'border-success/40 dark:border-success/50',
+    icon: 'text-success-dark dark:text-success',
+    progress: 'bg-success dark:bg-success-light',
+  },
+  error: {
+    bg: 'bg-error-light/90 dark:bg-error/20',
+    border: 'border-error/40 dark:border-error/50',
+    icon: 'text-error-dark dark:text-error',
+    progress: 'bg-error dark:bg-error-light',
+  },
+  warning: {
+    bg: 'bg-warning-light/90 dark:bg-warning/20',
+    border: 'border-warning/40 dark:border-warning/50',
+    icon: 'text-warning-dark dark:text-warning',
+    progress: 'bg-warning dark:bg-warning-light',
+  },
+  info: {
+    bg: 'bg-info-light/90 dark:bg-info/20',
+    border: 'border-info/40 dark:border-info/50',
+    icon: 'text-info-dark dark:text-info',
+    progress: 'bg-info dark:bg-info-light',
+  },
+} as const;
+
+/**
+ * Configuración de animaciones
+ */
+const ANIMATION_CONFIG = {
+  initial: { opacity: 0, x: 300, scale: 0.9 },
+  animate: { opacity: 1, x: 0, scale: 1 },
+  exit: { opacity: 0, x: 300, scale: 0.9 },
+  transition: { 
+    type: 'spring',
+    stiffness: 400,
+    damping: 30,
+  },
+} as const;
+
+const Toast = memo(forwardRef<HTMLDivElement, ToastProps>(({
   id,
   type,
   title,
   message,
   duration = 5000,
-  onClose
+  onClose,
+  icon,
+  action,
 }, ref) => {
+  // Callback memoizado para cerrar (Performance)
+  const handleClose = useCallback(() => {
+    onClose(id);
+  }, [id, onClose]);
+  
+  // Auto-dismiss timer
   useEffect(() => {
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        onClose(id)
-      }, duration)
-      return () => clearTimeout(timer)
-    }
-  }, [id, duration, onClose])
+    if (duration <= 0) return;
+    
+    const timer = setTimeout(handleClose, duration);
+    return () => clearTimeout(timer);
+  }, [duration, handleClose]);
 
-  const getIcon = () => {
-    switch (type) {
-      case 'success':
-        return <FiCheckCircle className="w-5 h-5" />
-      case 'error':
-        return <FiAlertCircle className="w-5 h-5" />
-      case 'warning':
-        return <FiAlertCircle className="w-5 h-5" />
-      default:
-        return <FiInfo className="w-5 h-5" />
-    }
-  }
-
-  const getColorClasses = () => {
-    switch (type) {
-      case 'success':
-        return 'from-emerald-500/20 to-green-500/20 border-emerald-500/30 text-emerald-100'
-      case 'error':
-        return 'from-red-500/20 to-rose-500/20 border-red-500/30 text-red-100'
-      case 'warning':
-        return 'from-amber-500/20 to-yellow-500/20 border-amber-500/30 text-amber-100'
-      default:
-        return 'from-blue-500/20 to-indigo-500/20 border-blue-500/30 text-blue-100'
-    }
-  }
-
-  const getIconColorClasses = () => {
-    switch (type) {
-      case 'success':
-        return 'text-emerald-400'
-      case 'error':
-        return 'text-red-400'
-      case 'warning':
-        return 'text-amber-400'
-      default:
-        return 'text-blue-400'
-    }
-  }
+  // Obtener configuración de estilos (memoizado)
+  const styles = useMemo(() => TOAST_STYLES[type], [type]);
+  const Icon = icon || TOAST_ICONS[type];
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x: 300, scale: 0.8 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 300, scale: 0.8 }}
-      transition={{ 
-        type: "spring",
-        stiffness: 500,
-        damping: 30,
-        mass: 0.5
-      }}
+      {...ANIMATION_CONFIG}
       className={`
-        relative flex items-start gap-3 p-4 min-w-[320px] max-w-[400px]
-        bg-gradient-to-r ${getColorClasses()}
-        backdrop-blur-xl border rounded-2xl shadow-2xl
-        before:absolute before:inset-0 before:rounded-2xl 
-        before:bg-gradient-to-r before:from-white/10 before:to-white/5
-        before:backdrop-blur-xl before:-z-10
+        relative 
+        flex items-start gap-3 
+        p-4 pr-3
+        min-w-[320px] max-w-[420px]
+        ${styles.bg}
+        backdrop-blur-lg
+        border-2 ${styles.border}
+        rounded-xl
+        shadow-lg
+        text-neutral-900 dark:text-neutral-100
       `}
+      role="alert"
+      aria-live="polite"
+      aria-atomic="true"
     >
       {/* Icono */}
-      <div className={`flex-shrink-0 ${getIconColorClasses()}`}>
-        {getIcon()}
+      <div className={`flex-shrink-0 mt-0.5 ${styles.icon}`}>
+        <Icon className="w-5 h-5" aria-hidden="true" />
       </div>
 
       {/* Contenido */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-sm mb-1">
+        <h4 className="font-semibold text-sm leading-tight mb-1">
           {title}
         </h4>
+        
         {message && (
-          <p className="text-xs opacity-80 leading-relaxed">
+          <p className="text-xs opacity-90 leading-relaxed">
             {message}
           </p>
+        )}
+        
+        {/* Acción opcional */}
+        {action && (
+          <button
+            onClick={() => {
+              action.onClick();
+              handleClose();
+            }}
+            className="
+              mt-2 text-xs font-medium
+              underline underline-offset-2
+              hover:opacity-80
+              transition-opacity
+              focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-1
+            "
+          >
+            {action.label}
+          </button>
         )}
       </div>
 
       {/* Botón cerrar */}
       <button
-        onClick={() => onClose(id)}
-        className="flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-colors duration-200"
+        onClick={handleClose}
+        className="
+          flex-shrink-0 p-1.5 rounded-lg
+          hover:bg-black/5 dark:hover:bg-white/5
+          transition-colors duration-200
+          focus:outline-none focus:ring-2 focus:ring-current
+        "
+        aria-label="Cerrar notificación"
+        type="button"
       >
-        <FiX className="w-4 h-4 opacity-60 hover:opacity-100" />
+        <X className="w-4 h-4 opacity-70 hover:opacity-100 transition-opacity" aria-hidden="true" />
       </button>
 
       {/* Barra de progreso */}
       {duration > 0 && (
         <motion.div
-          initial={{ width: "100%" }}
-          animate={{ width: "0%" }}
-          transition={{ duration: duration / 1000, ease: "linear" }}
-          className="absolute bottom-0 left-0 h-1 bg-white/30 rounded-b-2xl"
+          initial={{ scaleX: 1 }}
+          animate={{ scaleX: 0 }}
+          transition={{ duration: duration / 1000, ease: 'linear' }}
+          className={`absolute bottom-0 left-0 right-0 h-1 ${styles.progress} rounded-b-xl origin-left`}
+          aria-hidden="true"
         />
       )}
     </motion.div>
-  )
-})
+  );
+}));
 
-Toast.displayName = 'Toast'
+Toast.displayName = 'Toast';
 
-export default Toast
+export default Toast;

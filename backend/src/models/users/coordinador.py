@@ -1,7 +1,8 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, DATE
+from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy.dialects.postgresql import DATE, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
 
 
 class Coordinador(Base):

@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import {
-  ClockIcon,
-  ExclamationTriangleIcon,
-  PauseIcon,
-  PlayIcon
-} from '@heroicons/react/24/outline';
+import { Clock as ClockIcon, Pause as PauseIcon, AlertTriangle as ExclamationTriangleIcon } from 'lucide-react';
 
 interface TimerExamenProps {
   tiempoRestante: number; // en segundos
   tiempoTotal: number; // en segundos
   onTiempoAgotado: () => void;
+  onAutoSave?: () => void | Promise<void>; // Callback para auto-guardar
   pausado?: boolean;
+  habilitarNotificaciones?: boolean;
+  habilitarAutoSave?: boolean;
+  intervaloAutoSaveSegundos?: number;
   className?: string;
 }
 
@@ -19,31 +18,121 @@ export function TimerExamen({
   tiempoRestante,
   tiempoTotal,
   onTiempoAgotado,
+  onAutoSave,
   pausado = false,
+  habilitarNotificaciones = true,
+  habilitarAutoSave = true,
+  intervaloAutoSaveSegundos = 30,
   className = ''
 }: TimerExamenProps) {
-  const [ultimoTiempo, setUltimoTiempo] = useState(tiempoRestante);
+  const ultimoTiempoRef = useRef(tiempoRestante);
   const [pulsando, setPulsando] = useState(false);
+  const notificacionesMostradasRef = useRef<Set<number>>(new Set());
+
+  // Solicitar permisos de notificación al montar
+  useEffect(() => {
+    if (habilitarNotificaciones && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, [habilitarNotificaciones]);
+
+  // Función para mostrar notificación
+  const mostrarNotificacion = useCallback((titulo: string, mensaje: string) => {
+    if (!habilitarNotificaciones) return;
+
+    // Notificación de escritorio
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(titulo, {
+        body: mensaje,
+        icon: '/logo.png',
+        badge: '/logo.png',
+        tag: 'timer-evaluacion',
+        requireInteraction: false
+      });
+    }
+
+    // Reproducir sonido de alerta
+    try {
+      const audioContext = new AudioContext();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800; // Tono de alerta
+      gainNode.gain.value = 0.2;
+
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      oscillator.stop(audioContext.currentTime + 0.3);
+
+      setTimeout(() => audioContext.close(), 400);
+    } catch (error) {
+      console.error('Error reproduciendo sonido:', error);
+    }
+  }, [habilitarNotificaciones]);
+
+  // Notificaciones en tiempos específicos
+  useEffect(() => {
+    const minutosRestantes = Math.floor(tiempoRestante / 60);
+    const umbralNotificacion = [15, 10, 5, 3, 1]; // minutos
+
+    umbralNotificacion.forEach(umbral => {
+      if (minutosRestantes === umbral && !notificacionesMostradasRef.current.has(umbral)) {
+        notificacionesMostradasRef.current.add(umbral);
+        mostrarNotificacion(
+          'Evaluación - Tiempo restante',
+          `Quedan ${umbral} minuto${umbral !== 1 ? 's' : ''} para finalizar`
+        );
+      }
+    });
+
+    // Notificación de últimos 30 segundos
+    if (tiempoRestante === 30 && !notificacionesMostradasRef.current.has(0)) {
+      notificacionesMostradasRef.current.add(0);
+      mostrarNotificacion(
+        'Evaluación - ¡ATENCIÓN!',
+        '¡Quedan solo 30 segundos!'
+      );
+    }
+  }, [tiempoRestante, mostrarNotificacion]);
+
+  // Auto-save periódico
+  useEffect(() => {
+    if (!habilitarAutoSave || !onAutoSave || pausado) {
+      return;
+    }
+
+    const intervalo = setInterval(() => {
+      onAutoSave();
+    }, intervaloAutoSaveSegundos * 1000);
+
+    return () => clearInterval(intervalo);
+  }, [habilitarAutoSave, onAutoSave, pausado, intervaloAutoSaveSegundos]);
 
   // Detectar cuando el tiempo se agota
   useEffect(() => {
-    if (tiempoRestante <= 0 && ultimoTiempo > 0) {
+    if (tiempoRestante <= 0 && ultimoTiempoRef.current > 0) {
       onTiempoAgotado();
     }
-    setUltimoTiempo(tiempoRestante);
-  }, [tiempoRestante, ultimoTiempo, onTiempoAgotado]);
+    ultimoTiempoRef.current = tiempoRestante;
+  }, [tiempoRestante, onTiempoAgotado]);
 
   // Efecto de pulsación cuando queda poco tiempo
   useEffect(() => {
-    if (tiempoRestante <= 300 && tiempoRestante > 0 && !pausado) { // Últimos 5 minutos
+    const debePulsar = tiempoRestante <= 300 && tiempoRestante > 0 && !pausado;
+    
+    if (debePulsar) {
       const intervalo = setInterval(() => {
         setPulsando(prev => !prev);
       }, 1000);
-
       return () => clearInterval(intervalo);
-    } else {
-      setPulsando(false);
     }
+    
+    // Usar timeout para evitar setState sincrónico en el cuerpo del efecto
+    const timeout = setTimeout(() => setPulsando(false), 0);
+    return () => clearTimeout(timeout);
   }, [tiempoRestante, pausado]);
 
   const formatearTiempo = useCallback((segundos: number) => {

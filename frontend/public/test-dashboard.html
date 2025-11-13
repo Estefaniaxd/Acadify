@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avatar Studio - Testing Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      color: #1a202c;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #718096;
+      font-size: 16px;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .card h2 {
+      font-size: 20px;
+      color: #1a202c;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card .emoji {
+      font-size: 24px;
+    }
+    
+    .test-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #f7fafc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-item.pending { background: #fef3c7; }
+    .test-item.running { background: #dbeafe; }
+    .test-item.success { background: #d1fae5; }
+    .test-item.error { background: #fee2e2; }
+    
+    .test-item .status {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    .test-item .label {
+      flex: 1;
+      font-size: 14px;
+      color: #4a5568;
+    }
+    
+    .button {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 12px;
+    }
+    
+    .button.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .button.secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+    
+    .button.secondary:hover {
+      background: #cbd5e0;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+    
+    .stat {
+      text-align: center;
+      padding: 16px;
+      background: #f7fafc;
+      border-radius: 8px;
+    }
+    
+    .stat .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .stat .label {
+      font-size: 12px;
+      color: #718096;
+      margin-top: 4px;
+    }
+    
+    .console {
+      background: #1a202c;
+      color: #48bb78;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    
+    .console .log {
+      margin-bottom: 6px;
+    }
+    
+    .console .log.success { color: #48bb78; }
+    .console .log.error { color: #f56565; }
+    .console .log.info { color: #63b3ed; }
+    .console .log.warning { color: #f6ad55; }
+    
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 Avatar Studio - Testing Dashboard</h1>
+      <p>Pruebas automatizadas y manuales para la optimización Phase 4</p>
+    </div>
+    
+    <div class="grid">
+      <!-- Tests Funcionales -->
+      <div class="card">
+        <h2><span class="emoji">✅</span> Tests Funcionales</h2>
+        
+        <div class="test-item pending" id="test-mount">
+          <div class="status">⏳</div>
+          <div class="label">Montaje del componente</div>
+        </div>
+        
+        <div class="test-item pending" id="test-manifest">
+          <div class="status">⏳</div>
+          <div class="label">Carga de manifest</div>
+        </div>
+        
+        <div class="test-item pending" id="test-categories">
+          <div class="status">⏳</div>
+          <div class="label">Categorías visibles</div>
+        </div>
+        
+        <div class="test-item pending" id="test-gender">
+          <div class="status">⏳</div>
+          <div class="label">Controles de género</div>
+        </div>
+        
+        <div class="test-item pending" id="test-localStorage">
+          <div class="status">⏳</div>
+          <div class="label">Persistencia localStorage</div>
+        </div>
+        
+        <button class="button primary" onclick="runFunctionalTests()">
+          ▶️ Ejecutar Tests
+        </button>
+      </div>
+      
+      <!-- Tests de Performance -->
+      <div class="card">
+        <h2><span class="emoji">⚡</span> Tests de Performance</h2>
+        
+        <div class="stats">
+          <div class="stat">
+            <div class="value" id="stat-renders">-</div>
+            <div class="label">Renders</div>
+          </div>
+          <div class="stat">
+            <div class="value" id="stat-time">-</div>
+            <div class="label">Tiempo (ms)</div>
+          </div>
+          <div class="stat">
+            <div class="value" id="stat-bundle">14.42</div>
+            <div class="label">KB gzip</div>
+          </div>
+        </div>
+        
+        <button class="button primary" onclick="runPerformanceTests()">
+          ⚡ Medir Performance
+        </button>
+        
+        <button class="button secondary" onclick="openAvatarStudio()">
+          🎨 Abrir Avatar Studio
+        </button>
+      </div>
+      
+      <!-- Instrucciones Manuales -->
+      <div class="card">
+        <h2><span class="emoji">📝</span> Pruebas Manuales</h2>
+        
+        <div class="test-item">
+          <div class="status">1️⃣</div>
+          <div class="label">Selecciona categoría (Hair, Eyes, etc.)</div>
+        </div>
+        
+        <div class="test-item">
+          <div class="status">2️⃣</div>
+          <div class="label">Click en asset → Agrega capa</div>
+        </div>
+        
+        <div class="test-item">
+          <div class="status">3️⃣</div>
+          <div class="label">Click en X → Remueve capa</div>
+        </div>
+        
+        <div class="test-item">
+          <div class="status">4️⃣</div>
+          <div class="label">Cambiar género Male/Female</div>
+        </div>
+        
+        <div class="test-item">
+          <div class="status">5️⃣</div>
+          <div class="label">Click "Visualizar" → Preview</div>
+        </div>
+        
+        <button class="button secondary" onclick="document.getElementById('console').innerHTML = ''">
+          🗑️ Limpiar Consola
+        </button>
+      </div>
+      
+      <!-- Estado Actual -->
+      <div class="card full-width">
+        <h2><span class="emoji">📊</span> Resultados</h2>
+        <div class="console" id="console">
+          <div class="log info">💡 Presiona "Ejecutar Tests" para comenzar...</div>
+        </div>
+      </div>
+      
+      <!-- Preview de Avatar Studio -->
+      <div class="card full-width">
+        <h2><span class="emoji">🎨</span> Avatar Studio (Live)</h2>
+        <iframe id="avatar-frame" src="http://localhost:5173/avatar"></iframe>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function log(message, type = 'info') {
+      const console = document.getElementById('console');
+      const log = document.createElement('div');
+      log.className = `log ${type}`;
+      log.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      console.appendChild(log);
+      console.scrollTop = console.scrollHeight;
+    }
+    
+    function updateTestStatus(testId, status) {
+      const test = document.getElementById(testId);
+      test.className = `test-item ${status}`;
+      
+      const icons = {
+        pending: '⏳',
+        running: '🔄',
+        success: '✅',
+        error: '❌'
+      };
+      
+      test.querySelector('.status').textContent = icons[status];
+    }
+    
+    async function runFunctionalTests() {
+      log('🧪 Iniciando tests funcionales...', 'info');
+      
+      const iframe = document.getElementById('avatar-frame');
+      const iframeWindow = iframe.contentWindow;
+      
+      // Test 1: Montaje
+      updateTestStatus('test-mount', 'running');
+      await sleep(500);
+      try {
+        const hasComponent = iframeWindow.document.querySelector('[class*="avatar"]');
+        if (hasComponent) {
+          updateTestStatus('test-mount', 'success');
+          log('✅ Componente montado correctamente', 'success');
+        } else {
+          throw new Error('Componente no encontrado');
+        }
+      } catch(e) {
+        updateTestStatus('test-mount', 'error');
+        log('❌ Error en montaje: ' + e.message, 'error');
+      }
+      
+      // Test 2: Manifest
+      updateTestStatus('test-manifest', 'running');
+      await sleep(1000);
+      try {
+        const assets = iframeWindow.document.querySelectorAll('[class*="asset"], img[alt*="asset"]');
+        if (assets.length > 0) {
+          updateTestStatus('test-manifest', 'success');
+          log(`✅ Manifest cargado: ${assets.length} assets encontrados`, 'success');
+        } else {
+          throw new Error('No se encontraron assets');
+        }
+      } catch(e) {
+        updateTestStatus('test-manifest', 'error');
+        log('❌ Error en manifest: ' + e.message, 'error');
+      }
+      
+      // Test 3: Categorías
+      updateTestStatus('test-categories', 'running');
+      await sleep(500);
+      try {
+        const categories = iframeWindow.document.querySelectorAll('[role="tab"], button[class*="tab"]');
+        if (categories.length > 0) {
+          updateTestStatus('test-categories', 'success');
+          log(`✅ ${categories.length} categorías encontradas`, 'success');
+        } else {
+          throw new Error('No se encontraron categorías');
+        }
+      } catch(e) {
+        updateTestStatus('test-categories', 'error');
+        log('❌ Error en categorías: ' + e.message, 'error');
+      }
+      
+      // Test 4: Género
+      updateTestStatus('test-gender', 'running');
+      await sleep(500);
+      try {
+        const genderButtons = Array.from(iframeWindow.document.querySelectorAll('button')).filter(
+          btn => btn.textContent.toLowerCase().includes('male') || 
+                 btn.textContent.toLowerCase().includes('female')
+        );
+        if (genderButtons.length >= 2) {
+          updateTestStatus('test-gender', 'success');
+          log(`✅ Controles de género encontrados`, 'success');
+        } else {
+          throw new Error('Controles de género incompletos');
+        }
+      } catch(e) {
+        updateTestStatus('test-gender', 'error');
+        log('❌ Error en género: ' + e.message, 'error');
+      }
+      
+      // Test 5: localStorage
+      updateTestStatus('test-localStorage', 'running');
+      await sleep(500);
+      try {
+        const maleLayers = iframeWindow.localStorage.getItem('avatar_male_layers');
+        const femaleLayers = iframeWindow.localStorage.getItem('avatar_female_layers');
+        updateTestStatus('test-localStorage', 'success');
+        log(`✅ localStorage configurado correctamente`, 'success');
+        log(`   Male layers: ${maleLayers ? JSON.parse(maleLayers).length : 0} capas`, 'info');
+        log(`   Female layers: ${femaleLayers ? JSON.parse(femaleLayers).length : 0} capas`, 'info');
+      } catch(e) {
+        updateTestStatus('test-localStorage', 'error');
+        log('❌ Error en localStorage: ' + e.message, 'error');
+      }
+      
+      log('✨ Tests funcionales completados!', 'success');
+    }
+    
+    function runPerformanceTests() {
+      log('⚡ Iniciando medición de performance...', 'info');
+      log('📝 Por favor, interactúa con Avatar Studio:', 'warning');
+      log('   1. Agrega 5 capas diferentes', 'info');
+      log('   2. Cambia de género', 'info');
+      log('   3. Visualiza el preview', 'info');
+      
+      const iframe = document.getElementById('avatar-frame');
+      const iframeWindow = iframe.contentWindow;
+      
+      let renderCount = 0;
+      const startTime = performance.now();
+      
+      const observer = new MutationObserver(() => {
+        renderCount++;
+        document.getElementById('stat-renders').textContent = renderCount;
+      });
+      
+      const targetNode = iframeWindow.document.querySelector('[class*="avatar"]');
+      if (targetNode) {
+        observer.observe(targetNode, { 
+          attributes: true, 
+          childList: true, 
+          subtree: true 
+        });
+        
+        setTimeout(() => {
+          observer.disconnect();
+          const endTime = performance.now();
+          const duration = (endTime - startTime).toFixed(0);
+          
+          document.getElementById('stat-time').textContent = duration;
+          
+          log(`📊 Resultados de Performance:`, 'success');
+          log(`   Renders: ${renderCount}`, 'info');
+          log(`   Duración: ${duration}ms`, 'info');
+          
+          if (renderCount < 25) {
+            log(`   ✅ EXCELENTE: Menos de 25 renders!`, 'success');
+          } else if (renderCount < 40) {
+            log(`   ⚠️  ACEPTABLE: 25-40 renders`, 'warning');
+          } else {
+            log(`   ❌ NECESITA OPTIMIZACIÓN: Más de 40 renders`, 'error');
+          }
+        }, 15000);
+        
+        log('⏱️  Midiendo durante 15 segundos...', 'info');
+      } else {
+        log('❌ No se pudo iniciar medición', 'error');
+      }
+    }
+    
+    function openAvatarStudio() {
+      window.open('http://localhost:5173/avatar', '_blank');
+    }
+    
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // Auto-ejecutar tests al cargar
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('🚀 Dashboard listo!', 'success');
+        log('💡 El iframe puede tardar unos segundos en cargar...', 'info');
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

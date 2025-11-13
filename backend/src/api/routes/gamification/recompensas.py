@@ -1,15 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-import src.crud.gamification.recompensas as crud_recompensas
-from src.schemas.gamification.recompensa import (
-    RecompensaResponse, RecompensaCreate, RecompensaUpdate,
-    RecompensasDisponiblesResponse, UsuarioRecompensaResponse, 
-    CanjearRecompensaRequest, HistorialCanjesUsuarioResponse
-)
-from src.api.deps import get_db
+
 from src.api.dependencies import get_current_user
+from src.api.deps import get_db
+import src.crud.gamification.recompensas as crud_recompensas
 from src.models.users.usuario import Usuario
+from src.schemas.gamification.recompensa import (
+    CanjearRecompensaRequest,
+    HistorialCanjesUsuarioResponse,
+    RecompensaCreate,
+    RecompensaResponse,
+    RecompensasDisponiblesResponse,
+    RecompensaUpdate,
+    UsuarioRecompensaResponse,
+)
+
 
 router = APIRouter()
 
@@ -17,7 +22,7 @@ router = APIRouter()
 # CRUD Recompensas
 @router.get(
     "/",
-    response_model=List[RecompensaResponse],
+    response_model=list[RecompensaResponse],
     summary="Listar todas las recompensas",
     tags=["Recompensas"],
 )
@@ -32,9 +37,7 @@ def list_recompensas(db: Session = Depends(get_db)):
     summary="Crear una recompensa",
     tags=["Recompensas"],
 )
-def create_recompensa(
-    recompensa: RecompensaCreate, db: Session = Depends(get_db)
-):
+def create_recompensa(recompensa: RecompensaCreate, db: Session = Depends(get_db)):
     return crud_recompensas.create_recompensa(db, recompensa)
 
 
@@ -63,17 +66,16 @@ def update_recompensa(
     summary="Eliminar una recompensa",
     tags=["Recompensas"],
 )
-def delete_recompensa(recompensa_id: str, db: Session = Depends(get_db)):
+def delete_recompensa(recompensa_id: str, db: Session = Depends(get_db)) -> None:
     ok = crud_recompensas.delete_recompensa(db, recompensa_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Recompensa no encontrada")
-    return None
 
 
 # Endpoints de tienda y canje
 @router.get(
     "/tienda/recompensas",
-    response_model=List[RecompensasDisponiblesResponse],
+    response_model=list[RecompensasDisponiblesResponse],
     summary="Ver recompensas disponibles en la tienda",
     tags=["Recompensas"],
 )
@@ -102,10 +104,11 @@ def redeem_reward(
             detail="No tienes permiso para canjear recompensas de otro usuario",
         )
     try:
-        canje = crud_recompensas.canjear_recompensa(db, request)
-        return canje
+        return crud_recompensas.canjear_recompensa(db, request)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
 
 
 @router.get(

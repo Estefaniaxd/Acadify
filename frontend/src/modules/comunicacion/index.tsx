@@ -1,123 +1,168 @@
-import React, { useState } from 'react';
+/**
+ * Módulo de Comunicación - Refactorizado
+ * =======================================
+ * Centro de comunicación con chat en tiempo real.
+ * 
+ * Funcionalidades:
+ * - Chat en tiempo real con WebSocket
+ * - Gestión de salas (individuales, grupos, clases)
+ * - Indicadores de escritura y presencia
+ * - Archivos adjuntos y reacciones
+ * 
+ * Arquitectura:
+ * - Componentes modulares (ChatList, ChatWindow, MessageBubble, MessageInput)
+ * - Hooks personalizados (useChatWebSocket)
+ * - Servicios de comunicación (chatService)
+ * 
+ * @author Acadify Team
+ * @version 2.0 - Refactorizado con SOLID principles
+ */
+
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiMessageSquare, 
-  FiUsers, 
-  FiVideo,
-  FiPhone,
-  FiSend,
-  FiPaperclip,
-  FiSmile,
-  FiSearch,
-  FiMoreVertical
-} from 'react-icons/fi';
+import { MessageSquare, Video, Bell } from 'lucide-react';
+import { ChatList, ChatWindow } from './components/Chat';
+import { useChatWebSocket } from '../../hooks/useChatWebSocket';
+import { getChatService } from '../../services/chatService';
+import { SalaChat, TipoMensaje } from '../../types/communication';
 
-interface Chat {
-  id: string;
-  nombre: string;
-  tipo: 'individual' | 'grupo' | 'clase';
-  ultimoMensaje: string;
-  timestamp: string;
-  noLeidos: number;
-  avatar?: string;
-  participantes?: string[];
-}
+// TODO: Obtener del contexto de autenticación
+const USUARIO_ID_TEMP = 'user-123';
+const TOKEN_TEMP = localStorage.getItem('token') || '';
 
-interface Mensaje {
-  id: string;
-  autor: string;
-  contenido: string;
-  timestamp: string;
-  tipo: 'texto' | 'archivo' | 'imagen';
-  esPropio: boolean;
-}
-
-const chatsMock: Chat[] = [
-  {
-    id: '1',
-    nombre: 'Matemáticas 11A',
-    tipo: 'clase',
-    ultimoMensaje: 'La tarea para mañana está en la plataforma',
-    timestamp: '15:30',
-    noLeidos: 3,
-    participantes: ['Prof. García', '28 estudiantes']
-  },
-  {
-    id: '2',
-    nombre: 'Ana García',
-    tipo: 'individual',
-    ultimoMensaje: '¿Podemos revisar el ejercicio 5?',
-    timestamp: '14:15',
-    noLeidos: 1
-  },
-  {
-    id: '3',
-    nombre: 'Grupo de Estudio',
-    tipo: 'grupo',
-    ultimoMensaje: 'Luis: Nos vemos en la biblioteca',
-    timestamp: '12:45',
-    noLeidos: 0,
-    participantes: ['Luis', 'María', 'Carlos', 'Sofía']
-  }
-];
-
-const mensajesMock: Mensaje[] = [
-  {
-    id: '1',
-    autor: 'Prof. García',
-    contenido: 'Buenos días clase, recuerden que hoy revisaremos la tarea',
-    timestamp: '10:00',
-    tipo: 'texto',
-    esPropio: false
-  },
-  {
-    id: '2',
-    autor: 'Tú',
-    contenido: 'Profesora, tengo una duda sobre el ejercicio 3',
-    timestamp: '10:15',
-    tipo: 'texto',
-    esPropio: true
-  },
-  {
-    id: '3',
-    autor: 'Prof. García',
-    contenido: 'Perfecto, lo revisamos en clase',
-    timestamp: '10:16',
-    tipo: 'texto',
-    esPropio: false
-  }
-];
 
 export default function ModuloComunicacion() {
+  // ========================================
+  // Estado
+  // ========================================
   const [activeTab, setActiveTab] = useState<'chats' | 'videollamadas' | 'notificaciones'>('chats');
-  const [chatActivo, setChatActivo] = useState<string | null>('1');
-  const [nuevoMensaje, setNuevoMensaje] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [salas, setSalas] = useState<SalaChat[]>([]);
+  const [salaActiva, setSalaActiva] = useState<string | null>(null);
+  const [isLoadingSalas, setIsLoadingSalas] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const chatsFiltrados = chatsMock.filter(chat =>
-    chat.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ========================================
+  // WebSocket Hook (solo si hay sala activa)
+  // ========================================
+  const chatWebSocketEnabled = !!salaActiva;
+  const {
+    mensajes,
+    usuariosEscribiendo,
+    usuariosOnline,
+    isConnected,
+    enviarMensaje,
+    editarMensaje,
+    eliminarMensaje,
+    añadirReaccion,
+    setEscribiendo
+  } = useChatWebSocket({
+    baseUrl: 'ws://localhost:8000',
+    salaId: salaActiva || '',
+    usuarioId: USUARIO_ID_TEMP,
+    token: TOKEN_TEMP,
+    autoConnect: chatWebSocketEnabled
+  });
 
-  const enviarMensaje = () => {
-    if (nuevoMensaje.trim()) {
-      // Aquí se enviaría el mensaje al backend
-      console.log('Enviando mensaje:', nuevoMensaje);
-      setNuevoMensaje('');
+  // ========================================
+  // Cargar salas al montar
+  // ========================================
+  useEffect(() => {
+    cargarSalas();
+  }, []);
+
+  const cargarSalas = async () => {
+    try {
+      setIsLoadingSalas(true);
+      setError(null);
+      const chatService = getChatService();
+      const salasData = await chatService.getSalas();
+      setSalas(salasData);
+    } catch (err) {
+      console.error('Error al cargar salas:', err);
+      setError('No se pudieron cargar los chats. Intenta de nuevo.');
+    } finally {
+      setIsLoadingSalas(false);
     }
   };
 
-  const getTipoIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'individual': return FiMessageSquare;
-      case 'grupo': return FiUsers;
-      case 'clase': return FiVideo;
-      default: return FiMessageSquare;
+  // ========================================
+  // Handlers
+  // ========================================
+  const handleSelectSala = (salaId: string) => {
+    setSalaActiva(salaId);
+  };
+
+  const handleCloseSala = () => {
+    setSalaActiva(null);
+  };
+
+  const handleSendMessage = async (contenido: string, archivos?: File[]) => {
+    if (!salaActiva) return;
+
+    try {
+      if (archivos && archivos.length > 0) {
+        // Si hay archivos, subir primero y luego enviar mensaje con URLs
+        const chatService = getChatService();
+        const urls = await chatService.subirArchivos(archivos, salaActiva);
+        
+        await enviarMensaje({
+          contenido,
+          tipo_mensaje: archivos[0].type.startsWith('image/') ? TipoMensaje.IMAGEN : TipoMensaje.ARCHIVO,
+          archivos_urls: urls
+        });
+      } else {
+        // Solo texto, usar WebSocket
+        await enviarMensaje({
+          contenido,
+          tipo_mensaje: TipoMensaje.TEXTO
+        });
+      }
+    } catch (err) {
+      console.error('Error al enviar mensaje:', err);
     }
   };
 
+  const handleEditMessage = async (mensajeId: string, nuevoContenido: string) => {
+    try {
+      await editarMensaje(mensajeId, nuevoContenido);
+    } catch (err) {
+      console.error('Error al editar mensaje:', err);
+    }
+  };
+
+  const handleDeleteMessage = async (mensajeId: string) => {
+    if (window.confirm('¿Estás seguro de eliminar este mensaje?')) {
+      try {
+        await eliminarMensaje(mensajeId);
+      } catch (err) {
+        console.error('Error al eliminar mensaje:', err);
+      }
+    }
+  };
+
+  const handleReactMessage = async (mensajeId: string, emoji: string) => {
+    try {
+      await añadirReaccion(mensajeId, emoji);
+    } catch (err) {
+      console.error('Error al reaccionar:', err);
+    }
+  };
+
+  const handleTyping = (isTyping: boolean) => {
+    setEscribiendo(isTyping);
+  };
+
+  // ========================================
+  // Obtener sala activa
+  // ========================================
+  const salaActivaData = salas.find(s => s.id === salaActiva);
+
+  // ========================================
+  // Render
+  // ========================================
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
-      <div className="max-w-7xl mx-auto p-6 mt-6">
+    <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 min-h-screen">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -126,18 +171,28 @@ export default function ModuloComunicacion() {
           <p className="text-gray-600 dark:text-gray-400">
             Chats, videollamadas y notificaciones en tiempo real
           </p>
+          
+          {/* Estado de conexión */}
+          {salaActiva && (
+            <div className="mt-2 flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {isConnected ? 'Conectado' : 'Desconectado'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Navigation Tabs */}
         <div className="flex flex-wrap bg-white dark:bg-gray-800 rounded-xl p-2 mb-6 border border-gray-200 dark:border-gray-700">
           {[
-            { key: 'chats', label: 'Chats', icon: FiMessageSquare },
-            { key: 'videollamadas', label: 'Videollamadas', icon: FiVideo },
-            { key: 'notificaciones', label: 'Notificaciones', icon: FiUsers }
+            { key: 'chats', label: 'Chats', icon: MessageSquare },
+            { key: 'videollamadas', label: 'Videollamadas', icon: Video },
+            { key: 'notificaciones', label: 'Notificaciones', icon: Bell }
           ].map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
+              onClick={() => setActiveTab(tab.key as 'chats' | 'videollamadas' | 'notificaciones')}
               className={`
                 flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                 ${activeTab === tab.key
@@ -161,166 +216,66 @@ export default function ModuloComunicacion() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-300px)]"
             >
-              {/* Lista de Chats */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <div className="relative">
-                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Buscar chats..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-                    />
+              {/* Lista de Salas */}
+              <div className="h-full">
+                {isLoadingSalas ? (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                      <p className="text-gray-600 dark:text-gray-400">Cargando chats...</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="overflow-y-auto h-full">
-                  {chatsFiltrados.map((chat) => {
-                    const TipoIcon = getTipoIcon(chat.tipo);
-                    return (
+                ) : error ? (
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
                       <button
-                        key={chat.id}
-                        onClick={() => setChatActivo(chat.id)}
-                        className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                          chatActivo === chat.id ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500' : ''
-                        }`}
+                        onClick={cargarSalas}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                       >
-                        <div className="flex items-start space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                            <TipoIcon className="w-5 h-5 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="font-medium text-gray-900 dark:text-white text-sm truncate">
-                                {chat.nombre}
-                              </p>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                  {chat.timestamp}
-                                </span>
-                                {chat.noLeidos > 0 && (
-                                  <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                    {chat.noLeidos}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
-                              {chat.ultimoMensaje}
-                            </p>
-                            {chat.participantes && (
-                              <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-1">
-                                {chat.participantes.join(', ')}
-                              </p>
-                            )}
-                          </div>
-                        </div>
+                        Reintentar
                       </button>
-                    );
-                  })}
-                </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ChatList
+                    salas={salas}
+                    salaActiva={salaActiva}
+                    onSelectSala={handleSelectSala}
+                    usuariosOnline={usuariosOnline}
+                  />
+                )}
               </div>
 
               {/* Chat Activo */}
-              <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-                {chatActivo ? (
-                  <>
-                    {/* Header del Chat */}
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                            <FiMessageSquare className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {chatsMock.find(c => c.id === chatActivo)?.nombre}
-                            </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              En línea
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <FiVideo className="w-5 h-5" />
-                          </button>
-                          <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <FiPhone className="w-5 h-5" />
-                          </button>
-                          <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <FiMoreVertical className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mensajes */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                      {mensajesMock.map((mensaje) => (
-                        <div
-                          key={mensaje.id}
-                          className={`flex ${mensaje.esPropio ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            mensaje.esPropio
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                          }`}>
-                            {!mensaje.esPropio && (
-                              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                {mensaje.autor}
-                              </p>
-                            )}
-                            <p className="text-sm">{mensaje.contenido}</p>
-                            <p className={`text-xs mt-1 ${
-                              mensaje.esPropio ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                            }`}>
-                              {mensaje.timestamp}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Input de Mensaje */}
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center space-x-2">
-                        <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                          <FiPaperclip className="w-5 h-5" />
-                        </button>
-                        <div className="flex-1 relative">
-                          <input
-                            type="text"
-                            placeholder="Escribe un mensaje..."
-                            value={nuevoMensaje}
-                            onChange={(e) => setNuevoMensaje(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && enviarMensaje()}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                          />
-                        </div>
-                        <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                          <FiSmile className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={enviarMensaje}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          <FiSend className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </>
+              <div className="lg:col-span-2 h-full">
+                {salaActivaData ? (
+                  <ChatWindow
+                    sala={salaActivaData}
+                    mensajes={mensajes}
+                    usuarioId={USUARIO_ID_TEMP}
+                    usuariosEscribiendo={usuariosEscribiendo}
+                    usuariosOnline={usuariosOnline}
+                    onClose={handleCloseSala}
+                    onSendMessage={handleSendMessage}
+                    onEditMessage={handleEditMessage}
+                    onDeleteMessage={handleDeleteMessage}
+                    onReactMessage={handleReactMessage}
+                    onTyping={handleTyping}
+                  />
                 ) : (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <FiMessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Selecciona un chat para comenzar
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center h-full">
+                    <div className="text-center p-8">
+                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full p-6 mb-4 inline-block">
+                        <MessageSquare className="w-12 h-12 text-white" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        Selecciona un chat
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400 max-w-sm">
+                        Elige una conversación de la lista para comenzar a chatear
                       </p>
                     </div>
                   </div>
@@ -338,15 +293,20 @@ export default function ModuloComunicacion() {
               transition={{ duration: 0.3 }}
               className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700 text-center"
             >
-              <FiVideo className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full p-6 mb-4 inline-block">
+                <Video className="w-12 h-12 text-white" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Videollamadas
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Inicia o únete a videollamadas con tu clase
+                Sistema de videollamadas en desarrollo (Fase 2)
               </p>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Iniciar Videollamada
+              <button
+                disabled
+                className="px-6 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+              >
+                Próximamente
               </button>
             </motion.div>
           )}
@@ -358,23 +318,23 @@ export default function ModuloComunicacion() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="space-y-4"
+              className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700 text-center"
             >
-              {[
-                { titulo: 'Nueva tarea asignada', mensaje: 'Matemáticas - Ejercicios de álgebra', tiempo: '5 min' },
-                { titulo: 'Mensaje de profesor', mensaje: 'Prof. García: Revisen el material adicional', tiempo: '15 min' },
-                { titulo: 'Recordatorio de clase', mensaje: 'Historia Universal en 30 minutos', tiempo: '30 min' }
-              ].map((notif, index) => (
-                <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white">{notif.titulo}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{notif.mensaje}</p>
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{notif.tiempo}</span>
-                  </div>
-                </div>
-              ))}
+              <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-full p-6 mb-4 inline-block">
+                <Bell className="w-12 h-12 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Notificaciones
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Sistema de notificaciones en desarrollo (Fase 3)
+              </p>
+              <button
+                disabled
+                className="px-6 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+              >
+                Próximamente
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

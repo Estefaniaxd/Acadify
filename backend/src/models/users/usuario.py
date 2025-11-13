@@ -1,25 +1,28 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, String, CheckConstraint, BOOLEAN, SMALLINT, text
-from sqlalchemy.dialects.postgresql import UUID, ENUM, TIMESTAMP, TEXT
-from ...enums.users.usuario_enums import (
+from sqlalchemy import (
+    BOOLEAN,
+    SMALLINT,
+    Column,
+    ForeignKey,
+    String,
+    text,
+)
+from sqlalchemy.dialects.postgresql import ENUM, TEXT, TIMESTAMP, UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from src.db.base_class import Base
+from src.enums.users.usuario_enums import (
+    EstadoCuentaUsuario,
     RolUsuario,
     TipoDocumentoUsuario,
-    EstadoCuentaUsuario,
 )
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 
 
 class Usuario(Base):
     __tablename__ = "Usuario"
 
-    __table_args__ = (
-        CheckConstraint(
-            "(rol = 'administrador' AND username IS NOT NULL AND correo_institucional IS NULL) "
-            "OR (rol <> 'administrador' AND correo_institucional IS NOT NULL AND username IS NULL)",
-            name="chk_login",
-        ),
-    )
+    # Todos los usuarios deben tener username y correo_institucional
+    # No se aplica CheckConstraint restrictivo
 
     usuario_id = Column(
         UUID(as_uuid=True),
@@ -58,12 +61,42 @@ class Usuario(Base):
     locked_until = Column(TIMESTAMP(timezone=True), nullable=True)
     twofa_enabled = Column(BOOLEAN, nullable=False, server_default=text("false"))
     twofa_secret = Column(String(32), nullable=True)
+
+    # === Sistema de Personalización de Perfil ===
+    banner_activo_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("avatar_asset.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+        doc="ID del banner actualmente activo (asset de tipo backgrounds)",
+    )
+    banner_url = Column(TEXT, nullable=True, doc="URL del banner de fondo del perfil")
+    marco_perfil_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("avatar_asset.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+        doc="ID del marco decorativo alrededor del avatar (asset de tipo accessories)",
+    )
+    foto_perfil_custom_url = Column(
+        TEXT,
+        nullable=True,
+        doc="URL de foto de perfil personalizada (alternativa al avatar generado)",
+    )
+    usa_foto_custom = Column(
+        BOOLEAN,
+        nullable=False,
+        server_default=text("false"),
+        doc="True: muestra foto_perfil_custom_url | False: muestra avatar generado",
+    )
+
     coordinador = relationship("Coordinador", backref="usuario", uselist=False)
     estudiante = relationship("Estudiante", backref="usuario", uselist=False)
 
-    mensajes = relationship("Mensaje", backref="usuario")
+    # NOTA: mensajes no tiene FK a Usuario - se relaciona con salas_chat
+    # mensajes = relationship("Mensaje", backref="usuario")
 
-    archivos = relationship("ArchivoChat", backref="usuario")
+    #     archivos = relationship("ArchivoChat", backref="usuario")
 
     usuario_insignias = relationship(
         "UsuarioInsignia",
@@ -82,14 +115,32 @@ class Usuario(Base):
         "HistorialPuntos", backref="usuario", passive_deletes=True
     )
 
+    misiones_usuario = relationship(
+        "MisionUsuario", back_populates="usuario", passive_deletes=True
+    )
+
     temas_personalizados = relationship(
         "TemaPersonalizado", backref="usuario", passive_deletes=True
     )
     oauth_providers = relationship(
         "OAuthProvider", back_populates="usuario", passive_deletes=True
     )
-    
+
     # Comentarios del usuario
     comentarios = relationship(
         "Comentario", back_populates="autor", passive_deletes=True
+    )
+
+    # === Relaciones de Personalización ===
+    banner_activo = relationship(
+        "AvatarAsset",
+        foreign_keys=[banner_activo_id],
+        passive_deletes=True,
+        doc="Asset del banner activo",
+    )
+    marco_perfil = relationship(
+        "AvatarAsset",
+        foreign_keys=[marco_perfil_id],
+        passive_deletes=True,
+        doc="Asset del marco decorativo del perfil",
     )

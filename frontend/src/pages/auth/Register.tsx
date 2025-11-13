@@ -3,12 +3,9 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import formatApiError from '../../utils/formatApiError'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiCheckCircle, FiAlertCircle, 
-  FiArrowRight, FiArrowLeft, FiUserCheck, FiShield, FiCreditCard,
-  FiFileText, FiUsers
-} from 'react-icons/fi'
-import { HiSparkles, HiAcademicCap } from 'react-icons/hi'
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle, CreditCard, Eye, EyeOff, FileText, GraduationCap, Lock, Mail, Shield, Sparkles, User, Users } from "lucide-react";;
+
+
 
 interface FormData {
   rol: string
@@ -147,8 +144,8 @@ const FormField = ({
             whileTap={{ scale: 0.95 }}
           >
             {(field === 'password' ? showPassword : showConfirm) ? 
-              <FiEyeOff className="w-5 h-5" /> : 
-              <FiEye className="w-5 h-5" />
+              <EyeOff className="w-5 h-5" /> : 
+              <Eye className="w-5 h-5" />
             }
           </motion.button>
         )}
@@ -162,7 +159,7 @@ const FormField = ({
               exit={{ opacity: 0, scale: 0 }}
               className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
             >
-              <FiCheckCircle className="w-5 h-5 text-emerald-500" />
+              <CheckCircle className="w-5 h-5 text-emerald-500" />
             </motion.div>
           )}
           {errors[field] && (
@@ -172,7 +169,7 @@ const FormField = ({
               exit={{ opacity: 0, scale: 0 }}
               className={`absolute inset-y-0 ${isPassword ? 'right-12' : 'right-4'} flex items-center`}
             >
-              <FiAlertCircle className="w-5 h-5 text-red-500" />
+              <AlertCircle className="w-5 h-5 text-red-500" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -187,7 +184,7 @@ const FormField = ({
             exit={{ opacity: 0, y: -10 }}
             className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
           >
-            <FiAlertCircle className="w-4 h-4" />
+            <AlertCircle className="w-4 h-4" />
             {errors[field]}
           </motion.p>
         )}
@@ -378,9 +375,12 @@ export default function Register() {
   )
 
   return (
-  <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 dark:from-gray-900 dark:via-emerald-900/20 dark:to-teal-900/20 pt-16 pb-16 md:pt-24 md:pb-24">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden py-20 md:py-24">
+      {/* Fondo de página completo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 dark:from-neutral-950 dark:via-emerald-950/30 dark:to-teal-950/20" />
+      
       {/* Elementos decorativos de fondo */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full"
           style={{
@@ -457,7 +457,7 @@ export default function Register() {
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6"
             >
-              <FiCheckCircle className="w-10 h-10 text-white" />
+              <CheckCircle className="w-10 h-10 text-white" />
             </motion.div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4">
               ¡Registro exitoso!
@@ -485,7 +485,7 @@ export default function Register() {
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <HiAcademicCap className="w-8 h-8 text-white" />
+                <GraduationCap className="w-8 h-8 text-white" />
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                   animate={{
@@ -522,7 +522,7 @@ export default function Register() {
                       animate={{ scale: stepNumber === step ? 1.1 : 1 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
-                      {stepNumber < step ? <FiCheckCircle className="w-5 h-5" /> : stepNumber}
+                      {stepNumber < step ? <CheckCircle className="w-5 h-5" /> : stepNumber}
                     </motion.div>
                     {stepNumber < totalSteps && (
                       <div className={`w-12 h-1 mx-2 rounded-full transition-all duration-300 ${
@@ -540,9 +540,9 @@ export default function Register() {
 
             {/* Formulario */}
             <form onSubmit={handleSubmit} className="relative">
-              <div className="relative p-8 rounded-3xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/50 dark:border-gray-700/50 shadow-2xl overflow-hidden">
+              <div className="relative p-8 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border-2 border-emerald-200/50 dark:border-emerald-800/50 shadow-2xl overflow-hidden">
                 {/* Efectos de fondo del formulario */}
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/5 via-teal-600/5 to-transparent dark:from-emerald-400/10 dark:via-teal-400/10" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/5 via-teal-600/5 to-transparent dark:from-emerald-400/5 dark:via-teal-400/5" />
                 
                 <div className="relative z-10">
                   <AnimatePresence mode="wait">
@@ -557,7 +557,7 @@ export default function Register() {
                         className="space-y-6"
                       >
                         <div className="text-center mb-6">
-                          <FiUser className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
+                          <User className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
                           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                             Información Personal
                           </h3>
@@ -568,19 +568,19 @@ export default function Register() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {renderFormField({
-                            icon: FiUser,
+                            icon: User,
                             label: "Nombres",
                             field: "nombres",
                             placeholder: "Ingresa tus nombres"
                           })}
                           {renderFormField({
-                            icon: FiUser,
+                            icon: User,
                             label: "Apellidos",
                             field: "apellidos",
                             placeholder: "Ingresa tus apellidos"
                           })}
                           {renderFormField({
-                            icon: FiFileText,
+                            icon: FileText,
                             label: "Tipo de documento",
                             field: "tipoDocumento",
                             placeholder: "Selecciona...",
@@ -591,7 +591,7 @@ export default function Register() {
                             ]
                           })}
                           {renderFormField({
-                            icon: FiCreditCard,
+                            icon: CreditCard,
                             label: "Número de documento",
                             field: "numeroDocumento",
                             placeholder: "Número de identificación"
@@ -605,8 +605,8 @@ export default function Register() {
                           </label>
                           <div className="grid grid-cols-2 gap-4">
                             {[
-                              { value: 'estudiante', label: 'Estudiante', icon: HiAcademicCap, color: 'from-emerald-500 to-teal-600' },
-                              { value: 'docente', label: 'Docente', icon: FiUsers, color: 'from-violet-500 to-purple-600' }
+                              { value: 'estudiante', label: 'Estudiante', icon: GraduationCap, color: 'from-emerald-500 to-teal-600' },
+                              { value: 'docente', label: 'Docente', icon: Users, color: 'from-violet-500 to-purple-600' }
                             ].map((rol) => (
                               <motion.button
                                 key={rol.value}
@@ -632,7 +632,7 @@ export default function Register() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="absolute top-2 right-2"
                                   >
-                                    <FiCheckCircle className="w-5 h-5 text-emerald-600" />
+                                    <CheckCircle className="w-5 h-5 text-emerald-600" />
                                   </motion.div>
                                 )}
                               </motion.button>
@@ -653,7 +653,7 @@ export default function Register() {
                         className="space-y-6"
                       >
                         <div className="text-center mb-6">
-                          <FiUserCheck className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
+                          <CheckCircle className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
                           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                             Credenciales de Acceso
                           </h3>
@@ -664,13 +664,13 @@ export default function Register() {
 
                         <div className="space-y-6">
                           {renderFormField({
-                            icon: FiUser,
+                            icon: User,
                             label: "Nombre de usuario",
                             field: "username",
                             placeholder: "Elige un nombre de usuario único"
                           })}
                           {renderFormField({
-                            icon: FiMail,
+                            icon: Mail,
                             label: "Correo electrónico",
                             field: "email",
                             type: "email",
@@ -691,7 +691,7 @@ export default function Register() {
                         className="space-y-6"
                       >
                         <div className="text-center mb-6">
-                          <FiShield className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
+                          <Shield className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
                           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                             Protege tu Cuenta
                           </h3>
@@ -702,14 +702,14 @@ export default function Register() {
 
                         <div className="space-y-6">
                           {renderFormField({
-                            icon: FiLock,
+                            icon: Lock,
                             label: "Contraseña",
                             field: "password",
                             placeholder: "Crea una contraseña segura",
                             isPassword: true
                           })}
                           {renderFormField({
-                            icon: FiLock,
+                            icon: Lock,
                             label: "Confirmar contraseña",
                             field: "confirm",
                             placeholder: "Confirma tu contraseña",
@@ -755,7 +755,7 @@ export default function Register() {
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         className="mt-6 p-4 rounded-2xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium flex items-center gap-3"
                       >
-                        <FiAlertCircle className="w-5 h-5 flex-shrink-0" />
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
                         <span>{globalError}</span>
                       </motion.div>
                     )}
@@ -776,7 +776,7 @@ export default function Register() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <FiArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4" />
                         Anterior
                       </motion.button>
                     ) : (
@@ -792,7 +792,7 @@ export default function Register() {
                         whileTap={{ scale: 0.98 }}
                       >
                         Siguiente
-                        <FiArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4" />
                       </motion.button>
                     ) : (
                       <motion.button
@@ -835,7 +835,7 @@ export default function Register() {
                             </>
                           ) : (
                             <>
-                              <HiSparkles className="w-5 h-5" />
+                              <Sparkles className="w-5 h-5" />
                               Crear Cuenta
                             </>
                           )}

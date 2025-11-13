@@ -1,8 +1,9 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
-from sqlalchemy.sql import func
+from sqlalchemy import Column, ForeignKey, text
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from src.db.base_class import Base
 
 
 class UsuarioRecompensa(Base):
@@ -25,5 +26,7 @@ class UsuarioRecompensa(Base):
         nullable=True,
     )
 
-    usuario = relationship("Usuario", back_populates="usuario_recompensas", passive_deletes=True)
+    usuario = relationship(
+        "Usuario", back_populates="usuario_recompensas", passive_deletes=True
+    )
     recompensa = relationship("Recompensa", back_populates="usuario_recompensas")

@@ -1,17 +1,6 @@
-import React, { useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { 
-  UserIcon,
-  ShieldCheckIcon,
-  StarIcon,
-  ChatBubbleLeftIcon,
-  AtSymbolIcon
-} from '@heroicons/react/24/outline';
-import { 
-  UserIcon as UserIconSolid,
-  ShieldCheckIcon as ShieldCheckIconSolid 
-} from '@heroicons/react/24/solid';
+import React, { useState, memo } from 'react';
+import { formatRelativeTime } from '../../utils/dateUtils';
+import { AtSign, Heart, MessageCircle, Shield, Star, User } from 'lucide-react';
 
 interface Participante {
   id: string;
@@ -119,13 +108,13 @@ export const UserList: React.FC<UserListProps> = ({
       <div className="flex items-center space-x-1 ml-2">
         {participante.es_admin && (
           <div className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium flex items-center">
-            <ShieldCheckIconSolid className="h-3 w-3 mr-1" />
+            <Shield className="h-3 w-3 mr-1" />
             Admin
           </div>
         )}
         {participante.es_moderador && !participante.es_admin && (
           <div className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium flex items-center">
-            <StarIcon className="h-3 w-3 mr-1" />
+            <Star className="h-3 w-3 mr-1" />
             Mod
           </div>
         )}
@@ -150,7 +139,7 @@ export const UserList: React.FC<UserListProps> = ({
           className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
           title="Mencionar"
         >
-          <AtSymbolIcon className="h-4 w-4" />
+          <AtSign className="h-4 w-4" />
         </button>
         
         {onPrivateMessage && (
@@ -159,7 +148,7 @@ export const UserList: React.FC<UserListProps> = ({
             className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-700"
             title="Mensaje privado"
           >
-            <ChatBubbleLeftIcon className="h-4 w-4" />
+            <MessageCircle className="h-4 w-4" />
           </button>
         )}
       </div>
@@ -213,7 +202,7 @@ export const UserList: React.FC<UserListProps> = ({
       <div className="flex-1 overflow-y-auto p-4">
         {filteredParticipants.length === 0 ? (
           <div className="text-center py-8">
-            <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500">
               {filter === 'conectados' ? 'Nadie está conectado' : 'No hay participantes'}
             </p>
@@ -254,10 +243,7 @@ export const UserList: React.FC<UserListProps> = ({
                         {isOnline ? (
                           <span className="text-green-600 font-medium">En línea</span>
                         ) : participante.ultimo_acceso ? (
-                          `Visto ${formatDistanceToNow(new Date(participante.ultimo_acceso), {
-                            addSuffix: true,
-                            locale: es,
-                          })}`
+                          `Visto ${formatRelativeTime(participante.ultimo_acceso)}`
                         ) : (
                           'Desconectado'
                         )}

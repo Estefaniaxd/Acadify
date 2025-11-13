@@ -1,0 +1,848 @@
+import { useState } from 'react';
+
+import { motion, AnimatePresence } from 'framer-motion';import { motion, AnimatePresence } from 'framer-motion';
+
+import { import { 
+
+  Building2, Plus, Search, Edit, Trash2, Users, BookOpen,  Building2, 
+
+  MapPin, Mail, Phone, Globe, Shield, Loader, AlertCircle, X, Check  Plus, 
+
+} from 'lucide-react';  Search, 
+
+import {   Edit, 
+
+  useInstituciones,   Trash2, 
+
+  useCrearInstitucion,   Users, 
+
+  useActualizarInstitucion,   BookOpen,
+
+  useEliminarInstitucion   MapPin,
+
+} from '../../hooks/useInstituciones';  Mail,
+
+import type { Institucion, InstitucionCreate, InstitucionUpdate } from '../../services/instituciones.service';  Phone,
+
+  Globe,
+
+export default function AdminInstitucionesPage() {  Shield,
+
+  const [searchTerm, setSearchTerm] = useState('');  Loader,
+
+  const [selectedTipo, setSelectedTipo] = useState<string>('todas');  AlertCircle
+
+  const [showCreateModal, setShowCreateModal] = useState(false);} from 'lucide-react';
+
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const [selectedInstitucion, setSelectedInstitucion] = useState<Institucion | null>(null);interface Institucion {
+
+  id: string;
+
+  // React Query hooks con datos reales del backend  nombre: string;
+
+  const { data: instituciones = [], isLoading, error } = useInstituciones();  codigo: string;
+
+  const crearMutation = useCrearInstitucion();  tipo: 'universidad' | 'colegio' | 'instituto' | 'academia';
+
+  const actualizarMutation = useActualizarInstitucion();  email: string;
+
+  const eliminarMutation = useEliminarInstitucion();  telefono: string;
+
+  direccion: string;
+
+  // Filtrar instituciones  ciudad: string;
+
+  const filteredInstituciones = instituciones.filter((inst) => {  pais: string;
+
+    const matchSearch =  sitioWeb?: string;
+
+      inst.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||  logo?: string;
+
+      inst.codigo.toLowerCase().includes(searchTerm.toLowerCase());  totalUsuarios: number;
+
+    const matchTipo = selectedTipo === 'todas' || inst.tipo === selectedTipo;  totalCursos: number;
+
+    return matchSearch && matchTipo;  estado: 'activa' | 'inactiva' | 'pendiente';
+
+  });  fechaCreacion: string;
+
+}
+
+  const getTipoBadgeColor = (tipo: string) => {
+
+    const colors = {// TODO: Reemplazar con datos reales de la API
+
+      universidad: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',const mockInstituciones: Institucion[] = [
+
+      colegio: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',  {
+
+      instituto: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',    id: '1',
+
+      academia: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',    nombre: 'Universidad Nacional',
+
+      otro: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',    codigo: 'UNAL',
+
+    };    tipo: 'universidad',
+
+    return colors[tipo as keyof typeof colors] || colors.universidad;    email: 'info@unal.edu.co',
+
+  };    telefono: '+57 1 3165000',
+
+    direccion: 'Carrera 30 # 45-03',
+
+  const getEstadoBadgeColor = (estado: string) => {    ciudad: 'Bogotá',
+
+    const colors = {    pais: 'Colombia',
+
+      activa: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',    sitioWeb: 'https://unal.edu.co',
+
+      inactiva: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',    totalUsuarios: 1247,
+
+      pendiente: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',    totalCursos: 156,
+
+    };    estado: 'activa',
+
+    return colors[estado as keyof typeof colors] || colors.pendiente;    fechaCreacion: '2024-01-15'
+
+  };  },
+
+  {
+
+  const handleEliminar = async (institucion: Institucion) => {    id: '2',
+
+    if (!confirm(`¿Eliminar "${institucion.nombre}"? Esta acción no se puede deshacer.`)) return;    nombre: 'SENA',
+
+    await eliminarMutation.mutateAsync(institucion.institucion_id);    codigo: 'SENA',
+
+  };    tipo: 'instituto',
+
+    email: 'contacto@sena.edu.co',
+
+  return (    telefono: '+57 1 5925555',
+
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">    direccion: 'Calle 57 # 8-69',
+
+      <div className="max-w-7xl mx-auto space-y-6">    ciudad: 'Bogotá',
+
+        {/* Header */}    pais: 'Colombia',
+
+        <motion.div    sitioWeb: 'https://www.sena.edu.co',
+
+          initial={{ opacity: 0, y: -20 }}    totalUsuarios: 3421,
+
+          animate={{ opacity: 1, y: 0 }}    totalCursos: 287,
+
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"    estado: 'activa',
+
+        >    fechaCreacion: '2023-12-10'
+
+          <div>  }
+
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">];
+
+              <Building2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+
+              Gestión de Institucionesexport default function AdminInstitucionesPage() {
+
+            </h1>  const [instituciones] = useState<Institucion[]>(mockInstituciones);
+
+            <p className="text-gray-600 dark:text-gray-400 mt-1">  const [searchTerm, setSearchTerm] = useState('');
+
+              Administra todas las instituciones educativas del sistema  const [selectedTipo, setSelectedTipo] = useState<string>('todas');
+
+            </p>  
+
+          </div>  // TODO: Conectar con API real - por ahora simular loading
+
+          <motion.button  const isLoading = false;
+
+            whileHover={{ scale: 1.05 }}  const error = null;
+
+            whileTap={{ scale: 0.95 }}
+
+            onClick={() => setShowCreateModal(true)}  const filteredInstituciones = instituciones.filter((inst) => {
+
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"    const matchSearch =
+
+          >      inst.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+
+            <Plus className="w-5 h-5" />      inst.codigo.toLowerCase().includes(searchTerm.toLowerCase());
+
+            Nueva Institución    const matchTipo = selectedTipo === 'todas' || inst.tipo === selectedTipo;
+
+          </motion.button>    return matchSearch && matchTipo;
+
+        </motion.div>  });
+
+
+
+        {/* Filtros y búsqueda */}  const getTipoBadgeColor = (tipo: string) => {
+
+        <motion.div    const colors = {
+
+          initial={{ opacity: 0, y: 20 }}      universidad: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+
+          animate={{ opacity: 1, y: 0 }}      colegio: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"      instituto: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+
+        >      academia: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+
+          <div className="flex flex-col sm:flex-row gap-4">    };
+
+            <div className="flex-1 relative">    return colors[tipo as keyof typeof colors] || colors.universidad;
+
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />  };
+
+              <input
+
+                type="text"  const getEstadoBadgeColor = (estado: string) => {
+
+                placeholder="Buscar por nombre o código..."    const colors = {
+
+                value={searchTerm}      activa: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+
+                onChange={(e) => setSearchTerm(e.target.value)}      inactiva: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
+
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"      pendiente: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+
+              />    };
+
+            </div>    return colors[estado as keyof typeof colors] || colors.pendiente;
+
+            <select  };
+
+              value={selectedTipo}
+
+              onChange={(e) => setSelectedTipo(e.target.value)}  return (
+
+              className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
+
+            >      <div className="max-w-7xl mx-auto space-y-6">
+
+              <option value="todas">Todos los tipos</option>        {/* Header */}
+
+              <option value="universidad">Universidad</option>        <motion.div
+
+              <option value="colegio">Colegio</option>          initial={{ opacity: 0, y: -20 }}
+
+              <option value="instituto">Instituto</option>          animate={{ opacity: 1, y: 0 }}
+
+              <option value="academia">Academia</option>          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+
+              <option value="otro">Otro</option>        >
+
+            </select>          <div>
+
+          </div>            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+
+              <Building2 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+
+          {/* Estadísticas */}              Gestión de Instituciones
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">            </h1>
+
+            <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">            <p className="text-gray-600 dark:text-gray-400 mt-1">
+
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{instituciones.length}</div>              Administra todas las instituciones educativas del sistema
+
+              <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>            </p>
+
+            </div>          </div>
+
+            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">          <motion.button
+
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">            whileHover={{ scale: 1.05 }}
+
+                {instituciones.filter(i => i.estado === 'activa').length}            whileTap={{ scale: 0.95 }}
+
+              </div>            onClick={() => {
+
+              <div className="text-sm text-gray-600 dark:text-gray-400">Activas</div>              // TODO: Abrir modal de creación
+
+            </div>              alert('Función de crear institución - Implementar modal');
+
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">            }}
+
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
+
+                {instituciones.reduce((sum, i) => sum + (i.total_usuarios || 0), 0)}          >
+
+              </div>            <Plus className="w-5 h-5" />
+
+              <div className="text-sm text-gray-600 dark:text-gray-400">Usuarios</div>            Nueva Institución
+
+            </div>          </motion.button>
+
+            <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">        </motion.div>
+
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+
+                {instituciones.reduce((sum, i) => sum + (i.total_cursos || 0), 0)}        {/* Filtros y búsqueda */}
+
+              </div>        <motion.div
+
+              <div className="text-sm text-gray-600 dark:text-gray-400">Cursos</div>          initial={{ opacity: 0, y: 20 }}
+
+            </div>          animate={{ opacity: 1, y: 0 }}
+
+          </div>          transition={{ delay: 0.1 }}
+
+        </motion.div>          className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
+
+        >
+
+        {/* Loading/Error states */}          <div className="flex flex-col sm:flex-row gap-4">
+
+        {isLoading && (            {/* Búsqueda */}
+
+          <div className="flex items-center justify-center py-12">            <div className="flex-1 relative">
+
+            <Loader className="w-8 h-8 animate-spin text-blue-600 mr-3" />              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+
+            <span className="text-gray-600 dark:text-gray-400">Cargando instituciones...</span>              <input
+
+          </div>                type="text"
+
+        )}                placeholder="Buscar por nombre o código..."
+
+                value={searchTerm}
+
+        {error && (                onChange={(e) => setSearchTerm(e.target.value)}
+
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
+
+            <div className="flex items-center gap-3">              />
+
+              <AlertCircle className="w-6 h-6 text-red-600" />            </div>
+
+              <div>
+
+                <h3 className="font-bold text-red-900 dark:text-red-100">Error al cargar instituciones</h3>            {/* Filtro por tipo */}
+
+                <p className="text-sm text-red-700 dark:text-red-300 mt-1">Intenta nuevamente más tarde</p>            <select
+
+              </div>              value={selectedTipo}
+
+            </div>              onChange={(e) => setSelectedTipo(e.target.value)}
+
+          </div>              className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white"
+
+        )}            >
+
+              <option value="todas">Todos los tipos</option>
+
+        {/* Lista de instituciones */}              <option value="universidad">Universidad</option>
+
+        {!isLoading && !error && (              <option value="colegio">Colegio</option>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">              <option value="instituto">Instituto</option>
+
+            <AnimatePresence>              <option value="academia">Academia</option>
+
+              {filteredInstituciones.map((inst, index) => (            </select>
+
+                <motion.div          </div>
+
+                  key={inst.institucion_id}
+
+                  initial={{ opacity: 0, y: 20 }}          {/* Estadísticas rápidas */}
+
+                  animate={{ opacity: 1, y: 0 }}          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+
+                  exit={{ opacity: 0, scale: 0.9 }}            <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+
+                  transition={{ delay: index * 0.05 }}              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all"                {instituciones.length}
+
+                >              </div>
+
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">              <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+
+                    <div className="flex items-start justify-between">            </div>
+
+                      <div className="flex items-center gap-3">            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+
+                          <Building2 className="w-6 h-6" />                {instituciones.filter(i => i.estado === 'activa').length}
+
+                        </div>              </div>
+
+                        <div>              <div className="text-sm text-gray-600 dark:text-gray-400">Activas</div>
+
+                          <h3 className="text-lg font-bold">{inst.nombre}</h3>            </div>
+
+                          <p className="text-sm text-blue-100">            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+
+                            {inst.sigla ? `${inst.sigla} • ` : ''}Código: {inst.codigo}              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+
+                          </p>                {instituciones.reduce((sum, i) => sum + i.totalUsuarios, 0)}
+
+                        </div>              </div>
+
+                      </div>              <div className="text-sm text-gray-600 dark:text-gray-400">Usuarios</div>
+
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEstadoBadgeColor(inst.estado)}`}>            </div>
+
+                        {inst.estado}            <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+
+                      </span>              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+
+                    </div>                {instituciones.reduce((sum, i) => sum + i.totalCursos, 0)}
+
+                  </div>              </div>
+
+              <div className="text-sm text-gray-600 dark:text-gray-400">Cursos</div>
+
+                  <div className="p-6 space-y-4">            </div>
+
+                    <div className="flex items-center gap-2">          </div>
+
+                      <Shield className="w-4 h-4 text-gray-400" />        </motion.div>
+
+                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getTipoBadgeColor(inst.tipo)}`}>
+
+                        {inst.tipo.charAt(0).toUpperCase() + inst.tipo.slice(1)}        {/* Lista de instituciones */}
+
+                      </span>        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    </div>          <AnimatePresence>
+
+            {filteredInstituciones.map((inst, index) => (
+
+                    {(inst.email || inst.telefono || inst.direccion || inst.sitio_web) && (              <motion.div
+
+                      <div className="space-y-2">                key={inst.id}
+
+                        {inst.email && (                initial={{ opacity: 0, y: 20 }}
+
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">                animate={{ opacity: 1, y: 0 }}
+
+                            <Mail className="w-4 h-4" />                exit={{ opacity: 0, scale: 0.9 }}
+
+                            <span className="truncate">{inst.email}</span>                transition={{ delay: index * 0.05 }}
+
+                          </div>                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all"
+
+                        )}              >
+
+                        {inst.telefono && (                {/* Header de la card */}
+
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
+
+                            <Phone className="w-4 h-4" />                  <div className="flex items-start justify-between">
+
+                            {inst.telefono}                    <div className="flex items-center gap-3">
+
+                          </div>                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+
+                        )}                        <Building2 className="w-6 h-6" />
+
+                        {(inst.direccion || inst.ciudad || inst.pais) && (                      </div>
+
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">                      <div>
+
+                            <MapPin className="w-4 h-4 flex-shrink-0" />                        <h3 className="text-lg font-bold">{inst.nombre}</h3>
+
+                            <span className="truncate">                        <p className="text-sm text-blue-100">Código: {inst.codigo}</p>
+
+                              {[inst.direccion, inst.ciudad, inst.pais].filter(Boolean).join(', ')}                      </div>
+
+                            </span>                    </div>
+
+                          </div>                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEstadoBadgeColor(inst.estado)}`}>
+
+                        )}                      {inst.estado}
+
+                        {inst.sitio_web && (                    </span>
+
+                          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">                  </div>
+
+                            <Globe className="w-4 h-4 flex-shrink-0" />                </div>
+
+                            <a href={inst.sitio_web} target="_blank" rel="noopener noreferrer" className="hover:underline truncate">
+
+                              {inst.sitio_web}                {/* Contenido */}
+
+                            </a>                <div className="p-6 space-y-4">
+
+                          </div>                  {/* Tipo */}
+
+                        )}                  <div className="flex items-center gap-2">
+
+                      </div>                    <Shield className="w-4 h-4 text-gray-400" />
+
+                    )}                    <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getTipoBadgeColor(inst.tipo)}`}>
+
+                      {inst.tipo.charAt(0).toUpperCase() + inst.tipo.slice(1)}
+
+                    <div className="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">                    </span>
+
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">                  </div>
+
+                        <Users className="w-4 h-4" />
+
+                        <span className="font-medium">{inst.total_usuarios || 0}</span> usuarios                  {/* Información de contacto */}
+
+                      </div>                  <div className="space-y-2">
+
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+
+                        <BookOpen className="w-4 h-4" />                      <Mail className="w-4 h-4" />
+
+                        <span className="font-medium">{inst.total_cursos || 0}</span> cursos                      {inst.email}
+
+                      </div>                    </div>
+
+                    </div>                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+
+                      <Phone className="w-4 h-4" />
+
+                    <div className="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">                      {inst.telefono}
+
+                      <button                    </div>
+
+                        onClick={() => {                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+
+                          setSelectedInstitucion(inst);                      <MapPin className="w-4 h-4" />
+
+                          setShowEditModal(true);                      {inst.direccion}, {inst.ciudad}, {inst.pais}
+
+                        }}                    </div>
+
+                        className="flex-1 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg font-medium hover:bg-blue-100 transition-colors"                    {inst.sitioWeb && (
+
+                      >                      <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+
+                        <Edit className="w-4 h-4 inline mr-2" />                        <Globe className="w-4 h-4" />
+
+                        Editar                        <a href={inst.sitioWeb} target="_blank" rel="noopener noreferrer" className="hover:underline">
+
+                      </button>                          {inst.sitioWeb}
+
+                      <button                        </a>
+
+                        onClick={() => handleEliminar(inst)}                      </div>
+
+                        disabled={eliminarMutation.isPending}                    )}
+
+                        className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"                  </div>
+
+                      >
+
+                        <Trash2 className="w-4 h-4" />                  {/* Estadísticas */}
+
+                      </button>                  <div className="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+
+                    </div>                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+
+                  </div>                      <Users className="w-4 h-4" />
+
+                </motion.div>                      <span className="font-medium">{inst.totalUsuarios}</span>
+
+              ))}                      <span>usuarios</span>
+
+            </AnimatePresence>                    </div>
+
+          </div>                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+
+        )}                      <BookOpen className="w-4 h-4" />
+
+                      <span className="font-medium">{inst.totalCursos}</span>
+
+        {!isLoading && !error && filteredInstituciones.length === 0 && (                      <span>cursos</span>
+
+          <div className="text-center py-12">                    </div>
+
+            <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />                  </div>
+
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+
+              No se encontraron instituciones                  {/* Acciones */}
+
+            </h3>                  <div className="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+
+            <p className="text-gray-600 dark:text-gray-400">                    <motion.button
+
+              {instituciones.length === 0 ? 'Crea tu primera institución' : 'Intenta otros filtros'}                      whileHover={{ scale: 1.05 }}
+
+            </p>                      whileTap={{ scale: 0.95 }}
+
+          </div>                      onClick={() => {
+
+        )}                        // TODO: Navegar a detalle de institución
+
+      </div>                        alert(`Ver detalles de: ${inst.nombre}`);
+
+                      }}
+
+      {/* Modales */}                      className="flex-1 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+
+      {showCreateModal && (                    >
+
+        <InstitucionModal                      Ver Detalles
+
+          title="Nueva Institución"                    </motion.button>
+
+          onClose={() => setShowCreateModal(false)}                    <motion.button
+
+          onSubmit={(data) => {                      whileHover={{ scale: 1.05 }}
+
+            crearMutation.mutate(data, {                      whileTap={{ scale: 0.95 }}
+
+              onSuccess: () => setShowCreateModal(false),                      onClick={() => {
+
+            });                        // TODO: Abrir modal de edición
+
+          }}                        alert(`Editar: ${inst.nombre}`);
+
+          isLoading={crearMutation.isPending}                      }}
+
+        />                      className="p-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+
+      )}                    >
+
+                      <Edit className="w-5 h-5" />
+
+      {showEditModal && selectedInstitucion && (                    </motion.button>
+
+        <InstitucionModal                    <motion.button
+
+          title="Editar Institución"                      whileHover={{ scale: 1.05 }}
+
+          initialData={selectedInstitucion}                      whileTap={{ scale: 0.95 }}
+
+          onClose={() => {                      onClick={() => {
+
+            setShowEditModal(false);                        if (confirm(`¿Eliminar ${inst.nombre}?`)) {
+
+            setSelectedInstitucion(null);                          // TODO: Implementar eliminación
+
+          }}                          alert('Función de eliminar - Implementar');
+
+          onSubmit={(data) => {                        }
+
+            actualizarMutation.mutate(                      }}
+
+              { id: selectedInstitucion.institucion_id, data },                      className="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+
+              {                    >
+
+                onSuccess: () => {                      <Trash2 className="w-5 h-5" />
+
+                  setShowEditModal(false);                    </motion.button>
+
+                  setSelectedInstitucion(null);                  </div>
+
+                },                </div>
+
+              }              </motion.div>
+
+            );            ))}
+
+          }}          </AnimatePresence>
+
+          isLoading={actualizarMutation.isPending}        </div>
+
+        />
+
+      )}        {/* Mensaje si no hay resultados */}
+
+    </div>        {filteredInstituciones.length === 0 && (
+
+  );          <motion.div
+
+}            initial={{ opacity: 0 }}
+
+            animate={{ opacity: 1 }}
+
+// Modal unificado para crear/editar            className="text-center py-12"
+
+function InstitucionModal({           >
+
+  title,             <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+
+  initialData,             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+
+  onClose,               No se encontraron instituciones
+
+  onSubmit,             </h3>
+
+  isLoading             <p className="text-gray-600 dark:text-gray-400">
+
+}: {              Intenta con otros criterios de búsqueda
+
+  title: string;            </p>
+
+  initialData?: Institucion;          </motion.div>
+
+  onClose: () => void;        )}
+
+  onSubmit: (data: InstitucionCreate | InstitucionUpdate) => void;      </div>
+
+  isLoading: boolean;    </div>
+
+}) {  );
+
+  const [formData, setFormData] = useState({}
+
+    nombre: initialData?.nombre || '',
+    sigla: initialData?.sigla || '',
+    tipo: initialData?.tipo || 'universidad',
+    email: initialData?.email || '',
+    telefono: initialData?.telefono || '',
+    sitio_web: initialData?.sitio_web || '',
+    pais: initialData?.pais || 'Colombia',
+    ciudad: initialData?.ciudad || '',
+    direccion: initialData?.direccion || '',
+    nivel_educativo: initialData?.nivel_educativo || '',
+    estado: initialData?.estado || 'activa',
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold flex items-center gap-3">
+            <Building2 className="w-6 h-6" />
+            {title}
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }} className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Nombre *</label>
+              <input
+                type="text"
+                required
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Sigla</label>
+              <input
+                type="text"
+                value={formData.sigla}
+                onChange={(e) => setFormData({ ...formData, sigla: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Tipo *</label>
+              <select
+                required
+                value={formData.tipo}
+                onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              >
+                <option value="universidad">Universidad</option>
+                <option value="colegio">Colegio</option>
+                <option value="instituto">Instituto</option>
+                <option value="academia">Academia</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Teléfono</label>
+              <input
+                type="tel"
+                value={formData.telefono}
+                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Sitio Web</label>
+              <input
+                type="url"
+                value={formData.sitio_web}
+                onChange={(e) => setFormData({ ...formData, sitio_web: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">País</label>
+              <input
+                type="text"
+                value={formData.pais}
+                onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Ciudad</label>
+              <input
+                type="text"
+                value={formData.ciudad}
+                onChange={(e) => setFormData({ ...formData, ciudad: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Dirección</label>
+              <input
+                type="text"
+                value={formData.direccion}
+                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isLoading}
+              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-medium hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <><Loader className="w-5 h-5 animate-spin" /> Guardando...</>
+              ) : (
+                <><Check className="w-5 h-5" /> {initialData ? 'Guardar' : 'Crear'}</>
+              )}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  );
+}

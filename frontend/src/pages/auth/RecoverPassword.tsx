@@ -2,8 +2,9 @@ import { useState, ChangeEvent, FormEvent } from 'react'
 import axios from 'axios'
 import formatApiError from '../../utils/formatApiError'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiMail, FiArrowRight, FiCheckCircle, FiAlertCircle, FiSend, FiArrowLeft } from 'react-icons/fi'
-import { HiOutlineKey } from 'react-icons/hi'
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle, Key, Mail, Send } from "lucide-react";
+
+
 
 export default function RecoverPassword() {
   const [email, setEmail] = useState('')
@@ -59,9 +60,12 @@ export default function RecoverPassword() {
   }
 
   return (
-  <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20 pt-16 pb-16 md:pt-24 md:pb-24">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden py-20 md:py-24">
+      {/* Fondo de página completo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-neutral-950 dark:via-blue-950/30 dark:to-purple-950/20" />
+      
       {/* Elementos decorativos de fondo */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full"
           style={{
@@ -135,7 +139,7 @@ export default function RecoverPassword() {
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <HiOutlineKey className="w-8 h-8 text-white" />
+            <Key className="w-8 h-8 text-white" />
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
               animate={{
@@ -158,9 +162,9 @@ export default function RecoverPassword() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="relative"
         >
-          <div className="relative p-8 rounded-3xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/50 dark:border-gray-700/50 shadow-2xl overflow-hidden">
+          <div className="relative p-8 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border-2 border-blue-200/50 dark:border-blue-800/50 shadow-2xl overflow-hidden">
             {/* Efectos de fondo del formulario */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-transparent dark:from-blue-400/10 dark:via-indigo-400/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-transparent dark:from-blue-400/5 dark:via-indigo-400/5" />
             
             <div className="relative z-10">
               <AnimatePresence mode="wait">
@@ -180,7 +184,7 @@ export default function RecoverPassword() {
                       transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                       className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto"
                     >
-                      <FiSend className="w-10 h-10 text-white" />
+                      <Send className="w-10 h-10 text-white" />
                     </motion.div>
                     
                     <motion.div
@@ -215,9 +219,9 @@ export default function RecoverPassword() {
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <HiOutlineKey className="w-5 h-5" />
+                        <Key className="w-5 h-5" />
                         Ir a restablecer contraseña
-                        <FiArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4" />
                       </motion.a>
                       
                       <div className="text-center">
@@ -227,7 +231,7 @@ export default function RecoverPassword() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          <FiArrowLeft className="w-4 h-4" />
+                          <ArrowLeft className="w-4 h-4" />
                           Volver al login
                         </motion.a>
                       </div>
@@ -279,7 +283,7 @@ export default function RecoverPassword() {
                               }}
                               transition={{ duration: 0.2 }}
                             >
-                              <FiMail className="w-5 h-5" />
+                              <Mail className="w-5 h-5" />
                             </motion.div>
                           </div>
                           <input
@@ -315,7 +319,7 @@ export default function RecoverPassword() {
                                 exit={{ opacity: 0, scale: 0 }}
                                 className="absolute inset-y-0 right-4 flex items-center"
                               >
-                                <FiCheckCircle className="w-5 h-5 text-emerald-500" />
+                                <CheckCircle className="w-5 h-5 text-emerald-500" />
                               </motion.div>
                             )}
                             {error && (
@@ -325,7 +329,7 @@ export default function RecoverPassword() {
                                 exit={{ opacity: 0, scale: 0 }}
                                 className="absolute inset-y-0 right-4 flex items-center"
                               >
-                                <FiAlertCircle className="w-5 h-5 text-red-500" />
+                                <AlertCircle className="w-5 h-5 text-red-500" />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -340,7 +344,7 @@ export default function RecoverPassword() {
                               exit={{ opacity: 0, y: -10 }}
                               className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
                             >
-                              <FiAlertCircle className="w-4 h-4" />
+                              <AlertCircle className="w-4 h-4" />
                               {error}
                             </motion.p>
                           )}
@@ -355,7 +359,7 @@ export default function RecoverPassword() {
                         className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
                       >
                         <div className="flex items-start gap-3">
-                          <FiMail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                          <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                           <div className="text-sm text-blue-700 dark:text-blue-300">
                             <p className="font-medium mb-1">¿Qué sucederá después?</p>
                             <ul className="space-y-1 text-xs opacity-90">
@@ -413,12 +417,12 @@ export default function RecoverPassword() {
                               </>
                             ) : (
                               <>
-                                <FiSend className="w-5 h-5" />
+                                <Send className="w-5 h-5" />
                                 Enviar instrucciones
                                 <motion.div
                                   className="group-hover:translate-x-1 transition-transform duration-200"
                                 >
-                                  <FiArrowRight className="w-4 h-4" />
+                                  <ArrowRight className="w-4 h-4" />
                                 </motion.div>
                               </>
                             )}
@@ -448,7 +452,7 @@ export default function RecoverPassword() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          <FiArrowLeft className="w-4 h-4" />
+                          <ArrowLeft className="w-4 h-4" />
                           Volver al login
                         </motion.a>
                       </motion.div>

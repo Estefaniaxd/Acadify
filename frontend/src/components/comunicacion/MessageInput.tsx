@@ -1,13 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  PaperAirplaneIcon, 
-  PaperClipIcon, 
-  PhotoIcon,
-  FaceSmileIcon,
-  AtSymbolIcon,
-  MicrophoneIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
+import { Send, X } from 'lucide-react';
+;
 
 interface Participante {
   id: string;
@@ -228,7 +221,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               onClick={onCancelReply}
               className="ml-2 p-1 hover:bg-gray-200 rounded"
             >
-              <XMarkIcon className="h-4 w-4 text-gray-500" />
+              <X className="h-4 w-4 text-gray-500" />
             </button>
           </div>
         </div>
@@ -245,7 +238,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   onClick={() => removeFile(index)}
                   className="ml-2 p-1 hover:bg-blue-100 rounded"
                 >
-                  <XMarkIcon className="h-3 w-3 text-blue-600" />
+                  <X className="h-3 w-3 text-blue-600" />
                 </button>
               </div>
             ))}
@@ -391,7 +384,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Enviar mensaje"
             >
-              <PaperAirplaneIcon className="h-5 w-5" />
+              <Send className="h-5 w-5" />
             </button>
           </div>
         </div>

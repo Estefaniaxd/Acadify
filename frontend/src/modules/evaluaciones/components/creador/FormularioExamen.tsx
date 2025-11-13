@@ -1,19 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import {
-  CalendarIcon,
-  ClockIcon,
-  AcademicCapIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline';
+;
 import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
 import { LoadingSpinner } from '../common/LoadingComponents';
 import { useToast } from '../common/AlertComponents';
 import { TipoExamen, EstadoExamen, DificultadPregunta, Examen } from '../../types';
 import { TIPO_EXAMEN_LABELS, ESTADO_EXAMEN_LABELS, DIFICULTAD_LABELS } from '../../utils';
+import { Calendar, Eye, GraduationCap, Info } from 'lucide-react';
 
 interface FormularioExamenProps {
   examen?: Examen | null;
@@ -149,10 +143,10 @@ export function FormularioExamen({ examen, onGuardar, onCancelar }: FormularioEx
   }, [watchedValues.fecha_inicio, watchedValues.fecha_limite, showToast]);
 
   const secciones = [
-    { id: 'basica', nombre: 'Información Básica', icono: InformationCircleIcon },
+    { id: 'basica', nombre: 'Información Básica', icono: Info },
     { id: 'configuracion', nombre: 'Configuración', icono: ClockIcon },
     { id: 'antitrampa', nombre: 'Anti-trampa', icono: ExclamationTriangleIcon },
-    { id: 'avanzada', nombre: 'Opciones Avanzadas', icono: AcademicCapIcon }
+    { id: 'avanzada', nombre: 'Opciones Avanzadas', icono: GraduationCap }
   ];
 
   return (
@@ -732,7 +726,7 @@ export function FormularioExamen({ examen, onGuardar, onCancelar }: FormularioEx
                   onClick={() => setMostrarPrevia(!mostrarPrevia)}
                   className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <Eye className="h-5 w-5" />
                   <span>{mostrarPrevia ? 'Ocultar' : 'Ver'} previa</span>
                 </button>
 

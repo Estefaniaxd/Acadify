@@ -4,13 +4,8 @@ from src.enums.users.usuario_enums import RolUsuario, TipoDocumentoUsuario
 
 class UserRegisterRequest(BaseModel):
     """Schema para registro de nuevo usuario"""
-
-    correo_institucional: EmailStr | None = Field(
-        None, description="Email institucional"
-    )
-    username: str | None = Field(
-        None, description="Nombre de usuario (solo administrador)"
-    )
+    correo_institucional: EmailStr = Field(..., description="Email institucional")
+    username: str = Field(..., description="Nombre de usuario")
     nombres: str = Field(
         ..., min_length=2, max_length=100, description="Nombres del usuario"
     )
@@ -44,32 +39,9 @@ class UserRegisterRequest(BaseModel):
             )
 
         return v
-
-    @field_validator("username")
-    def validate_admin_username(cls, v, values):
-        """Validar que solo admin tenga username"""
-        rol = values.get("rol")
-        if rol == RolUsuario.administrador:
-            if not v:
-                raise ValueError("El administrador debe tener username")
-        else:
-            if v:
-                raise ValueError("Solo el administrador puede tener username")
-        return v
-
-    @field_validator("correo_institucional")
-    def validate_non_admin_email(cls, v, values):
-        """Validar que roles no admin tengan email institucional"""
-        rol = values.get("rol")
-        if rol != RolUsuario.administrador:
-            if not v:
-                raise ValueError(
-                    "El correo institucional es obligatorio para roles distintos a administrador"
-                )
-        else:
-            if v:
-                raise ValueError("El administrador no debe tener correo institucional")
-        return v
+    # Ahora todos los usuarios deben proporcionar tanto username como correo_institucional.
+    # Las validaciones por rol previas fueron removidas para permitir que cualquier rol
+    # tenga ambos campos.
 
     class Config:
         json_schema_extra = {

@@ -1,19 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import {
-  PlusIcon,
-  TrashIcon,
-  PhotoIcon,
-  SpeakerWaveIcon,
-  XMarkIcon,
-  EyeIcon,
-  ExclamationTriangleIcon,
-  TagIcon
-} from '@heroicons/react/24/outline';
+import { useForm, Controller } from 'react-hook-form';
+import { AlertTriangle, Tag } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
 import { LoadingSpinner } from '../common/LoadingComponents';
-import { useToast } from '../common/AlertComponents';
+import { ConfirmDialog, useToast } from '../common/AlertComponents';
 import { 
   BancoPregunta, 
   TipoPregunta, 
@@ -355,7 +346,7 @@ export function CreadorPregunta({
                     onClick={agregarOpcion}
                     className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                   >
-                    <PlusIcon className="h-4 w-4" />
+                    <Plus className="h-4 w-4" />
                     <span>Agregar Opción</span>
                   </button>
                 )
@@ -404,7 +395,7 @@ export function CreadorPregunta({
                           onClick={() => eliminarOpcion(index)}
                           className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                         </button>
                       )}
                     </motion.div>
@@ -473,7 +464,7 @@ export function CreadorPregunta({
                       onClick={agregarCategoria}
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                     >
-                      <PlusIcon className="h-4 w-4" />
+                      <Plus className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -502,7 +493,7 @@ export function CreadorPregunta({
                         onClick={agregarEtiqueta}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                       >
-                        <PlusIcon className="h-4 w-4" />
+                        <Plus className="h-4 w-4" />
                       </button>
                     </div>
 
@@ -513,14 +504,14 @@ export function CreadorPregunta({
                             key={index}
                             className="flex items-center space-x-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm"
                           >
-                            <TagIcon className="h-3 w-3" />
+                            <Tag className="h-3 w-3" />
                             <span>{etiqueta}</span>
                             <button
                               type="button"
                               onClick={() => eliminarEtiqueta(etiqueta)}
                               className="ml-1 hover:text-red-600 dark:hover:text-red-400"
                             >
-                              <XMarkIcon className="h-3 w-3" />
+                              <X className="h-3 w-3" />
                             </button>
                           </span>
                         ))}
@@ -567,13 +558,13 @@ export function CreadorPregunta({
                   onClick={() => setMostrarPrevia(!mostrarPrevia)}
                   className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <Eye className="h-5 w-5" />
                   <span>{mostrarPrevia ? 'Ocultar' : 'Ver'} previa</span>
                 </button>
 
                 {isDirty && (
                   <div className="flex items-center space-x-2 text-sm text-amber-600 dark:text-amber-400">
-                    <ExclamationTriangleIcon className="h-4 w-4" />
+                    <AlertTriangle className="h-4 w-4" />
                     <span>Cambios sin guardar</span>
                   </div>
                 )}

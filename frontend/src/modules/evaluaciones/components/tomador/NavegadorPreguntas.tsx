@@ -1,13 +1,9 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import {
-  XMarkIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  ClockIcon
-} from '@heroicons/react/24/outline';
+;
 import { Card, CardHeader, CardContent } from '../common/LayoutComponents';
 import { PreguntaExamen, RespuestaEstudiante, TipoPregunta, DificultadPregunta } from '../../types';
+import { AlertCircle, CheckCircle, X } from 'lucide-react';
 
 interface NavegadorPreguntasProps {
   preguntas: PreguntaExamen[];
@@ -69,13 +65,13 @@ export function NavegadorPreguntas({
       return {
         estado: 'respondida',
         color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-        icono: <CheckCircleIcon className="h-4 w-4" />
+        icono: <CheckCircle className="h-4 w-4" />
       };
     } else {
       return {
         estado: 'pendiente',
         color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-        icono: <ExclamationCircleIcon className="h-4 w-4" />
+        icono: <AlertCircle className="h-4 w-4" />
       };
     }
   };
@@ -112,7 +108,7 @@ export function NavegadorPreguntas({
           onClick={onCerrar}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
-          <XMarkIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+          <X className="h-6 w-6 text-gray-500 dark:text-gray-400" />
         </button>
       </div>
 

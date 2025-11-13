@@ -33,7 +33,7 @@ def get_current_user_simple(
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         
         # Verificar tipo
-        if payload.get("type") != "access":
+        if payload.get("type") != "access":,
             raise HTTPException(status_code=401, detail="Token tipo inválido")
         
         # Obtener usuario
@@ -70,7 +70,7 @@ async def test_obtener_comentarios(
             # Verificar acceso al curso
             acceso_result = db.execute(text("""
                 SELECT 1 FROM "EstudianteGrupo" eg
-                JOIN "GrupoCurso" gc ON eg.grupo_id = gc.grupo_id  
+                JOIN "GrupoCurso" gc ON eg.grupo_id = gc.grupo_id,
                 WHERE gc.curso_id = :curso_id AND eg.estudiante_id = :usuario_id
                 
                 UNION
@@ -87,7 +87,7 @@ async def test_obtener_comentarios(
                 SELECT c.comentario_id, c.contenido, c.tipo, c.fecha_creacion, 
                        u.nombres, u.apellidos
                 FROM "Comentario" c
-                JOIN "Usuario" u ON c.autor_id = u.usuario_id
+                JOIN "Usuario" u ON c.autor_id = u.usuario_id,
                 WHERE c.curso_id = :curso_id
                 ORDER BY c.fecha_creacion DESC
                 LIMIT 10

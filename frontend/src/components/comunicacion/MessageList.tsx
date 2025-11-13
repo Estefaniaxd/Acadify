@@ -1,16 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { 
-  PaperClipIcon, 
-  PhotoIcon,
-  ChatBubbleLeftEllipsisIcon,
-  HeartIcon,
-  FaceSmileIcon,
-  EllipsisHorizontalIcon,
-  ArrowUturnLeftIcon
-} from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import React, { useEffect, useRef, useState, memo, useMemo } from 'react';
+import { formatRelativeTime } from '../../utils/dateUtils';
+import { Paperclip, MessageCircle, Heart, CornerUpLeft, MoreHorizontal } from 'lucide-react';
 
 interface Mensaje {
   id: string;
@@ -40,7 +30,7 @@ interface MessageListProps {
   onReaction?: (mensajeId: string, emoji: string) => void;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ 
+const MessageListComponent: React.FC<MessageListProps> = ({ 
   messages, 
   currentUserId, 
   salaId,
@@ -110,7 +100,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                <PaperClipIcon className="h-4 w-4 text-gray-600" />
+                <Paperclip className="h-4 w-4 text-gray-600" />
                 <span className="text-sm text-gray-800">
                   {url.split('/').pop() || 'Archivo adjunto'}
                 </span>
@@ -200,10 +190,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                 {respuesta.usuario?.nombre || 'Usuario'}
               </span>
               <span className="text-xs text-gray-500">
-                {formatDistanceToNow(new Date(respuesta.fecha_creacion), {
-                  addSuffix: true,
-                  locale: es,
-                })}
+                {formatRelativeTime(respuesta.fecha_creacion)}
               </span>
             </div>
             {renderMessageContent(respuesta)}
@@ -238,7 +225,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center">
-          <ChatBubbleLeftEllipsisIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500">No hay mensajes aún</p>
           <p className="text-sm text-gray-400 mt-1">¡Sé el primero en escribir!</p>
         </div>
@@ -302,10 +289,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 
                 {/* Hora del mensaje */}
                 <div className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
-                  {formatDistanceToNow(new Date(mensaje.fecha_creacion), {
-                    addSuffix: true,
-                    locale: es,
-                  })}
+                  {formatRelativeTime(mensaje.fecha_creacion)}
                 </div>
 
                 {/* Botones de acción (aparecen al hover) */}
@@ -316,20 +300,20 @@ export const MessageList: React.FC<MessageListProps> = ({
                       className="p-1 hover:bg-gray-100 rounded"
                       title="Me gusta"
                     >
-                      <HeartIcon className="h-4 w-4 text-gray-600" />
+                      <Heart className="h-4 w-4 text-gray-600" />
                     </button>
                     <button
                       onClick={() => onReply?.(mensaje)}
                       className="p-1 hover:bg-gray-100 rounded"
                       title="Responder"
                     >
-                      <ArrowUturnLeftIcon className="h-4 w-4 text-gray-600" />
+                      <CornerUpLeft className="h-4 w-4 text-gray-600" />
                     </button>
                     <button
                       className="p-1 hover:bg-gray-100 rounded"
                       title="Más opciones"
                     >
-                      <EllipsisHorizontalIcon className="h-4 w-4 text-gray-600" />
+                      <MoreHorizontal className="h-4 w-4 text-gray-600" />
                     </button>
                   </div>
                 )}
@@ -348,3 +332,6 @@ export const MessageList: React.FC<MessageListProps> = ({
     </div>
   );
 };
+
+// Memoizar componente para evitar re-renders cuando messages no cambian
+export const MessageList = memo(MessageListComponent);

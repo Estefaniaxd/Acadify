@@ -47,7 +47,7 @@ def test_database_structure():
         result = db.execute(text("""
             SELECT column_name, data_type 
             FROM information_schema.columns 
-            WHERE table_name = 'Comentario' 
+            WHERE table_name = 'Comentario',
             AND column_name = 'archivos_adjuntos'
         """))
         

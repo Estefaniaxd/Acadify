@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class EstadoTarea(str, Enum):
     ASIGNADA = "asignada"
     EN_PROGRESO = "en_progreso"
@@ -7,6 +8,7 @@ class EstadoTarea(str, Enum):
     CALIFICADA = "calificada"
     VENCIDA = "vencida"
     CANCELADA = "cancelada"
+
 
 class TipoTarea(str, Enum):
     ENSAYO = "ensayo"
@@ -19,11 +21,13 @@ class TipoTarea(str, Enum):
     EXAMEN = "examen"
     OTRO = "otro"
 
+
 class PrioridadTarea(str, Enum):
     BAJA = "baja"
     MEDIA = "media"
     ALTA = "alta"
     URGENTE = "urgente"
+
 
 class EstadoEntrega(str, Enum):
     BORRADOR = "borrador"

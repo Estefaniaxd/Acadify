@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiBook, FiUsers, FiCalendar, FiPlus, FiEdit3, FiTrash2, FiEye, FiClock } from 'react-icons/fi';
+import { Book, Calendar, Clock, Edit3, Eye, Plus, Trash2, Users } from 'lucide-react';
+;
 
 interface Clase {
   id: string;
@@ -109,7 +110,7 @@ export default function ClasesCoordinador() {
           onClick={() => setShowAddForm(true)}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <FiPlus className="w-4 h-4" />
+          <Plus className="w-4 h-4" />
           <span>Nueva Clase</span>
         </button>
       </div>
@@ -198,7 +199,7 @@ export default function ClasesCoordinador() {
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <FiBook className="w-4 h-4 text-white" />
+                  <Book className="w-4 h-4 text-white" />
                 </div>
                 <span
                   className={`px-2 py-1 text-xs font-medium rounded-full ${getEstadoColor(clase.estado)}`}
@@ -208,16 +209,16 @@ export default function ClasesCoordinador() {
               </div>
               <div className="flex space-x-1">
                 <button className="p-1 text-gray-500 hover:text-blue-600">
-                  <FiEye className="w-4 h-4" />
+                  <Eye className="w-4 h-4" />
                 </button>
                 <button className="p-1 text-gray-500 hover:text-blue-600">
-                  <FiEdit3 className="w-4 h-4" />
+                  <Edit3 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleDeleteClase(clase.id)}
                   className="p-1 text-gray-500 hover:text-red-600"
                 >
-                  <FiTrash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -228,26 +229,26 @@ export default function ClasesCoordinador() {
             
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center space-x-2">
-                <FiUsers className="w-4 h-4" />
+                <Users className="w-4 h-4" />
                 <span>Profesor: {clase.profesor}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <FiBook className="w-4 h-4" />
+                <Book className="w-4 h-4" />
                 <span>Materia: {clase.materia}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <FiUsers className="w-4 h-4" />
+                <Users className="w-4 h-4" />
                 <span>{clase.estudiantes} estudiantes</span>
               </div>
               {clase.aula && (
                 <div className="flex items-center space-x-2">
-                  <FiCalendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4" />
                   <span>Aula: {clase.aula}</span>
                 </div>
               )}
               {clase.horario && (
                 <div className="flex items-center space-x-2">
-                  <FiClock className="w-4 h-4" />
+                  <Clock className="w-4 h-4" />
                   <span>{clase.horario}</span>
                 </div>
               )}

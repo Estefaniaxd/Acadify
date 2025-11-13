@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 
 def utcnow_aware():
     """Devuelve la hora actual en UTC como datetime aware."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)

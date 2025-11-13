@@ -1,8 +1,9 @@
-from ...db.base_class import Base
-from sqlalchemy import Column, text, String, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, ENUM, NUMERIC
-from ...enums.assessment.escala_calificacion_enums import TipoEscalafonEnum
+from sqlalchemy import Column, ForeignKey, String, text
+from sqlalchemy.dialects.postgresql import ENUM, NUMERIC, UUID
 from sqlalchemy.orm import relationship
+
+from src.db.base_class import Base
+from src.enums.assessment.escala_calificacion_enums import TipoEscalafonEnum
 
 
 class EscalaCalificacion(Base):

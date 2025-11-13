@@ -202,11 +202,11 @@ def cleanup_orphaned_assets(db: Session, assets_info: Dict[str, List[Dict[str, A
     return orphaned_count
 
 
-async def main():
-    """Función principal del script."""
-    print("=== Avatar Assets Sync ===")
-    print(f"Assets directory: {settings.AVATAR_ASSETS_PATH}")
-    print(f"Database URL: {settings.DATABASE_URL}")
+def main():
+    """Función principal."""
+    print("="*50)
+    print("AVATAR ASSETS SYNC")
+    print("="*50)
     print()
     
     # Escanear directorio de assets
@@ -236,9 +236,9 @@ async def main():
         # Generar manifest
         print("\n" + "="*50)
         print("Generating manifest.json...")
-        manifest = await generate_manifest(settings.AVATAR_ASSETS_PATH)
+        manifest = generate_manifest(settings.AVATAR_ASSETS_PATH)
         manifest_path = os.path.join(settings.AVATAR_ASSETS_PATH, "manifest.json")
-        await save_manifest(manifest, manifest_path)
+        save_manifest(manifest, manifest_path)
         print(f"Manifest saved to: {manifest_path}")
         
         # Mostrar estadísticas finales
@@ -260,4 +260,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
