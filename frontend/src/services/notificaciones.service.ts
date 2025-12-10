@@ -7,6 +7,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { API_BASE_URL } from '../config/api.config';
 
 // ==================== TIPOS ====================
 
@@ -93,7 +94,6 @@ export interface ContadorNotificaciones {
 
 // ==================== CONFIGURACIÓN ====================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const NOTIFICACIONES_PATH = '/api/communication';
 
 /**
@@ -204,7 +204,7 @@ class NotificacionesAPIClient {
    */
   async obtenerConfiguracion(): Promise<ConfiguracionNotificaciones> {
     try {
-      const { data } = await this.client.get('/configuracion/notificaciones');
+  const { data } = await this.client.get('/notificaciones/configuracion');
       return data;
     } catch (error) {
       console.warn('Error al obtener configuración de notificaciones:', error);
@@ -239,7 +239,7 @@ class NotificacionesAPIClient {
   async actualizarConfiguracion(
     config: Partial<ConfiguracionNotificaciones>
   ): Promise<ConfiguracionNotificaciones> {
-    const { data } = await this.client.put('/configuracion/notificaciones', config);
+  const { data } = await this.client.put('/notificaciones/configuracion', config);
     return data;
   }
 }

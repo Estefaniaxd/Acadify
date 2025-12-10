@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Crear tabla archivos_curso en PostgreSQL",
+			"type": "shell",
+			"command": "psql -U acadify_user -d acadify -f backend/database/10_create_archivos_curso.sql",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

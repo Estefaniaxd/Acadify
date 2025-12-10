@@ -18,9 +18,10 @@ from src.crud.communication.chat import (
     crud_notificacion,
     crud_participante_sala,
 )
-from src.db.session import get_db
-from src.models.communication.chat import Mensaje, TipoMensaje
-from src.models.users import Usuario
+from src.api.deps import get_db
+from src.models.communication.chat import TipoMensaje
+from src.models.communication.mensaje import Mensaje
+from src.models.users.usuario import Usuario
 from src.schemas.communication.chat_schemas import MensajeCreate, NotificacionCreate
 
 

@@ -12,13 +12,10 @@ from typing import Any
 from fastapi import Depends, Query, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
-from api.dependencies import get_current_user_websocket, get_db
-from crud.communication.videollamada import (
-    crud_videollamada,
-    crud_videollamada_participante,
-)
-from models.users import Usuario
-from services.videollamada_websocket import videollamada_ws_manager
+from src.api.dependencies import get_current_user_websocket, get_db
+from src.crud.communication.videollamada import crud_videollamada
+from src.models.users.usuario import Usuario
+from src.services.videollamada_websocket import videollamada_ws_manager
 
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Any
+from uuid import UUID
 
-from sqlalchemy import and_, asc, case, desc, or_
+from sqlalchemy import and_, asc, case, desc, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, joinedload
 
 from src.crud.base import CRUDBase
@@ -130,7 +132,7 @@ class CRUDTarea(CRUDBase[Tarea, TareaCreate, TareaUpdate]):
             .options(
                 joinedload(Tarea.docente),
                 joinedload(Tarea.grupo),
-                joinedload(Tarea.rubrica),
+                joinedload(Tarea.rubrica_obj),
                 joinedload(Tarea.entregas),
             )
             .filter(Tarea.tarea_id == tarea_id)
@@ -228,6 +230,7 @@ class CRUDEntregaTarea(CRUDBase[EntregaTarea, EntregaTareaCreate, EntregaTareaUp
                     EntregaTarea.estudiante_id == entrega_data.estudiante_id,
                 )
             )
+            .order_by(EntregaTarea.fecha_creacion.desc())  # Get the latest submission
             .first()
         )
 
@@ -249,6 +252,15 @@ class CRUDEntregaTarea(CRUDBase[EntregaTarea, EntregaTareaCreate, EntregaTareaUp
                 "fecha_limite_original": tarea.fecha_limite if tarea else None,
             }
         )
+        
+        # ✨ PRESERVE archivo_url and archivos_adicionales from previous submission if not provided
+        # This ensures students don't lose their uploaded files on re-submission
+        if entrega_existente:
+            if not entrega_dict.get("archivo_url") and entrega_existente.archivo_url:
+                entrega_dict["archivo_url"] = entrega_existente.archivo_url
+                
+            if not entrega_dict.get("archivos_adicionales") and entrega_existente.archivos_adicionales:
+                entrega_dict["archivos_adicionales"] = entrega_existente.archivos_adicionales
 
         entrega = EntregaTarea(**entrega_dict)
         db.add(entrega)
@@ -307,59 +319,265 @@ class CRUDEntregaTarea(CRUDBase[EntregaTarea, EntregaTareaCreate, EntregaTareaUp
 
         return entrega
 
+    def calificar_entrega_con_puntos(
+        self,
+        db: Session,
+        *,
+        entrega_id: str,
+        calificacion_data: CalificarEntrega,
+        calificado_por: str,
+        puntos_service=None,
+    ) -> dict[str, Any]:
+        """Calificar una entrega e integrar puntos de gamificación.
+
+        Este método mejorado:
+        1. Valida la calificación contra puntuación máxima
+        2. Actualiza campos de calificación en BD
+        3. Calcula puntos usando fórmula de gamificación
+        4. Almacena puntos en la BD (puntos_otorgados field)
+        5. Registra los datos para procesamiento asíncrono de puntos
+
+        Args:
+            db: Sesión de base de datos síncrona
+            entrega_id: ID de la entrega
+            calificacion_data: Datos de calificación
+            calificado_por: UUID del docente calificador
+            puntos_service: Instancia de PuntosService (opcional, para logging)
+
+        Returns:
+            Dict con:
+            {
+                "entrega": EntregaTarea (actualizada),
+                "puntos_otorgados": int (calculados pero no otorgados aún),
+                "formula_aplicada": str (para auditoría)
+            }
+
+        Note:
+            Los puntos se almacenan en entregas_tareas.puntos_otorgados
+            pero NO se actualizan las tablas UsuarioPuntos y HistorialPuntos
+            aún. Eso debe hacerse en un background job o celery task.
+
+        Raises:
+            ValueError: Si calificación excede puntuación máxima
+            Exception: Si entrega no existe
+        """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        # 1. Obtener entrega y tarea
+        entrega = self.get(db, id=entrega_id)
+        if not entrega:
+            raise ValueError(f"Entrega no encontrada: {entrega_id}")
+
+        tarea = db.query(Tarea).filter(Tarea.tarea_id == entrega.tarea_id).first()
+
+        # 2. Validar calificación
+        if tarea and calificacion_data.calificacion > tarea.puntuacion_maxima:
+            msg = f"La calificación no puede exceder {tarea.puntuacion_maxima} puntos"
+            raise ValueError(msg)
+
+        # 3. Actualizar campos de calificación
+        entrega.calificacion = calificacion_data.calificacion
+        entrega.calificacion_letras = calificacion_data.calificacion_letras
+        entrega.comentarios_docente = calificacion_data.comentarios_docente
+        entrega.rubrica_calificacion = calificacion_data.rubrica_calificacion
+        entrega.requiere_revision = calificacion_data.requiere_revision
+        entrega.estado = (
+            EstadoEntrega.DEVUELTA
+            if calificacion_data.requiere_revision
+            else EstadoEntrega.CALIFICADA
+        )
+        entrega.calificado_por = calificado_por
+        entrega.fecha_calificacion = datetime.utcnow()
+
+        # 4. Calcular puntos - FORMULA SINCRÓNICA
+        puntos_resultado = {
+            "puntos_otorgados": 0,
+            "formula_aplicada": "Sin cálculo (tarea sin configuración de puntos)",
+        }
+
+        if tarea and tarea.puntos_base is not None:
+            try:
+                # FÓRMULA COMPLETA (sincrónica - copiada de PuntosService)
+                # =========================================================
+
+                # Puntos base de la tarea
+                puntos_base = tarea.puntos_base if tarea.puntos_base else 50
+
+                # Bonificación por excelencia (calificación >= 4.5)
+                puntos_bonificacion = 0
+                if (
+                    calificacion_data.calificacion >= 4.5
+                    and tarea.puntos_bonificacion
+                ):
+                    puntos_bonificacion = tarea.puntos_bonificacion
+
+                # Penalización por entrega tardía (-30%)
+                penalizacion_tardia = 0
+                if tarea.fecha_limite and entrega.fecha_entrega > tarea.fecha_limite:
+                    penalizacion_tardia = int(puntos_base * 0.30)
+
+                # Penalización por intentos adicionales (-10% por intento extra, max 2)
+                entregas_previas = (
+                    db.query(EntregaTarea)
+                    .filter(
+                        and_(
+                            EntregaTarea.tarea_id == tarea.tarea_id,
+                            EntregaTarea.estudiante_id == entrega.estudiante_id,
+                            EntregaTarea.entrega_id != entrega_id,
+                        )
+                    )
+                    .count()
+                )
+
+                penalizacion_intentos = 0
+                if entregas_previas > 0:
+                    intentos_extra = min(entregas_previas, 2)  # Máximo 2 intentos extra
+                    penalizacion_intentos = int(puntos_base * 0.10 * intentos_extra)
+
+                # Calcular total
+                puntos_totales = (
+                    puntos_base
+                    + puntos_bonificacion
+                    - penalizacion_tardia
+                    - penalizacion_intentos
+                )
+
+                # Asegurar que no sean negativos
+                puntos_totales = max(0, puntos_totales)
+
+                # Desglose para auditoría
+                desglose_partes = [f"{puntos_base} (base)"]
+                if puntos_bonificacion > 0:
+                    desglose_partes.append(f"+ {puntos_bonificacion} (bonus)")
+                if penalizacion_tardia > 0:
+                    desglose_partes.append(f"- {penalizacion_tardia} (tardía)")
+                if penalizacion_intentos > 0:
+                    desglose_partes.append(
+                        f"- {penalizacion_intentos} ({entregas_previas} intento(s))"
+                    )
+
+                desglose = " ".join(desglose_partes)
+
+                # Guardar en la entrega
+                entrega.puntos_otorgados = puntos_totales
+
+                puntos_resultado = {
+                    "puntos_otorgados": puntos_totales,
+                    "formula_aplicada": desglose,
+                }
+
+                logger.info(
+                    f"Puntos calculados: entrega_id={entrega_id}, "
+                    f"estudiante_id={entrega.estudiante_id}, "
+                    f"puntos={puntos_totales}, fórmula: {desglose}"
+                )
+
+            except Exception as e:
+                logger.exception(
+                    f"Error al calcular puntos en calificación: {e!s}. "
+                    f"La entrega será calificada pero sin puntos."
+                )
+                entrega.puntos_otorgados = 0
+
+        # 5. Guardar cambios
+        db.add(entrega)
+        db.commit()
+        db.refresh(entrega)
+
+        logger.info(
+            f"Entrega calificada: entrega_id={entrega_id}, "
+            f"calificacion={calificacion_data.calificacion}, "
+            f"puntos={entrega.puntos_otorgados}"
+        )
+
+        return {
+            "entrega": entrega,
+            **puntos_resultado,
+        }
+
     def obtener_entregas_por_tarea(
         self, db: Session, *, tarea_id: str, filtros: FiltrosEntrega | None = None
     ) -> list[EntregaTarea]:
-        """Obtener todas las entregas de una tarea."""
-        query = db.query(EntregaTarea).filter(EntregaTarea.tarea_id == tarea_id)
+        """Obtener todas las entregas de una tarea + estudiantes sin entregas."""
+        
+        # 1. Obtener la tarea para saber el grupo
+        tarea = db.query(Tarea).filter(Tarea.tarea_id == tarea_id).first()
+        if not tarea:
+            return []
+        
+        # 2. Obtener TODOS los estudiantes del grupo
+        from src.models.academic.estudiante_grupo import EstudianteGrupo
+        from src.models.users.usuario import Usuario
+        from src.models.users.estudiante import Estudiante
+        
+        estudiantes = (
+            db.query(Usuario)
+            .join(Estudiante, Usuario.usuario_id == Estudiante.estudiante_id)
+            .join(EstudianteGrupo, Estudiante.estudiante_id == EstudianteGrupo.estudiante_id)
+            .filter(EstudianteGrupo.grupo_id == tarea.grupo_id)
+            .all()
+        )
+        
+        # 3. Query de entregas existentes
+        query = (
+            db.query(EntregaTarea)
+            .options(joinedload(EntregaTarea.estudiante))
+            .filter(EntregaTarea.tarea_id == tarea_id)
+        )
 
+        # Aplicar filtros si existen
         if filtros:
             if filtros.estado:
                 query = query.filter(EntregaTarea.estado == filtros.estado)
-
+            
             if filtros.estudiante_id:
-                query = query.filter(
-                    EntregaTarea.estudiante_id == filtros.estudiante_id
-                )
+                query = query.filter(EntregaTarea.estudiante_id == filtros.estudiante_id)
 
-            if filtros.solo_calificadas:
-                query = query.filter(EntregaTarea.calificacion.isnot(None))
+        todas_entregas = query.all()
 
-            if filtros.solo_pendientes:
-                query = query.filter(
-                    and_(
-                        EntregaTarea.estado == EstadoEntrega.ENTREGADA,
-                        EntregaTarea.calificacion.is_(None),
-                    )
-                )
-
-            if filtros.fecha_desde:
-                query = query.filter(EntregaTarea.fecha_entrega >= filtros.fecha_desde)
-
-            if filtros.fecha_hasta:
-                query = query.filter(EntregaTarea.fecha_entrega <= filtros.fecha_hasta)
-
-            # Ordenamiento
-            if filtros.ordenar_por == "fecha_entrega":
-                order_field = EntregaTarea.fecha_entrega
-            elif filtros.ordenar_por == "calificacion":
-                order_field = EntregaTarea.calificacion
-            elif filtros.ordenar_por == "fecha_creacion":
-                order_field = EntregaTarea.fecha_creacion
+        # 4. Filtrar solo la última entrega por estudiante
+        latest_entregas_map = {}
+        for entrega in todas_entregas:
+            est_id = str(entrega.estudiante_id)
+            if est_id not in latest_entregas_map:
+                latest_entregas_map[est_id] = entrega
             else:
-                order_field = EntregaTarea.fecha_entrega
+                existing = latest_entregas_map[est_id]
+                if (entrega.numero_intento or 0) > (existing.numero_intento or 0):
+                    latest_entregas_map[est_id] = entrega
+                elif (entrega.numero_intento or 0) == (existing.numero_intento or 0):
+                    if entrega.fecha_creacion and existing.fecha_creacion and entrega.fecha_creacion > existing.fecha_creacion:
+                        latest_entregas_map[est_id] = entrega
 
-            if filtros.orden_desc:
-                query = query.order_by(desc(order_field))
+        # 5. Combinar estudiantes con entregas
+        resultado = []
+        for estudiante in estudiantes:
+            est_id = str(estudiante.usuario_id)
+            if est_id in latest_entregas_map:
+                resultado.append(latest_entregas_map[est_id])
             else:
-                query = query.order_by(asc(order_field))
+                # Crear dummy para estudiante sin entrega
+                dummy = EntregaTarea(
+                    entrega_id=f"dummy_{est_id}",
+                    tarea_id=tarea_id,
+                    estudiante_id=est_id,
+                    estudiante=estudiante,
+                    estado="asignada",
+                    fecha_entrega=None,
+                    fecha_creacion=datetime.now(),  # Fecha válida requerida por schema
+                    calificacion=None,
+                    calificado_por=None,  # Evitar UUID serialization error
+                    numero_intento=0
+                )
+                resultado.append(dummy)
+        
+        # 6. Si hay filtro de estado, excluir dummies que no cumplan
+        if filtros and filtros.estado:
+            resultado = [e for e in resultado if e.estado == filtros.estado]
 
-            # Paginación
-            if filtros.pagina and filtros.tamaño_pagina:
-                offset = (filtros.pagina - 1) * filtros.tamaño_pagina
-                query = query.offset(offset).limit(filtros.tamaño_pagina)
-
-        return query.all()
+        return resultado
 
     def obtener_entregas_por_estudiante(
         self, db: Session, *, estudiante_id: str, grupo_id: str | None = None
@@ -373,6 +591,22 @@ class CRUDEntregaTarea(CRUDBase[EntregaTarea, EntregaTareaCreate, EntregaTareaUp
             query = query.join(Tarea).filter(Tarea.grupo_id == grupo_id)
 
         return query.all()
+
+    def get_by_tarea_and_estudiante(
+        self, db: Session, *, tarea_id: str, estudiante_id: str
+    ) -> EntregaTarea | None:
+        """Obtener la entrega de un estudiante para una tarea específica."""
+        return (
+            db.query(EntregaTarea)
+            .filter(
+                and_(
+                    EntregaTarea.tarea_id == tarea_id,
+                    EntregaTarea.estudiante_id == estudiante_id,
+                )
+            )
+            .order_by(desc(EntregaTarea.fecha_creacion))
+            .first()
+        )
 
     def obtener_entrega_detallada(
         self, db: Session, entrega_id: str
@@ -444,5 +678,5 @@ class CRUDRubrica(CRUDBase[Rubrica, RubricaCreate, RubricaUpdate]):
 
 # Instancias de los CRUDs
 crud_tarea = CRUDTarea(Tarea)
-crud_entrega_tarea = CRUDEntregaTarea(EntregaTarea)
+crud_entrega_tarea = CRUDEntregaTarea(EntregaTarea, id_field="entrega_id")
 crud_rubrica = CRUDRubrica(Rubrica)

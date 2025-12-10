@@ -57,7 +57,8 @@ class TareaService:
         fecha_limite: datetime,
         puntos_max: float,
         usuario: Usuario,
-        tipo: Optional[str] = "individual",
+        tipo: Optional[str] = "ejercicios",
+        prioridad: Optional[str] = "media",
         archivo_adjunto: Optional[str] = None
     ) -> Dict[str, Any]:
         """
@@ -88,26 +89,47 @@ class TareaService:
             # Crear tarea usando SQL directo (por ahora)
             query = text("""
                 INSERT INTO tareas (
-                    curso_id, titulo, descripcion, fecha_limite,
-                    puntos_max, tipo, archivo_adjunto, creado_por,
-                    fecha_creacion
+                    tarea_id, docente_id, titulo, descripcion, fecha_limite,
+                    puntuacion_maxima, tipo, prioridad, grupo_id,
+                    creado_por, fecha_creacion
                 )
                 VALUES (
-                    :curso_id, :titulo, :descripcion, :fecha_limite,
-                    :puntos_max, :tipo, :archivo_adjunto, :creado_por,
-                    :fecha_creacion
+                    gen_random_uuid()::text, :docente_id, :titulo, :descripcion, :fecha_limite,
+                    :puntuacion_maxima, CAST(:tipo AS tipo_tarea), CAST(:prioridad AS prioridad_tarea), :grupo_id,
+                    :creado_por, :fecha_creacion
                 )
                 RETURNING tarea_id
             """)
             
-            result = db.execute(query, {
+            # Obtener el grupo_id correspondiente al curso_id
+            grupo_query = text("""
+                SELECT grupo_id FROM "GrupoCurso" 
+                WHERE curso_id = :curso_id AND docente_id = :docente_id
+                LIMIT 1
+            """)
+            
+            grupo_result = db.execute(grupo_query, {
                 "curso_id": curso_id,
+                "docente_id": usuario.usuario_id
+            }).fetchone()
+            
+            if not grupo_result:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="No se encontró un grupo asignado para este curso"
+                )
+            
+            grupo_id = grupo_result[0]
+            
+            result = db.execute(query, {
+                "docente_id": usuario.usuario_id,
                 "titulo": titulo,
                 "descripcion": descripcion,
                 "fecha_limite": fecha_limite,
-                "puntos_max": puntos_max,
-                "tipo": tipo,
-                "archivo_adjunto": archivo_adjunto,
+                "puntuacion_maxima": puntos_max,
+                "tipo": tipo or "ejercicios",
+                "prioridad": prioridad or "media",
+                "grupo_id": grupo_id,  # Usar el grupo_id obtenido
                 "creado_por": usuario.usuario_id,
                 "fecha_creacion": datetime.now(timezone.utc)
             })
@@ -164,6 +186,40 @@ class TareaService:
             # Validar acceso al curso
             TareaService._validar_acceso_curso(db, curso_id, usuario)
             
+            # Obtener el grupo_id correspondiente al curso_id
+            grupo_query = text("""
+                SELECT grupo_id FROM "GrupoCurso" 
+                WHERE curso_id = :curso_id AND docente_id = :docente_id
+                LIMIT 1
+            """)
+            
+            grupo_result = db.execute(grupo_query, {
+                "curso_id": curso_id,
+                "docente_id": usuario.usuario_id
+            }).fetchone()
+            
+            if not grupo_result:
+                # Si no es docente del curso, intentar como estudiante
+                grupo_query_estudiante = text("""
+                    SELECT gc.grupo_id FROM "GrupoCurso" gc
+                    JOIN "EstudianteGrupo" eg ON gc.grupo_id = eg.grupo_id
+                    WHERE gc.curso_id = :curso_id AND eg.estudiante_id = :usuario_id
+                    LIMIT 1
+                """)
+                
+                grupo_result = db.execute(grupo_query_estudiante, {
+                    "curso_id": curso_id,
+                    "usuario_id": usuario.usuario_id
+                }).fetchone()
+                
+                if not grupo_result:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="No tienes acceso a este curso"
+                    )
+            
+            grupo_id = grupo_result[0]
+            
             # Query optimizada con información de entrega
             fecha_actual = datetime.now(timezone.utc)
             
@@ -173,9 +229,8 @@ class TareaService:
                     t.titulo,
                     t.descripcion,
                     t.fecha_limite,
-                    t.puntos_max,
-                    t.tipo,
-                    t.archivo_adjunto,
+                    t.puntuacion_maxima as puntos_base,
+                    t.tipo as tipo,
                     t.fecha_creacion,
                     u.nombres || ' ' || u.apellidos as creador_nombre,
                     CASE 
@@ -190,10 +245,15 @@ class TareaService:
                 FROM tareas t
                 JOIN "Usuario" u ON t.creado_por = u.usuario_id
                 LEFT JOIN entregas_tareas et ON t.tarea_id = et.tarea_id
-                LEFT JOIN entregas_tareas mi_entrega 
-                    ON t.tarea_id = mi_entrega.tarea_id 
-                    AND mi_entrega.estudiante_id = :usuario_id
-                WHERE t.curso_id = :curso_id
+                LEFT JOIN LATERAL (
+                    SELECT entrega_id, estado, calificacion
+                    FROM entregas_tareas
+                    WHERE tarea_id = t.tarea_id 
+                      AND estudiante_id = :usuario_id
+                    ORDER BY fecha_entrega DESC
+                    LIMIT 1
+                ) mi_entrega ON true
+                WHERE t.grupo_id = :grupo_id
                     AND (:incluir_vencidas OR t.fecha_limite >= :fecha_actual)
                 GROUP BY t.tarea_id, u.usuario_id, mi_entrega.entrega_id, 
                          mi_entrega.estado, mi_entrega.calificacion
@@ -202,7 +262,7 @@ class TareaService:
             """)
             
             result = db.execute(query, {
-                "curso_id": curso_id,
+                "grupo_id": grupo_id,
                 "usuario_id": usuario.usuario_id,
                 "fecha_actual": fecha_actual,
                 "incluir_vencidas": incluir_vencidas,
@@ -214,17 +274,20 @@ class TareaService:
             count_query = text("""
                 SELECT COUNT(*) 
                 FROM tareas 
-                WHERE curso_id = :curso_id
+                WHERE grupo_id = :grupo_id
                     AND (:incluir_vencidas OR fecha_limite >= :fecha_actual)
             """)
             
             total = db.execute(count_query, {
-                "curso_id": curso_id,
+                "grupo_id": grupo_id,
                 "fecha_actual": fecha_actual,
                 "incluir_vencidas": incluir_vencidas
             }).scalar()
             
             tareas = [dict(row._mapping) for row in result]
+            
+            logger.info(f"📊 TAREAS ENCONTRADAS: {len(tareas)} tareas para grupo_id={grupo_id}, curso_id={curso_id}")
+            logger.info(f"   Tareas: {[t['titulo'] for t in tareas]}")
             
             # Enriquecer con información adicional
             for tarea in tareas:
@@ -235,6 +298,8 @@ class TareaService:
                     tarea['estado_tiempo'],
                     tarea.get('mi_estado_entrega')
                 )
+            
+            logger.info(f"✅ Devolviendo {len(tareas)} tareas al frontend")
             
             return {
                 "success": True,
@@ -256,14 +321,144 @@ class TareaService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error al obtener tareas: {str(e)}"
             )
-    
+    @staticmethod
+    def obtener_tarea(
+        db: Session,
+        tarea_id: str,
+        usuario: Usuario
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los detalles de una tarea específica
+        
+        Args:
+            db: Sesión de base de datos
+            tarea_id: ID de la tarea
+            usuario: Usuario que consulta
+            
+        Returns:
+            Dict con los detalles de la tarea
+        """
+        try:
+            # 1. Obtener información básica de la tarea y verificar existencia
+            query_info = text("""
+                SELECT t.grupo_id, t.fecha_limite
+                FROM tareas t
+                WHERE t.tarea_id = :tarea_id
+            """)
+            
+            result_info = db.execute(query_info, {"tarea_id": tarea_id}).fetchone()
+            
+            if not result_info:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Tarea no encontrada"
+                )
+                
+            grupo_id = result_info[0]
+            
+            # 2. Validar acceso al curso/grupo
+            # Si es estudiante, debe estar inscrito en el grupo
+            # Si es docente, debe ser docente del curso asociado al grupo
+            
+            if usuario.rol == "estudiante":
+                query_acceso = text("""
+                    SELECT 1 FROM "EstudianteGrupo"
+                    WHERE grupo_id = :grupo_id AND estudiante_id = :usuario_id
+                """)
+                if not db.execute(query_acceso, {"grupo_id": grupo_id, "usuario_id": usuario.usuario_id}).fetchone():
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="No tienes acceso a esta tarea"
+                    )
+            else:
+                # Docente/Coordinador
+                query_acceso = text("""
+                    SELECT 1 FROM "GrupoCurso" gc
+                    WHERE gc.grupo_id = :grupo_id AND (gc.docente_id = :usuario_id OR :rol = 'coordinador')
+                """)
+                if not db.execute(query_acceso, {
+                    "grupo_id": grupo_id, 
+                    "usuario_id": usuario.usuario_id,
+                    "rol": usuario.rol
+                }).fetchone():
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="No tienes acceso a esta tarea"
+                    )
+
+            # 3. Obtener detalles completos
+            fecha_actual = datetime.now(timezone.utc)
+            
+            query = text("""
+                SELECT 
+                    t.tarea_id,
+                    t.titulo,
+                    t.descripcion,
+                    t.fecha_limite,
+                    t.puntuacion_maxima as puntos_base,
+                    t.tipo as tipo,
+                    t.fecha_creacion,
+                    t.grupo_id,
+                    t.prioridad,
+                    u.nombres || ' ' || u.apellidos as creador_nombre,
+                    CASE 
+                        WHEN t.fecha_limite < :fecha_actual THEN 'vencida'
+                        WHEN t.fecha_limite < :fecha_actual + INTERVAL '24 hours' THEN 'proxima'
+                        ELSE 'activa'
+                    END as estado_tiempo,
+                    COALESCE(mi_entrega.entrega_id, NULL) as mi_entrega_id,
+                    COALESCE(mi_entrega.estado, NULL) as mi_estado_entrega,
+                    COALESCE(mi_entrega.calificacion, NULL) as mi_calificacion,
+                    COALESCE(mi_entrega.retroalimentacion_docente, NULL) as mi_retroalimentacion
+                FROM tareas t
+                JOIN "Usuario" u ON t.creado_por = u.usuario_id
+                LEFT JOIN LATERAL (
+                    SELECT entrega_id, estado, calificacion, retroalimentacion_docente
+                    FROM entregas_tareas
+                    WHERE tarea_id = t.tarea_id 
+                      AND estudiante_id = :usuario_id
+                    ORDER BY fecha_entrega DESC
+                    LIMIT 1
+                ) mi_entrega ON true
+                WHERE t.tarea_id = :tarea_id
+            """)
+            
+            result = db.execute(query, {
+                "tarea_id": tarea_id,
+                "usuario_id": usuario.usuario_id,
+                "fecha_actual": fecha_actual
+            }).fetchone()
+            
+            tarea = dict(result._mapping)
+            
+            # Enriquecer con información adicional
+            tarea['dias_restantes'] = TareaService._calcular_dias_restantes(tarea['fecha_limite'])
+            tarea['puede_entregar'] = TareaService._puede_entregar(
+                tarea['estado_tiempo'],
+                tarea.get('mi_estado_entrega')
+            )
+            
+            return tarea
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error obteniendo tarea {tarea_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error al obtener tarea: {str(e)}"
+            )
+
     @staticmethod
     def entregar_tarea(
         db: Session,
         tarea_id: str,
         usuario: Usuario,
         contenido: str,
-        archivo_url: Optional[str] = None
+        archivo_url: Optional[str] = None,
+        archivo_urls: Optional[list] = None,
+        archivos_metadata: Optional[list] = None,
+        enlaces_externos: Optional[list] = None  # ← Enlaces externos
     ) -> Dict[str, Any]:
         """
         Registra la entrega de una tarea por un estudiante
@@ -273,18 +468,19 @@ class TareaService:
             tarea_id: ID de la tarea
             usuario: Estudiante que entrega
             contenido: Contenido de la entrega
-            archivo_url: URL del archivo adjunto
+            archivo_url: URL del archivo adjunto principal
+            archivo_urls: Lista de todas las URLs de archivos
+            archivos_metadata: Lista con metadata (url, nombre_original, nombre_almacenado)
+            enlaces_externos: Lista de enlaces externos [{url, titulo}]
             
         Returns:
             Dict con la entrega registrada
         """
         try:
-            # Validar contenido no vacío
-            if not contenido or not contenido.strip():
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="El contenido de la entrega no puede estar vacío"
-                )
+            import json
+            
+            # Permitir entregas vacías para poder actualizar solo archivos o comentarios
+            # No validar contenido obligatorio
             
             # Validaciones
             TareaService._validar_puede_entregar(db, tarea_id, usuario)
@@ -292,21 +488,77 @@ class TareaService:
             # Verificar si ya entregó
             entrega_existente = TareaService._obtener_mi_entrega(db, tarea_id, usuario.usuario_id)
             
+            # Preparar JSON con archivos adicionales (con metadata)
+            archivos_json = None
+            if archivos_metadata is not None:
+                # Si se pasa una lista (vacía o no), usarla. Esto permite borrar archivos enviando lista vacía.
+                archivos_json = json.dumps({"archivos": archivos_metadata})
+                if len(archivos_metadata) > 0:
+                    logger.info(f"   ✅ archivos_json creado con {len(archivos_metadata)} archivos:")
+                    logger.info(f"      {archivos_json[:300]}")
+                else:
+                    logger.info(f"   ⚠️ Lista de archivos vacía (se eliminarán los archivos existentes)")
+            elif archivo_urls and len(archivo_urls) > 0:
+                # Fallback: si no hay metadata, usar solo URLs
+                archivos_json = json.dumps({
+                    "archivos": [{"url": url, "nombre": url.split("/")[-1]} for url in archivo_urls]
+                })
+                logger.info(f"   ⚠️ Usando fallback URL con {len(archivo_urls)} archivos")
+            else:
+                # ✅ FIX #4: Si no hay archivos nuevos, reusar de entrega cancelada anterior
+                logger.info(f"   ⚠️ Sin archivos nuevos")
+                
+            # Si no hay archivos nuevos pero hay una entrega cancelada, reusar archivos
+            if not archivos_json and entrega_existente and entrega_existente.get('estado') == 'cancelada':
+                if entrega_existente.get('archivos_adicionales'):
+                    # ✅ CRÍTICO: Verificar si ya es string o dict
+                    archivos_anteriores = entrega_existente['archivos_adicionales']
+                    
+                    if isinstance(archivos_anteriores, str):
+                        # Ya es JSON string, usar directamente
+                        archivos_json = archivos_anteriores
+                        logger.info(f"   ♻️ Reusando archivos (ya en formato JSON string)")
+                    elif isinstance(archivos_anteriores, dict):
+                        # Es dict, convertir a JSON string
+                        try:
+                            archivos_json = json.dumps(archivos_anteriores)
+                            archivos_data = archivos_anteriores
+                            archivos_count = len(archivos_data.get('archivos', [])) if isinstance(archivos_data, dict) else 0
+                            logger.info(f"   ♻️ REUSANDO {archivos_count} archivos de entrega cancelada {entrega_existente['entrega_id']}")
+                        except Exception as e:
+                            logger.error(f"   ❌ Error convirtiendo archivos anteriores a JSON: {e}")
+                            archivos_json = None
+                    else:
+                        logger.warning(f"   ⚠️ Tipo inesperado para archivos_adicionales: {type(archivos_anteriores)}")
+                        archivos_json = None
+                else:
+                    logger.info(f"   ⚠️ Entrega cancelada no tiene archivos para reusar")
+            
+            
+            # Preparar enlaces externos como JSON (ANTES de la lógica de actualizar/crear)
+            enlaces_json = None
+            if enlaces_externos is not None:
+                # Si se pasa una lista (vacía o no), usarla. Esto permite borrar enlaces enviando lista vacía.
+                enlaces_json = json.dumps(enlaces_externos)
+                logger.info(f"   🔗 Enlaces externos a guardar: {len(enlaces_externos)}")
+            
+            # ✅ FIX CRÍTICO: Actualizar entrega existente (incluso si está cancelada)
+            # En vez de crear múltiples entregas, reutilizar la cancelada
             if entrega_existente:
-                # Actualizar entrega existente
+                logger.info(f"   🔄 Actualizando entrega existente: {entrega_existente['entrega_id']} (estado: {entrega_existente.get('estado')})")
                 return TareaService._actualizar_entrega(
-                    db, entrega_existente['entrega_id'], contenido, archivo_url
+                    db, entrega_existente['entrega_id'], contenido, archivo_url, archivos_json, enlaces_json
                 )
             
             # Crear nueva entrega
             query = text("""
                 INSERT INTO entregas_tareas (
-                    tarea_id, estudiante_id, contenido, archivo_url,
-                    fecha_entrega, estado
+                    entrega_id, tarea_id, estudiante_id, contenido_texto, archivo_url,
+                    archivos_adicionales, enlaces_externos, fecha_entrega, estado
                 )
                 VALUES (
-                    :tarea_id, :estudiante_id, :contenido, :archivo_url,
-                    :fecha_entrega, 'entregada'
+                    gen_random_uuid()::text, :tarea_id, :estudiante_id, :contenido, :archivo_url,
+                    :archivos_adicionales::json, :enlaces_externos::json, :fecha_entrega, 'entregada'
                 )
                 RETURNING entrega_id
             """)
@@ -316,13 +568,28 @@ class TareaService:
                 "estudiante_id": usuario.usuario_id,
                 "contenido": contenido,
                 "archivo_url": archivo_url,
+                "archivos_adicionales": archivos_json,
+                "enlaces_externos": enlaces_json,
                 "fecha_entrega": datetime.now(timezone.utc)
             })
             
             entrega_id = result.fetchone()[0]
             db.commit()
             
-            logger.info(f"Tarea entregada: {tarea_id} por {usuario.usuario_id}")
+            logger.info(f"Tarea entregada: {tarea_id} por {usuario.usuario_id} - {len(archivo_urls or [])} archivos, {len(enlaces_externos or [])} enlaces")
+            
+            # ✅ FIX: Devolver archivos reales (incluyendo reutilizados de entrega cancelada)
+            archivos_response = archivos_metadata or []
+            if not archivos_response and archivos_json:
+                # Si no hay archivos_metadata pero sí archivos_json (reutilizados), parsear
+                try:
+                    archivos_data = json.loads(archivos_json) if isinstance(archivos_json, str) else archivos_json
+                    archivos_response = archivos_data.get('archivos', []) if isinstance(archivos_data, dict) else []
+                except:
+                    archivos_response = []
+            
+            # ✅ FIX: Devolver enlaces también
+            enlaces_response = enlaces_externos or []
             
             return {
                 "success": True,
@@ -330,7 +597,9 @@ class TareaService:
                 "data": {
                     "entrega_id": str(entrega_id),
                     "fecha_entrega": datetime.now(timezone.utc).isoformat(),
-                    "estado": "entregada"
+                    "estado": "entregada",
+                    "archivos": archivos_response,
+                    "enlaces": enlaces_response
                 }
             }
             
@@ -344,6 +613,371 @@ class TareaService:
                 detail=f"Error al entregar tarea: {str(e)}"
             )
     
+    @staticmethod
+    def obtener_entrega(
+        db: Session,
+        entrega_id: str,
+        usuario: Usuario
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los detalles de una entrega específica
+        """
+        try:
+            import json
+            
+            # Consulta con nombres de columnas exactos según esquema de BD
+            query = text("""
+                SELECT 
+                    et.entrega_id,
+                    et.tarea_id,
+                    et.estudiante_id,
+                    et.titulo_entrega,
+                    et.descripcion_entrega,
+                    et.comentarios_estudiante,
+                    et.archivo_url,
+                    et.archivos_adicionales,
+                    et.contenido_texto,
+                    et.enlaces_externos,
+                    et.fecha_entrega,
+                    et.fecha_limite_original,
+                    et.numero_intento,
+                    et.es_entrega_tardia,
+                    et.calificacion,
+                    et.calificacion_letras,
+                    et.comentarios_docente,
+                    et.rubrica_calificacion,
+                    et.estado,
+                    et.es_final,
+                    et.requiere_revision,
+                    et.tiempo_empleado,
+                    et.dificultad_percibida,
+                    et.satisfaccion_estudiante,
+                    et.fecha_creacion,
+                    et.fecha_actualizacion,
+                    et.calificado_por,
+                    et.fecha_calificacion
+                FROM entregas_tareas et
+                WHERE et.entrega_id = :entrega_id
+            """)
+
+            result = db.execute(query, {"entrega_id": entrega_id}).fetchone()
+
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Entrega no encontrada"
+                )
+            
+            # Convertir resultado a diccionario
+            entrega = dict(result._mapping)
+            
+            # Convertir UUIDs a strings para que sean serializables a JSON
+            # PostgreSQL retorna UUIDs como objetos uuid.UUID que no son serializables
+            for key in ['entrega_id', 'tarea_id', 'estudiante_id', 'calificado_por']:
+                if key in entrega and entrega[key] is not None:
+                    entrega[key] = str(entrega[key])
+            
+            # Convertir timestamps a ISO format strings para serialización JSON
+            for key in ['fecha_entrega', 'fecha_limite_original', 'fecha_creacion', 'fecha_actualizacion', 'fecha_calificacion']:
+                if key in entrega and entrega[key] is not None:
+                    entrega[key] = entrega[key].isoformat() if hasattr(entrega[key], 'isoformat') else str(entrega[key])
+            
+            # Convertir campos de string para asegurar que sean strings (no objetos especiales)
+            for key in ['titulo_entrega', 'descripcion_entrega', 'comentarios_estudiante', 'archivo_url', 'contenido_texto', 'calificacion_letras', 'comentarios_docente', 'estado']:
+                if key in entrega and entrega[key] is not None and not isinstance(entrega[key], str):
+                    entrega[key] = str(entrega[key])
+            
+            # Convertir campos numéricos a int o float según corresponda
+            if 'numero_intento' in entrega and entrega['numero_intento'] is not None:
+                entrega['numero_intento'] = int(entrega['numero_intento'])
+            if 'calificacion' in entrega and entrega['calificacion'] is not None:
+                entrega['calificacion'] = float(entrega['calificacion'])
+            if 'tiempo_empleado' in entrega and entrega['tiempo_empleado'] is not None:
+                entrega['tiempo_empleado'] = int(entrega['tiempo_empleado'])
+            if 'dificultad_percibida' in entrega and entrega['dificultad_percibida'] is not None:
+                entrega['dificultad_percibida'] = int(entrega['dificultad_percibida'])
+            if 'satisfaccion_estudiante' in entrega and entrega['satisfaccion_estudiante'] is not None:
+                entrega['satisfaccion_estudiante'] = int(entrega['satisfaccion_estudiante'])
+            
+            # Convertir booleanos
+            for key in ['es_entrega_tardia', 'es_final', 'requiere_revision']:
+                if key in entrega and entrega[key] is not None:
+                    entrega[key] = bool(entrega[key])
+            
+            # Parsear archivos_adicionales JSON y preparar lista completa de archivos
+            # IMPORTANTE: SIEMPRE usar archivos_adicionales como fuente de verdad (nunca archivo_url)
+            # archivo_url es un campo legado que solo contiene el PRIMER archivo
+            archivos_lista = []
+            
+            # ✅ FIX #4: LOGGING DETALLADO + DEFENSIVE CHECKS para diagnóstico
+            logger.info(f"🔍 PARSEANDO ARCHIVOS para entrega {entrega_id}:")
+            logger.info(f"   - archivos_adicionales type: {type(entrega.get('archivos_adicionales'))}")
+            logger.info(f"   - archivos_adicionales existe: {bool(entrega.get('archivos_adicionales'))}")
+            
+            # Defensive check: asegurar que archivos_adicionales existe y no es None
+            if entrega.get('archivos_adicionales') is not None and entrega.get('archivos_adicionales') != '':
+                # Log del JSON raw
+                raw_json = entrega['archivos_adicionales']
+                logger.info(f"   - Raw JSON (primeros 500 chars): {raw_json[:500] if isinstance(raw_json, str) else str(raw_json)[:500]}")
+                
+                try:
+                    # Defensive: si ya es dict, no parsear
+                    if isinstance(raw_json, dict):
+                        archivos_data = raw_json
+                        logger.info(f"   ✅ Ya es dict, no requiere parseo")
+                    else:
+                        archivos_data = json.loads(entrega['archivos_adicionales'])
+                        logger.info(f"   ✅ JSON parseado correctamente")
+                    
+                    logger.info(f"   - Tipo de datos parseados: {type(archivos_data)}")
+                    logger.info(f"   - Tiene key 'archivos': {isinstance(archivos_data, dict) and 'archivos' in archivos_data}")
+                    
+                    # Defensive: verificar estructura esperada
+                    if isinstance(archivos_data, dict) and 'archivos' in archivos_data:
+                        archivos_array = archivos_data['archivos']
+                        
+                        # Defensive: asegurar que es lista
+                        if not isinstance(archivos_array, list):
+                            logger.warning(f"   ⚠️ archivos_array NO es lista: {type(archivos_array)}")
+                            archivos_array = []
+                        
+                        logger.info(f"   - Total archivos en array: {len(archivos_array)}")
+                        
+                        # Iterar sobre TODOS los archivos en metadata
+                        for idx, archivo in enumerate(archivos_array, 1):
+                            logger.info(f"      📄 Archivo {idx}:")
+                            logger.info(f"         - Type: {type(archivo)}")
+                            
+                            # Defensive: manejar diferentes formatos
+                            if isinstance(archivo, dict) and 'url' in archivo:
+                                logger.info(f"         - Keys disponibles: {archivo.keys()}")
+                                logger.info(f"         - url: {archivo['url']}")
+                                logger.info(f"         - nombre_original: {archivo.get('nombre_original')}")
+                                logger.info(f"         - nombre: {archivo.get('nombre')}")
+                                
+                                # ✅ FIX #2 y #3: GARANTIZAR que nombre_original esté disponible
+                                nombre_original = archivo.get('nombre_original')
+                                nombre = archivo.get('nombre')
+                                url_filename = archivo['url'].split("/")[-1] if archivo.get('url') else f"archivo_{idx}"
+                                
+                                # Priorizar nombre_original, luego nombre, luego extraer de URL
+                                nombre_final = nombre_original or nombre or url_filename
+                                
+                                logger.info(f"         ➡️ Nombre final elegido: {nombre_final}")
+                                
+                                archivos_lista.append({
+                                    "url": archivo['url'],
+                                    "nombre": nombre_final,
+                                    "nombre_original": nombre_original or nombre or url_filename,
+                                    "nombre_almacenado": archivo.get('nombre_almacenado', url_filename)
+                                })
+                            elif isinstance(archivo, str):
+                                # Formato legacy: solo URL como string
+                                logger.info(f"         - Es string (URL): {archivo}")
+                                archivos_lista.append({
+                                    "url": archivo,
+                                    "nombre": archivo.split("/")[-1],
+                                    "nombre_original": archivo.split("/")[-1]
+                                })
+                            else:
+                                logger.warning(f"         ⚠️ Formato inesperado de archivo: {archivo}")
+                        
+                        logger.info(f"   ✅ Total archivos procesados: {len(archivos_lista)}")
+                    else:
+                        logger.warning(f"   ⚠️ JSON no tiene estructura esperada {{archivos: [...]}}")
+                        logger.warning(f"   ⚠️ Estructura recibida: {archivos_data}")
+                        
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.error(f"   ❌ Error parseando JSON: {type(e).__name__}: {str(e)}")
+                    # Fallback a archivo_url si existe
+                    if entrega.get('archivo_url'):
+                        logger.info(f"   ➡️ Fallback a archivo_url: {entrega['archivo_url']}")
+                        archivos_lista.append({
+                            "url": entrega['archivo_url'],
+                            "nombre": entrega['archivo_url'].split("/")[-1],
+                            "nombre_original": entrega['archivo_url'].split("/")[-1]
+                        })
+            elif entrega.get('archivo_url'):
+                # Fallback: si no hay archivos_adicionales, usar archivo_url (legado)
+                logger.info(f"   ⚠️ No hay archivos_adicionales, usando archivo_url...")
+                archivos_lista.append({
+                    "url": entrega['archivo_url'],
+                    "nombre": entrega['archivo_url'].split("/")[-1],
+                    "nombre_original": entrega['archivo_url'].split("/")[-1]
+                })
+            else:
+                logger.info(f"   ⚠️ No hay archivos en esta entrega")
+            
+            # Agregar lista completa de archivos a la respuesta
+            entrega['archivos'] = archivos_lista
+            logger.info(f"🔍 RESULTADO FINAL: {len(archivos_lista)} archivos en entrega['archivos']")
+
+            
+            # 2. Validar permisos
+            # Estudiante: Solo su propia entrega
+            # Docente: Debe ser docente del curso
+            
+            if usuario.rol == "estudiante":
+                # Los UUIDs ya se convirtieron a strings arriba
+                if entrega['estudiante_id'] != str(usuario.usuario_id):
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="No tienes permiso para ver esta entrega"
+                    )
+            else:
+                # Para docentes, obtener grupo_id de la tarea
+                query_grupo = text("SELECT grupo_id FROM tareas WHERE tarea_id = :tarea_id")
+                grupo_result = db.execute(query_grupo, {"tarea_id": entrega['tarea_id']}).fetchone()
+                
+                if grupo_result:
+                    grupo_id = grupo_result[0]
+                    # Verificar si es docente del curso
+                    query_acceso = text("""
+                        SELECT 1 FROM "GrupoCurso" gc
+                        WHERE gc.grupo_id = :grupo_id AND (gc.docente_id = :usuario_id OR :rol = 'coordinador')
+                    """)
+                    if not db.execute(query_acceso, {
+                        "grupo_id": grupo_id, 
+                        "usuario_id": usuario.usuario_id,
+                        "rol": usuario.rol
+                    }).fetchone():
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="No tienes acceso a esta entrega"
+                        )
+            
+            # PASO CRÍTICO: Convertir archivos_adicionales de JSON string a dict
+            if isinstance(entrega.get('archivos_adicionales'), str):
+                try:
+                    entrega['archivos_adicionales'] = json.loads(entrega['archivos_adicionales'])
+                except (json.JSONDecodeError, TypeError):
+                    entrega['archivos_adicionales'] = None
+            
+            # PASO CRÍTICO: Convertir enlaces_externos de JSON string a list si es necesario
+            logger.info(f"🔗 DEBUG enlaces_externos RAW: {entrega.get('enlaces_externos')} (type: {type(entrega.get('enlaces_externos'))})")
+            enlaces_raw = entrega.get('enlaces_externos')
+            
+            if enlaces_raw is None:
+                logger.info(f"🔗 DEBUG enlaces_externos es NULL en BD")
+                entrega['enlaces_externos'] = None
+            elif isinstance(enlaces_raw, list):
+                # Ya es lista, no parsear
+                logger.info(f"🔗 DEBUG enlaces_externos ya es lista: {enlaces_raw}")
+                entrega['enlaces_externos'] = enlaces_raw
+            elif isinstance(enlaces_raw, str):
+                # Es string, parsear a JSON
+                try:
+                    entrega['enlaces_externos'] = json.loads(enlaces_raw)
+                    logger.info(f"🔗 DEBUG enlaces_externos PARSED: {entrega['enlaces_externos']}")
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning(f"🔗 DEBUG enlaces_externos PARSE ERROR: {e}")
+                    entrega['enlaces_externos'] = None
+            else:
+                logger.warning(f"🔗 DEBUG enlaces_externos tipo inesperado: {type(enlaces_raw)}")
+                entrega['enlaces_externos'] = None
+            
+            # PASO CRÍTICO: Convertir rubrica_calificacion de JSON string a dict si es necesario
+            if isinstance(entrega.get('rubrica_calificacion'), str):
+                try:
+                    entrega['rubrica_calificacion'] = json.loads(entrega['rubrica_calificacion'])
+                except (json.JSONDecodeError, TypeError):
+                    entrega['rubrica_calificacion'] = None
+            
+            # LOG FINAL: Verificar tipos antes de retornar
+            logger.info(f"🔍 TIPOS FINALES antes de retornar entrega {entrega_id}:")
+            for key, value in entrega.items():
+                tipo = type(value).__name__
+                logger.info(f"   {key}: {tipo}")
+            
+            return entrega
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error obteniendo entrega {entrega_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error al obtener entrega: {str(e)}"
+            )
+
+    @staticmethod
+    def cancelar_entrega(
+        db: Session,
+        entrega_id: str,
+        usuario: Usuario
+    ) -> Dict[str, Any]:
+        """
+        Cancela/elimina una entrega de tarea.
+        
+        Validaciones:
+        - Solo el estudiante propietario puede cancelar
+        - No se puede cancelar si ya está calificada
+        - Solo estudiantes pueden cancelar (no profesores)
+        """
+        try:
+            # 1. Obtener la entrega
+            query = text("""
+                SELECT entrega_id, estudiante_id, estado, calificacion
+                FROM entregas_tareas
+                WHERE entrega_id = :entrega_id
+            """)
+            
+            result = db.execute(query, {"entrega_id": entrega_id}).fetchone()
+            
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Entrega no encontrada"
+                )
+            
+            entrega = dict(result._mapping)
+            
+            # 2. Validar que es el estudiante propietario
+            if str(entrega['estudiante_id']) != str(usuario.usuario_id):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Solo puedes cancelar tus propias entregas"
+                )
+            
+            # 3. Validar que no esté calificada
+            if entrega['calificacion'] is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No puedes cancelar una entrega que ya ha sido calificada"
+                )
+            
+            # 4. Cambiar estado a 'cancelada' PRESERVANDO archivos_adicionales
+            # Así el estudiante puede ver sus archivos anteriores como referencia
+            update_query = text("""
+                UPDATE entregas_tareas
+                SET estado = 'cancelada'
+                WHERE entrega_id = :entrega_id
+            """)
+            
+            db.execute(update_query, {"entrega_id": entrega_id})
+            db.commit()
+            
+            logger.info(f"Entrega cancelada: {entrega_id} por {usuario.usuario_id} - Archivos preservados para referencia")
+            
+            return {
+                "success": True,
+                "message": "Entrega cancelada exitosamente. Ahora puedes volver a entregar la tarea.",
+                "data": {
+                    "entrega_id": entrega_id,
+                    "cancelada": True
+                }
+            }
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error cancelando entrega {entrega_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error al cancelar entrega: {str(e)}"
+            )
+
     @staticmethod
     async def calificar_entrega(
         db: Session,
@@ -388,7 +1022,10 @@ class TareaService:
                     et.entrega_id,
                     et.tarea_id,
                     et.estudiante_id,
-                    et.fecha_envio,
+                    u.nombres as estudiante_nombre,
+                    u.apellidos as estudiante_apellido,
+                    u.correo_institucional as estudiante_email,
+                    et.fecha_entrega as fecha_envio,
                     et.es_tardia,
                     et.intentos,
                     t.titulo as tarea_titulo,
@@ -399,6 +1036,7 @@ class TareaService:
                     t.tipo as tipo_tarea
                 FROM entregas_tareas et
                 JOIN tareas t ON et.tarea_id = t.tarea_id
+                JOIN "Usuario" u ON CAST(et.estudiante_id AS UUID) = u.usuario_id
                 WHERE et.entrega_id = :entrega_id
             """)
             
@@ -662,30 +1300,30 @@ class TareaService:
     
     @staticmethod
     def _validar_permisos_docente(db: Session, curso_id: str, usuario: Usuario) -> None:
-        """Valida que el usuario sea docente del curso"""
+        """Valida que el usuario sea docente del curso a través de GrupoCurso"""
         if usuario.rol != "docente" and usuario.rol != "coordinador":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Solo docentes pueden crear tareas"
             )
         
-        # Verificar que es docente del curso
+        # Verificar que existe un grupo para este curso y que el docente está asignado
         query = text("""
-            SELECT EXISTS(
-                SELECT 1 FROM "CursoDocente"
-                WHERE curso_id = :curso_id AND docente_id = :docente_id
-            )
+            SELECT gc.grupo_id
+            FROM "GrupoCurso" gc
+            WHERE gc.curso_id = :curso_id AND gc.docente_id = :docente_id
+            LIMIT 1
         """)
         
-        es_docente = db.execute(query, {
+        result = db.execute(query, {
             "curso_id": curso_id,
             "docente_id": usuario.usuario_id
-        }).scalar()
+        }).fetchone()
         
-        if not es_docente and usuario.rol != "coordinador":
+        if not result:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="No eres docente de este curso"
+                detail="No eres docente de este curso o el curso no tiene un grupo asignado"
             )
     
     @staticmethod
@@ -716,18 +1354,26 @@ class TareaService:
         """)
         
         result = db.execute(query, {"tarea_id": tarea_id}).fetchone()
-        
+
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Tarea no encontrada"
             )
-        
-        if result[0] < datetime.now(timezone.utc):
+
+        # Defensive: fecha_limite puede ser NULL en BD -> prevenir TypeError
+        fecha_limite = result[0]
+        logger.debug(f"Validando fecha_limite para tarea {tarea_id}: {fecha_limite!r}")
+
+        if fecha_limite is None:
+            logger.error(f"La tarea {tarea_id} no tiene 'fecha_limite' configurada")
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="La fecha límite de esta tarea ya pasó"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Tarea inválida: fecha límite no configurada"
             )
+
+        # Note: We allow late submissions but mark them as late in the database
+        # The frontend can show a warning, but we don't block the submission
     
     @staticmethod
     def _validar_calificacion(calificacion: float) -> None:
@@ -749,11 +1395,14 @@ class TareaService:
     
     @staticmethod
     def _obtener_mi_entrega(db: Session, tarea_id: str, estudiante_id: UUID) -> Optional[Dict]:
-        """Obtiene la entrega del estudiante para una tarea"""
+        """Obtiene la entrega MÁS RECIENTE del estudiante para una tarea"""
         query = text("""
             SELECT entrega_id, estado, fecha_entrega
             FROM entregas_tareas
-            WHERE tarea_id = :tarea_id AND estudiante_id = :estudiante_id
+            WHERE tarea_id = :tarea_id 
+              AND estudiante_id = :estudiante_id
+            ORDER BY fecha_entrega DESC
+            LIMIT 1
         """)
         
         result = db.execute(query, {
@@ -768,33 +1417,86 @@ class TareaService:
         db: Session,
         entrega_id: str,
         contenido: str,
-        archivo_url: Optional[str]
+        archivo_url: Optional[str],
+        archivos_json: Optional[str] = None,
+        enlaces_json: Optional[str] = None
     ) -> Dict[str, Any]:
         """Actualiza una entrega existente"""
+        
+        # ✅ LÓGICA CORRECTA: REEMPLAZAR archivos/enlaces, NO merge
+        # Si el usuario envía nuevos archivos/enlaces → REEMPLAZAR los anteriores
+        # Si NO envía nada → MANTENER los anteriores (solo si archivos_json/enlaces_json son None)
+        
+        # Solo preservar si explícitamente NO se enviaron nuevos (None, no vacío)
+        if archivos_json is None:
+            # Usuario no envió archivos nuevos → mantener anteriores
+            query_prev = text("SELECT archivos_adicionales FROM entregas_tareas WHERE entrega_id = :entrega_id")
+            prev_data = db.execute(query_prev, {"entrega_id": entrega_id}).fetchone()
+            if prev_data and prev_data[0]:
+                archivos_prev = prev_data[0]
+                archivos_json = json.dumps(archivos_prev) if isinstance(archivos_prev, dict) else archivos_prev
+                logger.info(f"   ♻️ Preservando archivos anteriores (usuario no envió nuevos)")
+        else:
+            logger.info(f"   🔄 REEMPLAZANDO archivos anteriores con nuevos")
+        
+        if enlaces_json is None:
+            # Usuario no envió enlaces nuevos → mantener anteriores
+            query_prev_enlaces = text("SELECT enlaces_externos FROM entregas_tareas WHERE entrega_id = :entrega_id")
+            prev_enlaces = db.execute(query_prev_enlaces, {"entrega_id": entrega_id}).fetchone()
+            if prev_enlaces and prev_enlaces[0]:
+                enlaces_prev = prev_enlaces[0]
+                enlaces_json = json.dumps(enlaces_prev) if isinstance(enlaces_prev, list) else enlaces_prev
+                logger.info(f"   ♻️ Preservando enlaces anteriores (usuario no envió nuevos)")
+        else:
+            logger.info(f"   🔄 REEMPLAZANDO enlaces anteriores con nuevos")
+        
         query = text("""
             UPDATE entregas_tareas
-            SET contenido = :contenido,
+            SET contenido_texto = :contenido,
                 archivo_url = :archivo_url,
+                archivos_adicionales = :archivos_adicionales,
+                enlaces_externos = :enlaces_externos,
                 fecha_entrega = :fecha_entrega,
                 estado = 'entregada'
             WHERE entrega_id = :entrega_id
         """)
-        
+
+    
         db.execute(query, {
             "entrega_id": entrega_id,
             "contenido": contenido,
             "archivo_url": archivo_url,
+            "archivos_adicionales": archivos_json,
+            "enlaces_externos": enlaces_json,
             "fecha_entrega": datetime.now(timezone.utc)
         })
-        
+
         db.commit()
+
+        # Parse response data
+        archivos_response = []
+        if archivos_json:
+            try:
+                archivos_data = json.loads(archivos_json) if isinstance(archivos_json, str) else archivos_json
+                archivos_response = archivos_data.get('archivos', []) if isinstance(archivos_data, dict) else []
+            except:
+                archivos_response = []
         
+        enlaces_response = []
+        if enlaces_json:
+            try:
+                enlaces_response = json.loads(enlaces_json) if isinstance(enlaces_json, str) else enlaces_json
+            except:
+                enlaces_response = []
+
         return {
             "success": True,
             "message": "Entrega actualizada exitosamente",
             "data": {
                 "entrega_id": str(entrega_id),
-                "actualizado": True
+                "actualizado": True,
+                "archivos": archivos_response,
+                "enlaces": enlaces_response
             }
         }
     
@@ -969,12 +1671,12 @@ class TareaService:
                 
                 insert_query = text("""
                     INSERT INTO entregas_tareas (
-                        tarea_id, estudiante_id, contenido_texto,
+                        entrega_id, tarea_id, estudiante_id, contenido_texto,
                         archivo_metadata, fecha_entrega, es_tardia,
                         intentos, estado
                     )
                     VALUES (
-                        :tarea_id, :estudiante_id, :contenido_texto,
+                        gen_random_uuid()::text, :tarea_id, :estudiante_id, :contenido_texto,
                         :archivo_metadata, :fecha_entrega, :es_tardia,
                         :intentos, 'entregada'
                     )

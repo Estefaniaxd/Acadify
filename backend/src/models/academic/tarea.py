@@ -74,7 +74,7 @@ class Tarea(Base):
         String, ForeignKey("Usuario.usuario_id", ondelete="CASCADE"), nullable=False
     )
     clase_id = Column(
-        String, ForeignKey("Clase.clase_id", ondelete="SET NULL"), nullable=True
+        String, nullable=True  # ForeignKey("Clase.clase_id", ondelete="SET NULL") - Comentado: tabla Clase no existe
     )
 
     # ============================================
@@ -92,8 +92,18 @@ class Tarea(Base):
     # CLASIFICACIÓN
     # ============================================
     tipo = Column(String(13), nullable=True)  # Tipo de tarea (VARCHAR en BD)
+    # Use the enum's values ("baja","media",...) to match the existing
+    # Postgres enum labels and avoid LookupError when DB stores the enum
+    # as the value. Explicitly set the DB enum type name to 'prioridad_tarea'
+    # so SQLAlchemy maps to the existing Postgres type.
     prioridad = Column(
-        SQLEnum(PrioridadTarea), nullable=False, default=PrioridadTarea.MEDIA
+        SQLEnum(
+            PrioridadTarea,
+            name="prioridad_tarea",
+            values_callable=lambda enum: [member.value for member in enum],
+        ),
+        nullable=False,
+        default=PrioridadTarea.MEDIA,
     )
     tags = Column(String(500), nullable=True)
 
@@ -273,6 +283,7 @@ class EntregaTarea(Base):
     archivos_adicionales = Column(JSON)  # Lista de archivos adicionales
     contenido_texto = Column(Text)  # Para entregas de texto plano
     enlaces_externos = Column(JSON)  # Enlaces a recursos externos (GitHub, etc.)
+    google_resources = Column(JSONB, nullable=True)  # Recursos de Google Workspace vinculados
 
     # ============================================
     # FECHAS Y CONTROL DE INTENTOS
@@ -356,13 +367,22 @@ class EntregaTarea(Base):
         if not self.fecha_entrega:
             return 0
         from datetime import datetime
-
-        return (datetime.now(UTC) - self.fecha_entrega).days
+        
+        # Ensure both are aware or both are naive to avoid TypeError
+        now = datetime.now(UTC)
+        fecha = self.fecha_entrega
+        if fecha.tzinfo is None:
+            # Fallback if DB returns naive datetime (shouldn't happen with timezone=True but safe to handle)
+            fecha = fecha.replace(tzinfo=UTC)
+            
+        return (now - fecha).days
 
     @property
     def porcentaje_calificacion(self) -> float:
         """Calificación como porcentaje."""
         if not self.calificacion or not self.tarea:
+            return 0.0
+        if self.tarea.puntuacion_maxima == 0:
             return 0.0
         return (self.calificacion / self.tarea.puntuacion_maxima) * 100
 
@@ -416,6 +436,21 @@ class EntregaTarea(Base):
             self.archivo_url
             or (self.archivos_adicionales and len(self.archivos_adicionales) > 0)
         )
+
+    # ============================================
+    # PROPIEDADES DE ESTUDIANTE (Proxy)
+    # ============================================
+    @property
+    def estudiante_nombre(self) -> str | None:
+        return self.estudiante.nombres if self.estudiante else None
+
+    @property
+    def estudiante_apellido(self) -> str | None:
+        return self.estudiante.apellidos if self.estudiante else None
+
+    @property
+    def estudiante_email(self) -> str | None:
+        return self.estudiante.correo_institucional if self.estudiante else None
 
     # ============================================
     # PROPIEDADES DE COMPATIBILIDAD CON LEGACY

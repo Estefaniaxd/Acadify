@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import AuthLayout from "./components/layout/AuthLayout";
 import Layout from "./components/layout/Layout";
 import { Spinner } from "./components/ui";
+
 import { ToastProvider } from "./context/ToastContext";
 import { RachaProvider } from "./context/RachaProvider";
 
@@ -21,6 +22,7 @@ const Login = lazy(() => import("./pages/auth/Login"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const RecoverPassword = lazy(() => import("./pages/auth/RecoverPassword"));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
+const OAuthCallback = lazy(() => import("./pages/auth/OAuthCallback"));
 
 // Dashboards - Bundle: ~200KB (separado por rol)
 const DashboardPage = lazy(() =>
@@ -107,6 +109,8 @@ const ChatClasePage = lazy(() => import("./pages/clase/ChatClasePage"));
 
 // Tareas - Bundle: ~120KB
 const TareaDetallePage = lazy(() => import("./pages/tareas/TareaDetallePage"));
+const SubirTareaPage = lazy(() => import("./pages/tareas/SubirTareaPage"));
+const CalificarTareaPage = lazy(() => import("./pages/tareas/CalificarTareaPage"));
 
 // Legal - Bundle: ~30KB (poco acceso)
 const TratamientoDatos = lazy(() => import("./pages/legal/TratamientoDatos"));
@@ -235,6 +239,15 @@ export default function App() {
         element={
           <Suspense fallback={<PageLoader />}>
             <ResetPassword />
+          </Suspense>
+        }
+      />
+      {/* OAuth Callback - Lazy loaded */}
+      <Route
+        path="/auth/google/callback"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <OAuthCallback />
           </Suspense>
         }
       />
@@ -557,6 +570,22 @@ export default function App() {
         element={
           <Suspense fallback={<PageLoader />}>
             <TareaDetallePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/tareas/:tareaId/entregar"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <SubirTareaPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/academic/tareas/:tareaId/calificar"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <CalificarTareaPage />
           </Suspense>
         }
       />

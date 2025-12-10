@@ -19,4 +19,4 @@ router.include_router(puntos_router, prefix="/puntos", tags=["Puntos"])
 router.include_router(insignias_router, prefix="/insignias", tags=["Insignias"])
 router.include_router(recompensas_router, prefix="/recompensas", tags=["Recompensas"])
 router.include_router(misiones_router, prefix="/misiones", tags=["Misiones"])
-router.include_router(rachas_router, tags=["Rachas"])  # Incluir router de rachas
+router.include_router(rachas_router, prefix="/rachas", tags=["Rachas"])  # Incluir router de rachas

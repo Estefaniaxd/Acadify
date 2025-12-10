@@ -8,10 +8,69 @@
  */
 
 /**
+ * Normaliza y resuelve la URL base que debe usar el frontend para hablar con el backend.
+ *
+ * Prioriza variables de entorno pero cae automáticamente al backend local cuando
+ * el frontend corre en Vite (puerto 5173/4173) para evitar llamadas al origen del navegador.
+ */
+const resolveApiBaseUrl = (): string => {
+  // 1. Prioridad: Si estamos en Vite (desarrollo), usar path relativo para aprovechar el proxy
+  // Esto evita problemas de CORS y asegura que las cookies/headers pasen correctamente
+  if (typeof window !== "undefined") {
+    const { port } = window.location;
+    if (port === "5173" || port === "4173") {
+      return "";
+    }
+  }
+
+  // 2. Variables de entorno (para producción o si no es Vite)
+  const candidates = [import.meta.env.VITE_API_URL, import.meta.env.VITE_API_BASE_URL];
+
+  const normalize = (value?: string | null): string | null => {
+    if (!value) {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed.replace(/\/$/, "");
+    }
+
+    if (typeof window !== "undefined") {
+      const base = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+      return `${window.location.origin}${base}`.replace(/\/$/, "");
+    }
+
+    return `http://localhost:8000${trimmed.startsWith("/") ? trimmed : `/${trimmed}`}`.replace(/\/$/, "");
+  };
+
+  for (const candidate of candidates) {
+    const normalized = normalize(candidate);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  // 3. Fallback
+  if (typeof window !== "undefined") {
+    const { protocol, hostname, port } = window.location;
+    const fallbackPort = port;
+    const portSegment = fallbackPort ? `:${fallbackPort}` : "";
+    return `${protocol}//${hostname}${portSegment}`.replace(/\/$/, "");
+  }
+
+  return "http://localhost:8000";
+};
+
+/**
  * Base URL del backend API
  * En producción, cambiar a la URL real del servidor
  */
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = resolveApiBaseUrl();
 
 /**
  * Base URL para WebSocket
@@ -31,7 +90,7 @@ export const API_ENDPOINTS = {
     REFRESH: '/api/auth/refresh',
     ME: '/api/auth/me',
   },
-  
+
   // Chat/Comunicación
   CHAT: {
     SALAS: '/api/chat/salas',
@@ -42,14 +101,14 @@ export const API_ENDPOINTS = {
     UPLOAD: '/api/chat/upload',
     BUSCAR: (id: string) => `/api/chat/salas/${id}/mensajes/buscar`,
   },
-  
+
   // WebSocket
   WS: {
     CHAT: (salaId: string) => `/ws/chat/${salaId}`,
     NOTIFICACIONES: '/ws/notificaciones',
     VIDEOLLAMADAS: '/ws/videollamadas',
   },
-  
+
   // Gamificación
   GAMIFICATION: {
     RACHAS: '/api/gamification/rachas/mi-racha',
@@ -57,7 +116,7 @@ export const API_ENDPOINTS = {
     USAR_RECUPERACION: '/api/gamification/rachas/usar-recuperacion',
     HISTORIAL: '/api/gamification/rachas/historial',
   },
-  
+
   // Instituciones
   INSTITUCIONES: {
     LIST: '/api/instituciones',
@@ -67,19 +126,29 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/api/instituciones/${id}`,
     INVITAR: (id: string) => `/admin/instituciones/${id}/invitar-coordinador`,
   },
-  
+
   // Tienda
   TIENDA: {
     ITEMS: '/api/tienda/items',
     COMPRAR: '/api/tienda/comprar',
     INVENTARIO: '/api/tienda/inventario',
   },
-  
+
   // Notificaciones
   NOTIFICACIONES: {
-    LIST: '/api/notificaciones',
-    MARCAR_LEIDA: (id: string) => `/api/notificaciones/${id}/marcar-leida`,
-    MARCAR_TODAS_LEIDAS: '/api/notificaciones/marcar-todas-leidas',
+    LIST: '/api/communication/notificaciones',
+    MARCAR_LEIDAS: '/api/communication/notificaciones/marcar-leidas',
+    MARCAR_TODAS_LEIDAS: '/api/communication/notificaciones/marcar-todas-leidas',
+    COUNT: '/api/communication/notificaciones/count',
+    CONFIG: '/api/communication/notificaciones/configuracion',
+    UPDATE_CONFIG: '/api/communication/notificaciones/configuracion',
+    SSE: '/api/communication/notificaciones/sse',
+  },
+
+  // Invitaciones
+  INVITACIONES: {
+    LIST: '/invitaciones',
+    ACEPTAR: (id: number | string) => `/invitaciones/${id}/aceptar`,
   },
 } as const;
 

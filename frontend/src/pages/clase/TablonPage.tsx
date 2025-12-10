@@ -13,7 +13,17 @@ export default function ClaseTablonPage() {
         <ul className="flex flex-col gap-3 mb-4">
           {publicaciones.map(p => (
             <li key={p.id} className="p-4 rounded bg-gray-100 dark:bg-zinc-800">
-              <div className="font-semibold text-primary">{p.autor}</div>
+              <div className="font-semibold text-primary">
+                {(() => {
+                  if (typeof p.autor === 'object' && p.autor?.nombre) {
+                    return `${p.autor.nombre} ${p.autor.apellido || ''}`.trim();
+                  } else if (typeof p.autor === 'string') {
+                    return p.autor;
+                  } else {
+                    return 'Usuario';
+                  }
+                })()}
+              </div>
               <div className="text-sm mb-1">{p.contenido}</div>
               <div className="text-xs text-gray-400">{p.fecha}</div>
             </li>

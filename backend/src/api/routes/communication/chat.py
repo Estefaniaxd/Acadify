@@ -15,7 +15,7 @@ from src.crud.communication.chat import (
 )
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, status
 from src.models.communication.chat import EstadoMensaje
-from src.models.users import Usuario
+from src.models.users.usuario import Usuario
 from src.schemas.communication.chat_schemas import (
     ConfiguracionNotificacionesResponse,
     # Configuración
@@ -47,7 +47,7 @@ from src.schemas.communication.chat_schemas import (
     SalaChatResponse,
     SalaChatUpdate,
 )
-from services.websocket_manager import websocket_endpoint
+from src.services.websocket_manager import websocket_endpoint
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/communication", tags=["Comunicación"])
@@ -80,7 +80,7 @@ async def crear_sala(
 ) -> SalaChatResponse:
     """Crear nueva sala de chat."""
     sala = crud_sala_chat.create_with_creator(
-        db=db, obj_in=sala_in, creador_id=str(current_user.id)
+        db=db, obj_in=sala_in, creador_id=str(current_user.usuario_id)
     )
     return SalaChatResponse.from_orm(sala)
 
@@ -117,7 +117,7 @@ async def listar_salas(
     )
 
     salas = crud_sala_chat.get_salas_usuario(
-        db=db, usuario_id=str(current_user.id), filtros=filtros
+        db=db, usuario_id=str(current_user.usuario_id), filtros=filtros
     )
 
     return [SalaChatResponse.from_orm(sala) for sala in salas]
@@ -131,7 +131,7 @@ async def obtener_sala(
 ) -> SalaChatDetallada:
     """Obtener detalles completos de una sala."""
     sala = crud_sala_chat.get_sala_detallada(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not sala:
@@ -154,7 +154,7 @@ async def actualizar_sala(
     """Actualizar sala de chat."""
     # Verificar permisos (admin o creador)
     participante = crud_participante_sala.get_participante(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not participante or not participante.es_admin:
@@ -187,7 +187,7 @@ async def eliminar_sala(
         )
 
     # Solo el creador puede eliminar
-    if sala.creador_id != current_user.id:
+    if sala.creador_id != current_user.usuario_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Solo el creador puede eliminar la sala",
@@ -206,7 +206,7 @@ async def obtener_estadisticas_sala(
     """Obtener estadísticas de una sala."""
     # Verificar acceso
     participante = crud_participante_sala.get_participante(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not participante:
@@ -233,7 +233,7 @@ async def listar_participantes(
     """Obtener participantes de una sala."""
     # Verificar acceso
     participante = crud_participante_sala.get_participante(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not participante:
@@ -259,7 +259,7 @@ async def agregar_participante(
     """Agregar participante a sala."""
     # Verificar permisos (admin o moderador)
     mi_participacion = crud_participante_sala.get_participante(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not mi_participacion or not (
@@ -290,7 +290,7 @@ async def actualizar_participante(
     """Actualizar participante de sala."""
     # Verificar permisos
     mi_participacion = crud_participante_sala.get_participante(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not mi_participacion or not mi_participacion.es_admin:
@@ -324,11 +324,11 @@ async def remover_participante(
     """Remover participante de sala."""
     # Verificar permisos o si es el mismo usuario
     mi_participacion = crud_participante_sala.get_participante(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     puede_remover = (mi_participacion and mi_participacion.es_admin) or str(
-        current_user.id
+        current_user.usuario_id
     ) == str(usuario_id)
 
     if not puede_remover:
@@ -366,7 +366,7 @@ async def enviar_mensaje(
     """Enviar nuevo mensaje (REST endpoint, también disponible via WebSocket)."""
     # Verificar permisos
     participante = crud_participante_sala.get_participante(
-        db=db, sala_id=str(mensaje_in.sala_id), usuario_id=str(current_user.id)
+        db=db, sala_id=str(mensaje_in.sala_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not participante or not participante.puede_escribir:
@@ -376,7 +376,7 @@ async def enviar_mensaje(
         )
 
     mensaje = crud_mensaje.create_mensaje(
-        db=db, obj_in=mensaje_in, usuario_id=str(current_user.id)
+        db=db, obj_in=mensaje_in, usuario_id=str(current_user.usuario_id)
     )
 
     return MensajeResponse.from_orm(mensaje)
@@ -421,7 +421,7 @@ async def listar_mensajes(
     )
 
     mensajes = crud_mensaje.get_mensajes_sala(
-        db=db, sala_id=str(sala_id), usuario_id=str(current_user.id), filtros=filtros
+        db=db, sala_id=str(sala_id), usuario_id=str(current_user.usuario_id), filtros=filtros
     )
 
     return [MensajeResponse.from_orm(m) for m in mensajes]
@@ -435,7 +435,7 @@ async def obtener_mensaje(
 ) -> MensajeDetallado:
     """Obtener mensaje con hilo de respuestas."""
     mensaje = crud_mensaje.get_mensaje_con_hilo(
-        db=db, mensaje_id=str(mensaje_id), usuario_id=str(current_user.id)
+        db=db, mensaje_id=str(mensaje_id), usuario_id=str(current_user.usuario_id)
     )
 
     if not mensaje:
@@ -463,7 +463,7 @@ async def actualizar_mensaje(
             status_code=status.HTTP_404_NOT_FOUND, detail="Mensaje no encontrado"
         )
 
-    if mensaje.usuario_id != current_user.id:
+    if mensaje.usuario_id != current_user.usuario_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Solo puedes editar tus propios mensajes",
@@ -488,11 +488,11 @@ async def eliminar_mensaje(
         )
 
     # Verificar permisos (autor o admin de sala)
-    puede_eliminar = mensaje.usuario_id == current_user.id
+    puede_eliminar = mensaje.usuario_id == current_user.usuario_id
 
     if not puede_eliminar:
         participante = crud_participante_sala.get_participante(
-            db=db, sala_id=str(mensaje.sala_id), usuario_id=str(current_user.id)
+            db=db, sala_id=str(mensaje.sala_id), usuario_id=str(current_user.usuario_id)
         )
         puede_eliminar = participante and participante.es_admin
 
@@ -523,7 +523,7 @@ async def agregar_reaccion(
     success = crud_mensaje.agregar_reaccion(
         db=db,
         mensaje_id=str(mensaje_id),
-        usuario_id=str(current_user.id),
+        usuario_id=str(current_user.usuario_id),
         emoji=reaccion.emoji,
     )
 
@@ -549,7 +549,7 @@ async def marcar_mensajes_leidos(
     if lectura.sala_id:
         # Marcar toda la sala como leída
         count = crud_lectura_mensaje.marcar_mensajes_sala_leidos(
-            db=db, sala_id=str(lectura.sala_id), usuario_id=str(current_user.id)
+            db=db, sala_id=str(lectura.sala_id), usuario_id=str(current_user.usuario_id)
         )
         return {"message": f"{count} mensajes marcados como leídos"}
 
@@ -558,7 +558,7 @@ async def marcar_mensajes_leidos(
         count = 0
         for mensaje_id in lectura.mensajes_ids:
             crud_lectura_mensaje.marcar_como_leido(
-                db=db, mensaje_id=str(mensaje_id), usuario_id=str(current_user.id)
+                db=db, mensaje_id=str(mensaje_id), usuario_id=str(current_user.usuario_id)
             )
             count += 1
 
@@ -595,7 +595,7 @@ async def listar_notificaciones(
     )
 
     notificaciones = crud_notificacion.get_notificaciones_usuario(
-        db=db, usuario_id=str(current_user.id), filtros=filtros
+        db=db, usuario_id=str(current_user.usuario_id), filtros=filtros
     )
 
     return [NotificacionResponse.from_orm(n) for n in notificaciones]
@@ -612,7 +612,7 @@ async def marcar_notificaciones_leidas(
     count = 0
     for notif_id in notificaciones.notificaciones_ids:
         if crud_notificacion.marcar_como_leida(
-            db=db, notificacion_id=str(notif_id), usuario_id=str(current_user.id)
+            db=db, notificacion_id=str(notif_id), usuario_id=str(current_user.usuario_id)
         ):
             count += 1
 
@@ -627,10 +627,28 @@ async def marcar_todas_notificaciones_leidas(
 ):
     """Marcar todas las notificaciones como leídas."""
     count = crud_notificacion.marcar_todas_leidas(
-        db=db, usuario_id=str(current_user.id), tipo_notificacion=tipo_notificacion
+        db=db, usuario_id=str(current_user.usuario_id), tipo_notificacion=tipo_notificacion
     )
 
     return {"message": f"{count} notificaciones marcadas como leídas"}
+
+
+@router.patch("/notificaciones/{notificacion_id}/leer")
+async def marcar_notificacion_individual_leida(
+    notificacion_id: str,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user),
+):
+    """Marcar una notificación específica como leída."""
+    if crud_notificacion.marcar_como_leida(
+        db=db, notificacion_id=notificacion_id, usuario_id=str(current_user.usuario_id)
+    ):
+        return {"message": "Notificación marcada como leída"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notificación no encontrada o no pertenece al usuario"
+        )
 
 
 @router.get("/notificaciones/count")
@@ -639,7 +657,7 @@ async def contar_notificaciones_no_leidas(
 ):
     """Obtener cantidad de notificaciones no leídas."""
     count = crud_notificacion.get_count_no_leidas(
-        db=db, usuario_id=str(current_user.id)
+        db=db, usuario_id=str(current_user.usuario_id)
     )
 
     return {"count": count}
@@ -656,7 +674,7 @@ async def obtener_configuracion_notificaciones(
 ) -> ConfiguracionNotificacionesResponse:
     """Obtener configuración de notificaciones del usuario."""
     config = crud_config_notificaciones.get_by_usuario(
-        db=db, usuario_id=str(current_user.id)
+        db=db, usuario_id=str(current_user.usuario_id)
     )
 
     return ConfiguracionNotificacionesResponse.from_orm(config)
@@ -673,7 +691,7 @@ async def actualizar_configuracion_notificaciones(
 ) -> ConfiguracionNotificacionesResponse:
     """Actualizar configuración de notificaciones."""
     config = crud_config_notificaciones.update_by_usuario(
-        db=db, usuario_id=str(current_user.id), obj_in=config_in
+        db=db, usuario_id=str(current_user.usuario_id), obj_in=config_in
     )
 
     return ConfiguracionNotificacionesResponse.from_orm(config)

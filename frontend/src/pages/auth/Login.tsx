@@ -23,7 +23,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(false)
   const [accepted, setAccepted] = useState(false)
-  const [touched, setTouched] = useState<{[key:string]:boolean}>({})
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
   const [focusedField, setFocusedField] = useState<string | null>(null)
 
   function validate() {
@@ -38,14 +38,14 @@ export default function Login() {
     if (err) return setError(err)
     setError('')
     setLoading(true)
-    
+
     try {
       const payload: any = { identifier, password, remember }
       if (otpRequired && otp) payload.otp_code = otp
       const res = await axios.post(
         '/auth/login',
         payload,
-        { 
+        {
           withCredentials: true,
           timeout: 10000,
           headers: {
@@ -55,9 +55,23 @@ export default function Login() {
       )
       // Si login exitoso, guardar tokens y redirigir
       if (res.data.access_token && res.data.refresh_token) {
-        // Guardar ambos tokens en localStorage
+        // Guardar tokens en localStorage
         localStorage.setItem('access_token', res.data.access_token);
         localStorage.setItem('refresh_token', res.data.refresh_token);
+
+        // Extraer y guardar información del usuario del token
+        try {
+          const payload = JSON.parse(atob(res.data.access_token.split('.')[1]));
+          if (payload.email) {
+            localStorage.setItem('userEmail', payload.email);
+          }
+          if (payload.username) {
+            localStorage.setItem('username', payload.username);
+          }
+        } catch (error) {
+          console.warn('Error extrayendo información del token:', error);
+        }
+
         login(res.data.access_token);
         setError('');
 
@@ -135,7 +149,7 @@ export default function Login() {
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden py-20 md:py-24">
       {/* Fondo de página completo */}
       <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-100 dark:from-neutral-950 dark:via-violet-950/30 dark:to-purple-950/20" />
-      
+
       {/* Elementos decorativos de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -170,7 +184,7 @@ export default function Login() {
             ease: "easeInOut"
           }}
         />
-        
+
         {/* Partículas flotantes */}
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -249,7 +263,7 @@ export default function Login() {
           <div className="relative p-8 rounded-3xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border-2 border-violet-200/50 dark:border-violet-800/50 shadow-2xl overflow-hidden">
             {/* Efectos de fondo del formulario */}
             <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-purple-600/5 to-transparent dark:from-violet-400/10 dark:via-purple-400/10" />
-            
+
             <div className="relative z-10 space-y-6">
               {/* Campo de identificador */}
               <motion.div
@@ -275,13 +289,12 @@ export default function Login() {
                     id="identifier"
                     type="text"
                     autoComplete="username"
-                    className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
-                      focusedField === 'identifier'
-                        ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
-                        : touched.identifier && !identifier
+                    className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${focusedField === 'identifier'
+                      ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
+                      : touched.identifier && !identifier
                         ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                    }`}
+                      }`}
                     value={identifier}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifier(e.target.value)}
                     onFocus={() => setFocusedField('identifier')}
@@ -342,13 +355,12 @@ export default function Login() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
-                    className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${
-                      focusedField === 'password'
-                        ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
-                        : touched.password && !password
+                    className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${focusedField === 'password'
+                      ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
+                      : touched.password && !password
                         ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                    }`}
+                      }`}
                     value={password}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     onFocus={() => setFocusedField('password')}
@@ -446,11 +458,10 @@ export default function Login() {
                       className="sr-only"
                     />
                     <motion.div
-                      className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                        remember
-                          ? 'bg-violet-600 border-violet-600 text-white'
-                          : 'border-gray-300 dark:border-gray-600 group-hover:border-violet-400'
-                      }`}
+                      className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${remember
+                        ? 'bg-violet-600 border-violet-600 text-white'
+                        : 'border-gray-300 dark:border-gray-600 group-hover:border-violet-400'
+                        }`}
                       whileTap={{ scale: 0.9 }}
                     >
                       <AnimatePresence>
@@ -468,7 +479,7 @@ export default function Login() {
                   </div>
                   Recordarme
                 </motion.label>
-                
+
                 <motion.a
                   href="/recover"
                   className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-200"
@@ -498,11 +509,10 @@ export default function Login() {
                       required
                     />
                     <motion.div
-                      className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                        accepted
-                          ? 'bg-violet-600 border-violet-600 text-white'
-                          : 'border-gray-300 dark:border-gray-600 group-hover:border-violet-400'
-                      }`}
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 ${accepted
+                        ? 'bg-violet-600 border-violet-600 text-white'
+                        : 'border-gray-300 dark:border-gray-600 group-hover:border-violet-400'
+                        }`}
                       whileTap={{ scale: 0.9 }}
                     >
                       <AnimatePresence>
@@ -573,7 +583,7 @@ export default function Login() {
                       ease: "easeInOut"
                     }}
                   />
-                  
+
                   <motion.div
                     className="relative flex items-center justify-center gap-3"
                     initial={false}
@@ -603,6 +613,47 @@ export default function Login() {
                       </>
                     )}
                   </motion.div>
+                </motion.button>
+              </motion.div>
+
+              {/* Divider */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.65, duration: 0.6 }}
+                className="relative flex items-center justify-center my-6"
+              >
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div className="relative px-4 bg-white dark:bg-neutral-900 text-sm text-gray-500 dark:text-gray-400">
+                  o continúa con
+                </div>
+              </motion.div>
+
+              {/* Google Login Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+              >
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+                    window.location.href = `${apiUrl}/auth/google/login`;
+                  }}
+                  className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-2xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:shadow-md"
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                  <span>Continuar con Google</span>
                 </motion.button>
               </motion.div>
 

@@ -108,14 +108,14 @@ class RachaService:
             RachaUsuario.usuario_id == usuario_id
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         racha = result.scalar_one_or_none()
         
         if not racha and crear_si_no_existe:
             racha = RachaUsuario(usuario_id=usuario_id)
             self.db.add(racha)
-            await self.db.commit()
-            await self.db.refresh(racha)
+            self.db.commit()
+            self.db.refresh(racha)
             
             logger.info(f"Racha creada para usuario {usuario_id}")
         
@@ -255,7 +255,7 @@ class RachaService:
         # Actualizar fecha
         racha.fecha_ultimo_dia = hoy
         
-        await self.db.commit()
+        self.db.commit()
         
         resultado["racha_actual"] = racha.racha_actual
         resultado["mensaje"] = self._generar_mensaje_racha(resultado)
@@ -298,7 +298,7 @@ class RachaService:
             )
         ).order_by(HistorialRacha.timestamp.desc()).limit(1)
         
-        result = await self.db.execute(query_historial)
+        result = self.db.execute(query_historial)
         ultimo_evento = result.scalar_one_or_none()
         
         if not ultimo_evento:
@@ -319,7 +319,7 @@ class RachaService:
             descripcion=f"Racha recuperada con item de recuperación"
         )
         
-        await self.db.commit()
+        self.db.commit()
         
         logger.info(
             f"Racha recuperada: Usuario {usuario_id} recuperó {racha_recuperada} días. "
@@ -364,7 +364,7 @@ class RachaService:
             descripcion=f"Congelador activado por {dias} días (hasta {racha.racha_congelada_hasta})"
         )
         
-        await self.db.commit()
+        self.db.commit()
         
         logger.info(
             f"Congelador activado: Usuario {usuario_id} protegido hasta "
@@ -405,7 +405,7 @@ class RachaService:
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         recompensa = result.scalar_one_or_none()
         
         if not recompensa:
@@ -464,7 +464,7 @@ class RachaService:
             RecompensaRacha.es_activa == True
         ).order_by(RecompensaRacha.dias_requeridos)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         recompensas = result.scalars().all()
         
         return [r.to_dict() for r in recompensas]
@@ -494,7 +494,7 @@ class RachaService:
             HistorialRacha.timestamp.desc()
         ).limit(limit)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         eventos = result.scalars().all()
         
         return [e.to_dict() for e in eventos]
@@ -535,7 +535,7 @@ class RachaService:
             HistorialRacha.usuario_id == usuario_id
         ).group_by(HistorialRacha.tipo_evento)
         
-        result_eventos = await self.db.execute(query_eventos)
+        result_eventos = self.db.execute(query_eventos)
         eventos_por_tipo = dict(result_eventos.all())
         
         # Milestones alcanzados
@@ -546,7 +546,7 @@ class RachaService:
             )
         ).order_by(HistorialRacha.racha_nueva)
         
-        result_milestones = await self.db.execute(query_milestones)
+        result_milestones = self.db.execute(query_milestones)
         milestones = [m[0] for m in result_milestones.all()]
         
         dia_semana = racha.dia_ciclo_semanal
@@ -601,7 +601,7 @@ class RachaService:
         query = select(UsuarioPuntos).where(
             UsuarioPuntos.usuario_id == usuario_id
         )
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         usuario_puntos = result.scalar_one_or_none()
         
         if usuario_puntos:
@@ -620,7 +620,7 @@ class RachaService:
                 UsuarioInsignia.insignia_id == insignia_id
             )
         )
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         ya_tiene = result.scalar_one_or_none()
         
         if not ya_tiene:

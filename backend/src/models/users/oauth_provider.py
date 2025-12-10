@@ -29,6 +29,13 @@ class OAuthProvider(Base):
         String(255), nullable=False
     )  # ID del usuario en el proveedor
     provider_email = Column(String(255), nullable=False)
+    
+    # Token storage for API access
+    access_token = Column(String(2048), nullable=True)
+    refresh_token = Column(String(2048), nullable=True)
+    token_expiry = Column(TIMESTAMP(timezone=True), nullable=True)
+    client_id = Column(String(512), nullable=True)
+    client_secret = Column(String(512), nullable=True)
 
     fecha_vinculacion = Column(
         TIMESTAMP(timezone=True), server_default=func.now(), nullable=False

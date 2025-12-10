@@ -1,6 +1,6 @@
 import { forwardRef, ReactNode, useEffect, useRef, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-;
 import { useClickOutside, useKeyPress } from '../../hooks';
 import { X } from 'lucide-react';
 
@@ -244,7 +244,30 @@ export const Modal: React.FC<ModalProps> = memo(({
   // Focus trap para accesibilidad
   useFocusTrap(modalRef, isOpen);
   
-  return (
+  // Obtener o crear el portal root
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    let portalRoot = document.getElementById('modal-root');
+    if (!portalRoot) {
+      portalRoot = document.createElement('div');
+      portalRoot.id = 'modal-root';
+      portalRoot.style.position = 'fixed';
+      portalRoot.style.top = '0';
+      portalRoot.style.left = '0';
+      portalRoot.style.width = '100%';
+      portalRoot.style.height = '100%';
+      portalRoot.style.pointerEvents = 'none';
+      portalRoot.style.zIndex = '9999';
+      document.body.appendChild(portalRoot);
+    }
+    
+    return () => {
+      // No remover el portal root, puede reutilizarse
+    };
+  }, [isOpen]);
+  
+  const modalContent = (
     <AnimatePresence mode="wait">
       {isOpen && (
         <div
@@ -253,6 +276,7 @@ export const Modal: React.FC<ModalProps> = memo(({
           aria-modal="true"
           aria-labelledby={title ? `${modalId}-title` : undefined}
           aria-describedby={description ? `${modalId}-description` : undefined}
+          style={{ pointerEvents: 'auto' }}
         >
           {/* Backdrop con gradiente sutil */}
           <motion.div
@@ -345,6 +369,13 @@ export const Modal: React.FC<ModalProps> = memo(({
       )}
     </AnimatePresence>
   );
+  
+  // Renderizar en portal si está abierto
+  const portalRoot = typeof document !== 'undefined' ? document.getElementById('modal-root') : null;
+  
+  return portalRoot 
+    ? createPortal(modalContent, portalRoot)
+    : modalContent;
 });
 
 Modal.displayName = 'Modal';

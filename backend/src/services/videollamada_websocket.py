@@ -11,8 +11,8 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from models.communication.videollamada import Videollamada, VideollamadaParticipante
-from services.websocket_manager import manager as base_manager
+from src.models.communication.videollamada import Videollamada, VideollamadaParticipante
+from src.services.websocket_manager import manager as base_manager
 
 
 logger = logging.getLogger(__name__)

@@ -1,2 +1,41 @@
 -- Dry-run SQL plan to normalize filenames. Review before applying.
 -- Backup DB before applying: pg_dump -Fc -f /path/to/backup.dump acadify_db
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/pantaloneta_morada.png' WHERE filename = 'unisex/pantaloneta_morada.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/medias_negras.png' WHERE filename = 'unisex/medias_negras.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/chaqueta_y2k.png' WHERE filename = 'unisex/chaqueta_y2k.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/zapatos.png' WHERE filename = 'unisex/zapatos.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/Smoking_fuck_news.png' WHERE filename = 'unisex/Smoking_fuck_news.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/Fuck_news_pantalon.png' WHERE filename = 'unisex/Fuck_news_pantalon.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/camisa_verde_juan.png' WHERE filename = 'unisex/camisa_verde_juan.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/pantalon.png' WHERE filename = 'unisex/pantalon.png' AND filename NOT LIKE '%/%';
+-- Update avatar_asset filename exact match (dry-run)
+-- UPDATE avatar_asset SET filename = 'clothes/unisex/Saco_tortuga.png' WHERE filename = 'unisex/Saco_tortuga.png' AND filename NOT LIKE '%/%';
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'clothes/medias_negras.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'clothes/medias_negras.png' with 'clothes/unisex/medias_negras.png'
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'eyes/ojos_1.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'eyes/ojos_1.png' with 'eyes/unisex/ojos_1.png'
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'clothes/Saco_tortuga.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'clothes/Saco_tortuga.png' with 'clothes/unisex/Saco_tortuga.png'
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'clothes/medias_negras.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'clothes/medias_negras.png' with 'clothes/unisex/medias_negras.png'
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'eyes/ojos_1.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'eyes/ojos_1.png' with 'eyes/unisex/ojos_1.png'
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'clothes/zapatos.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'clothes/zapatos.png' with 'clothes/unisex/zapatos.png'
+-- Update user_avatar layers replacing basename with category path (dry-run)
+-- SELECT id FROM user_avatar WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(layers::jsonb) elem WHERE elem->>'file' = 'eyes/ojos_1.png');
+-- -- For each id, you can run an UPDATE that rebuilds the layers JSON replacing occurrences of 'eyes/ojos_1.png' with 'eyes/unisex/ojos_1.png'

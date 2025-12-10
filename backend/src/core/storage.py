@@ -352,3 +352,41 @@ class StorageManager:
 
 # Instancia global del manager
 storage_manager = StorageManager()
+
+
+# Función auxiliar genérica para subir archivos (fallback simple)
+async def upload_file_to_storage(upload_file, file_path: str) -> str:
+    """Función auxiliar genérica para subir archivos al almacenamiento.
+    
+    Args:
+        upload_file: Archivo subido (UploadFile) o bytes
+        file_path: Ruta donde guardar el archivo (relativa al directorio uploads)
+        
+    Returns:
+        URL pública del archivo guardado
+    """
+    import os
+    
+    # Obtener ruta base del almacenamiento
+    uploads_dir = os.path.join(os.path.dirname(__file__), "..", "..", "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+    
+    # Crear subdirectorios si es necesario
+    full_path = os.path.join(uploads_dir, file_path)
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    
+    # Leer contenido del archivo
+    if hasattr(upload_file, 'file'):  # Es un UploadFile de FastAPI
+        file_content = await upload_file.read()
+    elif isinstance(upload_file, bytes):  # Son bytes
+        file_content = upload_file
+    else:
+        # Intentar leer como archivo
+        file_content = upload_file.read()
+    
+    # Guardar archivo
+    with open(full_path, "wb") as f:
+        f.write(file_content)
+    
+    # Retornar URL accesible
+    return f"/uploads/{file_path}"

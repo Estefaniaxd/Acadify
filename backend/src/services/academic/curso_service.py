@@ -155,7 +155,10 @@ class CursoService:
             LEFT JOIN "CursoDocente" cd ON c.curso_id = cd.curso_id
             LEFT JOIN "GrupoCurso" gc ON c.curso_id = gc.curso_id
             LEFT JOIN "EstudianteGrupo" eg ON gc.grupo_id = eg.grupo_id
-            WHERE cd.docente_id = :usuario_id
+            -- Considerar asignaciones tanto a nivel de curso (CursoDocente)
+            -- como a nivel de grupo (GrupoCurso). Algunos procesos crean solo
+            -- entradas en GrupoCurso, por eso incluimos ambas fuentes.
+            WHERE (cd.docente_id = :usuario_id OR gc.docente_id = :usuario_id)
             GROUP BY c.curso_id, c.nombre, c.descripcion, c.codigo_acceso, c.estado, i.nombre
             ORDER BY c.nombre
             LIMIT :limit OFFSET :offset
@@ -340,7 +343,68 @@ class CursoService:
         if not result:
             raise HTTPException(status_code=404, detail="Curso no encontrado")
 
-        return _serialize_row(dict(result._mapping))
+        curso_data = _serialize_row(dict(result._mapping))
+
+        # Obtener profesores del curso
+        profesores_query = text(
+            """
+            SELECT DISTINCT
+                u.usuario_id as id,
+                u.nombres,
+                u.apellidos,
+                u.correo_institucional as correo
+            FROM "Usuario" u
+            JOIN "Docente" d ON u.usuario_id = d.docente_id
+            JOIN "GrupoCurso" gc ON d.docente_id = gc.docente_id
+            WHERE gc.curso_id = :curso_id
+            ORDER BY u.nombres, u.apellidos
+        """
+        )
+
+        profesores_result = db.execute(profesores_query, {"curso_id": curso_id}).fetchall()
+        profesores = []
+
+        for prof_row in profesores_result:
+            prof_data = dict(prof_row._mapping)
+            profesores.append({
+                "id": str(prof_data["id"]),
+                "nombres": prof_data["nombres"],
+                "apellidos": prof_data["apellidos"],
+                "nombre_completo": f"{prof_data['nombres']} {prof_data['apellidos']}",
+                "correo": prof_data["correo"],
+                "fecha_asignacion": None,
+                "rol": "docente"
+            })
+
+        # Obtener estudiantes del curso (conteo)
+        estudiantes_query = text(
+            """
+            SELECT COUNT(DISTINCT eg.estudiante_id) as total_estudiantes
+            FROM "EstudianteGrupo" eg
+            JOIN "GrupoCurso" gc ON eg.grupo_id = gc.grupo_id
+            WHERE gc.curso_id = :curso_id
+        """
+        )
+
+        estudiantes_result = db.execute(estudiantes_query, {"curso_id": curso_id}).fetchone()
+        total_estudiantes = estudiantes_result._mapping["total_estudiantes"] if estudiantes_result else 0
+
+        # Construir respuesta completa
+        response = {
+            "success": True,
+            "message": "Curso obtenido exitosamente",
+            "data": {
+                **curso_data,
+                "personas": {
+                    "profesores": profesores,
+                    "estudiantes": [],  # Lista vacía por ahora, se puede poblar si es necesario
+                    "total_profesores": len(profesores),
+                    "total_estudiantes": total_estudiantes
+                }
+            }
+        }
+
+        return response
 
     @staticmethod
     def _usuario_tiene_acceso(db: Session, curso_id: str, usuario: Usuario) -> bool:
@@ -349,10 +413,10 @@ class CursoService:
             query = text(
                 """
                 SELECT EXISTS(
-                    SELECT 1 FROM "EstudianteGrupo" eg
-                    JOIN "GrupoCurso" gc ON eg.grupo_id = gc.grupo_id
+                    SELECT 1 FROM "EstudianteGrupo" ge
+                    JOIN "GrupoCurso" gc ON ge.grupo_id = gc.grupo_id
                     WHERE gc.curso_id = :curso_id
-                    AND eg.estudiante_id = :usuario_id
+                    AND ge.estudiante_id = :usuario_id
                 )
             """
             )
@@ -360,9 +424,9 @@ class CursoService:
             query = text(
                 """
                 SELECT EXISTS(
-                    SELECT 1 FROM "CursoDocente" cd
-                    WHERE cd.curso_id = :curso_id
-                    AND cd.docente_id = :usuario_id
+                    SELECT 1 FROM "GrupoCurso" gc
+                    WHERE gc.curso_id = :curso_id
+                    AND gc.docente_id = :usuario_id
                 )
             """
             )
@@ -386,6 +450,20 @@ class CursoService:
         ).scalar()
 
         return bool(result)
+
+    @staticmethod
+    def validar_acceso_curso(db: Session, curso_id: str, usuario: Usuario) -> bool:
+        """Método público para validar acceso a un curso.
+
+        Args:
+            db: Sesión de base de datos
+            curso_id: ID del curso
+            usuario: Usuario a validar
+
+        Returns:
+            True si tiene acceso, False otherwise
+        """
+        return CursoService._usuario_tiene_acceso(db, curso_id, usuario)
 
 
 # Instancia global del servicio

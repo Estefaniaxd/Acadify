@@ -133,6 +133,9 @@ class AvatarService:
                     "id": str(asset.id),
                     "filename": asset.filename,
                     "display_name": asset.display_name or asset.filename.split("/")[-1],
+                    "category": asset.category,
+                    "subcategory": asset.subcategory,
+                    "target_gender": asset.target_gender,
                     "width": asset.width,
                     "height": asset.height,
                     "file_size": asset.file_size,
@@ -144,6 +147,10 @@ class AvatarService:
 
             manifest["categories"][category] = asset_list
             manifest["total_assets"] += len(asset_list)
+
+        # Generar estructura jerárquica (opcional)
+        hierarchical = self._build_hierarchical_manifest(manifest["categories"])
+        manifest["hierarchical"] = hierarchical
 
         return manifest
 
@@ -188,6 +195,8 @@ class AvatarService:
                     "id": str(asset.id),
                     "filename": asset.filename,
                     "display_name": asset.display_name or asset.filename.split("/")[-1],
+                    "category": asset.category,
+                    "subcategory": asset.subcategory,
                     "target_gender": asset.target_gender,
                     "width": asset.width,
                     "height": asset.height,
@@ -201,7 +210,35 @@ class AvatarService:
             manifest["categories"][category] = asset_list
             manifest["total_assets"] += len(asset_list)
 
+        # Generar estructura jerárquica (opcional)
+        hierarchical = self._build_hierarchical_manifest(manifest["categories"])
+        manifest["hierarchical"] = hierarchical
+
         return manifest
+    
+    def _build_hierarchical_manifest(self, categories: dict[str, list[dict]]) -> dict[str, dict[str, list[dict]]]:
+        """Construye manifest jerárquico agrupando por category -> subcategory.
+        
+        Args:
+            categories: Dict de assets agrupados por categoría
+            
+        Returns:
+            Dict jerárquico: {category: {subcategory: [assets]}}
+        """
+        hierarchical = {}
+        
+        for category, assets in categories.items():
+            hierarchical[category] = {}
+            
+            for asset in assets:
+                subcategory = asset.get("subcategory") or "other"
+                
+                if subcategory not in hierarchical[category]:
+                    hierarchical[category][subcategory] = []
+                
+                hierarchical[category][subcategory].append(asset)
+        
+        return hierarchical
 
     async def generate_preview(
         self, db: Session, base_gender: str, layers: list[dict[str, str]]

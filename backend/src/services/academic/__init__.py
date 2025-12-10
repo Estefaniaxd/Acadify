@@ -1,0 +1,10 @@
+from .comentario_service import ComentarioService, comentario_service
+from .reaccion_service import ReaccionService, reaccion_service
+from .archivo_service import ArchivoService, archivo_service
+from .curso_service import CursoService, curso_service
+from .inscripcion_service import InscripcionService, inscripcion_service
+from .institucion_service import InstitucionService, institucion_service
+from .periodo_academico_service import PeriodoAcademicoService, periodo_academico_service
+from .personas_service import PersonasService, personas_service
+from .tarea_enriched_service import TareaEnriquecidaService, crear_servicio_tareas_enriquecidas
+from .tarea_service import TareaService, tarea_service

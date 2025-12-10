@@ -343,7 +343,17 @@ export default function ChatClasePage() {
                         <span className="text-2xl">{mensaje.avatar}</span>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{mensaje.autor}</h4>
+                            <h4 className="font-semibold">
+                              {(() => {
+                                if (typeof mensaje.autor === 'object' && mensaje.autor?.nombre) {
+                                  return `${mensaje.autor.nombre} ${mensaje.autor.apellido || ''}`.trim();
+                                } else if (typeof mensaje.autor === 'string') {
+                                  return mensaje.autor;
+                                } else {
+                                  return 'Usuario';
+                                }
+                              })()}
+                            </h4>
                             <span className="px-2 py-1 bg-white/20 rounded-full text-xs font-medium">
                               {mensaje.rol}
                             </span>
@@ -447,7 +457,15 @@ export default function ChatClasePage() {
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-lg">{respuesta.avatar}</span>
                               <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                                {respuesta.autor}
+                                {(() => {
+                                  if (typeof respuesta.autor === 'object' && respuesta.autor?.nombre) {
+                                    return `${respuesta.autor.nombre} ${respuesta.autor.apellido || ''}`.trim();
+                                  } else if (typeof respuesta.autor === 'string') {
+                                    return respuesta.autor;
+                                  } else {
+                                    return 'Usuario';
+                                  }
+                                })()}
                               </span>
                               <span className="text-xs text-gray-500">
                                 {formatearFecha(respuesta.fecha)}

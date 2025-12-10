@@ -1,9 +1,14 @@
 BEGIN;
-UPDATE avatar_asset SET filename = 'hair/female/hair_2.png' WHERE filename = 'hair_2.png' AND filename NOT LIKE '%/%';
--- Verify the update: SELECT * FROM avatar_asset WHERE filename = 'hair/female/hair_2.png';
+UPDATE avatar_asset SET filename = 'makeup/female/ahumado_negro.png' WHERE filename = 'ahumado_negro.png' AND filename NOT LIKE '%/%';
+-- Verify the update: SELECT * FROM avatar_asset WHERE filename = 'makeup/female/ahumado_negro.png';
 COMMIT;
 
 BEGIN;
-UPDATE avatar_asset SET filename = 'hair/female/hair_1.png' WHERE filename = 'hair_1.png' AND filename NOT LIKE '%/%';
--- Verify the update: SELECT * FROM avatar_asset WHERE filename = 'hair/female/hair_1.png';
+UPDATE avatar_asset SET filename = 'makeup/female/remolino_rubor.png' WHERE filename = 'remolino_rubor.png' AND filename NOT LIKE '%/%';
+-- Verify the update: SELECT * FROM avatar_asset WHERE filename = 'makeup/female/remolino_rubor.png';
+COMMIT;
+
+BEGIN;
+UPDATE avatar_asset SET filename = 'mouth/female/boca_3.png' WHERE filename = 'boca_3.png' AND filename NOT LIKE '%/%';
+-- Verify the update: SELECT * FROM avatar_asset WHERE filename = 'mouth/female/boca_3.png';
 COMMIT;

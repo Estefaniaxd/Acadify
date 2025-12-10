@@ -24,7 +24,7 @@ security = HTTPBearer(auto_error=False)
 async def get_redis_service() -> RedisService:
     """Dependency para obtener RedisService."""
     if not redis_service.redis:
-        await redis_service.connect()
+        redis_service.connect()
     return redis_service
 
 
@@ -115,9 +115,12 @@ async def get_current_user(
             )
 
         # Validar que el rol del usuario esté en el token (defensa extra)
-        if roles and str(user.rol) not in [str(r) for r in roles]:
+        # Usar .value para obtener el string del Enum ('estudiante') en lugar de la repr ('RolUsuario.estudiante')
+        user_role_value = user.rol.value if hasattr(user.rol, "value") else str(user.rol)
+        
+        if roles and user_role_value not in [str(r) for r in roles]:
             logger.warning(
-                f"Rol de usuario no coincide: en token={roles}, en usuario={user.rol}"
+                f"Rol de usuario no coincide: en token={roles}, en usuario={user_role_value} (Enum: {user.rol})"
             )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

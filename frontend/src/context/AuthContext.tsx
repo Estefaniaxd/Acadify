@@ -12,63 +12,106 @@ type AuthContextType = {
   isAuthenticated: boolean;
   login: (accessToken: string, refreshToken?: string) => void;
   logout: () => void;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Pequeña función para decodificar JWT sin dependencias externas.
 // Maneja correctamente payload UTF-8.
+const base64UrlToBase64 = (value: string): string => {
+  let normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padding = normalized.length % 4;
+  if (padding) {
+    normalized += '='.repeat(4 - padding);
+  }
+  return normalized;
+};
+
 const parseUserFromToken = (token: string): User | null => {
   try {
-    if (!token || typeof token !== 'string') return null
-    const parts = token.split('.')
-    if (parts.length < 2) return null
-    const payload = parts[1]
-    // atob puede lanzar si el payload no está bien formado
-    const json = decodeURIComponent(
-      Array.prototype.map
-        .call(atob(payload), (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    )
-    const decoded: Record<string, unknown> = JSON.parse(json)
-    
-    // Extraer el rol del token
-    let role = (decoded.role || decoded.rol || decoded.perfil || 'estudiante') as string
-    
-    // Normalizar roles: convertir variantes del backend a los roles esperados por el frontend
-    const roleMap: Record<string, string> = {
-      'administrador': 'admin',
-      'ADMINISTRADOR': 'admin',
-      'Admin': 'admin',
-      'ADMIN': 'admin',
-      'estudiante': 'estudiante',
-      'ESTUDIANTE': 'estudiante',
-      'Estudiante': 'estudiante',
-      'profesor': 'profesor',
-      'PROFESOR': 'profesor',
-      'Profesor': 'profesor',
-      'coordinador': 'coordinador',
-      'COORDINADOR': 'coordinador',
-      'Coordinador': 'coordinador',
+    if (!token || typeof token !== 'string') {
+      console.warn('AuthContext: Token inválido o vacío');
+      return null;
     }
-    
-    // Aplicar mapeo si existe, sino usar el rol tal cual
-    role = roleMap[role] || role.toLowerCase()
-    
-    return {
-      id: (decoded.sub || decoded.user_id || '') as string,
-      username: (decoded.username || '') as string,
-      email: (decoded.email || decoded.correo_institucional || '') as string,
-      role: role,
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      console.warn('AuthContext: Token malformado (menos de 2 partes)');
+      return null;
     }
-  } catch {
-    return null
+
+    const payloadSegment = parts[1];
+    const base64Payload = base64UrlToBase64(payloadSegment);
+
+    try {
+      const json = decodeURIComponent(
+        Array.prototype.map
+          .call(atob(base64Payload), (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const decoded: Record<string, unknown> = JSON.parse(json);
+
+      console.log('AuthContext: Token decodificado correctamente', {
+        sub: decoded.sub,
+        exp: decoded.exp,
+        roles: decoded.roles
+      });
+
+      const rawRoles = decoded.roles;
+      const rawRole = decoded.role || decoded.rol || decoded.perfil;
+      let roleCandidate: string | undefined;
+
+      if (typeof rawRole === 'string') {
+        roleCandidate = rawRole;
+      } else if (Array.isArray(rawRoles) && rawRoles.length > 0 && typeof rawRoles[0] === 'string') {
+        roleCandidate = rawRoles[0];
+      }
+
+      let role = roleCandidate || 'estudiante';
+
+      const roleMap: Record<string, string> = {
+        administrador: 'admin',
+        ADMINISTRADOR: 'admin',
+        Admin: 'admin',
+        ADMIN: 'admin',
+        estudiante: 'estudiante',
+        ESTUDIANTE: 'estudiante',
+        Estudiante: 'estudiante',
+        profesor: 'profesor',
+        PROFESOR: 'profesor',
+        Profesor: 'profesor',
+        coordinador: 'coordinador',
+        COORDINADOR: 'coordinador',
+        Coordinador: 'coordinador',
+        docente: 'profesor',
+        DOCENTE: 'profesor',
+      };
+
+      role = roleMap[role] || role.toLowerCase();
+
+      const username = (decoded.username || decoded.name || decoded.nombres || '') as string;
+      const email = (decoded.email || decoded.correo_institucional || decoded.preferred_username || '') as string;
+
+      return {
+        id: String(decoded.sub || decoded.user_id || ''),
+        username,
+        email,
+        role,
+      };
+    } catch (e) {
+      console.error('AuthContext: Error al decodificar payload JSON', e);
+      return null;
+    }
+  } catch (error) {
+    console.warn('AuthContext: Error general al procesar token:', error);
+    return null;
   }
-}
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const login = useCallback((accessToken: string, refreshToken?: string) => {
     localStorage.setItem('access_token', accessToken);
@@ -78,6 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const u = parseUserFromToken(accessToken);
     setUser(u);
     setIsAuthenticated(!!u);
+    setLoading(false);
   }, [])
 
   const logout = useCallback(() => {
@@ -85,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('refresh_token');
     setUser(null);
     setIsAuthenticated(false);
+    setLoading(false);
     window.location.href = '/login';
   }, [])
 
@@ -101,6 +146,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('refresh_token');
       }
     }
+    setLoading(false);
 
     // Escuchar eventos de token expirado
     const handleTokenExpired = () => {
@@ -116,8 +162,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Memoizar el valor del contexto para evitar re-renders innecesarios
   const contextValue = useMemo(
-    () => ({ user, isAuthenticated, login, logout }),
-    [user, isAuthenticated, login, logout]
+    () => ({ user, isAuthenticated, login, logout, loading }),
+    [user, isAuthenticated, login, logout, loading]
   );
 
   return (

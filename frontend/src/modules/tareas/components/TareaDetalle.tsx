@@ -11,13 +11,13 @@
  */
 
 import { useState, useEffect } from 'react';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Clock, 
-  Award, 
-  Users, 
-  FileText, 
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Award,
+  Users,
+  FileText,
   AlertCircle,
   CheckCircle2,
   Sparkles,
@@ -36,6 +36,7 @@ interface TareaDetalleProps {
   onEditar?: (tarea: TareaEnriquecida) => void;
   onEliminar?: (tareaId: string) => void;
   onCalificarEntrega?: (entrega: EntregaTarea) => void;
+  onIrACalificar?: () => void;
 }
 
 /**
@@ -62,7 +63,7 @@ const useTareaData = (tareaId: string, cursoId: string) => {
       // TODO: Implementar endpoint de entregas
       // const entregasResponse = await apiClientTareas.obtenerEntregasTarea(tareaId);
       setEntregas([]);
-      
+
     } catch (err) {
       console.error('Error cargando datos:', err);
       setError('Error al cargar los datos de la tarea');
@@ -160,24 +161,21 @@ const TareaInfoSection = ({ tarea }: { tarea: TareaEnriquecida }) => {
         {/* Tiempo restante */}
         {tarea.tiempo_restante && (
           <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg ${
-              tarea.tiempo_restante.es_muy_urgente ? 'bg-red-100 dark:bg-red-900/30' :
+            <div className={`p-2 rounded-lg ${tarea.tiempo_restante.es_muy_urgente ? 'bg-red-100 dark:bg-red-900/30' :
               tarea.tiempo_restante.es_urgente ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-              'bg-gray-100 dark:bg-gray-800'
-            }`}>
-              <Clock className={`w-5 h-5 ${
-                tarea.tiempo_restante.es_muy_urgente ? 'text-red-600 dark:text-red-400' :
+                'bg-gray-100 dark:bg-gray-800'
+              }`}>
+              <Clock className={`w-5 h-5 ${tarea.tiempo_restante.es_muy_urgente ? 'text-red-600 dark:text-red-400' :
                 tarea.tiempo_restante.es_urgente ? 'text-yellow-600 dark:text-yellow-400' :
-                'text-gray-600 dark:text-gray-400'
-              }`} />
+                  'text-gray-600 dark:text-gray-400'
+                }`} />
             </div>
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">Tiempo restante</div>
-              <div className={`text-lg font-semibold ${
-                tarea.tiempo_restante.es_muy_urgente ? 'text-red-600 dark:text-red-400' :
+              <div className={`text-lg font-semibold ${tarea.tiempo_restante.es_muy_urgente ? 'text-red-600 dark:text-red-400' :
                 tarea.tiempo_restante.es_urgente ? 'text-yellow-600 dark:text-yellow-400' :
-                'text-gray-900 dark:text-gray-100'
-              }`}>
+                  'text-gray-900 dark:text-gray-100'
+                }`}>
                 {tarea.tiempo_restante.mensaje_tiempo}
               </div>
             </div>
@@ -327,10 +325,10 @@ const MetricasSection = ({ tarea }: { tarea: TareaEnriquecida }) => {
  * Componente para la lista de entregas
  * Single Responsibility: Solo muestra las entregas
  */
-const EntregasSection = ({ 
-  entregas, 
-  onCalificar 
-}: { 
+const EntregasSection = ({
+  entregas,
+  onCalificar
+}: {
   entregas: EntregaTarea[];
   onCalificar?: (entrega: EntregaTarea) => void;
 }) => {
@@ -426,7 +424,8 @@ export default function TareaDetalle({
   onBack,
   onEditar,
   onEliminar,
-  onCalificarEntrega
+  onCalificarEntrega,
+  onIrACalificar
 }: TareaDetalleProps) {
   const { tarea, entregas, loading, error } = useTareaData(tareaId, cursoId);
 
@@ -464,6 +463,15 @@ export default function TareaDetalle({
         </button>
 
         <div className="flex items-center gap-2">
+          {onIrACalificar && (
+            <button
+              onClick={onIrACalificar}
+              className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2"
+            >
+              <Award className="w-4 h-4" />
+              <span>Calificar Tarea</span>
+            </button>
+          )}
           {onEditar && (
             <button
               onClick={() => onEditar(tarea)}
@@ -492,8 +500,8 @@ export default function TareaDetalle({
       <MetricasSection tarea={tarea} />
 
       {/* Entregas */}
-      <EntregasSection 
-        entregas={entregas} 
+      <EntregasSection
+        entregas={entregas}
         onCalificar={onCalificarEntrega}
       />
     </div>

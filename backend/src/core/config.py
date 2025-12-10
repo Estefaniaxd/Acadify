@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     # JWT Token Settings
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15  # 15 minutes
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours (era 15 min, muy poco)
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30  # 30 days
 
     # Password Reset Settings
@@ -208,6 +208,7 @@ class Settings(BaseSettings):
     # OAuth Settings (Google, Microsoft, etc.)
     GOOGLE_CLIENT_ID: str | None = None
     GOOGLE_CLIENT_SECRET: str | None = None
+    GOOGLE_REDIRECT_URI: str | None = None
 
     MICROSOFT_CLIENT_ID: str | None = None
     MICROSOFT_CLIENT_SECRET: str | None = None

@@ -9,6 +9,7 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.api.dependencies import get_current_user
@@ -23,7 +24,21 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=dict[str, Any])
+class NotificacionesListResponse(BaseModel):
+    """Respuesta estándar para listados de notificaciones."""
+
+    notificaciones: list[dict[str, Any]] = Field(default_factory=list)
+    total: int = 0
+    no_leidas: int = 0
+
+
+class NotificacionesIds(BaseModel):
+    """Payload para marcar notificaciones como leídas."""
+
+    ids: list[str] = Field(default_factory=list, min_length=0)
+
+
+@router.get("", response_model=NotificacionesListResponse)
 def obtener_notificaciones(
     solo_no_leidas: bool = Query(False),
     ordenar_por: str = Query("fecha_creacion"),
@@ -45,16 +60,12 @@ def obtener_notificaciones(
     )
 
     # TODO: Implementar lógica real cuando exista el modelo Notificacion
-    return {
-        "notificaciones": [],
-        "total": 0,
-        "no_leidas": 0,
-    }
+    return NotificacionesListResponse()
 
 
 @router.post("/marcar-leidas", status_code=status.HTTP_200_OK)
 def marcar_notificaciones_como_leidas(
-    ids: list[str],
+    payload: NotificacionesIds,
     current_user: Usuario = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -63,8 +74,9 @@ def marcar_notificaciones_como_leidas(
     **Implementación temporal**: Retorna éxito sin hacer nada.
 
     Args:
-        ids: Lista de IDs de notificaciones a marcar como leídas
+        payload: Lista de IDs de notificaciones a marcar como leídas
     """
+    ids = payload.ids
     logger.info(
         f"✓ Marcando {len(ids)} notificaciones como leídas para {current_user.correo_institucional}"
     )
@@ -72,7 +84,7 @@ def marcar_notificaciones_como_leidas(
     # TODO: Implementar lógica real
     return {
         "success": True,
-        "marcadas": 0,
+        "marcadas": len(ids),
         "message": "Sistema de notificaciones en desarrollo",
     }
 
@@ -174,3 +186,24 @@ def actualizar_configuracion_notificaciones(
         "message": "Sistema de notificaciones en desarrollo",
         **config,
     }
+
+
+@router.get("/sse")
+async def sse_notificaciones(
+    usuario_id: str = Query(...),
+    token: str = Query(...),
+):
+    """Endpoint dummy para SSE de notificaciones.
+    
+    Evita errores 404/405 en el frontend mientras se implementa el sistema real.
+    """
+    from fastapi.responses import StreamingResponse
+    import asyncio
+
+    async def event_generator():
+        # Enviar un comentario de keep-alive y cerrar
+        yield ": keep-alive\n\n"
+        await asyncio.sleep(0.1)
+        # No enviar nada más para que la conexión se cierre limpiamente o se mantenga abierta sin datos
+    
+    return StreamingResponse(event_generator(), media_type="text/event-stream")

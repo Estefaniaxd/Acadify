@@ -35,3 +35,4 @@ class EstadoEntrega(str, Enum):
     CALIFICADA = "calificada"
     DEVUELTA = "devuelta"
     REENTREGADA = "reentregada"
+    CANCELADA = "cancelada"

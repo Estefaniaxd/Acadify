@@ -2201,3 +2201,33 @@ Traceback (most recent call last):
 sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: FATAL:  no existe el rol «acadify_user»
 
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
+/usr/bin/python: No module named uvicorn
+2025-11-23 18:23:41,984 - src.api.routes.academic.ia_tareas - INFO - ✅ Router IA y Gamificación cargado con 13 rutas
+2025-11-23 18:23:44,694 - acadify-api - INFO - 📁 Archivos estáticos montados en /static desde /run/media/arch/Storage/SENA/Proyecto-Formativo/Acadify/backend/src/../static
+2025-11-23 18:23:44,695 - acadify-api - INFO - 📁 Archivos de uploads montados en /uploads desde /run/media/arch/Storage/SENA/Proyecto-Formativo/Acadify/backend/src/../uploads
+2025-11-23 18:23:44,695 - acadify-api - INFO - 🌐 CORS Origins configurados: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://localhost:8080']
+2025-11-23 18:23:44,738 - acadify-api - INFO - ✅ Router incluido: /auth - ['Autenticación']
+2025-11-23 18:23:44,758 - acadify-api - INFO - ✅ Router incluido: /avatar - ['Avatars']
+2025-11-23 18:23:44,766 - acadify-api - INFO - ✅ Router incluido: /admin - ['Administración']
+2025-11-23 18:23:44,775 - acadify-api - INFO - ✅ Router incluido: /invitaciones - ['Invitaciones']
+2025-11-23 18:23:44,787 - acadify-api - INFO - ✅ Router incluido: /api/coordinador - ['Coordinador']
+2025-11-23 18:23:44,799 - acadify-api - INFO - ✅ Router incluido:  - ['Instituciones Públicas']
+2025-11-23 18:23:44,850 - acadify-api - INFO - ✅ Router incluido: /evaluaciones - ['Evaluaciones']
+2025-11-23 18:23:44,864 - acadify-api - INFO - ✅ Router incluido: /api/programas - ['Programas']
+2025-11-23 18:23:44,876 - acadify-api - INFO - ✅ Router incluido: /api/grupos - ['Grupos/Clases']
+2025-11-23 18:23:44,921 - acadify-api - INFO - ✅ Router incluido: /api - ['Cursos']
+2025-11-23 18:23:44,963 - acadify-api - INFO - ✅ Router incluido: /api - ['Inscripciones']
+2025-11-23 18:23:45,041 - acadify-api - INFO - ✅ Router incluido: /api/tareas - ['Tareas']
+2025-11-23 18:23:45,060 - acadify-api - INFO - ✅ Router incluido: /api - ['Tareas Curso']
+2025-11-23 18:23:45,092 - acadify-api - INFO - ✅ Router incluido: /api - ['Comentarios']
+2025-11-23 18:23:45,103 - acadify-api - INFO - ✅ Router incluido: /api - ['Reacciones']
+2025-11-23 18:23:45,110 - acadify-api - INFO - ✅ Router incluido: /api - ['Archivos']
+2025-11-23 18:23:45,116 - acadify-api - INFO - ✅ Router incluido: /api - ['Personas y Perfiles']
+2025-11-23 18:23:45,141 - acadify-api - INFO - ✅ Router incluido: /api/instituciones - ['Instituciones']
+2025-11-23 18:23:45,168 - acadify-api - INFO - ✅ Router incluido: /api - ['IA y Gamificación']
+2025-11-23 18:23:45,233 - acadify-api - INFO - ✅ Router incluido: /api/gamificacion - ['Gamificación']
+2025-11-23 18:23:45,346 - acadify-api - INFO - ✅ Router incluido: /api - ['Chat']
+2025-11-23 18:23:45,349 - acadify-api - INFO - ✅ Router incluido: /api - ['WebSocket Chat']
+2025-11-23 18:23:45,410 - acadify-api - INFO - ✅ Router incluido: /api/communication - ['Videollamadas']
+2025-11-23 18:23:45,427 - acadify-api - INFO - ✅ Router incluido: /api/communication - ['Notificaciones']
+2025-11-23 18:23:45,431 - acadify-api - INFO - ✅ Router incluido:  - ['Development-Email']

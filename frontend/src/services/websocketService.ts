@@ -20,7 +20,7 @@
  * @version 1.0.0
  */
 
-import { EventEmitter } from 'events';
+import EventEmitter from 'eventemitter3';
 
 /**
  * Estado de la conexión WebSocket
@@ -140,7 +140,16 @@ export class WebSocketService {
     };
     
     this.eventEmitter = new EventEmitter();
-    this.eventEmitter.setMaxListeners(50); // Permitir muchos listeners
+    // eventemitter3 doesn't implement setMaxListeners in browsers; guard the call
+    try {
+      // @ts-ignore
+      if (typeof this.eventEmitter.setMaxListeners === 'function') {
+        // @ts-ignore
+        this.eventEmitter.setMaxListeners(50);
+      }
+    } catch {
+      // noop
+    }
     
     this.log('WebSocketService inicializado', this.options);
   }

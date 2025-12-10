@@ -3,11 +3,13 @@
  * 
  * @module hooks/useNotificaciones
  * @description Hooks personalizados para gestionar el estado de notificaciones
- * con React Query. Incluye polling automático y actualizaciones en tiempo real.
+ * con React Query. Incluye polling automático, SSE en tiempo real y actualizaciones.
  */
 
+import { useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config/api.config';
 import notificacionesService, {
   Notificacion,
   ConfiguracionNotificaciones,
@@ -28,14 +30,17 @@ export const NOTIFICACIONES_KEYS = {
 /**
  * Hook para obtener notificaciones con filtros opcionales
  * Incluye auto-refetch cada 30 segundos
+ * ✨ NUEVO: Integración con SSE para actualizaciones en tiempo real
  */
 export function useNotificaciones(
   filtros?: FiltrosNotificaciones
 ): UseQueryResult<Notificacion[], Error> {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const eventSourceRef = useRef<EventSource | null>(null);
 
-  return useQuery({
-    queryKey: NOTIFICACIONES_KEYS.list(filtros),
+  const query = useQuery({
+    queryKey: ['notificaciones', 'list', filtros],
     queryFn: () => notificacionesService.obtenerNotificaciones(filtros),
     enabled: !!user,
     staleTime: 20000, // 20 segundos
@@ -43,6 +48,52 @@ export function useNotificaciones(
     refetchInterval: 30000, // Auto-refetch cada 30 segundos
     refetchOnWindowFocus: true,
   });
+
+  // Conectar a SSE para actualizaciones en tiempo real
+  useEffect(() => {
+    if (!user?.id) return;
+
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.warn('No hay token disponible para conectar SSE de notificaciones');
+        return;
+      }
+
+      const eventSource = new EventSource(
+        `${API_BASE_URL}/api/communication/notificaciones/sse?usuario_id=${user.id}&token=${token}`
+      );
+
+      eventSource.onmessage = (event) => {
+        try {
+          const nuevaNotificacion: Notificacion = JSON.parse(event.data);
+          console.log('📨 Nueva notificación en tiempo real:', nuevaNotificacion);
+
+          // Invalidar query para refrescar
+          queryClient.invalidateQueries({ queryKey: ['notificaciones'] });
+        } catch (error) {
+          console.error('Error procesando SSE:', error);
+        }
+      };
+
+      eventSource.onerror = () => {
+        console.warn('Conexión SSE cerrada, intentando reconectar...');
+        eventSource.close();
+      };
+
+      eventSourceRef.current = eventSource;
+    } catch (error) {
+      console.error('Error conectando SSE:', error);
+    }
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, [user?.id, queryClient]);
+
+  return query;
 }
 
 /**

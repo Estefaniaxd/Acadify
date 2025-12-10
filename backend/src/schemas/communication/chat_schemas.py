@@ -7,7 +7,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, validator
 from uuid import UUID
 
-from models.communication.chat import TipoSala, TipoMensaje, EstadoMensaje
+from src.models.communication.chat import TipoSala, TipoMensaje, EstadoMensaje
 
 
 # ==================== SCHEMAS DE SALA DE CHAT ====================
@@ -223,7 +223,7 @@ class NotificacionBase(BaseModel):
     tipo_notificacion: str
     url_accion: Optional[str] = None
     icono: Optional[str] = None
-    color: Optional[str] = Field(None, regex=r'^#[0-9A-Fa-f]{6}$')
+    color: Optional[str] = Field(None, pattern=r'^#[0-9A-Fa-f]{6}$')
 
 
 class NotificacionCreate(NotificacionBase):
@@ -286,8 +286,8 @@ class ConfiguracionNotificacionesBase(BaseModel):
     menciones_email: bool = True
     
     # Configuración de horarios
-    horario_inicio: str = Field("08:00", regex=r'^([01]\d|2[0-3]):[0-5]\d$')
-    horario_fin: str = Field("22:00", regex=r'^([01]\d|2[0-3]):[0-5]\d$')
+    horario_inicio: str = Field("08:00", pattern=r'^([01]\d|2[0-3]):[0-5]\d$')
+    horario_fin: str = Field("22:00", pattern=r'^([01]\d|2[0-3]):[0-5]\d$')
     dias_activos: List[int] = Field(default=[1,2,3,4,5], min_items=1, max_items=7)
     
     @validator('dias_activos')

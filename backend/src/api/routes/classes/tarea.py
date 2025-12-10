@@ -16,7 +16,7 @@ router = APIRouter()
 @router.post("/", response_model=Tarea)
 def create_tarea(tarea_in: TareaCreate, db: Session = Depends(get_db)):
     """Crear una nueva tarea."""
-    return crud_tarea.create(db, obj_in=tarea_data)
+    return crud_tarea.create(db, obj_in=tarea_in)
 
 
 @router.get("/{tarea_id}", response_model=Tarea)
@@ -82,7 +82,7 @@ def update_tarea(tarea_id: UUID, tarea_in: TareaUpdate, db: Session = Depends(ge
     db_obj = crud_tarea.get(db, tarea_id=tarea_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
-    return crud_tarea.update(db, db_obj=db_obj, obj_in=tarea_data)
+    return crud_tarea.update(db, db_obj=db_obj, obj_in=tarea_in)
 
 
 @router.delete("/{tarea_id}", response_model=Tarea)

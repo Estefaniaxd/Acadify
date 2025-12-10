@@ -121,41 +121,47 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['examen_id'], ['examenes.examen_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('pregunta_id')
     )
-    op.create_table('videollamadas_grabaciones',
-    sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('videollamada_id', sa.Uuid(), nullable=False),
-    sa.Column('titulo', sa.String(length=255), nullable=False),
-    sa.Column('archivo_url', sa.String(length=500), nullable=False),
-    sa.Column('thumbnail_url', sa.String(length=500), nullable=True),
-    sa.Column('formato', sa.Enum('MP4', 'WEBM', 'MKV', 'AVI', name='formato_grabacion', native_enum=False), nullable=False),
-    sa.Column('calidad', sa.Enum('SD', 'HD', 'FHD', 'UHD_4K', name='calidad_grabacion', native_enum=False), nullable=False),
-    sa.Column('duracion_segundos', sa.Integer(), nullable=False),
-    sa.Column('tamano_bytes', sa.Integer(), nullable=False),
-    sa.Column('fecha_subida', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('estado_procesamiento', sa.Enum('PENDIENTE', 'PROCESANDO', 'COMPLETADO', 'ERROR', name='estado_procesamiento', native_enum=False), nullable=False),
-    sa.Column('error_mensaje', sa.Text(), nullable=True),
-    sa.Column('metadatos', sa.JSON(), nullable=True),
-    sa.ForeignKeyConstraint(['videollamada_id'], ['videollamadas.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_videollamadas_grabaciones_estado_procesamiento'), 'videollamadas_grabaciones', ['estado_procesamiento'], unique=False)
-    op.create_index(op.f('ix_videollamadas_grabaciones_videollamada_id'), 'videollamadas_grabaciones', ['videollamada_id'], unique=False)
-    op.create_table('videollamadas_participantes',
-    sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('videollamada_id', sa.Uuid(), nullable=False),
-    sa.Column('usuario_id', sa.UUID(), nullable=False),
-    sa.Column('fecha_union', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('fecha_salida', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('duracion_segundos', sa.Integer(), nullable=True),
-    sa.Column('es_moderador', sa.Boolean(), nullable=False),
-    sa.Column('calidad_conexion', sa.Enum('EXCELENTE', 'BUENA', 'REGULAR', 'MALA', name='calidad_conexion', native_enum=False), nullable=True),
-    sa.Column('estadisticas', sa.JSON(), nullable=True),
-    sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
-    sa.ForeignKeyConstraint(['videollamada_id'], ['videollamadas.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_videollamadas_participantes_usuario_id'), 'videollamadas_participantes', ['usuario_id'], unique=False)
-    op.create_index(op.f('ix_videollamadas_participantes_videollamada_id'), 'videollamadas_participantes', ['videollamada_id'], unique=False)
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    tables = inspector.get_table_names()
+
+    if 'videollamadas_grabaciones' not in tables:
+        op.create_table('videollamadas_grabaciones',
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('videollamada_id', sa.Uuid(), nullable=False),
+        sa.Column('titulo', sa.String(length=255), nullable=False),
+        sa.Column('archivo_url', sa.String(length=500), nullable=False),
+        sa.Column('thumbnail_url', sa.String(length=500), nullable=True),
+        sa.Column('formato', sa.Enum('MP4', 'WEBM', 'MKV', 'AVI', name='formato_grabacion', native_enum=False), nullable=False),
+        sa.Column('calidad', sa.Enum('SD', 'HD', 'FHD', 'UHD_4K', name='calidad_grabacion', native_enum=False), nullable=False),
+        sa.Column('duracion_segundos', sa.Integer(), nullable=False),
+        sa.Column('tamano_bytes', sa.Integer(), nullable=False),
+        sa.Column('fecha_subida', sa.DateTime(timezone=True), nullable=False),
+        sa.Column('estado_procesamiento', sa.Enum('PENDIENTE', 'PROCESANDO', 'COMPLETADO', 'ERROR', name='estado_procesamiento', native_enum=False), nullable=False),
+        sa.Column('error_mensaje', sa.Text(), nullable=True),
+        sa.Column('metadatos', sa.JSON(), nullable=True),
+        sa.ForeignKeyConstraint(['videollamada_id'], ['videollamadas.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_videollamadas_grabaciones_estado_procesamiento'), 'videollamadas_grabaciones', ['estado_procesamiento'], unique=False)
+        op.create_index(op.f('ix_videollamadas_grabaciones_videollamada_id'), 'videollamadas_grabaciones', ['videollamada_id'], unique=False)
+    if 'videollamadas_participantes' not in tables:
+        op.create_table('videollamadas_participantes',
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('videollamada_id', sa.Uuid(), nullable=False),
+        sa.Column('usuario_id', sa.UUID(), nullable=False),
+        sa.Column('fecha_union', sa.DateTime(timezone=True), nullable=False),
+        sa.Column('fecha_salida', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('duracion_segundos', sa.Integer(), nullable=True),
+        sa.Column('es_moderador', sa.Boolean(), nullable=False),
+        sa.Column('calidad_conexion', sa.Enum('EXCELENTE', 'BUENA', 'REGULAR', 'MALA', name='calidad_conexion', native_enum=False), nullable=True),
+        sa.Column('estadisticas', sa.JSON(), nullable=True),
+        sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
+        sa.ForeignKeyConstraint(['videollamada_id'], ['videollamadas.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_videollamadas_participantes_usuario_id'), 'videollamadas_participantes', ['usuario_id'], unique=False)
+        op.create_index(op.f('ix_videollamadas_participantes_videollamada_id'), 'videollamadas_participantes', ['videollamada_id'], unique=False)
     op.create_table('MensajeBot',
     sa.Column('mensaje_bot_id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('usuario_id', sa.UUID(), nullable=True),
@@ -170,20 +176,21 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('mensaje_bot_id')
     )
-    op.create_table('insignias_evaluacion',
-    sa.Column('insignia_evaluacion_id', sa.UUID(), nullable=False),
-    sa.Column('usuario_id', sa.UUID(), nullable=False),
-    sa.Column('evaluacion_id', sa.UUID(), nullable=True),
-    sa.Column('insignia_id', sa.UUID(), nullable=True),
-    sa.Column('nombre_insignia', sa.String(length=200), nullable=True),
-    sa.Column('descripcion', sa.Text(), nullable=True),
-    sa.Column('imagen_url', sa.String(length=500), nullable=True),
-    sa.Column('fecha_obtencion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('criterios_cumplidos', sa.JSON(), nullable=True),
-    sa.ForeignKeyConstraint(['evaluacion_id'], ['evaluaciones.id'], ),
-    sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
-    sa.PrimaryKeyConstraint('insignia_evaluacion_id')
-    )
+    if 'insignias_evaluacion' not in tables:
+        op.create_table('insignias_evaluacion',
+        sa.Column('insignia_evaluacion_id', sa.UUID(), nullable=False),
+        sa.Column('usuario_id', sa.UUID(), nullable=False),
+        sa.Column('evaluacion_id', sa.String(), nullable=True),
+        sa.Column('insignia_id', sa.UUID(), nullable=True),
+        sa.Column('nombre_insignia', sa.String(length=200), nullable=True),
+        sa.Column('descripcion', sa.Text(), nullable=True),
+        sa.Column('imagen_url', sa.String(length=500), nullable=True),
+        sa.Column('fecha_obtencion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('criterios_cumplidos', sa.JSON(), nullable=True),
+        sa.ForeignKeyConstraint(['evaluacion_id'], ['evaluaciones.id'], ),
+        sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
+        sa.PrimaryKeyConstraint('insignia_evaluacion_id')
+        )
     op.create_table('HistorialAccesoClase',
     sa.Column('historial_id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('clase_id', sa.UUID(), nullable=False),
@@ -198,65 +205,68 @@ def upgrade() -> None:
     )
     op.create_index('idx_historial_clase_estudiante', 'HistorialAccesoClase', ['clase_id', 'estudiante_id'], unique=False)
     op.create_index('idx_historial_fecha_acceso', 'HistorialAccesoClase', ['fecha_acceso'], unique=False)
-    op.create_table('eventos_antitrampa',
-    sa.Column('evento_id', sa.UUID(), nullable=False),
-    sa.Column('intento_id', sa.UUID(), nullable=True),
-    sa.Column('tipo_evento', sa.String(length=100), nullable=False),
-    sa.Column('categoria', sa.String(length=50), nullable=True),
-    sa.Column('severidad', sa.String(length=20), nullable=True),
-    sa.Column('peso', sa.Integer(), nullable=True),
-    sa.Column('descripcion', sa.Text(), nullable=True),
-    sa.Column('datos_evento', sa.JSON(), nullable=True),
-    sa.Column('timestamp', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('pregunta_id', sa.UUID(), nullable=True),
-    sa.Column('tiempo_transcurrido', sa.Integer(), nullable=True),
-    sa.Column('ip_address', sa.String(length=45), nullable=True),
-    sa.Column('user_agent', sa.Text(), nullable=True),
-    sa.Column('es_sospechoso', sa.Boolean(), nullable=True),
-    sa.Column('requiere_revision', sa.Boolean(), nullable=True),
-    sa.Column('accion_tomada', sa.String(length=50), nullable=True),
-    sa.Column('notificacion_enviada', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['intento_id'], ['intentos_evaluacion.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('evento_id')
-    )
-    op.create_table('ranking_evaluacion',
-    sa.Column('ranking_id', sa.UUID(), nullable=False),
-    sa.Column('evaluacion_id', sa.UUID(), nullable=True),
-    sa.Column('usuario_id', sa.UUID(), nullable=True),
-    sa.Column('intento_id', sa.UUID(), nullable=True),
-    sa.Column('posicion', sa.Integer(), nullable=False),
-    sa.Column('posicion_anterior', sa.Integer(), nullable=True),
-    sa.Column('puntuacion', sa.Float(), nullable=False),
-    sa.Column('tiempo_total', sa.Integer(), nullable=False),
-    sa.Column('respuestas_correctas_seguidas', sa.Integer(), nullable=True),
-    sa.Column('tiempo_primera_respuesta', sa.Integer(), nullable=True),
-    sa.Column('fecha_actualizacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['evaluacion_id'], ['evaluaciones.id'], ),
-    sa.ForeignKeyConstraint(['intento_id'], ['intentos_evaluacion.id'], ),
-    sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
-    sa.PrimaryKeyConstraint('ranking_id')
-    )
-    op.create_table('registros_puntos_evaluacion',
-    sa.Column('registro_id', sa.UUID(), nullable=False),
-    sa.Column('usuario_id', sa.UUID(), nullable=False),
-    sa.Column('evaluacion_id', sa.UUID(), nullable=True),
-    sa.Column('intento_id', sa.UUID(), nullable=True),
-    sa.Column('puntos_base', sa.Integer(), nullable=False),
-    sa.Column('puntos_bonus', sa.Integer(), nullable=True),
-    sa.Column('multiplicador', sa.Float(), nullable=True),
-    sa.Column('puntos_totales', sa.Integer(), nullable=False),
-    sa.Column('puntos_por_completar', sa.Integer(), nullable=True),
-    sa.Column('puntos_por_aciertos', sa.Integer(), nullable=True),
-    sa.Column('puntos_por_velocidad', sa.Integer(), nullable=True),
-    sa.Column('puntos_por_racha', sa.Integer(), nullable=True),
-    sa.Column('puntos_por_ranking', sa.Integer(), nullable=True),
-    sa.Column('fecha_otorgamiento', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('descripcion', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['evaluacion_id'], ['evaluaciones.id'], ),
-    sa.ForeignKeyConstraint(['intento_id'], ['intentos_evaluacion.id'], ),
-    sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
-    sa.PrimaryKeyConstraint('registro_id')
-    )
+    if 'eventos_antitrampa' not in tables:
+        op.create_table('eventos_antitrampa',
+        sa.Column('evento_id', sa.UUID(), nullable=False),
+        sa.Column('intento_id', sa.String(), nullable=True),
+        sa.Column('tipo_evento', sa.String(length=100), nullable=False),
+        sa.Column('categoria', sa.String(length=50), nullable=True),
+        sa.Column('severidad', sa.String(length=20), nullable=True),
+        sa.Column('peso', sa.Integer(), nullable=True),
+        sa.Column('descripcion', sa.Text(), nullable=True),
+        sa.Column('datos_evento', sa.JSON(), nullable=True),
+        sa.Column('timestamp', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('pregunta_id', sa.UUID(), nullable=True),
+        sa.Column('tiempo_transcurrido', sa.Integer(), nullable=True),
+        sa.Column('ip_address', sa.String(length=45), nullable=True),
+        sa.Column('user_agent', sa.Text(), nullable=True),
+        sa.Column('es_sospechoso', sa.Boolean(), nullable=True),
+        sa.Column('requiere_revision', sa.Boolean(), nullable=True),
+        sa.Column('accion_tomada', sa.String(length=50), nullable=True),
+        sa.Column('notificacion_enviada', sa.Boolean(), nullable=True),
+        sa.ForeignKeyConstraint(['intento_id'], ['intentos_evaluacion.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('evento_id')
+        )
+    if 'ranking_evaluacion' not in tables:
+        op.create_table('ranking_evaluacion',
+        sa.Column('ranking_id', sa.UUID(), nullable=False),
+        sa.Column('evaluacion_id', sa.String(), nullable=True),
+        sa.Column('usuario_id', sa.UUID(), nullable=True),
+        sa.Column('intento_id', sa.String(), nullable=True),
+        sa.Column('posicion', sa.Integer(), nullable=False),
+        sa.Column('posicion_anterior', sa.Integer(), nullable=True),
+        sa.Column('puntuacion', sa.Float(), nullable=False),
+        sa.Column('tiempo_total', sa.Integer(), nullable=False),
+        sa.Column('respuestas_correctas_seguidas', sa.Integer(), nullable=True),
+        sa.Column('tiempo_primera_respuesta', sa.Integer(), nullable=True),
+        sa.Column('fecha_actualizacion', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.ForeignKeyConstraint(['evaluacion_id'], ['evaluaciones.id'], ),
+        sa.ForeignKeyConstraint(['intento_id'], ['intentos_evaluacion.id'], ),
+        sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
+        sa.PrimaryKeyConstraint('ranking_id')
+        )
+    if 'registros_puntos_evaluacion' not in tables:
+        op.create_table('registros_puntos_evaluacion',
+        sa.Column('registro_id', sa.UUID(), nullable=False),
+        sa.Column('usuario_id', sa.UUID(), nullable=False),
+        sa.Column('evaluacion_id', sa.String(), nullable=True),
+        sa.Column('intento_id', sa.String(), nullable=True),
+        sa.Column('puntos_base', sa.Integer(), nullable=False),
+        sa.Column('puntos_bonus', sa.Integer(), nullable=True),
+        sa.Column('multiplicador', sa.Float(), nullable=True),
+        sa.Column('puntos_totales', sa.Integer(), nullable=False),
+        sa.Column('puntos_por_completar', sa.Integer(), nullable=True),
+        sa.Column('puntos_por_aciertos', sa.Integer(), nullable=True),
+        sa.Column('puntos_por_velocidad', sa.Integer(), nullable=True),
+        sa.Column('puntos_por_racha', sa.Integer(), nullable=True),
+        sa.Column('puntos_por_ranking', sa.Integer(), nullable=True),
+        sa.Column('fecha_otorgamiento', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('descripcion', sa.Text(), nullable=True),
+        sa.ForeignKeyConstraint(['evaluacion_id'], ['evaluaciones.id'], ),
+        sa.ForeignKeyConstraint(['intento_id'], ['intentos_evaluacion.id'], ),
+        sa.ForeignKeyConstraint(['usuario_id'], ['Usuario.usuario_id'], ),
+        sa.PrimaryKeyConstraint('registro_id')
+        )
     op.drop_index(op.f('idx_inventario_equipado'), table_name='inventario_usuario')
     op.drop_index(op.f('idx_inventario_item'), table_name='inventario_usuario')
     op.drop_index(op.f('idx_inventario_usuario'), table_name='inventario_usuario')
@@ -265,7 +275,7 @@ def upgrade() -> None:
     op.drop_index(op.f('idx_etiqueta_categoria'), table_name='etiquetas_perfil')
     op.drop_index(op.f('idx_etiqueta_comprable'), table_name='etiquetas_perfil')
     op.drop_index(op.f('idx_etiqueta_rareza'), table_name='etiquetas_perfil')
-    op.drop_table('etiquetas_perfil')
+    # op.drop_table('etiquetas_perfil')
     op.drop_index(op.f('ix_inscripciones_activo'), table_name='inscripciones')
     op.drop_index(op.f('ix_inscripciones_codigo_inscripcion'), table_name='inscripciones')
     op.drop_index(op.f('ix_inscripciones_en_lista_espera'), table_name='inscripciones')
@@ -296,11 +306,11 @@ def upgrade() -> None:
     op.drop_index(op.f('idx_config_antitrampa_institucion'), table_name='configuraciones_antitrampa')
     op.drop_index(op.f('idx_config_antitrampa_padre'), table_name='configuraciones_antitrampa')
     op.drop_index(op.f('idx_config_antitrampa_tipo'), table_name='configuraciones_antitrampa')
-    op.drop_table('configuraciones_antitrampa')
+    # op.drop_table('configuraciones_antitrampa')
     op.drop_index(op.f('idx_recompensa_racha_activa'), table_name='recompensa_racha')
     op.drop_index(op.f('idx_recompensa_racha_milestone'), table_name='recompensa_racha')
     op.drop_index(op.f('idx_recompensa_racha_tipo'), table_name='recompensa_racha')
-    op.drop_table('recompensa_racha')
+    # op.drop_table('recompensa_racha')
     op.drop_index(op.f('idx_participantes_fecha_union'), table_name='videollamada_participantes')
     op.drop_index(op.f('idx_participantes_usuario'), table_name='videollamada_participantes')
     op.drop_index(op.f('idx_participantes_videollamada'), table_name='videollamada_participantes')
@@ -309,7 +319,7 @@ def upgrade() -> None:
     op.drop_index(op.f('idx_racha_proxima_actividad'), table_name='racha_usuario')
     op.drop_index(op.f('idx_racha_tipo'), table_name='racha_usuario')
     op.drop_index(op.f('idx_racha_usuario'), table_name='racha_usuario')
-    op.drop_table('racha_usuario')
+    # op.drop_table('racha_usuario')
     op.drop_index(op.f('idx_transaccion_fecha'), table_name='transaccion_tienda')
     op.drop_index(op.f('idx_transaccion_item'), table_name='transaccion_tienda')
     op.drop_index(op.f('idx_transaccion_usuario'), table_name='transaccion_tienda')
@@ -323,7 +333,7 @@ def upgrade() -> None:
     op.drop_index(op.f('ix_periodos_academicos_institucion_activo'), table_name='periodos_academicos')
     op.drop_index(op.f('ix_periodos_academicos_institucion_anio'), table_name='periodos_academicos')
     op.drop_index(op.f('ix_periodos_academicos_institucion_id'), table_name='periodos_academicos')
-    op.drop_table('periodos_academicos')
+    # op.drop_table('periodos_academicos')
     op.drop_index(op.f('idx_grabaciones_deleted_at'), table_name='videollamada_grabaciones')
     op.drop_index(op.f('idx_grabaciones_estado'), table_name='videollamada_grabaciones')
     op.drop_index(op.f('idx_grabaciones_videollamada'), table_name='videollamada_grabaciones')
@@ -341,7 +351,7 @@ def upgrade() -> None:
     op.drop_index(op.f('idx_tienda_item_disponible'), table_name='tienda_item')
     op.drop_index(op.f('idx_tienda_item_rareza'), table_name='tienda_item')
     op.drop_index(op.f('idx_tienda_item_tipo'), table_name='tienda_item')
-    op.drop_table('tienda_item')
+    # op.drop_table('tienda_item')
     op.drop_index(op.f('idx_historial_fecha'), table_name='historial_racha')
     op.drop_index(op.f('idx_historial_racha'), table_name='historial_racha')
     op.drop_index(op.f('idx_historial_usuario'), table_name='historial_racha')
@@ -355,19 +365,36 @@ def upgrade() -> None:
     op.alter_column('Clase', 'grupo_curso_id',
                existing_type=sa.UUID(),
                nullable=True)
-    op.alter_column('Clase', 'titulo',
+    op.execute("DROP VIEW IF EXISTS vista_cursos_estadisticas CASCADE")
+    op.execute("DROP VIEW IF EXISTS vista_evaluaciones_resumen CASCADE")
+    op.execute("DROP VIEW IF EXISTS vista_entregas_pendientes CASCADE")
+    op.execute("DROP VIEW IF EXISTS vista_ranking_cursos CASCADE")
+    op.execute("DROP VIEW IF EXISTS vista_actividad_reciente CASCADE")
+
+    op.alter_column('Curso', 'nombre',
                existing_type=sa.TEXT(),
-               type_=sa.String(length=150),
+               type_=sa.String(length=100),
                existing_nullable=False)
+
+
+    tipo_clase_enum = postgresql.ENUM('teorica', 'practica', 'laboratorio', 'taller', 'seminario', 'conferencia', 'examen', 'otro', name='tipo_clase')
+    tipo_clase_enum.create(op.get_bind(), checkfirst=True)
+    
+    estado_clase_enum = postgresql.ENUM('programada', 'en_progreso', 'finalizada', 'cancelada', name='estado_clase')
+    estado_clase_enum.create(op.get_bind(), checkfirst=True)
+
     op.alter_column('Clase', 'tipo_clase',
                existing_type=sa.VARCHAR(length=50),
                type_=postgresql.ENUM('teorica', 'practica', 'laboratorio', 'taller', 'seminario', 'conferencia', 'examen', 'otro', name='tipo_clase'),
-               nullable=False)
+               nullable=False,
+               postgresql_using="tipo_clase::tipo_clase")
+    op.alter_column('Clase', 'estado', server_default=None)
     op.alter_column('Clase', 'estado',
                existing_type=sa.VARCHAR(length=20),
                type_=postgresql.ENUM('programada', 'en_progreso', 'finalizada', 'cancelada', name='estado_clase'),
                nullable=False,
-               existing_server_default=sa.text("'activo'::character varying"))
+               server_default='programada',
+               postgresql_using="CASE WHEN estado = 'activo' THEN 'programada'::estado_clase ELSE estado::estado_clase END")
     op.alter_column('Clase', 'fecha_inicio',
                existing_type=postgresql.TIMESTAMP(),
                type_=postgresql.TIMESTAMP(timezone=True),
@@ -383,7 +410,8 @@ def upgrade() -> None:
     op.alter_column('Clase', 'duracion',
                existing_type=postgresql.INTERVAL(),
                type_=sa.INTEGER(),
-               nullable=True)
+               nullable=True,
+               postgresql_using="EXTRACT(EPOCH FROM duracion)::integer / 60")
     op.alter_column('Clase', 'link_videollamada',
                existing_type=sa.TEXT(),
                type_=sa.String(length=500),
@@ -392,10 +420,14 @@ def upgrade() -> None:
                existing_type=sa.VARCHAR(length=20),
                type_=sa.String(length=10),
                nullable=False)
+    estado_codigo_acceso_enum = postgresql.ENUM('activo', 'vencido', 'deshabilitado', name='estado_codigo_acceso')
+    estado_codigo_acceso_enum.create(op.get_bind(), checkfirst=True)
+
     op.alter_column('Clase', 'estado_codigo',
                existing_type=sa.VARCHAR(length=20),
                type_=postgresql.ENUM('activo', 'vencido', 'deshabilitado', name='estado_codigo_acceso'),
-               nullable=False)
+               nullable=False,
+               postgresql_using="estado_codigo::estado_codigo_acceso")
     op.alter_column('Clase', 'fecha_vencimiento_codigo',
                existing_type=postgresql.TIMESTAMP(),
                type_=postgresql.TIMESTAMP(timezone=True),
@@ -1964,10 +1996,169 @@ def downgrade() -> None:
                existing_type=sa.VARCHAR(length=20),
                comment='Código identificador del curso (ej: MAT101)',
                existing_nullable=True)
+
+
     op.alter_column('Curso', 'nombre',
                existing_type=sa.String(length=100),
                type_=sa.VARCHAR(length=50),
                existing_nullable=False)
+
+    op.execute("""
+CREATE OR REPLACE VIEW vista_cursos_estadisticas AS
+SELECT 
+    c.curso_id,
+    c.nombre,
+    c.codigo_curso,
+    c.activo,
+    c.estado,
+    u.nombres || ' ' || u.apellidos AS coordinador,
+    (SELECT COUNT(DISTINCT eg.estudiante_id) FROM "EstudianteGrupo" eg INNER JOIN "GrupoCurso" gc ON eg.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id) AS total_estudiantes,
+    (SELECT COUNT(DISTINCT gc.grupo_id) FROM "GrupoCurso" gc WHERE gc.curso_id = c.curso_id) AS total_grupos,
+    (SELECT COUNT(*) FROM tareas t INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id) AS total_tareas,
+    (SELECT COUNT(*) FROM evaluaciones WHERE curso_id::uuid = c.curso_id) AS total_evaluaciones,
+    (SELECT COUNT(*) FROM entregas_tareas et INNER JOIN tareas t ON et.tarea_id = t.tarea_id INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id) AS total_entregas,
+    (SELECT COUNT(*) FROM entregas_tareas et INNER JOIN tareas t ON et.tarea_id = t.tarea_id INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id AND et.calificacion IS NULL) AS entregas_pendientes_calificacion,
+    (SELECT AVG(et.calificacion) FROM entregas_tareas et INNER JOIN tareas t ON et.tarea_id = t.tarea_id INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id AND et.calificacion IS NOT NULL) AS promedio_entregas,
+    (SELECT AVG(ie.puntuacion_obtenida) FROM intentos_evaluacion ie INNER JOIN evaluaciones ev ON ie.evaluacion_id = ev.id WHERE ev.curso_id::uuid = c.curso_id AND ie.puntuacion_obtenida IS NOT NULL) AS promedio_evaluaciones,
+    CASE WHEN (SELECT COUNT(*) FROM entregas_tareas et INNER JOIN tareas t ON et.tarea_id = t.tarea_id INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id AND et.calificacion IS NOT NULL) > 0 THEN (SELECT COUNT(*) * 100.0 / NULLIF(COUNT(*), 0) FROM entregas_tareas et INNER JOIN tareas t ON et.tarea_id = t.tarea_id INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE gc.curso_id = c.curso_id AND et.calificacion >= 3.0) ELSE 0 END AS tasa_aprobacion,
+    c.fecha_creacion,
+    c.fecha_actualizacion
+FROM "Curso" c
+LEFT JOIN "Usuario" u ON c.coordinador_id = u.usuario_id
+ORDER BY c.nombre;
+    """)
+
+    op.execute("""
+CREATE OR REPLACE VIEW vista_evaluaciones_resumen AS
+SELECT 
+    ev.id AS evaluacion_id,
+    ev.titulo,
+    ev.descripcion,
+    ev.tipo_evaluacion,
+    ev.estado_examen,
+    ev.fecha_apertura,
+    ev.fecha_cierre,
+    ev.tiempo_limite_minutos,
+    ev.intentos_permitidos,
+    ev.puntuacion_minima_aprobacion,
+    c.nombre,
+    c.codigo_curso,
+    COUNT(DISTINCT ie.id) AS total_intentos,
+    COUNT(DISTINCT ie.estudiante_id) AS estudiantes_participantes,
+    COUNT(DISTINCT CASE WHEN ie.fecha_fin IS NOT NULL THEN ie.id END) AS intentos_completados,
+    COUNT(DISTINCT CASE WHEN ie.fecha_fin IS NULL THEN ie.id END) AS intentos_en_progreso,
+    AVG(ie.puntuacion_obtenida) AS promedio_calificacion,
+    MIN(ie.puntuacion_obtenida) AS calificacion_minima,
+    MAX(ie.puntuacion_obtenida) AS calificacion_maxima,
+    STDDEV(ie.puntuacion_obtenida) AS desviacion_estandar,
+    CASE WHEN COUNT(DISTINCT CASE WHEN ie.puntuacion_obtenida IS NOT NULL THEN ie.id END) > 0 THEN (COUNT(DISTINCT CASE WHEN ie.puntuacion_obtenida >= ev.puntuacion_minima_aprobacion THEN ie.id END) * 100.0 / NULLIF(COUNT(DISTINCT CASE WHEN ie.puntuacion_obtenida IS NOT NULL THEN ie.id END), 0)) ELSE 0 END AS tasa_aprobacion,
+    CASE WHEN COUNT(DISTINCT ie.id) > 0 THEN (COUNT(DISTINCT CASE WHEN ie.fecha_fin IS NOT NULL THEN ie.id END) * 100.0 / NULLIF(COUNT(DISTINCT ie.id), 0)) ELSE 0 END AS tasa_completitud,
+    AVG(EXTRACT(EPOCH FROM (ie.fecha_fin - ie.fecha_inicio))/60) AS duracion_promedio_minutos,
+    CASE WHEN ev.fecha_apertura > NOW() THEN 'Próxima' WHEN ev.fecha_cierre < NOW() THEN 'Cerrada' ELSE 'Activa' END AS estado_actual,
+    (SELECT COUNT(*) FROM preguntas_evaluacion pe WHERE evaluacion_id = ev.id) AS total_preguntas,
+    (SELECT SUM(puntuacion) FROM preguntas_evaluacion pe WHERE evaluacion_id = ev.id) AS puntos_totales
+FROM evaluaciones ev
+LEFT JOIN "Curso" c ON ev.curso_id::uuid = c.curso_id
+LEFT JOIN intentos_evaluacion ie ON ev.id = ie.evaluacion_id
+GROUP BY ev.id, ev.titulo, ev.descripcion, ev.tipo_evaluacion, ev.estado_examen, ev.fecha_apertura, ev.fecha_cierre, ev.tiempo_limite_minutos, ev.intentos_permitidos, ev.puntuacion_minima_aprobacion, c.nombre, c.codigo_curso
+ORDER BY ev.fecha_apertura DESC;
+    """)
+
+    op.execute("""
+CREATE OR REPLACE VIEW vista_entregas_pendientes AS
+SELECT 
+    et.entrega_id,
+    et.fecha_entrega,
+    EXTRACT(DAY FROM NOW() - et.fecha_entrega)::INTEGER AS dias_pendiente,
+    e.estudiante_id,
+    u.nombres || ' ' || u.apellidos AS estudiante_nombre,
+    u.correo_institucional AS estudiante_correo,
+    t.tarea_id,
+    t.titulo,
+    t.descripcion AS tarea_descripcion,
+    t.fecha_limite,
+    c.curso_id,
+    c.nombre AS curso_nombre,
+    c.codigo_curso,
+    g.grupo_id,
+    g.nombre AS grupo_nombre,
+    et.comentarios_estudiante,
+    et.archivo_url,
+    et.intentos,
+    et.estado,
+    CASE WHEN EXTRACT(DAY FROM NOW() - et.fecha_entrega) > 7 THEN 'Alta' WHEN EXTRACT(DAY FROM NOW() - et.fecha_entrega) > 3 THEN 'Media' ELSE 'Normal' END AS prioridad_revision,
+    CASE WHEN t.fecha_limite IS NOT NULL AND et.fecha_entrega > t.fecha_limite THEN TRUE ELSE FALSE END AS entrega_tardia
+FROM entregas_tareas et
+INNER JOIN "Estudiante" e ON et.estudiante_id = e.estudiante_id
+INNER JOIN "Usuario" u ON e.estudiante_id = u.usuario_id
+INNER JOIN tareas t ON et.tarea_id = t.tarea_id
+INNER JOIN "Grupo" g ON t.grupo_id = g.grupo_id
+INNER JOIN "GrupoCurso" gc ON g.grupo_id = gc.grupo_id
+INNER JOIN "Curso" c ON gc.curso_id = c.curso_id
+WHERE et.calificacion IS NULL AND et.estado IN ('entregada', 'en_revision')
+ORDER BY dias_pendiente DESC, et.fecha_entrega ASC;
+    """)
+
+    op.execute("""
+CREATE OR REPLACE VIEW vista_ranking_cursos AS
+SELECT 
+    c.curso_id,
+    c.nombre,
+    c.codigo_curso,
+    e.estudiante_id,
+    u.nombres || ' ' || u.apellidos AS nombre_completo,
+    calcular_promedio_estudiante_curso(e.estudiante_id, c.curso_id) AS promedio_curso,
+    ROW_NUMBER() OVER (PARTITION BY c.curso_id ORDER BY calcular_promedio_estudiante_curso(e.estudiante_id, c.curso_id) DESC NULLS LAST) AS posicion,
+    COUNT(*) OVER (PARTITION BY c.curso_id) AS total_estudiantes,
+    PERCENT_RANK() OVER (PARTITION BY c.curso_id ORDER BY calcular_promedio_estudiante_curso(e.estudiante_id, c.curso_id)) * 100 AS percentil,
+    (SELECT COUNT(*) FROM entregas_tareas et INNER JOIN tareas t ON et.tarea_id = t.tarea_id INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id WHERE et.estudiante_id = e.estudiante_id AND gc.curso_id = c.curso_id) AS total_entregas_curso,
+    (SELECT COUNT(*) FROM intentos_evaluacion ie INNER JOIN evaluaciones ev ON ie.evaluacion_id = ev.id WHERE ie.estudiante_id::uuid = e.estudiante_id AND ev.curso_id::uuid = c.curso_id) AS total_intentos_curso
+FROM "Curso" c
+CROSS JOIN "Estudiante" e
+INNER JOIN "Usuario" u ON e.estudiante_id = u.usuario_id
+INNER JOIN "EstudianteGrupo" eg ON e.estudiante_id = eg.estudiante_id
+INNER JOIN "GrupoCurso" gc ON eg.grupo_id = gc.grupo_id
+WHERE gc.curso_id = c.curso_id
+ORDER BY c.nombre, posicion;
+    """)
+
+    op.execute("""
+CREATE OR REPLACE VIEW vista_actividad_reciente AS
+SELECT 
+    'Entrega' AS tipo_actividad,
+    et.entrega_id::TEXT AS actividad_id,
+    et.fecha_entrega AS fecha_actividad,
+    u.nombres || ' ' || u.apellidos AS estudiante,
+    t.titulo AS titulo,
+    c.nombre AS curso,
+    CASE WHEN et.calificacion IS NULL THEN 'Pendiente' WHEN et.calificacion >= 3.0 THEN 'Aprobada' ELSE 'Reprobada' END AS estado,
+    et.calificacion
+FROM entregas_tareas et
+INNER JOIN "Estudiante" e ON et.estudiante_id = e.estudiante_id
+INNER JOIN "Usuario" u ON e.estudiante_id = u.usuario_id
+INNER JOIN tareas t ON et.tarea_id = t.tarea_id
+INNER JOIN "GrupoCurso" gc ON t.grupo_id = gc.grupo_id
+INNER JOIN "Curso" c ON gc.curso_id = c.curso_id
+WHERE et.fecha_entrega >= NOW() - INTERVAL '7 days'
+UNION ALL
+SELECT 
+    'Intento Evaluación' AS tipo_actividad,
+    ie.id::TEXT AS actividad_id,
+    ie.fecha_inicio AS fecha_actividad,
+    u.nombres || ' ' || u.apellidos AS estudiante,
+    ev.titulo AS titulo,
+    c.nombre AS curso,
+    CASE WHEN ie.fecha_fin IS NULL THEN 'En Progreso' WHEN ie.puntuacion_obtenida IS NULL THEN 'Pendiente' WHEN ie.puntuacion_obtenida >= ev.puntuacion_minima_aprobacion THEN 'Aprobado' ELSE 'Reprobado' END AS estado,
+    ie.puntuacion_obtenida AS calificacion
+FROM intentos_evaluacion ie
+INNER JOIN "Estudiante" e ON ie.estudiante_id::uuid = e.estudiante_id
+INNER JOIN "Usuario" u ON e.estudiante_id = u.usuario_id
+INNER JOIN evaluaciones ev ON ie.evaluacion_id = ev.id
+INNER JOIN "Curso" c ON ev.curso_id::uuid = c.curso_id
+WHERE ie.fecha_inicio >= NOW() - INTERVAL '7 days'
+ORDER BY fecha_actividad DESC
+LIMIT 100;
+    """)
     op.alter_column('Curso', 'programa_id',
                existing_type=sa.UUID(),
                nullable=False)

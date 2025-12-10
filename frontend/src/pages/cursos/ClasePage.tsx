@@ -19,21 +19,44 @@ export default function ClasePage() {
   const [tab, setTab] = useState('tablon');
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#18181b] p-8">
-      <div className="w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-xl shadow p-8 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold text-primary">Nombre de la clase</h2>
-          <div className="ml-auto flex gap-2">
-            <button className="px-3 py-1 rounded bg-primary/10 text-primary font-semibold hover:bg-primary/20">Ajustes</button>
-            <button className="px-3 py-1 rounded bg-primary/10 text-primary font-semibold hover:bg-primary/20">Abandonar</button>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#18181b]">
+      {/* Header con título y botones */}
+      <div className="sticky top-0 z-40 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-3xl font-bold text-primary">Nombre de la clase</h2>
+            <div className="flex gap-2">
+              <button className="px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold hover:bg-primary/20 transition-colors">
+                ⚙️ Ajustes
+              </button>
+              <button className="px-4 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                👋 Abandonar
+              </button>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`px-4 py-3 font-semibold transition-all border-b-2 ${
+                  tab === t.id
+                    ? 'text-primary border-primary'
+                    : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
-        <div className="flex gap-2 mb-8">
-          {TABS.map(t => (
-            <button key={t.id} className={`px-4 py-2 rounded-t-lg font-semibold text-base ${tab === t.id ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200'}`} onClick={() => setTab(t.id)}>{t.label}</button>
-          ))}
-        </div>
-        <div>
+      </div>
+
+      {/* Contenido dinámico */}
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
           {tab === 'tablon' && <ClaseTablonPage />}
           {tab === 'tareas' && <ClaseTareasPage />}
           {tab === 'materiales' && <ClaseMaterialesPage />}

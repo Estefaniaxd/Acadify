@@ -1,19 +1,10 @@
-/**
- * TareaDetallePage
- * 
- * Página completa para mostrar el detalle de una tarea.
- * Coordina TareaDetalle y CalificarEntregaModal.
- */
-
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { TareaDetalle, CalificarEntregaModal } from '../../modules/tareas/components';
-import { EntregaTarea, CalificacionResponse } from '../../modules/tareas/types';
+import { useNavigate, useParams } from 'react-router-dom';
+import { TareaDetalle } from '../../modules/tareas/components';
+import { EntregaTarea } from '../../modules/tareas/types';
 
 export default function TareaDetallePage() {
   const { cursoId, tareaId } = useParams<{ cursoId: string; tareaId: string }>();
   const navigate = useNavigate();
-  const [entregaSeleccionada, setEntregaSeleccionada] = useState<EntregaTarea | null>(null);
 
   if (!cursoId || !tareaId) {
     return (
@@ -32,15 +23,14 @@ export default function TareaDetallePage() {
     navigate(`/cursos/${cursoId}/clase`);
   };
 
-  const handleCalificarEntrega = (entrega: EntregaTarea) => {
-    setEntregaSeleccionada(entrega);
+  const handleIrACalificar = () => {
+    navigate(`/academic/tareas/${tareaId}/calificar`);
   };
 
-  const handleCalificacionGuardada = (_response: CalificacionResponse) => {
-    // Calificación guardada exitosamente
-    setEntregaSeleccionada(null);
-    // Recargar la página para ver los cambios
-    window.location.reload();
+  const handleCalificarEntrega = (_entrega: EntregaTarea) => {
+    // Navegar a la página de calificación
+    // Podríamos pasar el ID de la entrega en el futuro para pre-seleccionar
+    navigate(`/academic/tareas/${tareaId}/calificar`);
   };
 
   return (
@@ -51,18 +41,9 @@ export default function TareaDetallePage() {
           cursoId={cursoId}
           onBack={handleBack}
           onCalificarEntrega={handleCalificarEntrega}
+          onIrACalificar={handleIrACalificar}
         />
       </div>
-
-      {/* Modal de calificación */}
-      {entregaSeleccionada && (
-        <CalificarEntregaModal
-          entrega={entregaSeleccionada}
-          puntos_maximos={100} // TODO: Obtener de la tarea
-          onClose={() => setEntregaSeleccionada(null)}
-          onCalificacionGuardada={handleCalificacionGuardada}
-        />
-      )}
     </div>
   );
 }

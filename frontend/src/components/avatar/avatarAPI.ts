@@ -1,38 +1,32 @@
 // API client para avatars
 import { API_BASE_URL } from "../../utils/api";
+import type {
+  AssetInfo,
+  LayerItem,
+  ManifestResponse,
+  PreviewRequest,
+  PreviewResponse,
+  SaveAvatarRequest,
+  UserAvatarResponse,
+  UserAvatarListResponse,
+  GenderType,
+  CategoryType,
+  SubcategoryType,
+} from "../../types/avatar";
 
-export interface LayerItem {
-  category: string;
-  filename: string;
-  url: string;
-}
+// Re-export types for backwards compatibility
+export type { 
+  AssetInfo, 
+  LayerItem, 
+  ManifestResponse, 
+  PreviewResponse, 
+  UserAvatarListResponse,
+  GenderType,
+  CategoryType,
+  SubcategoryType,
+} from "../../types/avatar";
 
-export interface AssetInfo {
-  id?: string;
-  filename: string;
-  display_name?: string;
-  target_gender: string;
-  width?: number;
-  height?: number;
-  file_size?: number;
-  is_normalized?: boolean;
-  meta_info?: Record<string, any>;
-  url: string; // URL completa del asset
-}
-
-export interface ManifestResponse {
-  resolution: [number, number];
-  categories: Record<string, AssetInfo[]>;
-  total_assets: number;
-  gender?: string; // Para manifests filtrados por género
-}
-
-export interface PreviewResponse {
-  preview_url: string;
-  layers_hash: string;
-  from_cache: boolean;
-}
-
+// Legacy interfaces for backwards compatibility
 export interface UserAvatar {
   id: string;
   user_id: string;
@@ -45,13 +39,6 @@ export interface UserAvatar {
   is_public: boolean;
   created_at: string;
   updated_at: string;
-}
-
-export interface UserAvatarListResponse {
-  avatars: UserAvatar[];
-  total: number;
-  has_active: boolean;
-  active_avatar_id?: string;
 }
 
 export class AvatarAPI {
@@ -168,11 +155,75 @@ export class AvatarAPI {
   }
 
   /**
-   * Obtiene el manifest de assets disponibles
+   * Obtiene el manifest de assets disponibles.
+   * 
+   * IMPORTANTE: El parámetro `gender` es INFORMATIVO únicamente.
+   * No bloquea la selección de items - cualquier avatar puede usar cualquier item
+   * independientemente del género objetivo del asset.
+   * 
+   * @param gender - Filtro opcional de género (male, female, unisex) - solo informativo
+   * @returns Manifest con estructura plana (categories) y jerárquica (hierarchical)
    */
-  async getAssetsManifest(gender?: "male" | "female"): Promise<ManifestResponse> {
+  async getAssetsManifest(gender?: GenderType): Promise<ManifestResponse> {
     const params = gender ? `?gender=${gender}` : "";
-    return this.request<ManifestResponse>(`/assets${params}`);
+    const response = await this.request<any>(`/assets${params}`);
+
+    // Transform snake_case backend response to camelCase frontend
+    const transformed: ManifestResponse = {
+      resolution: response.resolution,
+      categories: {} as Record<string, AssetInfo[]>,
+      hierarchical: undefined,
+      totalAssets: response.total_assets || response.totalAssets || 0,
+      gender: response.gender as GenderType | undefined,
+    };
+
+    // Transform flat categories (snake_case → camelCase)
+    if (response.categories) {
+      for (const [category, assets] of Object.entries(response.categories)) {
+        transformed.categories[category as CategoryType] = (assets as any[]).map((asset: any) => ({
+          id: asset.id || "",
+          filename: asset.filename,
+          displayName: asset.display_name || asset.displayName || asset.filename.split("/").pop() || "",
+          category: asset.category || category,
+          subcategory: asset.subcategory || undefined,
+          targetGender: (asset.target_gender || asset.targetGender || "unisex") as GenderType,
+          url: asset.url,
+          width: asset.width || 512,
+          height: asset.height || 512,
+          fileSize: asset.file_size || asset.fileSize || 0,
+          isNormalized: asset.is_normalized ?? asset.isNormalized ?? true,
+          metaInfo: asset.meta_info || asset.metaInfo || {},
+        }));
+      }
+    }
+
+    // Transform hierarchical structure (category → subcategory → items)
+    if (response.hierarchical) {
+      transformed.hierarchical = {};
+      
+      for (const [category, subcategories] of Object.entries(response.hierarchical)) {
+        transformed.hierarchical[category as CategoryType] = {} as Record<string, AssetInfo[]>;
+        
+        for (const [subcategory, assets] of Object.entries(subcategories as Record<string, any[]>)) {
+          transformed.hierarchical[category as CategoryType][subcategory] = assets.map((asset: any) => ({
+            id: asset.id || "",
+            filename: asset.filename,
+            displayName: asset.display_name || asset.displayName || asset.filename.split("/").pop() || "",
+            category: asset.category || category,
+            subcategory: asset.subcategory || subcategory,
+            targetGender: (asset.target_gender || asset.targetGender || "unisex") as GenderType,
+            url: asset.url,
+            width: asset.width || 512,
+            height: asset.height || 512,
+            fileSize: asset.file_size || asset.fileSize || 0,
+            isNormalized: asset.is_normalized ?? asset.isNormalized ?? true,
+            metaInfo: asset.meta_info || asset.metaInfo || {},
+          }));
+        }
+      }
+    }
+
+    return transformed;
   }
 
   /**

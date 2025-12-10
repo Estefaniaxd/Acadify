@@ -2,6 +2,10 @@ import logging
 import os
 import sys
 
+# ✅ CRÍTICO: Cargar variables de entorno desde .env ANTES de todo
+from dotenv import load_dotenv
+load_dotenv()  # Esto carga GEMINI_API_KEY y otras variables
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -49,6 +53,14 @@ if os.path.exists(static_dir):
 else:
     logger.warning(f"⚠️ Directorio de archivos estáticos no encontrado: {static_dir}")
 
+# Configurar archivos estáticos para uploads (cursos, tareas, etc.)
+uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+if os.path.exists(uploads_dir):
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+    logger.info(f"📁 Archivos de uploads montados en /uploads desde {uploads_dir}")
+else:
+    logger.warning(f"⚠️ Directorio de uploads no encontrado: {uploads_dir}")
+
 # Configuración CORS más permisiva para desarrollo
 cors_origins = settings.BACKEND_CORS_ORIGINS
 if not cors_origins:
@@ -70,9 +82,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+    # Allow all methods/headers in development to avoid CORS issues from the frontend dev server
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Length", "Content-Range", "X-Total-Count"],
+    expose_headers=["Content-Length", "Content-Range", "X-Total-Count", "WWW-Authenticate", "Authorization"],
 )
 
 # Servicio Redis
@@ -129,6 +142,27 @@ for router, prefix, tags in routers:
 async def options_handler(path: str):
     """Maneja las peticiones OPTIONS para CORS preflight."""
     return {"message": "OK"}
+
+
+# Middleware ligero de logging para depuración de entregas/tareas
+from fastapi import Request
+
+
+@app.middleware("http")
+async def log_tareas_requests(request: Request, call_next):
+    try:
+        path = request.url.path
+        # Solo loggear requests relevantes para debugging (tareas/entregas)
+        if "/cursos/tareas" in path or "/entregas" in path:
+            auth = request.headers.get("authorization")
+            content_type = request.headers.get("content-type")
+            logger.info(f"[DEBUG REQUEST] {request.method} {path} - Authorization present: {bool(auth)} - Authorization: {auth}")
+            logger.info(f"[DEBUG REQUEST] Content-Type: {content_type} - Content-Length: {request.headers.get('content-length')}")
+    except Exception as e:
+        logger.exception(f"Error logging request: {e}")
+
+    response = await call_next(request)
+    return response
 
 
 # Ruta raíz con información del sistema

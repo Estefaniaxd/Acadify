@@ -1,20 +1,20 @@
 """Rutas para el sistema de rachas diarias."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from src.api.deps import get_current_user, get_db
 from src.models.users.usuario import Usuario
 from src.services.gamification.racha_service import RachaService
 
 
-router = APIRouter(prefix="/rachas", tags=["Gamificación - Rachas"])
+router = APIRouter(tags=["Gamificación - Rachas"])
 
 
 @router.post("/registrar", summary="Registrar acceso diario")
 async def registrar_acceso_diario(
     current_user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Registra el acceso diario del usuario y actualiza su racha.
 
@@ -37,7 +37,7 @@ async def registrar_acceso_diario(
 @router.get("/mi-racha", summary="Obtener estado de mi racha")
 async def obtener_mi_racha(
     current_user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Obtiene el estado completo de la racha del usuario actual.
 
@@ -52,13 +52,13 @@ async def obtener_mi_racha(
     - **esta_congelada**: Si tiene protección activa
     """
     service = RachaService(db)
-    return await service.obtener_estado_racha(current_user.usuario_id)
+    return await service.get_estadisticas_racha(current_user.usuario_id)
 
 
 @router.post("/usar-recuperacion", summary="Usar recuperación de racha")
 async def usar_recuperacion(
     current_user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Usa una recuperación para salvar la racha perdida.
 
@@ -76,7 +76,7 @@ async def usar_recuperacion(
 async def congelar_racha(
     dias: int = 1,
     current_user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Congela la racha por X días usando un item funcional de la tienda.
 
@@ -102,7 +102,7 @@ async def congelar_racha(
 async def obtener_historial(
     limite: int = 10,
     current_user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Obtiene el historial de rachas del usuario.
 
@@ -124,7 +124,7 @@ async def obtener_historial(
 async def obtener_recompensas(
     limite: int = 7,
     current_user: Usuario = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Obtiene las recompensas de racha recientes.
 
@@ -145,7 +145,7 @@ async def obtener_recompensas(
 
 
 @router.get("/estadisticas-globales", summary="Estadísticas globales de rachas")
-async def obtener_estadisticas_globales(db: AsyncSession = Depends(get_db)):
+async def obtener_estadisticas_globales(db: Session = Depends(get_db)):
     """Obtiene estadísticas globales del sistema de rachas.
 
     **Endpoint público** que muestra:

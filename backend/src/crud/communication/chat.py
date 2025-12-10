@@ -8,14 +8,13 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.crud.base import CRUDBase
 from src.models.communication.chat import (
-from src.models.communication.mensaje import Mensaje
     ConfiguracionNotificaciones,
-    Lectura
-    
+    LecturaMensaje,
     Notificacion,
     ParticipanteSala,
     SalaChat,
 )
+from src.models.communication.mensaje import Mensaje
 from src.schemas.communication.chat_schemas import (
     ConfiguracionNotificacionesUpdate,
     FiltrosMensajes,

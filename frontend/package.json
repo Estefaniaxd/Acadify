@@ -20,6 +20,8 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/face_detection": "^0.4.1646425229",
     "@tanstack/react-query": "^5.90.5",
@@ -27,6 +29,7 @@
     "@tanstack/react-query-persist-client": "^5.90.7",
     "axios": "^1.12.2",
     "date-fns": "^4.1.0",
+    "eventemitter3": "^5.0.0",
     "framer-motion": "^10.18.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.552.0",

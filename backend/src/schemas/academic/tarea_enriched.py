@@ -4,7 +4,7 @@ Incluye estados calculados, métricas de progreso y lógica de negocio.
 Aplica Clean Code y principios SOLID.
 """
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, ConfigDict
 from typing import Optional, Literal
 from datetime import datetime, timedelta
 from enum import Enum
@@ -208,10 +208,14 @@ class TareaEnriquecida(TareaResponse):
                 }
             }
         }
+    
+    # Usar la configuración del padre (use_enum_values=True)
 
 
 class TareaResumen(BaseModel):
     """Schema resumido para listas y vistas rápidas."""
+    
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
     
     tarea_id: str
     titulo: str
@@ -232,9 +236,6 @@ class TareaResumen(BaseModel):
     es_vencida: bool
     es_urgente: bool
     tiene_entregas_sin_calificar: bool
-    
-    class Config:
-        from_attributes = True
 
 
 class TareaEstudianteEnriquecida(BaseModel):
@@ -270,13 +271,14 @@ class TareaEstudianteEnriquecida(BaseModel):
     es_tardia: bool = Field(..., description="Si la entrega sería tardía")
     penalizacion_aplicable: float = Field(default=0.0, description="Penalización si entrega ahora")
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
 
 # Schemas para requests con filtros
 class FiltrosTareaEnriquecida(BaseModel):
     """Filtros para consultar tareas enriquecidas."""
+    
+    model_config = ConfigDict(use_enum_values=True)
     
     grupo_id: Optional[str] = None
     docente_id: Optional[str] = None

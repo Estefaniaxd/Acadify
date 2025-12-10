@@ -94,3 +94,23 @@ async def delete_usuario(
         )
     user_crud.delete_user(db, user_id=str(usuario_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.put(
+    "/me",
+    response_model=Usuario,
+    summary="Actualizar mi perfil",
+    description="Actualiza los datos del usuario autenticado actual.",
+)
+async def update_me(
+    usuario_in: UsuarioUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    user_crud: UserCRUD = Depends(get_user_crud),
+):
+    """
+    Actualiza el perfil del usuario autenticado.
+    """
+    return user_crud.update_user(
+        db, user_id=str(current_user.usuario_id), user_update=usuario_in
+    )

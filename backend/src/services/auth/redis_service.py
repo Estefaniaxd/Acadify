@@ -1,3 +1,5 @@
+import logging
+
 import redis
 
 from src.core.config import settings
@@ -8,17 +10,33 @@ class RedisService:
 
     def __init__(self) -> None:
         self.redis: redis.Redis | None = None
+        self._logger = logging.getLogger(__name__)
 
     def connect(self) -> None:
         """Establecer conexión con Redis."""
-        self.redis = redis.from_url(
-            settings.REDIS_URL, encoding="utf-8", decode_responses=True
-        )
+        try:
+            self.redis = redis.from_url(
+                settings.REDIS_URL,
+                encoding="utf-8",
+                decode_responses=True,
+            )
+        except redis.RedisError as exc:
+            self._logger.warning("No se pudo conectar a Redis: %s", exc)
+            self.redis = None
 
     def disconnect(self) -> None:
         """Cerrar conexión con Redis."""
         if self.redis:
             self.redis.close()
+
+    def _ensure_client(self) -> redis.Redis | None:
+        """Devuelve un cliente Redis válido o None si no hay conexión."""
+
+        if self.redis is None:
+            self.connect()
+        if self.redis is None:
+            self._logger.debug("Redis no disponible, la operación se omitirá")
+        return self.redis
 
     # === BLACKLIST DE TOKENS ===
 
@@ -29,12 +47,18 @@ class RedisService:
     def blacklist_token(self, jti: str, ttl_seconds: int) -> None:
         """Agregar token JTI a blacklist con TTL."""
         key = self._get_blacklist_key(jti)
-        self.redis.setex(key, ttl_seconds, "1")
+        client = self._ensure_client()
+        if not client:
+            return
+        client.setex(key, ttl_seconds, "1")
 
     def is_token_blacklisted(self, jti: str) -> bool:
         """Verificar si token está en blacklist."""
         key = self._get_blacklist_key(jti)
-        return bool(self.redis.exists(key))
+        client = self._ensure_client()
+        if not client:
+            return False
+        return bool(client.exists(key))
 
     # === REFRESH TOKENS ACTIVOS ===
 
@@ -47,26 +71,40 @@ class RedisService:
     ) -> None:
         """Almacenar refresh token activo."""
         key = self._get_refresh_token_key(user_id)
+        client = self._ensure_client()
+        if not client:
+            return
         # Usar set para almacenar múltiples refresh tokens por usuario
-        self.redis.sadd(key, jti)
-        self.redis.expire(key, ttl_seconds)
+        client.sadd(key, jti)
+        client.expire(key, ttl_seconds)
 
     def remove_refresh_token(self, user_id: str, jti: str) -> None:
         """Remover refresh token específico."""
         key = self._get_refresh_token_key(user_id)
-        self.redis.srem(key, jti)
+        client = self._ensure_client()
+        if not client:
+            return
+        client.srem(key, jti)
 
     def invalidate_all_user_tokens(self, user_id: str) -> None:
         """Invalidar todos los tokens de un usuario."""
         key = self._get_refresh_token_key(user_id)
-        refresh_tokens = self.redis.smembers(key)
+        client = self._ensure_client()
+        if not client:
+            return
+        refresh_tokens = client.smembers(key)
 
         # Blacklist todos los refresh tokens
         for jti in refresh_tokens:
             self.blacklist_token(jti, 86400)  # 24 horas
 
         # Limpiar set de tokens activos
-        self.redis.delete(key)
+        client.delete(key)
+
+    def revoke_all_user_refresh_tokens(self, user_id: str) -> None:
+        """Alias semántico para invalidar tokens de refresco."""
+
+        self.invalidate_all_user_tokens(user_id)
 
     # === INTENTOS DE LOGIN FALLIDOS ===
 
@@ -77,19 +115,28 @@ class RedisService:
     def record_failed_attempt(self, identifier: str, ttl_seconds: int = 3600) -> None:
         """Registrar intento de login fallido."""
         key = self._get_failed_attempts_key(identifier)
-        self.redis.incr(key)
-        self.redis.expire(key, ttl_seconds)
+        client = self._ensure_client()
+        if not client:
+            return
+        client.incr(key)
+        client.expire(key, ttl_seconds)
 
     def get_failed_attempts(self, identifier: str) -> int:
         """Obtener número de intentos fallidos."""
         key = self._get_failed_attempts_key(identifier)
-        attempts = self.redis.get(key)
+        client = self._ensure_client()
+        if not client:
+            return 0
+        attempts = client.get(key)
         return int(attempts) if attempts else 0
 
     def clear_failed_attempts(self, identifier: str) -> None:
         """Limpiar intentos fallidos después de login exitoso."""
         key = self._get_failed_attempts_key(identifier)
-        self.redis.delete(key)
+        client = self._ensure_client()
+        if not client:
+            return
+        client.delete(key)
 
     # === CÓDIGOS DE VERIFICACIÓN ===
 
@@ -102,15 +149,21 @@ class RedisService:
     ) -> None:
         """Almacenar código de verificación temporal."""
         key = self._get_verification_key(user_id, code_type)
-        self.redis.setex(key, ttl_seconds, code)
+        client = self._ensure_client()
+        if not client:
+            return
+        client.setex(key, ttl_seconds, code)
 
     def verify_code(self, user_id: str, code_type: str, provided_code: str) -> bool:
         """Verificar código de verificación."""
         key = self._get_verification_key(user_id, code_type)
-        stored_code = self.redis.get(key)
+        client = self._ensure_client()
+        if not client:
+            return False
+        stored_code = client.get(key)
 
         if stored_code and stored_code == provided_code:
-            self.redis.delete(key)  # Código de un solo uso
+            client.delete(key)  # Código de un solo uso
             return True
         return False
 
@@ -123,12 +176,18 @@ class RedisService:
         key = f"session:user:{user_id}"
         import json
 
-        self.redis.setex(key, ttl_seconds, json.dumps(session_data))
+        client = self._ensure_client()
+        if not client:
+            return
+        client.setex(key, ttl_seconds, json.dumps(session_data))
 
     def get_cached_session(self, user_id: str) -> dict | None:
         """Obtener datos de sesión cacheados."""
         key = f"session:user:{user_id}"
-        data = self.redis.get(key)
+        client = self._ensure_client()
+        if not client:
+            return None
+        data = client.get(key)
         if data:
             import json
 
@@ -138,4 +197,7 @@ class RedisService:
     def clear_user_session(self, user_id: str) -> None:
         """Limpiar sesión de usuario."""
         key = f"session:user:{user_id}"
-        self.redis.delete(key)
+        client = self._ensure_client()
+        if not client:
+            return
+        client.delete(key)

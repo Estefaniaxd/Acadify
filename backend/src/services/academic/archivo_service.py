@@ -76,6 +76,30 @@ class ArchivoService:
             # Guardar archivo
             await ArchivoService._guardar_archivo(archivo, ruta_completa)
 
+            # Verificar que el archivo se guardó correctamente
+            if not ruta_completa.exists():
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Error al guardar el archivo en el sistema de archivos",
+                )
+
+            # Calcular tamaño real del archivo guardado
+            try:
+                tamaño_real = ruta_completa.stat().st_size
+                if tamaño_real == 0:
+                    # Si el tamaño es 0, intentar esperar un poco y recalcular
+                    import asyncio
+                    await asyncio.sleep(0.1)
+                    tamaño_real = ruta_completa.stat().st_size
+                    if tamaño_real == 0:
+                        logger.warning(f"Archivo {ruta_completa} tiene tamaño 0")
+            except OSError as e:
+                logger.error(f"Error al calcular tamaño del archivo {ruta_completa}: {e}")
+                tamaño_real = 0
+
+            # Log para debugging
+            logger.info(f"Archivo guardado: {ruta_completa}, tamaño calculado: {tamaño_real} bytes")
+
             # Registrar en BD
             url_archivo = f"/uploads/cursos/{curso_id}/{nombre_unico}"
             registro = ArchivoService._registrar_archivo_bd(
@@ -86,6 +110,7 @@ class ArchivoService:
                 descripcion,
                 tipo,
                 usuario.usuario_id,
+                tamaño_real,
             )
 
             logger.info(f"Archivo subido: {nombre_unico} al curso {curso_id}")
@@ -97,7 +122,7 @@ class ArchivoService:
                     "archivo_id": str(registro["archivo_id"]),
                     "nombre": archivo.filename,
                     "url": url_archivo,
-                    "tamaño": archivo.size,
+                    "tamaño": tamaño_real,
                 },
             }
 
@@ -150,6 +175,71 @@ class ArchivoService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error al obtener archivos",
+            ) from e
+
+    @staticmethod
+    def descargar_archivo(
+        db: Session, archivo_id: str, usuario: Usuario
+    ) -> dict[str, Any]:
+        """Descarga un archivo."""
+        try:
+            # Obtener info del archivo
+            query = text(
+                """
+                SELECT
+                    a.nombre_original,
+                    a.url,
+                    a.curso_id,
+                    a.subido_por
+                FROM archivos_curso a
+                WHERE a.archivo_id = :archivo_id
+            """
+            )
+
+            archivo = db.execute(query, {"archivo_id": archivo_id}).fetchone()
+
+            if not archivo:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Archivo no encontrado",
+                )
+
+            archivo_dict = dict(archivo._mapping)
+
+            # Validar acceso al curso
+            ArchivoService._validar_acceso_curso(db, archivo_dict["curso_id"], usuario)
+
+            # Construir ruta física del archivo
+            ruta_relativa = archivo_dict["url"].lstrip("/")
+            ruta_archivo = Path(ruta_relativa)
+
+            if not ruta_archivo.exists():
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Archivo no encontrado en el sistema de archivos",
+                )
+
+            # Determinar tipo MIME
+            import mimetypes
+            content_type, _ = mimetypes.guess_type(str(ruta_archivo))
+            if not content_type:
+                content_type = "application/octet-stream"
+
+            # Leer y devolver el archivo
+            from fastapi.responses import FileResponse
+            return FileResponse(
+                path=ruta_archivo,
+                media_type=content_type,
+                filename=archivo_dict["nombre_original"],
+            )
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception(f"Error descargando archivo: {e!s}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error al descargar archivo",
             ) from e
 
     @staticmethod
@@ -260,17 +350,18 @@ class ArchivoService:
         descripcion: str | None,
         tipo: str,
         subido_por: uuid.UUID,
+        tamaño: int,
     ) -> dict[str, Any]:
         """Registra el archivo en la BD."""
         query = text(
             """
             INSERT INTO archivos_curso (
                 curso_id, nombre_original, url, tipo,
-                descripcion, subido_por, fecha_subida
+                descripcion, subido_por, fecha_subida, tamaño
             )
             VALUES (
                 :curso_id, :nombre_original, :url, :tipo,
-                :descripcion, :subido_por, :fecha_subida
+                :descripcion, :subido_por, :fecha_subida, :tamaño
             )
             RETURNING archivo_id
         """
@@ -286,6 +377,7 @@ class ArchivoService:
                 "descripcion": descripcion,
                 "subido_por": subido_por,
                 "fecha_subida": datetime.now(UTC),
+                "tamaño": tamaño,
             },
         )
 

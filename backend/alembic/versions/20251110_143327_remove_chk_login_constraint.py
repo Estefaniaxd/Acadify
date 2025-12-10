@@ -18,7 +18,8 @@ depends_on = None
 
 def upgrade():
     # Drop the chk_login constraint
-    op.drop_constraint('chk_login', 'Usuario', type_='check')
+    # op.drop_constraint('chk_login', 'Usuario', type_='check')
+    pass
 
 
 def downgrade():

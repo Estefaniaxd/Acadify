@@ -25,6 +25,9 @@ try:
     from src.api.routes.communication.chat_ws import (
         router as chat_ws_router,
     )
+    from src.api.routes.communication.notificaciones import (
+        router as notificaciones_router,
+    )
 
 except Exception:
     import traceback
@@ -38,7 +41,9 @@ from src.api.routes.classes.clase import router as clase_router
 from src.api.routes.academic.curso_archivos import router as archivos_router
 from src.api.routes.academic.curso_comentarios import router as comentarios_router
 from src.api.routes.academic.curso_reacciones import router as reacciones_router
-from src.api.routes.academic.curso_tareas import router as tareas_router
+from src.api.routes.academic.curso_tareas import router as curso_tareas_router
+from src.api.routes.academic.ia_tareas import router as ia_tareas_router
+from src.api.routes.academic.tareas import router as tareas_router
 from src.api.routes.academic.cursos import router as cursos_router
 from src.api.routes.academic.inscripciones import router as inscripciones_curso_router
 from src.api.routes.academic.institucion import router as institucion_router
@@ -59,14 +64,24 @@ routers = [
     (cursos_router, "/api", ["Cursos"]),
     (periodos_router, "/api", ["Períodos Académicos"]),
     (inscripciones_curso_router, "/api", ["Inscripciones"]),
-    (tareas_router, "/api", ["Tareas"]),
+    (curso_tareas_router, "/api/cursos/tareas", ["Tareas Cursos"]),
+    (tareas_router, "/api/tareas", ["Tareas"]),
     (comentarios_router, "/api", ["Comentarios"]),
     (reacciones_router, "/api", ["Reacciones"]),
     (archivos_router, "/api", ["Archivos"]),
     (personas_router, "/api", ["Personas y Perfiles"]),
     (institucion_router, "/api/instituciones", ["Instituciones"]),
     (clase_router, "/api/v1", ["Clases"]),
+    (ia_tareas_router, "/api/cursos/tareas", ["IA Tareas"]),
+    (notificaciones_router, "/api", ["Notificaciones"]),
 ]
+
+# Rachas router is already included in gamificacion_router
+# try:
+#     from src.api.routes.gamification.rachas_routes import router as rachas_router
+#     # routers.append((rachas_router, "/api/gamification/rachas", ["Rachas"]))
+# except Exception:
+#     pass
 
 # Agregar videollamadas si se importó exitosamente
 if videollamadas_router is not None:

@@ -3,6 +3,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api.config';
 
 interface RachaState {
   usuario_id: string;
@@ -43,8 +44,6 @@ interface UseRachaReturn {
   obtenerHistorial: () => Promise<any[]>;
   recargarEstado: () => Promise<void>;
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const useRacha = (): UseRachaReturn => {
   const [rachaState, setRachaState] = useState<RachaState | null>(null);

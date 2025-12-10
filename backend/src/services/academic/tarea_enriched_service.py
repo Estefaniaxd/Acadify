@@ -14,9 +14,9 @@ import logging
 from sqlalchemy import and_, or_, text
 from sqlalchemy.orm import Session
 
-from ...enums.academic.tareas import EstadoTarea
-from ...models.academic.tarea import EntregaTarea, Tarea
-from ...schemas.academic.tarea_enriched import (
+from src.enums.academic.tareas import EstadoTarea
+from src.models.academic.tarea import EntregaTarea, Tarea
+from src.schemas.academic.tarea_enriched import (
     ColorEstado,
     EstadisticasCalificacion,
     EstadoVisual,
@@ -347,9 +347,62 @@ class TareaEnriquecidaService:
             dias_desde_asignacion = (datetime.now(UTC) - tarea.fecha_asignacion).days
 
             # 7. Construir TareaEnriquecida
+            # Build a safe dict with expected types/defaults for Pydantic
+            def safe_str(v: object) -> str:
+                return str(v) if v is not None else ""
+
+            def safe_bool(v: object, default: bool = False) -> bool:
+                return bool(v) if v is not None else default
+
+            def safe_float(v: object, default: float = 0.0) -> float:
+                try:
+                    return float(v) if v is not None else default
+                except Exception:
+                    return default
+
+            base = {
+                "tarea_id": safe_str(tarea.tarea_id),
+                "grupo_id": safe_str(tarea.grupo_id),
+                "docente_id": safe_str(tarea.docente_id),
+                "titulo": tarea.titulo or "",
+                "descripcion": tarea.descripcion,
+                "instrucciones": tarea.instrucciones,
+                "tipo": tarea.tipo,
+                "prioridad": tarea.prioridad.value if getattr(tarea, "prioridad", None) is not None else None,
+                "estado": tarea.estado,
+                "tags": tarea.tags,
+                "fecha_limite": tarea.fecha_limite,
+                "fecha_inicio_disponible": tarea.fecha_inicio_disponible,
+                "tiempo_estimado": tarea.tiempo_estimado or 0,
+                # Entrega config
+                "permite_entrega_tardia": safe_bool(getattr(tarea, "permite_entrega_tardia", None), False),
+                "penalizacion_tardia": safe_float(getattr(tarea, "penalizacion_tardia", None), 0.0),
+                "intentos_maximos": int(getattr(tarea, "intentos_maximos", 1) or 1),
+                "formato_entrega": tarea.formato_entrega,
+                "tamano_maximo_mb": safe_float(getattr(tarea, "tamano_maximo_mb", None), 10.0),
+                "puntuacion_maxima": safe_float(getattr(tarea, "puntuacion_maxima", None), 100.0),
+                "peso_evaluacion": safe_float(getattr(tarea, "peso_evaluacion", None), 1.0),
+                "es_grupal": safe_bool(getattr(tarea, "es_grupal", None), False),
+                "es_publica": safe_bool(getattr(tarea, "es_publica", None), True),
+                "requiere_aprobacion": safe_bool(getattr(tarea, "requiere_aprobacion", None), False),
+                "recursos_necesarios": tarea.recursos_necesarios,
+                "criterios_evaluacion": tarea.criterios_evaluacion,
+                # Auditoría
+                "fecha_asignacion": tarea.fecha_asignacion,
+                "fecha_creacion": tarea.fecha_creacion,
+                "fecha_actualizacion": tarea.fecha_actualizacion,
+                "creado_por": safe_str(getattr(tarea, "creado_por", None)),
+                "actualizado_por": safe_str(getattr(tarea, "actualizado_por", None)),
+                "activa": safe_bool(getattr(tarea, "activa", None), False),
+                # Propiedades calculadas
+                "total_entregas": getattr(tarea, "total_entregas", 0) or 0,
+                "entregas_pendientes": getattr(tarea, "entregas_pendientes", 0) or 0,
+                "promedio_calificaciones": getattr(tarea, "promedio_calificaciones", 0.0) or 0.0,
+                "esta_vencida": getattr(tarea, "esta_vencida", False) or False,
+            }
+
             tarea_dict = {
-                # Campos base de TareaResponse
-                **{k: v for k, v in tarea.__dict__.items() if not k.startswith("_")},
+                **base,
                 # Campos enriquecidos
                 "estado_visualizacion": estado_viz,
                 "estado_visual": estado_visual,
@@ -357,12 +410,12 @@ class TareaEnriquecidaService:
                 "dias_desde_asignacion": dias_desde_asignacion,
                 "metricas_progreso": metricas,
                 "estadisticas_calificacion": estadisticas_cal,
-                "es_activa": tarea.activa,
+                "es_activa": base["activa"],
                 "es_vencida": es_vencida,
                 "es_proxima_a_vencer": es_proxima_a_vencer,
                 "requiere_atencion": requiere_atencion,
                 "permite_entregas": permite_entregas,
-                "peso_porcentual": round(tarea.peso_evaluacion * 100, 2),
+                "peso_porcentual": round(base["peso_evaluacion"] * 100, 2),
                 "puntos_disponibles": self._calcular_puntos_disponibles(
                     tarea, es_vencida
                 ),
@@ -446,9 +499,8 @@ class TareaEnriquecidaService:
                 text(
                     """
                     SELECT COUNT(DISTINCT eg.estudiante_id)
-                    FROM estudiante_grupo eg
+                    FROM "EstudianteGrupo" eg
                     WHERE eg.grupo_id = :grupo_id
-                    AND eg.activo = true
                 """
                 ),
                 {"grupo_id": grupo_id},

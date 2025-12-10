@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => ({
             // Otros vendors
             return 'vendor';
           }
-          
+
           // Feature chunks (code splitting por módulo)
           // UI Components bundle (reutilizables)
           if (id.includes('/src/components/ui/')) {
@@ -109,6 +109,12 @@ export default defineConfig(({ mode }) => ({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
+        // Excluir rutas de OAuth callback para que las maneje React Router
+        bypass: (req) => {
+          if (req.url?.startsWith('/auth/google/callback')) {
+            return req.url; // Devolver la URL para que Vite sirva el HTML de React
+          }
+        },
       },
       '/api': {
         target: 'http://127.0.0.1:8000',
@@ -116,6 +122,16 @@ export default defineConfig(({ mode }) => ({
         secure: false,
       },
       '/static': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/invitaciones': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/uploads': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,

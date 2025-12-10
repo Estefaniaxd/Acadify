@@ -9,6 +9,7 @@
 
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { toCamelCase, toSnakeCase } from "../../../utils/transformers";
+import { API_BASE_URL } from "../../../config/api.config";
 import type {
   AceptarInvitacionDTO,
   CrearInvitacionDTO,
@@ -79,7 +80,6 @@ export interface AceptarInvitacionResponse {
 // CONFIGURACIÓN DE AXIOS
 // ============================================
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const BASE_PATH = "/invitaciones";
 
 /**
@@ -364,8 +364,12 @@ export const invitacionService = {
    */
   async getMisInvitaciones(): Promise<NotificacionInvitacion[]> {
     try {
+      const token = localStorage.getItem('access_token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
       const { data } = await apiClient.get<NotificacionInvitacion[]>(
-        `${BASE_PATH}/mis-invitaciones`
+        `${BASE_PATH}/mis-invitaciones`,
+        config
       );
       return data;
     } catch (error: any) {

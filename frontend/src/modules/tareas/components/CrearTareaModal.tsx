@@ -37,12 +37,14 @@ export default function CrearTareaModal({ cursoId, onClose, onTareaCreada }: Cre
       setLoading(true);
       setError(null);
 
-      // Preparar datos con solo los campos requeridos por el backend
+      // Enviar exactamente lo que el backend espera
       const tareaData = {
         titulo: formData.titulo,
         descripcion: formData.descripcion || '',
         fecha_limite: formData.fecha_limite,
         puntos_max: formData.puntos_max,
+        tipo: formData.tipo,
+        prioridad: formData.prioridad,
       };
 
       await apiClientTareas.crearTarea(cursoId, tareaData);

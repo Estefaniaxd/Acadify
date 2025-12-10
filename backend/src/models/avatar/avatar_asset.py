@@ -1,10 +1,20 @@
 """Modelo para assets de avatars (archivos de imágenes base)."""
 
-from sqlalchemy import JSON, Column, Integer, String, text
+from enum import Enum as PyEnum
+
+from sqlalchemy import JSON, Column, Enum, Integer, String, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.sql import func
 
 from src.db.base_class import Base
+
+
+class GenderType(str, PyEnum):
+    """Tipo de género para assets de avatar."""
+
+    MALE = "male"
+    FEMALE = "female"
+    UNISEX = "unisex"
 
 
 class AvatarAsset(Base):
@@ -29,12 +39,19 @@ class AvatarAsset(Base):
     )
 
     target_gender = Column(
-        String(20),
+        Enum(GenderType, name="gender_type", create_type=False, values_callable=lambda x: [e.value for e in x]),
         nullable=False,
-        default="unisex",
-        server_default=text("'unisex'"),
+        default=GenderType.UNISEX,
+        server_default=text("'unisex'::gender_type"),
         index=True,
-        doc="Género objetivo del asset: male, female, unisex",
+        doc="Género objetivo del asset: male, female, unisex (solo informativo, NO bloquea uso)",
+    )
+
+    subcategory = Column(
+        String(50),
+        nullable=True,
+        index=True,
+        doc="Subcategoría del asset: shirt, pants, short, medium, bracelet, etc.",
     )
 
     filename = Column(
@@ -78,7 +95,8 @@ class AvatarAsset(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<AvatarAsset(id={self.id}, category={self.category}, filename={self.filename})>"
+        subcat = f", subcategory={self.subcategory}" if self.subcategory else ""
+        return f"<AvatarAsset(id={self.id}, category={self.category}{subcat}, gender={self.target_gender.value}, filename={self.filename})>"
 
     @property
     def relative_path(self):

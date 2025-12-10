@@ -3,10 +3,44 @@ Esquemas Pydantic para el sistema de avatars.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
+
+# ======================
+# Tipos y Literales
+# ======================
+
+GenderType = Literal["male", "female", "unisex"]
+
+CategoryType = Literal[
+    "base",
+    "hair",
+    "eyes",
+    "mouth",
+    "makeup",
+    "clothes",
+    "accessories",
+    "backgrounds",
+]
+
+SubcategoryType = Literal[
+    # CLOTHES
+    "shirt", "pants", "skirt", "jacket", "socks", "shoes", "dress", "underwear",
+    # HAIR
+    "short", "medium", "long", "curly", "straight", "wavy", "ponytail", "braid",
+    # ACCESSORIES
+    "glasses", "hat", "earrings", "necklace", "bracelet", "ring", "watch", "headband", "mask",
+    # EYES
+    "normal", "anime", "realistic",
+    # MAKEUP
+    "lipstick", "eyeshadow", "blush", "eyeliner",
+    # BACKGROUNDS
+    "solid", "gradient", "pattern", "scene",
+    # GENERAL
+    "other", "none",
+]
 
 # ======================
 # Layer y componentes base
@@ -150,6 +184,9 @@ class AssetInfo(BaseModel):
     id: str = Field(..., description="ID único del asset")
     filename: str = Field(..., description="Nombre del archivo")
     display_name: str = Field(..., description="Nombre para mostrar")
+    category: str = Field(..., description="Categoría del asset")
+    subcategory: Optional[str] = Field(None, description="Subcategoría del asset")
+    target_gender: GenderType = Field(..., description="Género sugerido (informativo, NO bloquea uso)")
     url: str = Field(..., description="URL completa del asset")
     width: int = Field(..., description="Ancho en píxeles")
     height: int = Field(..., description="Alto en píxeles")
@@ -167,7 +204,10 @@ class ManifestResponse(BaseModel):
         ..., description="Resolución estándar [width, height]"
     )
     categories: Dict[str, List[AssetInfo]] = Field(
-        ..., description="Assets por categoría"
+        ..., description="Assets por categoría (flat)"
+    )
+    hierarchical: Optional[Dict[str, Dict[str, List[AssetInfo]]]] = Field(
+        None, description="Assets organizados jerárquicamente: category -> subcategory -> assets"
     )
     total_assets: int = Field(..., description="Total de assets disponibles")
 

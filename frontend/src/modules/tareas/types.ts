@@ -62,26 +62,27 @@ export interface Tarea {
   grupo_id: string;
   docente_id: string;
   clase_id?: string;
-  
+
   // === INFORMACIÓN BÁSICA ===
   titulo: string;
   descripcion?: string;
   instrucciones?: string;
   objetivos?: string;
+  recursos_necesarios?: string;
   archivo_adjunto?: string;
-  
+
   // === CLASIFICACIÓN ===
   tipo: TipoTarea;
   prioridad: PrioridadTarea;
   categoria?: string;
   tags?: string[];
-  
+
   // === FECHAS Y TIEMPO ===
   fecha_asignacion: string; // ISO string
   fecha_limite: string; // ISO string
   fecha_inicio_disponible?: string;
   tiempo_estimado?: number; // minutos
-  
+
   // === CONFIGURACIÓN DE ENTREGA ===
   permite_entrega_tardia: boolean;
   permite_entregas_tardias?: boolean; // campo duplicado en BD
@@ -90,7 +91,7 @@ export interface Tarea {
   formato_entrega?: string;
   tamano_maximo_mb: number;
   restricciones_archivo?: Record<string, unknown>;
-  
+
   // === EVALUACIÓN Y CALIFICACIÓN ===
   puntuacion_maxima: number;
   peso_evaluacion: number;
@@ -98,35 +99,40 @@ export interface Tarea {
   rubrica_id?: string;
   rubrica?: Record<string, unknown>; // JSONB
   criterios_evaluacion?: string;
-  
+
   // === GAMIFICACIÓN ===
   puntos_base?: number;
   puntos_bonificacion?: number;
-  
+
   // === IA Y RETROALIMENTACIÓN ===
   habilitar_retroalimentacion_ia: boolean;
   prompt_ia_personalizado?: string;
-  
+
   // === ESTADO Y VISIBILIDAD ===
   estado: EstadoTarea;
   visible_estudiantes: boolean;
   requiere_confirmacion_lectura: boolean;
-  
+
   // === AUDITORÍA ===
   fecha_creacion?: string;
   fecha_actualizacion?: string;
   creado_por?: string;
   actualizado_por?: string;
-  
+
   // === RELACIONES (opcional, pueden venir del backend) ===
   entregas?: EntregaTarea[];
-  
-  // === CAMPOS CALCULADOS (del backend enriquecido) ===
+
+  // === CAMPOS CALCULADOS / DE USUARIO ===
   total_entregas?: number;
   entregas_pendientes?: number;
   entregas_calificadas?: number;
   promedio_calificaciones?: number;
   esta_vencida?: boolean;
+
+  // Campos específicos del usuario actual
+  mi_entrega_id?: string;
+  mi_estado_entrega?: string;
+  mi_calificacion?: number;
 }
 
 /**
@@ -139,7 +145,7 @@ export interface TareaDetallada extends Tarea {
   rubrica_nombre?: string;
   estudiantes_asignados?: number;
   porcentaje_completitud?: number;
-  
+
   // Información del grupo/clase
   clase_nombre?: string;
   curso_nombre?: string;
@@ -172,19 +178,23 @@ export interface EntregaTarea {
   entrega_id: string;
   tarea_id: string;
   estudiante_id: string;
-  
+  estudiante_nombre?: string;
+  estudiante_apellido?: string;
+  estudiante_email?: string;
+
   // === INFORMACIÓN DE LA ENTREGA ===
   titulo_entrega?: string;
   descripcion_entrega?: string;
   comentarios_estudiante?: string;
-  
+
   // === ARCHIVOS Y CONTENIDO ===
   archivo_url?: string;
   archivo_metadata?: Record<string, unknown>; // JSONB
-  archivos_adicionales?: string; // JSON array de archivos
+  archivos_adicionales?: string | Record<string, unknown>; // JSON array de archivos o objeto parseado
+  archivos?: (string | { url: string; nombre: string; nombre_original?: string; nombre_almacenado?: string })[]; // URLs simples o con metadata
   contenido_texto?: string;
-  enlaces_externos?: string; // JSON array
-  
+  enlaces_externos?: { url: string; titulo: string; descripcion?: string }[]; // JSON array
+
   // === FECHAS Y CONTROL ===
   fecha_entrega?: string;
   fecha_limite_original?: string;
@@ -192,7 +202,7 @@ export interface EntregaTarea {
   intentos?: number;
   es_entrega_tardia: boolean;
   es_tardia?: boolean; // campo duplicado en BD
-  
+
   // === CALIFICACIÓN MANUAL ===
   calificacion?: number;
   calificacion_letras?: string;
@@ -200,34 +210,34 @@ export interface EntregaTarea {
   retroalimentacion_docente?: string;
   rubrica_calificacion?: Record<string, unknown>; // JSON
   comentarios_privados?: string;
-  
+
   // === CALIFICACIÓN IA ===
   calificacion_preliminar_ia?: number;
   retroalimentacion_ia?: Record<string, unknown>; // JSONB con análisis detallado
-  
+
   // === GAMIFICACIÓN ===
   puntos_otorgados?: number;
-  
+
   // === ESTADO ===
   estado: EstadoEntrega;
   es_final: boolean;
   requiere_revision: boolean;
-  
+
   // === METADATA Y FEEDBACK ===
   tiempo_empleado?: number; // minutos
   dificultad_percibida?: number; // 1-5
   satisfaccion_estudiante?: number; // 1-5
-  
+
   // === AUDITORÍA ===
   fecha_creacion?: string;
   fecha_actualizacion?: string;
   calificado_por?: string;
   fecha_calificacion?: string;
-  
+
   // === RELACIONES (opcional) ===
   estudiante_nombre?: string;
   estudiante_apellido?: string;
-  
+
   // === CAMPOS CALCULADOS ===
   dias_desde_entrega?: number;
   porcentaje_calificacion?: number;

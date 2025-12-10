@@ -41,6 +41,8 @@ from src.models.gamification.tema_predefinido import TemaPredefinido
 from src.models.gamification.usuario_insignia import UsuarioInsignia
 from src.models.gamification.usuario_puntos import UsuarioPuntos
 from src.models.gamification.usuario_recompensa import UsuarioRecompensa
+from src.models.gamification.mision import Mision
+from src.models.gamification.mision_usuario import MisionUsuario
 
 from src.models.assessment.escala_calificacion import EscalaCalificacion
 from src.models.assessment.valor_calificacion import ValorCalificacion

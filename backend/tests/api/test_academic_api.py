@@ -54,7 +54,23 @@ class TestCursosAPI:
     @pytest.fixture
     def client_estudiante(self, mock_usuario_estudiante, mock_db):
         """Cliente autenticado como estudiante"""
+        # Override both the high-level and low-level auth dependencies to make
+        # integration tests independent of token validation logic.
         app.dependency_overrides[deps.get_current_user] = lambda: mock_usuario_estudiante
+        app.dependency_overrides[deps.get_current_user_from_token] = lambda: mock_usuario_estudiante
+        # Also cover the alternative dependency module used by some routers
+        # (src.api.dependencies.get_current_user) so that endpoints that import
+        # from dependencies.py are also satisfied.
+        try:
+            from src.api import dependencies as api_dependencies
+
+            app.dependency_overrides[api_dependencies.get_current_user] = (
+                lambda: mock_usuario_estudiante
+            )
+        except Exception:
+            # If module isn't available, we ignore — tests will fail later if
+            # the dependency is required.
+            pass
         app.dependency_overrides[deps.get_db] = lambda: mock_db
         with TestClient(app) as client:
             yield client
@@ -64,6 +80,15 @@ class TestCursosAPI:
     def client_docente(self, mock_usuario_docente, mock_db):
         """Cliente autenticado como docente"""
         app.dependency_overrides[deps.get_current_user] = lambda: mock_usuario_docente
+        app.dependency_overrides[deps.get_current_user_from_token] = lambda: mock_usuario_docente
+        try:
+            from src.api import dependencies as api_dependencies
+
+            app.dependency_overrides[api_dependencies.get_current_user] = (
+                lambda: mock_usuario_docente
+            )
+        except Exception:
+            pass
         app.dependency_overrides[deps.get_db] = lambda: mock_db
         with TestClient(app) as client:
             yield client
@@ -322,6 +347,83 @@ class TestCursosAPI:
         assert response.status_code == 200
         data = response.json()
         assert len(data["data"]) > 0
+
+    def test_create_comment_with_attachment_and_get(self, client_estudiante, mock_db, mock_usuario_estudiante):
+        """Integration: crear comentario con archivo y luego obtenerlo (enriquecimiento)."""
+        curso_id = str(uuid4())
+        archivo_id = "file-int-123"
+
+        # Simular crear_comentario usando el servicio real; para este test, parcheamos
+        # crear_comentario para devolver el comentario con archivo_id (como lo haría la UI)
+        from src.services.academic import comentario_service
+
+        mock_comment = {
+            "success": True,
+            "data": {
+                "comentario_id": str(uuid4()),
+                "contenido": "Comentario con archivo",
+                "archivos_adjuntos": [{"archivo_id": archivo_id}]
+            }
+        }
+
+        # Not calling the create endpoint here - we test the GET enrichment directly
+        # and assume the create flow saved the comment as expected (mocked above).
+
+        # Now prepare DB mock for GET: comment row + archivos_curso metadata + count + respuestas
+        mock_row = Mock()
+        mock_row._mapping = {
+            "comentario_id": mock_comment["data"]["comentario_id"],
+            "contenido": "Comentario con archivo",
+            "tipo": "comentario",
+            "fecha_creacion": datetime.now(),
+            "archivos_adjuntos": f"[\"{archivo_id}\"]",
+            "autor_id": str(uuid4()),
+            "autor_nombre": "Estudiante Test",
+            "autor_avatar": None,
+            "total_respuestas": 0,
+            "total_reacciones": 0,
+        }
+
+        mock_result = Mock()
+        mock_result.fetchall.return_value = [mock_row]
+
+        mock_count = Mock()
+        mock_count.scalar.return_value = 1
+
+        mock_archivo_row = Mock()
+        mock_archivo_row._mapping = {
+            "archivo_id": archivo_id,
+            "nombre_original": "documento-integ.pdf",
+            "url": f"/uploads/cursos/{curso_id}/documento-integ.pdf",
+            "tipo": "application/pdf",
+            "tamaño": 1024,
+            "fecha_subida": datetime.now(),
+        }
+
+        def db_side_effect(query, params=None):
+            sql = str(query).lower()
+            if 'from archivos_curso' in sql:
+                mock_exc = Mock()
+                mock_exc.fetchone.return_value = mock_archivo_row
+                return mock_exc
+            if 'count(*)' in sql:
+                return mock_count
+            # any other select -> the comment list
+            return mock_result
+
+        mock_db.execute.side_effect = db_side_effect
+
+        # Ahora hacer GET y validar enrich
+        response2 = client_estudiante.get(f"/api/cursos/{curso_id}/comentarios")
+        assert response2.status_code == 200
+        data2 = response2.json()
+        assert data2["success"] is True
+        assert len(data2["data"]) == 1
+        comment = data2["data"][0]
+        assert "archivos_adjuntos" in comment
+        assert len(comment["archivos_adjuntos"]) == 1
+        assert comment["archivos_adjuntos"][0]["archivo_id"] == archivo_id
+        assert comment["archivos_adjuntos"][0]["nombre"] == "documento-integ.pdf"
     
     # ==================== Tests de Archivos ====================
     

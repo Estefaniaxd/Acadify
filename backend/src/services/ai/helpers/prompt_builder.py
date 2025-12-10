@@ -51,9 +51,9 @@ class PromptBuilder:
         # Contexto de la tarea
         prompt_partes.append("## CONTEXTO DE LA TAREA\n")
         prompt_partes.append(f"**Título**: {tarea.titulo}\n")
-        prompt_partes.append(
-            f"**Tipo**: {tarea.tipo.value if tarea.tipo else 'General'}\n"
-        )
+        # Handle tarea.tipo as both string and Enum
+        tipo_str = str(tarea.tipo) if tarea.tipo else 'General'
+        prompt_partes.append(f"**Tipo**: {tipo_str}\n")
 
         if tarea.descripcion:
             prompt_partes.append(f"**Descripción**: {tarea.descripcion}\n")

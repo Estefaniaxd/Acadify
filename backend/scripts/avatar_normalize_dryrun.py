@@ -115,13 +115,15 @@ def main() -> None:
         fname = src_name.strip()
         if not fname:
             continue
-        if "/" in fname:
-            # likely normalized
-            continue
-        cand = pick_candidate(fname)
+        # Try to resolve either bare basenames or filenames that include a path.
+        # Use the inventory of files by basename to find a filesystem candidate.
+        base = os.path.basename(fname)
+        cand = pick_candidate(base)
         if isinstance(cand, Path):
             rel = str(cand.relative_to(assets_dir)).replace(os.path.sep, "/")
-            mappings.append((fname, rel, "avatar_asset"))
+            # Only add mapping if the target differs from the current DB value
+            if rel != fname:
+                mappings.append((fname, rel, "avatar_asset"))
         elif isinstance(cand, list):
             ambiguous.append((fname, [str(p.relative_to(assets_dir)).replace(os.path.sep, "/") for p in cand], "avatar_asset"))
 
@@ -130,12 +132,12 @@ def main() -> None:
         fname = src_name.strip()
         if not fname:
             continue
-        if "/" in fname:
-            continue
-        cand = pick_candidate(fname)
+        base = os.path.basename(fname)
+        cand = pick_candidate(base)
         if isinstance(cand, Path):
             rel = str(cand.relative_to(assets_dir)).replace(os.path.sep, "/")
-            mappings.append((fname, rel, "user_avatar"))
+            if rel != fname:
+                mappings.append((fname, rel, "user_avatar"))
         elif isinstance(cand, list):
             ambiguous.append((fname, [str(p.relative_to(assets_dir)).replace(os.path.sep, "/") for p in cand], "user_avatar"))
 

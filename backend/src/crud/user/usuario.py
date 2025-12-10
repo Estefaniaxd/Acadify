@@ -498,3 +498,4 @@ class CRUDUsuario(CRUDBase[Usuario, UsuarioCreate, UsuarioUpdate]):
 
 # Create instance
 usuario_crud = CRUDUsuario(Usuario)
+UsuarioCRUD = usuario_crud

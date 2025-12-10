@@ -43,21 +43,38 @@ def obtener_mis_invitaciones(
         HTTPException 401: Usuario no autenticado
         HTTPException 500: Error interno del servidor
     """
-    logger.info(f"📨 Obteniendo invitaciones para usuario: {current_user.email}")
+    if not current_user.correo_institucional:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El usuario no tiene correo institucional configurado",
+        )
+
+    logger.info(
+        "📨 Obteniendo invitaciones para usuario: %s",
+        current_user.correo_institucional,
+    )
 
     try:
-        from src.crud.academic.institucion_crud import crud_institucion
-        from src.crud.auth.invitation_token_crud import crud_invitation_token
+        from src.crud.academic.crud_institucion import institucion_crud
+
+        from src.models.auth.invitation_token import InvitationToken, EstadoInvitacion
+        from datetime import datetime, UTC
 
         # Obtener invitaciones pendientes del usuario
-        invitaciones = crud_invitation_token.get_by_email(
-            db, email=current_user.email, only_valid=True
+        invitaciones = (
+            db.query(InvitationToken)
+            .filter(
+                InvitationToken.email_destino == current_user.correo_institucional,
+                InvitationToken.estado == EstadoInvitacion.pendiente,
+                InvitationToken.fecha_expiracion > datetime.now(UTC)
+            )
+            .all()
         )
 
         resultado = []
         for inv in invitaciones:
             # Obtener información de la institución
-            institucion = crud_institucion.get(db, id=inv.institucion_id)
+            institucion = institucion_crud.get(db, institucion_id=inv.institucion_id)
             if institucion:
                 resultado.append(
                     {

@@ -4,15 +4,22 @@ import {
   Download,
   Eye,
   Filter,
+  Gem,
+  Grid,
   Grid3x3,
+  Hand,
   Heart,
   Palette,
   RefreshCw,
+  RotateCcw,
   Save,
+  Shirt,
   Shuffle,
   Sparkles,
+  Trash2,
   User,
   Users,
+  Watch,
   X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -81,6 +88,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
 
   // Estados de UI
   const [activeCategory, setActiveCategory] = useState<string>("hair");
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null); // Para categories con subcategorías (ej: accessories)
   const [activeGenderFilter, setActiveGenderFilter] = useState<string>("all"); // all, male, female, unisex
   const [genderChangeTimeout, setGenderChangeTimeout] = useState<number | null>(null);
   // Ref para controlar si ya se mostró el toast inicial
@@ -113,6 +121,11 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
       loadManifest();
     }
   }, [selectedGender]);
+
+  // Resetear subcategoría activa cuando cambia la categoría
+  useEffect(() => {
+    setActiveSubcategory(null);
+  }, [actualActiveCategory]);
 
   // Limpiar localStorage de paths inválidos al montar
   useEffect(() => {
@@ -452,22 +465,56 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
     return categoryAssets.find((asset) => asset.filename === layer.filename) || null;
   };
 
-  const getFilteredAssetsForCategory = (category: string): AssetInfo[] => {
+  const getFilteredAssetsForCategory = (category: string, subcategory?: string | null): AssetInfo[] => {
     const manifestData = USE_NEW_HOOK ? avatarStudio.state.manifest : manifest;
     const genderFilter = USE_NEW_HOOK ? avatarStudio.state.activeGenderFilter : activeGenderFilter;
 
     if (!manifestData) return [];
 
-    const categoryAssets = manifestData.categories[category] || [];
+    // Usar estructura jerárquica si está disponible (mejor organización)
+    let categoryAssets: AssetInfo[] = [];
+    
+    if (manifestData.hierarchical && manifestData.hierarchical[category]) {
+      const subcategories = manifestData.hierarchical[category];
+      
+      // Si hay una subcategoría activa, usar solo esa subcategoría
+      if (subcategory && subcategories[subcategory]) {
+        categoryAssets = subcategories[subcategory];
+      } else {
+        // Aplanar todas las subcategorías de la categoría actual
+        categoryAssets = Object.values(subcategories).flat();
+      }
+    } else {
+      // Fallback a estructura plana
+      categoryAssets = manifestData.categories[category] || [];
+    }
 
+    console.log(`🔍 Filtering category "${category}" with gender "${genderFilter}"`, {
+      totalAssets: categoryAssets.length,
+      sampleAsset: categoryAssets[0],
+      sampleAssetKeys: categoryAssets[0] ? Object.keys(categoryAssets[0]) : [],
+    });
+
+    // IMPORTANTE: Los filtros de género son INFORMATIVOS, NO bloquean selección
+    // Mostrar todos los items pero resaltando los sugeridos
     if (genderFilter === "all") {
+      console.log(`✅ Showing all ${categoryAssets.length} assets (filter: "all")`);
       return categoryAssets;
     }
 
     // Filtrar por género: incluir unisex siempre + el género específico
-    return categoryAssets.filter(
-      (asset) => asset.target_gender === genderFilter || asset.target_gender === "unisex"
-    );
+    const filtered = categoryAssets.filter((asset) => {
+      // Usar tanto targetGender (camelCase) como target_gender (snake_case) para compatibilidad
+      const assetGender = (asset as any).targetGender || (asset as any).target_gender || "unisex";
+      const matches = assetGender === genderFilter || assetGender === "unisex";
+      
+      console.log(`  - ${asset.filename}: targetGender="${assetGender}" matches ${genderFilter}? ${matches}`);
+      
+      return matches;
+    });
+
+    console.log(`✅ Filtered ${filtered.length}/${categoryAssets.length} assets for gender "${genderFilter}"`);
+    return filtered;
   };
 
   const handleGenderChange = (newGender: "male" | "female", genderLabel: string) => {
@@ -516,52 +563,103 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
     setShowPreviewModal(true);
   };
 
-  const handleRandomize = () => {
+  const handleReset = () => {
     if (USE_NEW_HOOK) {
-      avatarStudio.generateRandom();
-      success("Avatar aleatorio generado");
+      avatarStudio.clearLayers();
+      success("Avatar reiniciado - volviendo a base vacía");
     } else {
       const manifestData = manifest;
       if (!manifestData) return;
 
-      const newLayers: LayerItem[] = [];
-
-      // Siempre incluir la base
+      // Solo mantener la base del género actual
+      const baseLayer: LayerItem[] = [];
       if (manifestData.categories.base?.length > 0) {
-        const baseAsset = manifestData.categories.base[0]; // Siempre tomar la primera base del género
-        newLayers.push({
+        const baseAsset = manifestData.categories.base[0];
+        baseLayer.push({
           category: "base",
           filename: baseAsset.filename,
           url: baseAsset.url,
         });
       }
 
-      // Randomizar otras categorías
-      Object.entries(manifestData.categories).forEach(([category, assets]) => {
-        if (category === "base") return; // Ya manejamos la base
+      setSelectedLayers(baseLayer);
+      
+      // Actualizar el storage del género actual
+      if (selectedGender === "male") {
+        setMaleLayers(baseLayer);
+      } else {
+        setFemaleLayers(baseLayer);
+      }
 
-        if (Math.random() > 0.4) {
-          // 60% chance de incluir cada categoría
-          const randomAsset = assets[Math.floor(Math.random() * assets.length)];
+      success("Avatar reiniciado - volviendo a base original");
+    }
+  };
+
+  const handleRandomize = () => {
+    if (USE_NEW_HOOK) {
+      avatarStudio.generateRandom();
+      success("¡Avatar aleatorio generado! 🎲");
+      return;
+    }
+    
+    // OLD logic (fallback)
+    const manifestData = manifest;
+    if (!manifestData) {
+      showError("No se pudo cargar el manifest");
+      return;
+    }
+
+    const newLayers: LayerItem[] = [];
+
+    // Siempre incluir la base
+    if (manifestData.categories.base?.length > 0) {
+      const baseAsset = manifestData.categories.base[0];
+      newLayers.push({
+        category: "base",
+        filename: baseAsset.filename,
+        url: baseAsset.url,
+      });
+    }
+
+    // Randomizar otras categorías (usar estructura jerárquica si está disponible)
+    const categoriesToRandomize = Object.keys(manifestData.categories).filter(
+      (cat) => cat !== "base"
+    );
+
+    categoriesToRandomize.forEach((category) => {
+      if (Math.random() > 0.4) {
+        // 60% chance de incluir cada categoría
+        let categoryAssets: AssetInfo[] = [];
+        
+        if (manifestData.hierarchical && manifestData.hierarchical[category]) {
+          const subcategories = manifestData.hierarchical[category];
+          categoryAssets = Object.values(subcategories).flat();
+        } else {
+          categoryAssets = manifestData.categories[category] || [];
+        }
+
+        if (categoryAssets.length > 0) {
+          const randomAsset = categoryAssets[Math.floor(Math.random() * categoryAssets.length)];
           newLayers.push({
             category,
             filename: randomAsset.filename,
             url: randomAsset.url,
           });
         }
-      });
-
-      console.log("🎲 Randomized layers:", newLayers);
-      setSelectedLayers(newLayers);
-      // Guardar en el estado correspondiente al género
-      if (selectedGender === "male") {
-        setMaleLayers(newLayers);
-      } else {
-        setFemaleLayers(newLayers);
       }
+    });
 
-      success("Avatar aleatorio generado");
+    console.log("🎲 Randomized layers:", newLayers);
+    setSelectedLayers(newLayers);
+    
+    // Guardar en el estado correspondiente al género
+    if (selectedGender === "male") {
+      setMaleLayers(newLayers);
+    } else {
+      setFemaleLayers(newLayers);
     }
+
+    success("Avatar aleatorio generado");
   };
 
   const handleSaveAvatar = async () => {
@@ -809,51 +907,51 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
     {
       key: "hair",
       label: "Cabello",
-      icon: User,
+      icon: Sparkles,
       color: "from-amber-500 to-orange-500",
-      description: "Estilos de cabello",
+      description: "Estilos",
     },
     {
       key: "eyes",
       label: "Ojos",
       icon: Eye,
       color: "from-blue-500 to-indigo-500",
-      description: "Color y forma de ojos",
+      description: "Forma",
     },
     {
       key: "mouth",
       label: "Boca",
       icon: Heart,
       color: "from-pink-500 to-rose-500",
-      description: "Expresiones y labios",
+      description: "Expresión",
     },
     {
       key: "makeup",
       label: "Maquillaje",
       icon: Palette,
       color: "from-purple-500 to-violet-500",
-      description: "Maquillaje y detalles",
+      description: "Detalles",
     },
     {
       key: "shirt",
       label: "Camisas",
-      icon: Grid3x3,
+      icon: Shirt,
       color: "from-green-500 to-emerald-500",
-      description: "Camisas y tops",
+      description: "Tops",
     },
     {
       key: "pants",
       label: "Pantalones",
       icon: Grid3x3,
       color: "from-blue-600 to-blue-700",
-      description: "Pantalones y leggins",
+      description: "Leggins",
     },
     {
       key: "skirt",
       label: "Faldas",
       icon: Grid3x3,
       color: "from-pink-500 to-rose-500",
-      description: "Faldas y vestidos",
+      description: "Vestidos",
     },
     {
       key: "shoes",
@@ -867,28 +965,28 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
       label: "Medias",
       icon: Grid3x3,
       color: "from-purple-500 to-violet-500",
-      description: "Medias y calcetines",
+      description: "Calcetines",
     },
     {
       key: "jacket",
       label: "Chaquetas",
       icon: Grid3x3,
       color: "from-indigo-600 to-purple-600",
-      description: "Chaquetas y sacos",
+      description: "Sacos",
     },
     {
       key: "accessories",
       label: "Accesorios",
-      icon: Palette,
+      icon: Watch,
       color: "from-yellow-500 to-amber-500",
-      description: "Complementos",
+      description: "Extras",
     },
     {
       key: "backgrounds",
       label: "Fondos",
       icon: Palette,
       color: "from-teal-500 to-cyan-500",
-      description: "Fondos y escenarios",
+      description: "Escenarios",
     },
   ];
 
@@ -1156,7 +1254,18 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                 </div>
 
                 {/* Botones de acción */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleReset}
+                    className="bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group"
+                    title="Reiniciar avatar a base original (deshacer todo)"
+                  >
+                    <RotateCcw className="inline mr-2" />
+                    <span className="text-sm">Reset</span>
+                  </motion.button>
+
                   <motion.button
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
@@ -1164,7 +1273,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                     className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group"
                   >
                     <Shuffle className="inline mr-2" />
-                    <span className="text-sm">Sorprender</span>
+                    <span className="text-sm">Aleatorio</span>
                   </motion.button>
 
                   <motion.button
@@ -1175,7 +1284,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                     className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
                   >
                     <Download className="inline mr-2" />
-                    <span className="text-sm">Obtener</span>
+                    <span className="text-sm">Descargar</span>
                   </motion.button>
 
                   <motion.button
@@ -1309,7 +1418,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                                 key={category.key}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
+                                transition={{ delay: index * 0.05 }}
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => {
@@ -1321,40 +1430,40 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                                     setActiveGenderFilter("all");
                                   }
                                 }}
-                                className={`relative overflow-hidden group px-6 py-4 rounded-2xl font-semibold transition-all duration-300 ${
+                                className={`relative overflow-hidden group px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
                                   isActive
-                                    ? "text-white shadow-xl"
-                                    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-md"
+                                    ? "text-white shadow-lg"
+                                    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm"
                                 }`}
                               >
                                 {isActive && (
                                   <motion.div
                                     layoutId="activeCategory"
-                                    className={`absolute inset-0 bg-gradient-to-r ${category.color} rounded-2xl`}
+                                    className={`absolute inset-0 bg-gradient-to-r ${category.color} rounded-xl`}
                                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                   />
                                 )}
-                                <div className="relative flex items-center">
-                                  <IconComponent className="mr-3 text-lg" />
-                                  <div className="text-left">
-                                    <div className="font-bold">{category.label}</div>
-                                    <div
-                                      className={`text-xs ${
-                                        isActive ? "text-white/80" : "text-gray-400"
+                                <div className="relative flex items-center gap-1.5">
+                                  <IconComponent className="w-4 h-4" />
+                                  <div className="flex flex-col items-start">
+                                    <span className="font-bold text-xs leading-tight">{category.label}</span>
+                                    <span
+                                      className={`text-[10px] leading-tight ${
+                                        isActive ? "text-white/70" : "text-gray-400"
                                       }`}
                                     >
                                       {category.description}
-                                    </div>
+                                    </span>
                                   </div>
                                 </div>
                                 {!isActive && (
-                                  <motion.div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-blue-500/0 group-hover:from-purple-500/10 group-hover:to-blue-500/10 rounded-2xl transition-all duration-300" />
+                                  <motion.div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-blue-500/0 group-hover:from-purple-500/10 group-hover:to-blue-500/10 rounded-xl transition-all duration-300" />
                                 )}
                               </motion.button>
                             );
                           })}
-                    </div>
-                  </div>
+                        </div>
+                      </div>
 
                   {/* Contenido de la Categoría Activa */}
                   <AnimatePresence mode="wait">
@@ -1366,38 +1475,52 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                       transition={{ duration: 0.3 }}
                       className="space-y-6"
                     >
-                      {/* Filtros de Género Mejorados */}
+                      {/* Filtros de Género Rediseñados */}
                       {actualActiveCategory !== "base" && (
-                        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl">
-                          <div className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
-                            <Filter className="mr-2" />
-                            Filtrar por:
+                        <div className="space-y-4">
+                          {/* Header de Filtros */}
+                          <div className="flex items-center gap-2 px-1">
+                            <Filter className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                              Filtrar por género
+                            </span>
+                            <div className="flex-1 h-px bg-gradient-to-r from-purple-200 to-transparent dark:from-purple-800" />
                           </div>
-                          <div className="flex gap-2">
+                          
+                          {/* Botones de Filtro */}
+                          <div className="flex gap-3 flex-wrap">
                             {[
-                              { key: "all", label: "Todos", icon: Users },
+                              { key: "all", label: "Todos", icon: Grid },
                               { key: "male", label: "Hombre", icon: User },
                               { key: "female", label: "Mujer", icon: User },
                               { key: "unisex", label: "Unisex", icon: Users },
                             ].map((filter) => {
                               const FilterIcon = filter.icon;
                               const isActive = actualGenderFilter === filter.key;
-                              const categoryAssets =
-                                actualManifest?.categories[actualActiveCategory] || [];
+                              
+                              // Obtener assets de la categoría actual (jerárquica o plana)
+                              let categoryAssets: AssetInfo[] = [];
+                              if (actualManifest?.hierarchical && actualManifest.hierarchical[actualActiveCategory]) {
+                                const subcategories = actualManifest.hierarchical[actualActiveCategory];
+                                categoryAssets = Object.values(subcategories).flat();
+                              } else {
+                                categoryAssets = actualManifest?.categories[actualActiveCategory] || [];
+                              }
+                              
+                              // Calcular count con compatibilidad snake_case y camelCase
                               const filteredCount =
                                 filter.key === "all"
                                   ? categoryAssets.length
-                                  : categoryAssets.filter(
-                                      (asset) =>
-                                        asset.target_gender === filter.key ||
-                                        asset.target_gender === "unisex"
-                                    ).length;
+                                  : categoryAssets.filter((asset) => {
+                                      const assetGender = (asset as any).targetGender || (asset as any).target_gender || "unisex";
+                                      return assetGender === filter.key || assetGender === "unisex";
+                                    }).length;
 
                               return (
                                 <motion.button
                                   key={filter.key}
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
+                                  whileHover={{ scale: 1.03, y: -2 }}
+                                  whileTap={{ scale: 0.97 }}
                                   onClick={() =>
                                     USE_NEW_HOOK
                                       ? avatarStudio.setGenderFilter(
@@ -1405,36 +1528,170 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                                         )
                                       : setActiveGenderFilter(filter.key)
                                   }
-                                  disabled={filteredCount === 0}
-                                  className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
-                                    isActive
-                                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"
-                                      : "bg-white dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500"
+                                  className={`group relative px-5 py-3 rounded-xl font-semibold transition-all duration-300 border-2 ${
+                                    filter.key === "all"
+                                      ? isActive
+                                        ? "bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 text-white border-gray-600 shadow-xl shadow-gray-500/30"
+                                        : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-gray-400 hover:shadow-lg"
+                                      : filter.key === "male"
+                                      ? isActive
+                                        ? "bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white border-blue-500 shadow-xl shadow-blue-500/30"
+                                        : "bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20"
+                                      : filter.key === "female"
+                                      ? isActive
+                                        ? "bg-gradient-to-br from-pink-500 via-pink-600 to-pink-700 text-white border-pink-500 shadow-xl shadow-pink-500/30"
+                                        : "bg-white dark:bg-gray-800 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-600 hover:border-pink-400 hover:shadow-lg hover:shadow-pink-500/20"
+                                      : isActive
+                                      ? "bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 text-white border-purple-500 shadow-xl shadow-purple-500/30"
+                                      : "bg-white dark:bg-gray-800 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-600 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/20"
                                   }`}
+                                  title={`Filtrar por ${filter.label.toLowerCase()}: ${filteredCount} items disponibles`}
                                 >
+                                  <div className="flex items-center gap-2.5">
+                                    <div className={`p-1.5 rounded-lg ${
+                                      isActive 
+                                        ? "bg-white/20" 
+                                        : filter.key === "all"
+                                        ? "bg-gray-100 dark:bg-gray-700 group-hover:bg-gray-200"
+                                        : filter.key === "male"
+                                        ? "bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200"
+                                        : filter.key === "female"
+                                        ? "bg-pink-100 dark:bg-pink-900/30 group-hover:bg-pink-200"
+                                        : "bg-purple-100 dark:bg-purple-900/30 group-hover:bg-purple-200"
+                                    }`}>
+                                      <FilterIcon className={`w-4 h-4 ${
+                                        isActive ? "text-white" : ""
+                                      }`} />
+                                    </div>
+                                    <span className="text-sm">{filter.label}</span>
+                                    <div className={`ml-auto px-2.5 py-1 rounded-lg text-xs font-bold ${
+                                      isActive
+                                        ? "bg-white/25 text-white backdrop-blur-sm"
+                                        : filter.key === "all"
+                                        ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                        : filter.key === "male"
+                                        ? "bg-blue-200 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100"
+                                        : filter.key === "female"
+                                        ? "bg-pink-200 dark:bg-pink-900/50 text-pink-900 dark:text-pink-100"
+                                        : "bg-purple-200 dark:bg-purple-900/50 text-purple-900 dark:text-purple-100"
+                                    }`}>
+                                      {filteredCount}
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Indicador de activo */}
                                   {isActive && (
                                     <motion.div
-                                      layoutId="genderFilter"
-                                      className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl"
-                                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                      layoutId="activeGenderFilter"
+                                      className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full bg-white shadow-lg"
+                                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                     />
                                   )}
-                                  <div className="relative flex items-center">
-                                    <FilterIcon className="mr-2" />
-                                    {filter.label}
-                                    <span
-                                      className={`ml-2 text-xs px-2 py-1 rounded-full ${
-                                        isActive
-                                          ? "bg-white/20 text-white"
-                                          : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                      }`}
-                                    >
-                                      {filteredCount}
-                                    </span>
-                                  </div>
                                 </motion.button>
                               );
                             })}
+                          </div>
+
+                          {/* Mensaje informativo mejorado */}
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="flex items-start gap-3 px-4 py-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-l-4 border-purple-500 dark:border-purple-400 rounded-lg"
+                          >
+                            <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                                Los filtros son sugerencias
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Puedes usar cualquier item independientemente del género. ¡Crea tu avatar único!
+                              </p>
+                            </div>
+                          </motion.div>
+                        </div>
+                      )}
+
+                      {/* Tabs de Subcategorías Rediseñados */}
+                      {actualManifest?.hierarchical && actualManifest.hierarchical[actualActiveCategory] && (
+                        <div className="space-y-3">
+                          {/* Header de Subcategorías */}
+                          <div className="flex items-center gap-2 px-1">
+                            <Grid3x3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                              Subcategorías
+                            </span>
+                            <div className="flex-1 h-px bg-gradient-to-r from-blue-200 to-transparent dark:from-blue-800" />
+                          </div>
+                          
+                          {/* Tabs Container */}
+                          <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/30 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <div className="flex gap-2 flex-wrap">
+                              {/* Botón "Todos" */}
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setActiveSubcategory(null)}
+                                className={`relative px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                                  activeSubcategory === null
+                                    ? "bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 text-gray-900 dark:text-white shadow-lg border-2 border-purple-300 dark:border-purple-600"
+                                    : "bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Grid className="w-4 h-4" />
+                                  <span>Todos</span>
+                                </div>
+                                {activeSubcategory === null && (
+                                  <motion.div
+                                    layoutId="activeSubcategory"
+                                    className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-blue-100/50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-xl -z-10"
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                  />
+                                )}
+                              </motion.button>
+
+                              {/* Botones de subcategorías */}
+                              {Object.keys(actualManifest.hierarchical[actualActiveCategory]).map((subcat) => {
+                                const isActive = activeSubcategory === subcat;
+                                
+                                // Mapeo de iconos y nombres para subcategorías
+                                let IconComponent = Sparkles;
+                                let label = subcat.charAt(0).toUpperCase() + subcat.slice(1);
+                                
+                                if (subcat === "head") { IconComponent = User; label = "Cabeza"; }
+                                else if (subcat === "face") { IconComponent = Eye; label = "Cara"; }
+                                else if (subcat === "hand") { IconComponent = Hand; label = "Mano"; }
+                                else if (subcat === "wrist") { IconComponent = Watch; label = "Muñeca"; }
+                                else if (subcat === "neck") { IconComponent = Heart; label = "Cuello"; }
+                                else if (subcat === "body") { IconComponent = Palette; label = "Cuerpo"; }
+                                
+                                return (
+                                  <motion.button
+                                    key={subcat}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => setActiveSubcategory(subcat)}
+                                    className={`relative px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                                      isActive
+                                        ? "bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 text-gray-900 dark:text-white shadow-lg border-2 border-purple-300 dark:border-purple-600"
+                                        : "bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <IconComponent className="w-4 h-4" />
+                                      <span>{label}</span>
+                                    </div>
+                                    {isActive && (
+                                      <motion.div
+                                        layoutId="activeSubcategory"
+                                        className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-blue-100/50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-xl -z-10"
+                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                      />
+                                    )}
+                                  </motion.button>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1482,7 +1739,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                         )}
 
                         {/* Assets de la categoría */}
-                        {getFilteredAssetsForCategory(actualActiveCategory).map((asset, index) => {
+                        {getFilteredAssetsForCategory(actualActiveCategory, activeSubcategory).map((asset, index) => {
                           const isSelected =
                             getSelectedAssetForCategory(actualActiveCategory)?.filename ===
                             asset.filename;
@@ -1534,24 +1791,36 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                                 </motion.div>
                               )}
 
-                              {/* Badge de género mejorado */}
+                              {/* Badge de género INFORMATIVO (NO bloquea selección) */}
                               <div
-                                className={`absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-bold backdrop-blur-sm ${
-                                  asset.target_gender === "male"
-                                    ? "bg-blue-500/90 text-white"
-                                    : asset.target_gender === "female"
-                                    ? "bg-pink-500/90 text-white"
-                                    : "bg-green-500/90 text-white"
+                                className={`absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-semibold backdrop-blur-md shadow-lg transition-all ${
+                                  asset.targetGender === "male"
+                                    ? "bg-blue-500/95 text-white border border-blue-300/50"
+                                    : asset.targetGender === "female"
+                                    ? "bg-pink-500/95 text-white border border-pink-300/50"
+                                    : "bg-purple-500/95 text-white border border-purple-300/50"
                                 }`}
+                                title={`Sugerido para avatares ${
+                                  asset.targetGender === "male" ? "masculinos" : 
+                                  asset.targetGender === "female" ? "femeninos" : 
+                                  "unisex (todos)"
+                                } - Puedes usarlo en cualquier avatar`}
                               >
-                                {asset.target_gender === "male" ? (
-                                  <User className="inline w-3 h-3" />
-                                ) : asset.target_gender === "female" ? (
-                                  <User className="inline w-3 h-3" />
+                                {asset.targetGender === "male" ? (
+                                  <span className="flex items-center gap-1">♂ Hombre</span>
+                                ) : asset.targetGender === "female" ? (
+                                  <span className="flex items-center gap-1">♀ Mujer</span>
                                 ) : (
-                                  <Users className="inline w-3 h-3" />
+                                  <span className="flex items-center gap-1">⚲ Unisex</span>
                                 )}
                               </div>
+
+                              {/* Badge de subcategoría (si existe) */}
+                              {asset.subcategory && asset.subcategory !== "other" && (
+                                <div className="absolute top-2 left-2 px-2 py-1 rounded-lg text-xs font-medium bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 backdrop-blur-sm shadow-md capitalize">
+                                  {asset.subcategory}
+                                </div>
+                              )}
 
                               {/* Hover effect */}
                               <motion.div className="absolute inset-0 bg-gradient-to-t from-black/0 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -1561,7 +1830,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                       </div>
 
                       {/* Estado vacío mejorado */}
-                      {getFilteredAssetsForCategory(actualActiveCategory).length === 0 && (
+                      {getFilteredAssetsForCategory(actualActiveCategory, activeSubcategory).length === 0 && (
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -1584,7 +1853,7 @@ const AvatarStudioV2: React.FC<AvatarStudioV2Props> = ({ onSave, onPreview }) =>
                       )}
                     </motion.div>
                   </AnimatePresence>
-                </div>
+                  </div>
               )}
 
               {/* Estado cuando no hay manifest */}
