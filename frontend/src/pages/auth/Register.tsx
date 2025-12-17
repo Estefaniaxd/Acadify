@@ -82,7 +82,7 @@ const FormField = ({
       className="space-y-2"
     >
       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
-        {label}
+        {label} <span className="text-red-500">*</span>
       </label>
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -99,10 +99,10 @@ const FormField = ({
         {options ? (
           <select
             className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${focusedField === field
-                ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
-                : errors[field]
-                  ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+              ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
+              : errors[field]
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               }`}
             value={formData[field]}
             onChange={handleInputChange}
@@ -120,10 +120,10 @@ const FormField = ({
           <input
             type={isPassword ? (field === 'password' ? (showPassword ? 'text' : 'password') : (showConfirm ? 'text' : 'password')) : type}
             className={`w-full pl-12 ${isPassword ? 'pr-12' : 'pr-4'} py-4 rounded-2xl border-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-0 ${focusedField === field
-                ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
-                : errors[field]
-                  ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+              ? 'border-violet-500 bg-white dark:bg-gray-700 shadow-lg shadow-violet-500/20'
+              : errors[field]
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               }`}
             value={formData[field]}
             onChange={handleInputChange}
@@ -511,10 +511,10 @@ export default function Register() {
                   <div key={stepNumber} className="flex items-center">
                     <motion.div
                       className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${stepNumber === step
-                          ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg'
-                          : stepNumber < step
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                        ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg'
+                        : stepNumber < step
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                         }`}
                       animate={{ scale: stepNumber === step ? 1.1 : 1 }}
                       transition={{ type: "spring", stiffness: 300 }}
@@ -609,8 +609,8 @@ export default function Register() {
                                 type="button"
                                 onClick={() => updateField('rol', rol.value)}
                                 className={`relative p-4 rounded-2xl border-2 transition-all duration-300 ${formData.rol === rol.value
-                                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                                   }`}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}

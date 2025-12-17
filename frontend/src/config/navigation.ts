@@ -1,12 +1,10 @@
 /**
- * Configuración centralizada de navegación por roles
- * Aplica principio de responsabilidad única (SRP) y abierto/cerrado (OCP)
+ * Configuración centralizada de navegación por roles - VERSIÓN SIMPLIFICADA
+ * Solo rutas esenciales que existen en el proyecto
  */
 
-;
-;
 import type { IconType } from 'react-icons';
-import { Award, BarChart, Book, Building2, Calendar, CheckCircle, Database, Edit, FileText, Home, Info, MessageSquare, Plus, Settings, ShoppingBag, Target, TrendingUp, User, Users } from 'lucide-react';
+import { Award, BarChart, Book, Building2, Home, MessageSquare, Settings, ShoppingBag, User } from 'lucide-react';
 
 export type UserRole = 'admin' | 'administrador' | 'coordinador' | 'profesor' | 'docente' | 'estudiante' | 'guest';
 
@@ -15,17 +13,15 @@ export interface NavigationItem {
   href: string;
   icon: IconType;
   description?: string;
-  badge?: string;
-  roles: UserRole[]; // Roles que pueden ver este ítem
-  section?: 'main' | 'academic' | 'management' | 'social' | 'tools'; // Agrupación lógica
+  roles: UserRole[];
+  section?: 'main' | 'academic' | 'tools';
 }
 
 /**
- * Definición completa de navegación
- * Cada item especifica explícitamente qué roles pueden acceder
+ * Navegación simplificada - Solo rutas verificadas
  */
 export const NAVIGATION_ITEMS: NavigationItem[] = [
-  // ========== NAVEGACIÓN PRINCIPAL (HOME SECTIONS para guest) ==========
+  // ========== GUEST ==========
   {
     label: 'Inicio',
     href: '/',
@@ -34,229 +30,69 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     roles: ['guest'],
     section: 'main'
   },
-  {
-    label: 'Características',
-    href: '/#features',
-    icon: Target,
-    description: 'Características de la plataforma',
-    roles: ['guest'],
-    section: 'main'
-  },
-  {
-    label: 'Cómo funciona',
-    href: '/#how',
-    icon: Info,
-    description: 'Cómo funciona Acadify',
-    roles: ['guest'],
-    section: 'main'
-  },
-  {
-    label: 'Open Source',
-    href: '/#opensource',
-    icon: Database,
-    description: 'Proyecto de código abierto',
-    roles: ['guest'],
-    section: 'main'
-  },
-  {
-    label: 'Testimonios',
-    href: '/#testimonials',
-    icon: MessageSquare,
-    description: 'Lo que dicen nuestros usuarios',
-    roles: ['guest'],
-    section: 'main'
-  },
 
-  // ========== NAVEGACIÓN AUTENTICADA ==========
+  // ========== DASHBOARD (Todos los autenticados) ==========
   {
     label: 'Dashboard',
     href: '/dashboard',
     icon: Home,
     description: 'Panel principal',
-    roles: ['admin', 'coordinador', 'profesor', 'docente', 'estudiante'],
+    roles: ['admin', 'administrador', 'coordinador', 'profesor', 'docente', 'estudiante'],
     section: 'main'
   },
 
-  // ========== GESTIÓN ADMINISTRATIVA ==========
+  // ========== ADMIN ==========
   {
     label: 'Instituciones',
     href: '/admin/instituciones',
     icon: Building2,
-    description: 'Administrar instituciones educativas',
-    roles: ['admin'],
+    description: 'Administrar instituciones',
+    roles: ['admin', 'administrador'],
     section: 'main'
   },
   {
     label: 'Usuarios Pendientes',
     href: '/admin/usuarios-pendientes',
-    icon: CheckCircle,
-    description: 'Gestionar solicitudes de acceso',
-    roles: ['admin'],
+    icon: User,
+    description: 'Aprobar usuarios',
+    roles: ['admin', 'administrador'],
     section: 'main'
   },
   {
     label: 'Tienda',
     href: '/admin/tienda',
     icon: ShoppingBag,
-    description: 'Gestionar productos y categorías de la tienda',
-    roles: ['admin'],
-    section: 'main'
-  },
-  {
-    label: 'Configuración',
-    href: '/admin/configuracion',
-    icon: Settings,
-    description: 'Configuración general del sistema',
-    roles: ['admin'],
+    description: 'Gestionar tienda',
+    roles: ['admin', 'administrador'],
     section: 'main'
   },
 
-  // ========== COORDINACIÓN ==========
+  // ========== COORDINADOR ==========
   {
     label: 'Mi Institución',
     href: '/coordinador/institucion',
     icon: Building2,
-    description: 'Gestionar mi institución',
+    description: 'Gestionar institución',
     roles: ['coordinador'],
     section: 'main'
   },
 
-  // ========== GESTIÓN DE CURSOS (roles académicos - NO ADMIN) ==========
+  // ========== ACADÉMICO (Profesores y Estudiantes) ==========
   {
-    label: 'Cursos',
+    label: 'Mis Cursos',
     href: '/cursos',
     icon: Book,
-    description: 'Explorar cursos disponibles',
-    roles: ['profesor', 'docente', 'estudiante'], // Admin NO necesita esto en navbar
-    section: 'main'
-  },
-  {
-    label: 'Mis Clases',
-    href: '/mis-clases',
-    icon: Calendar,
-    description: 'Clases inscritas/impartidas',
+    description: 'Ver cursos',
     roles: ['profesor', 'docente', 'estudiante'],
-    section: 'academic'
-  },
-
-  // ========== PROFESOR ==========
-  {
-    label: 'Panel Profesor',
-    href: '/profesor',
-    icon: Settings,
-    description: 'Panel de gestión docente',
-    roles: ['profesor', 'docente'],
-    section: 'management'
-  },
-  {
-    label: 'Crear Clase',
-    href: '/profesor/crear-clase',
-    icon: Plus,
-    description: 'Crear una nueva clase',
-    roles: ['profesor', 'docente'],
-    section: 'academic'
-  },
-  {
-    label: 'Gestión de Tareas',
-    href: '/profesor/tareas',
-    icon: Edit,
-    description: 'Administrar tareas y asignaciones',
-    roles: ['profesor', 'docente'],
-    section: 'academic'
-  },
-  {
-    label: 'Calificaciones',
-    href: '/profesor/calificaciones',
-    icon: BarChart,
-    description: 'Gestionar calificaciones',
-    roles: ['profesor', 'docente', 'coordinador'],
-    section: 'academic'
-  },
-  {
-    label: 'Asistencia',
-    href: '/profesor/asistencia',
-    icon: CheckCircle,
-    description: 'Registro de asistencia',
-    roles: ['profesor', 'docente'],
-    section: 'academic'
-  },
-
-  // ========== ESTUDIANTE ==========
-  {
-    label: 'Unirse a Clase',
-    href: '/estudiante/unirse-clase',
-    icon: Plus,
-    description: 'Inscribirse en nuevas clases',
-    roles: ['estudiante'],
-    section: 'academic'
-  },
-  {
-    label: 'Mis Tareas',
-    href: '/estudiante/tareas',
-    icon: FileText,
-    description: 'Tareas pendientes y completadas',
-    roles: ['estudiante'],
-    section: 'academic'
-  },
-  {
-    label: 'Mis Calificaciones',
-    href: '/estudiante/calificaciones',
-    icon: BarChart,
-    description: 'Ver mis notas',
-    roles: ['estudiante'],
-    section: 'academic'
-  },
-
-  // ========== EVALUACIONES (roles académicos - NO ADMIN) ==========
-  {
-    label: 'Evaluaciones',
-    href: '/evaluaciones',
-    icon: FileText,
-    description: 'Sistema de evaluaciones y exámenes',
-    roles: ['coordinador', 'profesor', 'docente', 'estudiante'], // Admin NO necesita esto
     section: 'main'
   },
 
-  // ========== COMUNICACIÓN (roles académicos - NO ADMIN) ==========
-  {
-    label: 'Comunicación',
-    href: '/comunicacion',
-    icon: MessageSquare,
-    description: 'Chat y mensajería',
-    roles: ['coordinador', 'profesor', 'docente', 'estudiante'], // Admin NO necesita esto
-    section: 'main'
-  },
-  {
-    label: 'Foros',
-    href: '/foros',
-    icon: Users,
-    description: 'Foros de discusión',
-    roles: ['coordinador', 'profesor', 'docente', 'estudiante'],
-    section: 'social'
-  },
-  {
-    label: 'Anuncios',
-    href: '/anuncios',
-    icon: Info,
-    description: 'Anuncios y notificaciones',
-    roles: ['admin', 'coordinador', 'profesor', 'docente', 'estudiante'],
-    section: 'social'
-  },
-
-  // ========== GAMIFICACIÓN (estudiantes principalmente) ==========
-  {
-    label: 'Misiones',
-    href: '/misiones',
-    icon: Target,
-    description: 'Misiones diarias y semanales',
-    roles: ['estudiante'],
-    section: 'tools'
-  },
+  // ========== GAMIFICACIÓN (Solo Estudiantes) ==========
   {
     label: 'Logros',
     href: '/logros',
     icon: Award,
-    description: 'Logros y medallas',
+    description: 'Mis logros',
     roles: ['estudiante'],
     section: 'tools'
   },
@@ -264,112 +100,113 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Tienda',
     href: '/tienda',
     icon: ShoppingBag,
-    description: 'Canjear puntos por premios',
-    roles: ['estudiante'],
-    section: 'tools'
-  },
-  {
-    label: 'Ranking',
-    href: '/ranking',
-    icon: TrendingUp,
-    description: 'Tabla de posiciones',
+    description: 'Canjear puntos',
     roles: ['estudiante'],
     section: 'tools'
   },
 
-  // ========== HERRAMIENTAS PERSONALES (todos) ==========
+  // ========== COMUNICACIÓN (Todos excepto admin) ==========
   {
-    label: 'Mi Avatar',
-    href: '/avatar',
-    icon: User,
-    description: 'Personalizar avatar',
-    roles: ['admin', 'coordinador', 'profesor', 'docente', 'estudiante'],
-    section: 'tools'
+    label: 'Mensajes',
+    href: '/comunicacion',
+    icon: MessageSquare,
+    description: 'Chat y mensajes',
+    roles: ['coordinador', 'profesor', 'docente', 'estudiante'],
+    section: 'main'
   },
+
+  // ========== PERFIL (Todos autenticados) ==========
   {
     label: 'Mi Perfil',
     href: '/perfil',
     icon: Settings,
-    description: 'Configuración de perfil',
-    roles: ['admin', 'coordinador', 'profesor', 'docente', 'estudiante'],
+    description: 'Configuración',
+    roles: ['admin', 'administrador', 'coordinador', 'profesor', 'docente', 'estudiante'],
+    section: 'tools'
+  },
+  {
+    label: 'Avatar',
+    href: '/avatar',
+    icon: User,
+    description: 'Personalizar avatar',
+    roles: ['admin', 'administrador', 'coordinador', 'profesor', 'docente', 'estudiante'],
     section: 'tools'
   }
 ];
 
 /**
  * Filtra items de navegación por rol
- * Principio de separación de responsabilidades
  */
 export function getNavigationByRole(role: UserRole = 'guest'): NavigationItem[] {
-  return NAVIGATION_ITEMS.filter(item => item.roles.includes(role));
+  const normalizedRole = role === 'administrador' ? 'admin' : role;
+  return NAVIGATION_ITEMS.filter(item => item.roles.includes(normalizedRole));
 }
 
 /**
- * Agrupa items por sección
- * Útil para crear menús categorizados
- */
-export function getNavigationBySection(role: UserRole = 'guest'): Record<string, NavigationItem[]> {
-  const items = getNavigationByRole(role);
-  const sections: Record<string, NavigationItem[]> = {};
-  
-  items.forEach(item => {
-    const section = item.section || 'main';
-    if (!sections[section]) {
-      sections[section] = [];
-    }
-    sections[section].push(item);
-  });
-  
-  return sections;
-}
-
-/**
- * Obtiene items principales para navbar (límite de items)
- * Prioriza items de la sección 'main'
+ * Obtiene items principales para navbar (máximo 6)
  */
 export function getMainNavItems(role: UserRole = 'guest', limit: number = 6): NavigationItem[] {
-  // Normalizar rol: si es 'administrador', buscar como 'admin' también
   const normalizedRole = role === 'administrador' ? 'admin' : role;
-  
   const allItems = getNavigationByRole(normalizedRole);
   const mainItems = allItems.filter(item => item.section === 'main');
-  
-  // Si hay menos items 'main' que el límite, completar con otros
-  if (mainItems.length < limit) {
-    const otherItems = allItems.filter(item => item.section !== 'main');
-    return [...mainItems, ...otherItems].slice(0, limit);
-  }
-  
   return mainItems.slice(0, limit);
 }
 
 /**
- * Obtiene items de sidebar completos
+ * Obtiene items de sidebar
  */
 export function getSidebarItems(role: UserRole = 'guest'): NavigationItem[] {
-  // Normalizar rol: si es 'administrador', buscar como 'admin' también
   const normalizedRole = role === 'administrador' ? 'admin' : role;
   return getNavigationByRole(normalizedRole);
 }
 
 /**
- * Verifica si un usuario con cierto rol puede acceder a una ruta
- */
-export function canAccessRoute(role: UserRole, href: string): boolean {
-  const item = NAVIGATION_ITEMS.find(i => i.href === href);
-  return item ? item.roles.includes(role) : false;
-}
-
-/**
- * Nombres de secciones para UI
+ * Nombres de secciones para el UI
  */
 export const SECTION_NAMES: Record<string, string> = {
   main: 'Principal',
   academic: 'Académico',
-  management: 'Gestión',
-  social: 'Comunicación',
   tools: 'Herramientas'
 };
+
+/**
+ * Agrupa items de navegación por sección
+ */
+export function getNavigationBySection(role: UserRole = 'guest'): Record<string, NavigationItem[]> {
+  const normalizedRole = role === 'administrador' ? 'admin' : role;
+  const items = getNavigationByRole(normalizedRole);
+
+  const grouped: Record<string, NavigationItem[]> = {
+    main: [],
+    academic: [],
+    tools: []
+  };
+
+  items.forEach(item => {
+    const section = item.section || 'main';
+    if (grouped[section]) {
+      grouped[section].push(item);
+    }
+  });
+
+  // Filtrar secciones vacías
+  Object.keys(grouped).forEach(key => {
+    if (grouped[key].length === 0) {
+      delete grouped[key];
+    }
+  });
+
+  return grouped;
+}
+
+/**
+ * Verifica si un usuario puede acceder a una ruta
+ */
+export function canAccessRoute(role: UserRole, href: string): boolean {
+  const normalizedRole = role === 'administrador' ? 'admin' : role;
+  const item = NAVIGATION_ITEMS.find(i => i.href === href);
+  return item ? item.roles.includes(normalizedRole) : false;
+}
 
 /**
  * Configuración de visualización por rol
@@ -411,3 +248,4 @@ export const ROLE_CONFIG = {
     description: 'Explorar la plataforma'
   }
 } as const;
+

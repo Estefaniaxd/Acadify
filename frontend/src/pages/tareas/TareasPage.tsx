@@ -2,7 +2,8 @@ import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, Plus, Search, Filter, TrendingUp } from "lucide-react";
+import { AlertCircle, Plus, Search, Filter, TrendingUp, FileDown, Loader2 } from "lucide-react";
+import { apiClientTareas } from "../../../modules/tareas/api";
 
 import { TareasApi } from "../../../modules/tareas";
 import {
@@ -32,6 +33,7 @@ interface TareasPageState {
   filterPriority: PrioridadTarea | "all";
   filterStatus: EstadoTarea | "all";
   showExpired: boolean;
+  isExporting: boolean;
 }
 
 // ====================================
@@ -55,6 +57,7 @@ export const TareasPage: React.FC = () => {
     filterPriority: "all",
     filterStatus: "all",
     showExpired: false,
+    isExporting: false,
   });
 
   // ====================================
@@ -183,6 +186,39 @@ export const TareasPage: React.FC = () => {
     }));
   };
 
+  // Handler para exportar reporte CSV
+  const handleExportCSV = async () => {
+    if (!cursoId && !grupoId) {
+      alert("No se puede exportar: ID de curso no disponible");
+      return;
+    }
+
+    setState((prev) => ({ ...prev, isExporting: true }));
+
+    try {
+      const exportId = cursoId || grupoId || "";
+      const blob = await apiClientTareas.exportarReporteCurso(exportId);
+
+      // Crear URL y descargar
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const timestamp = new Date().toISOString().slice(0, 10);
+      link.download = `reporte_curso_${exportId}_${timestamp}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      alert("✅ Reporte descargado exitosamente");
+    } catch (error) {
+      console.error("Error exportando reporte:", error);
+      alert("❌ Error al exportar el reporte. Por favor intente nuevamente.");
+    } finally {
+      setState((prev) => ({ ...prev, isExporting: false }));
+    }
+  };
+
   // ====================================
   // RENDER
   // ====================================
@@ -207,21 +243,40 @@ export const TareasPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Botón crear tarea */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() =>
-                setState((prev) => ({
-                  ...prev,
-                  showCreateModal: true,
-                }))
-              }
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
-            >
-              <Plus size={20} />
-              Nueva Tarea
-            </motion.button>
+            {/* Botones de acción */}
+            <div className="flex items-center gap-3">
+              {/* Botón exportar CSV */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleExportCSV}
+                disabled={state.isExporting}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg font-semibold transition-colors shadow-lg"
+              >
+                {state.isExporting ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <FileDown size={20} />
+                )}
+                {state.isExporting ? "Exportando..." : "Exportar CSV"}
+              </motion.button>
+
+              {/* Botón crear tarea */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() =>
+                  setState((prev) => ({
+                    ...prev,
+                    showCreateModal: true,
+                  }))
+                }
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
+              >
+                <Plus size={20} />
+                Nueva Tarea
+              </motion.button>
+            </div>
           </div>
 
           {/* Barra de búsqueda y filtros */}

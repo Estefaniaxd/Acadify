@@ -263,3 +263,64 @@ def obtener_estadisticas_institucion(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al obtener estadísticas"
         )
+
+
+@router.get("/dashboard-stats", response_model=dict[str, Any])
+def obtener_estadisticas_dashboard(
+    current_user: Usuario = Depends(get_current_coordinador),
+    db: Session = Depends(get_db),
+):
+    """Obtener estadísticas completas para el dashboard del coordinador.
+    
+    Utiliza el procedimiento almacenado sp_obtener_dashboard_coordinador.
+    """
+    logger.info(f"Obteniendo estadísticas dashboard de coordinador: {current_user.correo_institucional}")
+    
+    try:
+        # Llamar al procedimiento almacenado
+        from sqlalchemy import text
+        
+        query = text("""
+            SELECT * FROM sp_obtener_dashboard_coordinador(:usuario_id)
+        """)
+        
+        result = db.execute(query, {"usuario_id": str(current_user.usuario_id)}).fetchone()
+        
+        if not result:
+            # Si no hay resultado, devolver valores por defecto
+            return {
+                "institucion_nombre": "Sin institución asignada",
+                "total_programas": 0,
+                "total_cursos": 0,
+                "total_docentes": 0,
+                "total_estudiantes": 0,
+                "cursos_activos": 0,
+                "estudiantes_activos_mes": 0,
+                "tareas_pendiente_revision": 0
+            }
+        
+        # Convertir el resultado a diccionario
+        return {
+            "institucion_nombre": result[0],
+            "total_programas": result[1],
+            "total_cursos": result[2],
+            "total_docentes": result[3],
+            "total_estudiantes": result[4],
+            "cursos_activos": result[5],
+            "estudiantes_activos_mes": result[6],
+            "tareas_pendiente_revision": result[7]
+        }
+        
+    except Exception as e:
+        logger.exception(f"Error al obtener estadísticas dashboard: {e}")
+        # Devolver valores por defecto en caso de error
+        return {
+            "institucion_nombre": "Sin institución asignada",
+            "total_programas": 0,
+            "total_cursos": 0,
+            "total_docentes": 0,
+            "total_estudiantes": 0,
+            "cursos_activos": 0,
+            "estudiantes_activos_mes": 0,
+            "tareas_pendiente_revision": 0
+        }

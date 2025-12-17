@@ -337,3 +337,193 @@ async def calificar_entrega(
         db=db, entrega_id=entrega_id, calificacion=calificacion,
         retroalimentacion=comentarios, usuario=current_user
     )
+
+
+@router.get("/{curso_id}/reporte/export")
+async def exportar_reporte_curso(
+    curso_id: str,
+    current_user: Usuario = Depends(deps.get_current_user),
+    db: Session = Depends(deps.get_db)
+):
+    """
+    Exporta un reporte completo del curso en formato CSV.
+    
+    El reporte incluye:
+    - Información del curso (nombre, código, institución)
+    - Lista de todos los estudiantes inscritos
+    - Todas las tareas asignadas al curso
+    - Estado de entrega y calificaciones para cada estudiante-tarea
+    - Métricas calculadas (promedio, % entregas, etc.)
+    
+    **Formato CSV:**
+    - Header con información del curso
+    - Columnas: ID, Nombres, Apellidos, Email, [Tarea1], [Tarea2], ..., Promedio, Total Entregas, % Entregas
+    - Cada tarea muestra: calificación, "No entregó", o "Entregada - Sin calificar"
+    
+    **Permisos:** Solo coordinadores y docentes del curso pueden exportar.
+    """
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    from datetime import datetime
+    from sqlalchemy import and_
+    from src.models.academic.curso import Curso
+    from src.models.academic.grupo_curso import GrupoCurso
+    from src.models.academic.grupo import Grupo
+    from src.models.academic.estudiante_grupo import EstudianteGrupo
+    from src.models.users.estudiante import Estudiante
+    from src.models.users.usuario import Usuario as UsuarioModel
+    from src.models.academic.tarea import Tarea, EntregaTarea
+    import csv
+    from io import StringIO
+    
+    logger.info(f"GET reporte export curso {curso_id} - Usuario: {current_user.usuario_id}")
+    
+    # Verificar permisos (solo coordinadores y docentes)
+    if current_user.rol not in ['coordinador', 'docente']:
+        raise HTTPException(
+            status_code=403,
+            detail="Solo coordinadores y docentes pueden exportar reportes"
+        )
+    
+    # Obtener información del curso
+    curso = db.query(Curso).filter(Curso.curso_id == curso_id).first()
+    if not curso:
+        raise HTTPException(status_code=404, detail="Curso no encontrado")
+    
+    # Obtener institución
+    institucion_nombre = curso.institucion.nombre if curso.institucion else "N/A"
+    
+    # Obtener todos los grupos asociados al curso
+    grupos_ids = db.query(GrupoCurso.grupo_id).filter(
+        GrupoCurso.curso_id == curso_id
+    ).all()
+    grupos_ids = [g[0] for g in grupos_ids]
+    
+    # Obtener todos los estudiantes del curso
+    estudiantes_data = db.query(
+        UsuarioModel.usuario_id,
+        UsuarioModel.nombres,
+        UsuarioModel.apellidos,
+        UsuarioModel.correo_institucional,
+        Estudiante.fecha_ingreso
+    ).join(
+        Estudiante, Estudiante.estudiante_id == UsuarioModel.usuario_id
+    ).join(
+        EstudianteGrupo, EstudianteGrupo.estudiante_id == Estudiante.estudiante_id
+    ).filter(
+        EstudianteGrupo.grupo_id.in_(grupos_ids)
+    ).distinct().all()
+    
+    if not estudiantes_data:
+        logger.warning(f"No hay estudiantes inscritos en el curso {curso_id}")
+    
+    # Obtener todas las tareas del curso
+    tareas = db.query(Tarea).filter(
+        Tarea.grupo_id.in_(grupos_ids)
+    ).order_by(Tarea.fecha_limite).all()
+    
+    if not tareas:
+        logger.warning(f"No hay tareas asignadas en el curso {curso_id}")
+    
+    # Crear CSV en memoria
+    output = StringIO()
+    
+    # Agregar BOM UTF-8 para compatibilidad con Excel
+    output.write('\ufeff')
+    
+    writer = csv.writer(output)
+    
+    # Header del reporte
+    writer.writerow([f"Curso: {curso.nombre} ({curso.codigo_curso or 'N/A'})"])
+    writer.writerow([f"Institución: {institucion_nombre}"])
+    writer.writerow([f"Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"])
+    writer.writerow([f"Total estudiantes: {len(estudiantes_data)}"])
+    writer.writerow([f"Total tareas: {len(tareas)}"])
+    writer.writerow([])  # Línea vacía
+    
+    # Construir headers de columnas
+    headers = [
+        "ID Estudiante",
+        "Nombres",
+        "Apellidos",
+        "Email",
+        "Fecha Ingreso"
+    ]
+    
+    # Agregar columnas de tareas
+    for tarea in tareas:
+        fecha_limite = tarea.fecha_limite.strftime('%Y-%m-%d') if tarea.fecha_limite else 'N/A'
+        puntaje_max = tarea.puntuacion_maxima or 100
+        headers.append(f"{tarea.titulo} - Max: {puntaje_max}pts - Límite: {fecha_limite}")
+    
+    # Agregar columnas de métricas
+    headers.extend(["Promedio", "Tareas Entregadas", "% Entregas"])
+    
+    writer.writerow(headers)
+    
+    # Procesar cada estudiante
+    for est_data in estudiantes_data:
+        estudiante_id = str(est_data.usuario_id)
+        row = [
+            estudiante_id,
+            est_data.nombres or "",
+            est_data.apellidos or "",
+            est_data.correo_institucional or "",
+            est_data.fecha_ingreso.strftime('%Y-%m-%d') if est_data.fecha_ingreso else ""
+        ]
+        
+        calificaciones = []
+        tareas_entregadas = 0
+        
+        # Para cada tarea, buscar la entrega del estudiante
+        for tarea in tareas:
+            entrega = db.query(EntregaTarea).filter(
+                and_(
+                    EntregaTarea.tarea_id == tarea.tarea_id,
+                    EntregaTarea.estudiante_id == estudiante_id
+                )
+            ).first()
+            
+            if entrega:
+                if entrega.calificacion is not None:
+                    # Tiene calificación
+                    calificaciones.append(float(entrega.calificacion))
+                    tardia = " (Tardía)" if entrega.es_entrega_tardia or entrega.es_tardia else ""
+                    row.append(f"{entrega.calificacion}{tardia}")
+                    tareas_entregadas += 1
+                else:
+                    # Entregada pero sin calificar
+                    row.append("Entregada - Sin calificar")
+                    tareas_entregadas += 1
+            else:
+                # No entregó
+                row.append("No entregó")
+        
+        # Calcular métricas
+        promedio = sum(calificaciones) / len(calificaciones) if calificaciones else 0
+        porcentaje_entregas = (tareas_entregadas / len(tareas) * 100) if tareas else 0
+        
+        row.append(f"{promedio:.2f}")
+        row.append(str(tareas_entregadas))
+        row.append(f"{porcentaje_entregas:.1f}%")
+        
+        writer.writerow(row)
+    
+    # Obtener contenido CSV
+    csv_content = output.getvalue()
+    output.close()
+    
+    # Generar nombre de archivo
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"reporte_curso_{curso.codigo_curso or curso_id}_{timestamp}.csv"
+    
+    logger.info(f"Reporte generado exitosamente: {filename} - {len(estudiantes_data)} estudiantes, {len(tareas)} tareas")
+    
+    # Retornar como respuesta CSV
+    return Response(
+        content=csv_content,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )

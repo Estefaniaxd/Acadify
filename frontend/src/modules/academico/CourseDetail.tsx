@@ -168,6 +168,7 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
     puntos: 100
   });
   const [creatingTask, setCreatingTask] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]); // TODO: tipar eventos si es necesario
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [eventFormData, setEventFormData] = useState({
@@ -1950,6 +1951,49 @@ export default function CourseDetail({ courseId, onBack }: CourseDetailProps): J
 
         {activeTab === 'classwork' && (
           <div className="space-y-6">
+            {/* Header con botón de exportar */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Tareas del Curso</h2>
+              {isCurrentUserProfessor && (
+                <button
+                  onClick={async () => {
+                    if (!courseId) {
+                      alert('No se puede exportar: ID de curso no disponible');
+                      return;
+                    }
+                    setIsExporting(true);
+                    try {
+                      const blob = await apiClientTareas.exportarReporteCurso(courseId);
+                      const url = window.URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      const timestamp = new Date().toISOString().slice(0, 10);
+                      link.download = `reporte_curso_${courseId}_${timestamp}.csv`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(url);
+                      alert('✅ Reporte descargado exitosamente');
+                    } catch (error) {
+                      console.error('Error exportando reporte:', error);
+                      alert('❌ Error al exportar el reporte. Por favor intente nuevamente.');
+                    } finally {
+                      setIsExporting(false);
+                    }
+                  }}
+                  disabled={isExporting}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg font-semibold transition-colors shadow-lg"
+                >
+                  {isExporting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Download className="w-5 h-5" />
+                  )}
+                  {isExporting ? 'Exportando...' : 'Exportar Reporte CSV'}
+                </button>
+              )}
+            </div>
+
             {/* Estadísticas de tareas */}
             <TareasStatistics
               tareas={processedTaskData.tareas as any}

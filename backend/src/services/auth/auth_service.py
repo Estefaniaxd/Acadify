@@ -619,6 +619,47 @@ class AuthService:
             # Aún así consideramos logout exitoso
             return {"message": "Logout exitoso"}
 
+    async def logout_all_devices(self, db: Session, user_id: UUID) -> dict[str, str]:
+        """Cerrar sesión en todos los dispositivos (invalidar todas las sesiones)."""
+        try:
+            # Obtener usuario
+            user = usuario_crud.get(db, id=user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Usuario no encontrado"
+                )
+            
+            # Marcar en Redis que todas las sesiones de este usuario deben invalidarse
+            invalidation_key = f"invalidate_all_sessions:{user_id}"
+            # Guardar timestamp de invalidación (24 horas para dar tiempo a que expiren los tokens)
+            await self.redis.setex(invalidation_key, 86400, str(datetime.now(UTC).timestamp()))
+            
+            # Establecer locked_until temporal para forzar re-autenticación
+            # (solo por 1 minuto, suficiente para que el sistema detecte la invalidación)
+            from src.crud.user.usuario import usuario_crud
+            usuario_crud.update(
+                db,
+                db_obj=user,
+                obj_in={"locked_until": datetime.now(UTC) + timedelta(minutes=1)}
+            )
+            
+            logger.info(f"Todas las sesiones invalidadas para usuario {user_id}")
+            
+            return {
+                "message": "Sesión cerrada en todos los dispositivos. Debes iniciar sesión nuevamente.",
+                "devices_logged_out": "all"
+            }
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception(f"Error en logout_all_devices: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error al cerrar sesiones"
+            ) from e
+
     # ===============================
     # Password Reset
     # ===============================

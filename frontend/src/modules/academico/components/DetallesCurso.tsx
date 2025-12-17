@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Curso, EstadoCurso, ConfiguracionCurso } from '../types.js';
 import GestorMaterial from '../material/GestorMaterial';
+import { apiClientTareas } from '../../tareas/api';
 
 interface DetallesCursoProps {
   cursoId?: string;
@@ -15,7 +16,8 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
   const [curso, setCurso] = useState<Curso | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'informacion' | 'material' | 'estadisticas' | 'configuracion'>('informacion');
+  const [activeTab, setActiveTab] = useState<'informacion' | 'material' | 'tareas' | 'estadisticas' | 'configuracion'>('informacion');
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     if (cursoId) {
@@ -27,7 +29,7 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
     try {
       setLoading(true);
       setError(null);
-      
+
       // Simular llamada a API
       const cursoSimulado: Curso = {
         curso_id: cursoId || '1',
@@ -64,7 +66,7 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
         } as ConfiguracionCurso,
         fecha_creacion: new Date().toISOString(),
       };
-      
+
       setCurso(cursoSimulado);
     } catch (err) {
       setError('Error al cargar el curso');
@@ -96,18 +98,50 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
 
   const calcularProgreso = () => {
     if (!curso?.fecha_inicio || !curso?.fecha_fin) return 0;
-    
+
     const inicio = new Date(curso.fecha_inicio);
     const fin = new Date(curso.fecha_fin);
     const ahora = new Date();
-    
+
     if (ahora < inicio) return 0;
     if (ahora > fin) return 100;
-    
+
     const total = fin.getTime() - inicio.getTime();
     const transcurrido = ahora.getTime() - inicio.getTime();
-    
+
     return Math.round((transcurrido / total) * 100);
+  };
+
+  // Handler para exportar reporte CSV
+  const handleExportCSV = async () => {
+    if (!cursoId) {
+      alert("No se puede exportar: ID de curso no disponible");
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      const blob = await apiClientTareas.exportarReporteCurso(cursoId);
+
+      // Crear URL y descargar
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const timestamp = new Date().toISOString().slice(0, 10);
+      link.download = `reporte_curso_${cursoId}_${timestamp}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      alert("✅ Reporte descargado exitosamente");
+    } catch (error) {
+      console.error("Error exportando reporte:", error);
+      alert("❌ Error al exportar el reporte. Por favor intente nuevamente.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (loading) {
@@ -129,7 +163,7 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {error || 'Curso no encontrado'}
         </h3>
-        <button 
+        <button
           onClick={() => navigate('/cursos')}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
@@ -168,14 +202,13 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
                 {curso.estudiantes_actuales || 0} / {curso.maximo_estudiantes || 0} estudiantes
               </div>
               <div className="w-32 bg-gray-200 rounded-full h-2 mb-3">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full" 
-                  style={{ 
-                    width: `${
-                      curso.estudiantes_actuales && curso.maximo_estudiantes 
+                <div
+                  className="bg-blue-600 h-2 rounded-full"
+                  style={{
+                    width: `${curso.estudiantes_actuales && curso.maximo_estudiantes
                         ? (curso.estudiantes_actuales / curso.maximo_estudiantes) * 100
                         : 0
-                    }%` 
+                      }%`
                   }}
                 ></div>
               </div>
@@ -196,8 +229,8 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
               <div className="text-sm font-medium text-gray-700 mb-1">Progreso del curso</div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                  <div
+                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${calcularProgreso()}%` }}
                   ></div>
                 </div>
@@ -215,17 +248,17 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
             {[
               { id: 'informacion', label: 'Información', icon: 'ℹ️' },
               { id: 'material', label: 'Material', icon: '📚' },
+              { id: 'tareas', label: 'Tareas', icon: '📝' },
               { id: 'estadisticas', label: 'Estadísticas', icon: '📊' },
               { id: 'configuracion', label: 'Configuración', icon: '⚙️' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 text-sm font-medium transition-colors ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 py-4 px-1 border-b-2 text-sm font-medium transition-colors ${activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <span>{tab.icon}</span>
                 {tab.label}
@@ -268,31 +301,28 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Auto-inscripción:</span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        curso.configuracion?.permite_auto_inscripcion 
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${curso.configuracion?.permite_auto_inscripcion
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}>
+                        }`}>
                         {curso.configuracion?.permite_auto_inscripcion ? 'Habilitada' : 'Deshabilitada'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Requiere aprobación:</span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        curso.configuracion?.requiere_aprobacion 
-                          ? 'bg-yellow-100 text-yellow-800' 
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${curso.configuracion?.requiere_aprobacion
+                          ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-green-100 text-green-800'
-                      }`}>
+                        }`}>
                         {curso.configuracion?.requiere_aprobacion ? 'Sí' : 'No'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Curso público:</span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        curso.configuracion?.es_publico 
-                          ? 'bg-blue-100 text-blue-800' 
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${curso.configuracion?.es_publico
+                          ? 'bg-blue-100 text-blue-800'
                           : 'bg-gray-100 text-gray-800'
-                      }`}>
+                        }`}>
                         {curso.configuracion?.es_publico ? 'Público' : 'Privado'}
                       </span>
                     </div>
@@ -323,6 +353,53 @@ const DetallesCurso: React.FC<DetallesCursoProps> = ({ cursoId: propCursoId }) =
 
           {activeTab === 'material' && (
             <GestorMaterial />
+          )}
+
+          {activeTab === 'tareas' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">Tareas del Curso</h3>
+                <button
+                  onClick={handleExportCSV}
+                  disabled={isExporting}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg font-semibold transition-colors shadow-lg"
+                >
+                  {isExporting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Exportando...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Exportar Reporte CSV
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800">
+                      Reporte de Tareas
+                    </h3>
+                    <div className="mt-2 text-sm text-blue-700">
+                      <p>El reporte CSV incluye: información del curso, lista de estudiantes, todas las tareas, calificaciones, y métricas (promedio, % entregas). Los estudiantes sin entrega aparecen como "No entregó".</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           {activeTab === 'estadisticas' && (

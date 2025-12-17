@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ArrowLeft, Award, BarChart, Bell, Book, BookOpen, Calendar, Camera, Check, Clock, Edit3, Eye, EyeOff, Globe, Grid, Heart, List, Lock, Mail, MapPin, MessageCircle, Phone, PieChart, Save, Settings, Shield, Star, Target, TrendingUp, Upload, User, Users, X } from 'lucide-react';
-;
+import { Activity, ArrowLeft, Award, BarChart, Bell, Book, BookOpen, Calendar, Camera, Check, Clock, Edit3, Eye, EyeOff, Globe, Grid, Heart, List, Lock, LogOut, Mail, MapPin, MessageCircle, Phone, PieChart, Save, Settings, Shield, Star, Target, TrendingUp, Upload, User, Users, X, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 interface UserProfile {
   id: string;
@@ -44,6 +45,7 @@ interface RecentActivity {
 export default function ProfilePage(): JSX.Element {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { user, logoutAllDevices } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
@@ -51,6 +53,10 @@ export default function ProfilePage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [editForm, setEditForm] = useState({
     nombres: '',
     apellidos: '',
@@ -65,70 +71,82 @@ export default function ProfilePage(): JSX.Element {
   const loadUserData = async () => {
     try {
       setLoading(true);
-      // Simular datos - aquí harías llamadas reales al API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockProfile: UserProfile = {
-        id: userId || '',
-        nombres: 'Estefanía',
-        apellidos: 'Londoño',
-        correo_institucional: 'estefania.londono@arp.edu.co',
-        rol: 'estudiante',
-        estado_cuenta: 'activo',
-        telefono: '+57 300 123 4567',
-        descripcion: 'Estudiante de Ingeniería de Sistemas apasionada por la tecnología y el desarrollo web. Me encanta aprender nuevas tecnologías y trabajar en proyectos desafiantes.',
-        fecha_creacion: '2023-01-15T08:00:00Z',
-        ultimo_acceso: new Date().toISOString(),
-        email_verified: true,
-        twofa_enabled: false
-      };
 
-      const mockStats: UserStats = {
-        cursos_completados: 12,
-        cursos_activos: 3,
-        promedio_calificaciones: 4.7,
-        total_horas_estudio: 245,
-        logros_obtenidos: 18,
-        puntos_totales: 2840,
-        rango_actual: 'Estudiante Destacado',
-        nivel_actual: 15
-      };
+      // Si tenemos el usuario autenticado, usar sus datos
+      if (user) {
+        const mockProfile: UserProfile = {
+          id: user.usuario_id || userId || '',
+          nombres: user.nombres || 'Usuario',
+          apellidos: user.apellidos || '',
+          correo_institucional: user.email || '',
+          rol: user.rol || 'estudiante',
+          estado_cuenta: 'activo',
+          telefono: '+57 300 123 4567',
+          descripcion: 'Estudiante de Ingeniería de Sistemas apasionada por la tecnología y el desarrollo web. Me encanta aprender nuevas tecnologías y trabajar en proyectos desafiantes.',
+          fecha_creacion: '2023-01-15T08:00:00Z',
+          ultimo_acceso: new Date().toISOString(),
+          email_verified: true,
+          twofa_enabled: false
+        };
 
-      const mockActivities: RecentActivity[] = [
-        {
-          id: '1',
-          tipo: 'curso',
-          titulo: 'Programación Web Avanzada',
-          descripcion: 'Completado módulo de React Hooks',
-          fecha: '2025-09-29T14:30:00Z',
-          calificacion: 4.8
-        },
-        {
-          id: '2',
-          tipo: 'tarea',
-          titulo: 'Proyecto Final - API REST',
-          descripcion: 'Entregado proyecto final',
-          fecha: '2025-09-28T16:45:00Z',
-          calificacion: 4.9
-        },
-        {
-          id: '3',
-          tipo: 'logro',
-          titulo: 'Streak de 30 días',
-          descripcion: 'Mantuviste actividad diaria por 30 días',
-          fecha: '2025-09-27T10:00:00Z'
+        // Intentar cargar estadísticas desde el API
+        try {
+          const token = localStorage.getItem('access_token');
+          const response = await axios.get('/api/v1/students/stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          setStats(response.data);
+        } catch (err) {
+          // Si falla, usar datos de ejemplo
+          const mockStats: UserStats = {
+            cursos_completados: 12,
+            cursos_activos: 3,
+            promedio_calificaciones: 4.7,
+            total_horas_estudio: 245,
+            logros_obtenidos: 18,
+            puntos_totales: 2840,
+            rango_actual: 'Estudiante Destacado',
+            nivel_actual: 15
+          };
+          setStats(mockStats);
         }
-      ];
 
-      setProfile(mockProfile);
-      setStats(mockStats);
-      setActivities(mockActivities);
-      setEditForm({
-        nombres: mockProfile.nombres,
-        apellidos: mockProfile.apellidos,
-        telefono: mockProfile.telefono || '',
-        descripcion: mockProfile.descripcion || ''
-      });
+        const mockActivities: RecentActivity[] = [
+          {
+            id: '1',
+            tipo: 'curso',
+            titulo: 'Programación Web Avanzada',
+            descripcion: 'Completado módulo de React Hooks',
+            fecha: '2025-09-29T14:30:00Z',
+            calificacion: 4.8
+          },
+          {
+            id: '2',
+            tipo: 'tarea',
+            titulo: 'Proyecto Final - API REST',
+            descripcion: 'Entregado proyecto final',
+            fecha: '2025-09-28T16:45:00Z',
+            calificacion: 4.9
+          },
+          {
+            id: '3',
+            tipo: 'logro',
+            titulo: 'Streak de 30 días',
+            descripcion: 'Mantuviste actividad diaria por 30 días',
+            fecha: '2025-09-27T10:00:00Z'
+          }
+        ];
+
+        setProfile(mockProfile);
+        setActivities(mockActivities);
+        setEditForm({
+          nombres: mockProfile.nombres,
+          apellidos: mockProfile.apellidos,
+          telefono: mockProfile.telefono || '',
+          descripcion: mockProfile.descripcion || ''
+        });
+      }
     } catch (err) {
       setError('Error al cargar el perfil del usuario');
     } finally {
@@ -199,9 +217,13 @@ export default function ProfilePage(): JSX.Element {
 
   const handleSaveProfile = async () => {
     try {
-      // Aquí harías la llamada al API para guardar los cambios
-      console.log('Guardando perfil:', editForm);
-      
+      const token = localStorage.getItem('access_token');
+
+      // Llamada real al API para guardar los cambios
+      await axios.put('/api/v1/users/profile', editForm, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
       if (profile) {
         setProfile({
           ...profile,
@@ -211,10 +233,108 @@ export default function ProfilePage(): JSX.Element {
           descripcion: editForm.descripcion
         });
       }
-      
+
       setIsEditing(false);
     } catch (err) {
       console.error('Error al guardar perfil:', err);
+      alert('Error al guardar los cambios. Por favor, intenta nuevamente.');
+    }
+  };
+
+  const handleLogoutAllDevices = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logoutAllDevices();
+    } catch (error) {
+      console.error('Error al cerrar sesiones:', error);
+      setIsLoggingOut(false);
+      setShowLogoutConfirm(false);
+    }
+  };
+
+  const handleProfilePicUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    // Validar tamaño (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    setUploadingProfilePic(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('/api/v1/users/upload-profile-pic', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (profile) {
+        setProfile({
+          ...profile,
+          perfil_url: response.data.url
+        });
+      }
+      alert('Foto de perfil actualizada correctamente');
+    } catch (error) {
+      console.error('Error al subir foto:', error);
+      alert('Error al subir la foto. Intenta nuevamente.');
+    } finally {
+      setUploadingProfilePic(false);
+    }
+  };
+
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    setUploadingBanner(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('/api/v1/users/upload-banner', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (profile) {
+        setProfile({
+          ...profile,
+          portada_url: response.data.url
+        });
+      }
+      alert('Banner actualizado correctamente');
+    } catch (error) {
+      console.error('Error al subir banner:', error);
+      alert('Error al subir el banner. Intenta nuevamente.');
+    } finally {
+      setUploadingBanner(false);
     }
   };
 
@@ -271,11 +391,11 @@ export default function ProfilePage(): JSX.Element {
               <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
               Volver
             </button>
-            
+
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Perfil de Usuario
             </h1>
-            
+
             <div className="w-20"></div>
           </div>
         </div>
@@ -290,10 +410,33 @@ export default function ProfilePage(): JSX.Element {
         >
           {/* Cover Image */}
           <div className="h-48 bg-gradient-to-br from-blue-600 via-purple-600 to-emerald-600 relative">
+            {profile.portada_url && (
+              <img
+                src={profile.portada_url}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+            )}
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="absolute top-4 right-4">
-              <button className="p-2 bg-black/30 backdrop-blur-sm rounded-lg text-white hover:bg-black/50 transition-colors">
-                <Camera className="w-5 h-5" />
+              <input
+                type="file"
+                id="banner-upload"
+                accept="image/*"
+                className="hidden"
+                onChange={handleBannerUpload}
+                disabled={uploadingBanner}
+              />
+              <button
+                onClick={() => document.getElementById('banner-upload')?.click()}
+                disabled={uploadingBanner}
+                className="p-2 bg-black/30 backdrop-blur-sm rounded-lg text-white hover:bg-black/50 transition-colors disabled:opacity-50"
+              >
+                {uploadingBanner ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Camera className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -317,17 +460,31 @@ export default function ProfilePage(): JSX.Element {
                       </span>
                     </div>
                   )}
-                  
-                  <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center ${
-                    isUserOnline(profile.ultimo_acceso) ? 'bg-green-500' : 'bg-gray-400'
-                  }`}>
-                    <div className={`w-3 h-3 rounded-full ${
-                      isUserOnline(profile.ultimo_acceso) ? 'bg-green-400' : 'bg-gray-300'
-                    }`}></div>
+
+                  <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center ${isUserOnline(profile.ultimo_acceso) ? 'bg-green-500' : 'bg-gray-400'
+                    }`}>
+                    <div className={`w-3 h-3 rounded-full ${isUserOnline(profile.ultimo_acceso) ? 'bg-green-400' : 'bg-gray-300'
+                      }`}></div>
                   </div>
-                  
-                  <button className="absolute bottom-0 right-8 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-lg">
-                    <Camera className="w-4 h-4" />
+
+                  <input
+                    type="file"
+                    id="profile-pic-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleProfilePicUpload}
+                    disabled={uploadingProfilePic}
+                  />
+                  <button
+                    onClick={() => document.getElementById('profile-pic-upload')?.click()}
+                    disabled={uploadingProfilePic}
+                    className="absolute bottom-0 right-8 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50"
+                  >
+                    {uploadingProfilePic ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
 
@@ -339,14 +496,12 @@ export default function ProfilePage(): JSX.Element {
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRoleColor(profile.rol)}`}>
                       {profile.rol.charAt(0).toUpperCase() + profile.rol.slice(1)}
                     </span>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      profile.estado_cuenta === 'activo' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full mr-2 ${
-                        profile.estado_cuenta === 'activo' ? 'bg-green-500' : 'bg-red-500'
-                      }`}></div>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${profile.estado_cuenta === 'activo'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      }`}>
+                      <div className={`w-2 h-2 rounded-full mr-2 ${profile.estado_cuenta === 'activo' ? 'bg-green-500' : 'bg-red-500'
+                        }`}></div>
                       {profile.estado_cuenta === 'activo' ? 'Activo' : 'Inactivo'}
                     </span>
                     {profile.email_verified && (
@@ -397,11 +552,10 @@ export default function ProfilePage(): JSX.Element {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center px-4 py-3 rounded-lg font-medium transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
+                    className={`flex items-center px-4 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />
                     {tab.label}
@@ -450,7 +604,7 @@ export default function ProfilePage(): JSX.Element {
                             <input
                               type="text"
                               value={editForm.nombres}
-                              onChange={(e) => setEditForm({...editForm, nombres: e.target.value})}
+                              onChange={(e) => setEditForm({ ...editForm, nombres: e.target.value })}
                               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
                           </div>
@@ -461,7 +615,7 @@ export default function ProfilePage(): JSX.Element {
                             <input
                               type="text"
                               value={editForm.apellidos}
-                              onChange={(e) => setEditForm({...editForm, apellidos: e.target.value})}
+                              onChange={(e) => setEditForm({ ...editForm, apellidos: e.target.value })}
                               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
                           </div>
@@ -473,7 +627,7 @@ export default function ProfilePage(): JSX.Element {
                           <input
                             type="tel"
                             value={editForm.telefono}
-                            onChange={(e) => setEditForm({...editForm, telefono: e.target.value})}
+                            onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           />
                         </div>
@@ -483,7 +637,7 @@ export default function ProfilePage(): JSX.Element {
                           </label>
                           <textarea
                             value={editForm.descripcion}
-                            onChange={(e) => setEditForm({...editForm, descripcion: e.target.value})}
+                            onChange={(e) => setEditForm({ ...editForm, descripcion: e.target.value })}
                             rows={3}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           />
@@ -515,7 +669,7 @@ export default function ProfilePage(): JSX.Element {
                               <p className="text-gray-900 dark:text-white font-medium">{profile.correo_institucional}</p>
                             </div>
                           </div>
-                          
+
                           {profile.telefono && (
                             <div className="flex items-center">
                               <Phone className="w-5 h-5 text-gray-400 mr-3" />
@@ -525,7 +679,7 @@ export default function ProfilePage(): JSX.Element {
                               </div>
                             </div>
                           )}
-                          
+
                           <div className="flex items-center">
                             <Calendar className="w-5 h-5 text-gray-400 mr-3" />
                             <div>
@@ -533,15 +687,15 @@ export default function ProfilePage(): JSX.Element {
                               <p className="text-gray-900 dark:text-white font-medium">{formatDate(profile.fecha_creacion)}</p>
                             </div>
                           </div>
-                          
+
                           {profile.ultimo_acceso && (
                             <div className="flex items-center">
                               <Activity className="w-5 h-5 text-gray-400 mr-3" />
                               <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Último acceso</p>
                                 <p className="text-gray-900 dark:text-white font-medium">
-                                  {isUserOnline(profile.ultimo_acceso) 
-                                    ? 'En línea ahora' 
+                                  {isUserOnline(profile.ultimo_acceso)
+                                    ? 'En línea ahora'
                                     : formatTime(profile.ultimo_acceso)
                                   }
                                 </p>
@@ -573,7 +727,7 @@ export default function ProfilePage(): JSX.Element {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
@@ -585,7 +739,7 @@ export default function ProfilePage(): JSX.Element {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mr-3">
@@ -597,7 +751,7 @@ export default function ProfilePage(): JSX.Element {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-3">
@@ -685,7 +839,7 @@ export default function ProfilePage(): JSX.Element {
                     <span className="text-sm text-gray-600 dark:text-gray-400">{stats.puntos_totales} puntos</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
-                    <div 
+                    <div
                       className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full"
                       style={{ width: '75%' }}
                     ></div>
@@ -767,15 +921,14 @@ export default function ProfilePage(): JSX.Element {
                           </p>
                         </div>
                       </div>
-                      <button className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        profile.twofa_enabled 
-                          ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                          : 'bg-green-100 text-green-700 hover:bg-green-200'
-                      }`}>
+                      <button className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${profile.twofa_enabled
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                        }`}>
                         {profile.twofa_enabled ? 'Desactivar' : 'Activar'}
                       </button>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <Lock className="w-5 h-5 text-gray-400 mr-3" />
@@ -787,6 +940,58 @@ export default function ProfilePage(): JSX.Element {
                       <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
                         Cambiar
                       </button>
+                    </div>
+
+                    {/* Cerrar sesión en todos los dispositivos */}
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-red-900 dark:text-red-100 mb-2 flex items-center gap-2">
+                              <LogOut className="w-4 h-4" />
+                              Cerrar sesión en todos los dispositivos
+                            </h4>
+                            <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+                              Esta acción cerrará tu sesión en todos los dispositivos donde hayas iniciado sesión.
+                              Tendrás que volver a iniciar sesión en este dispositivo también.
+                            </p>
+
+                            {!showLogoutConfirm ? (
+                              <button
+                                onClick={() => setShowLogoutConfirm(true)}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
+                              >
+                                <LogOut className="w-4 h-4" />
+                                Cerrar sesión en todos los dispositivos
+                              </button>
+                            ) : (
+                              <div className="space-y-3">
+                                <p className="text-sm font-semibold text-red-900 dark:text-red-100">
+                                  ¿Estás seguro? Esta acción no se puede deshacer.
+                                </p>
+                                <div className="flex gap-3">
+                                  <button
+                                    onClick={handleLogoutAllDevices}
+                                    disabled={isLoggingOut}
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
+                                  >
+                                    <LogOut className="w-4 h-4" />
+                                    {isLoggingOut ? 'Cerrando sesiones...' : 'Sí, cerrar todas las sesiones'}
+                                  </button>
+                                  <button
+                                    onClick={() => setShowLogoutConfirm(false)}
+                                    disabled={isLoggingOut}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors duration-200 text-sm font-medium"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -810,7 +1015,7 @@ export default function ProfilePage(): JSX.Element {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <MessageCircle className="w-5 h-5 text-gray-400 mr-3" />

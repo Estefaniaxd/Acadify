@@ -215,6 +215,28 @@ async def logout(
         return LogoutResponse(message="Logout procesado")
 
 
+@router.post("/logout-all-devices", response_model=LogoutResponse)
+async def logout_all_devices(
+    *,
+    db: Session = Depends(get_db),
+    redis_client: redis.Redis = Depends(get_redis_client),
+    current_user: Usuario = Depends(get_current_active_user),
+) -> Any:
+    """Cerrar sesión en todos los dispositivos.
+    
+    Invalida todas las sesiones activas del usuario actual,
+    forzándolo a volver a iniciar sesión en todos sus dispositivos.
+    """
+    auth_service = AuthService(redis_client)
+    
+    try:
+        result = await auth_service.logout_all_devices(db, current_user.usuario_id)
+        return LogoutResponse(message=result["message"])
+    except Exception as e:
+        logger.exception(f"Error en logout_all_devices: {e}")
+        raise
+
+
 # ===============================
 # Password Management
 # ===============================

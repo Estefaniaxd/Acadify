@@ -12,6 +12,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   login: (accessToken: string, refreshToken?: string) => void;
   logout: () => void;
+  logoutAllDevices: () => Promise<void>;
   loading: boolean;
 };
 
@@ -133,6 +134,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     window.location.href = '/login';
   }, [])
 
+  const logoutAllDevices = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        // Llamar al endpoint para cerrar sesión en todos los dispositivos
+        await fetch('/api/v1/auth/logout-all-devices', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión en todos los dispositivos:', error);
+    } finally {
+      // Limpiar estado local de todas formas
+      logout();
+    }
+  }, [logout])
+
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -162,8 +184,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Memoizar el valor del contexto para evitar re-renders innecesarios
   const contextValue = useMemo(
-    () => ({ user, isAuthenticated, login, logout, loading }),
-    [user, isAuthenticated, login, logout, loading]
+    () => ({ user, isAuthenticated, login, logout, logoutAllDevices, loading }),
+    [user, isAuthenticated, login, logout, logoutAllDevices, loading]
   );
 
   return (

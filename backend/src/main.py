@@ -69,7 +69,10 @@ if not cors_origins:
         "http://localhost:3000",  # Create React App default
         "http://localhost:5173",  # Vite default
         "http://localhost:5174",  # Vite alternative
+        "http://localhost:5175",  # Vite alternative 2
         "http://127.0.0.1:5173",  # Localhost variante
+        "http://127.0.0.1:5174",  # Localhost variante
+        "http://127.0.0.1:5175",  # Localhost variante
         "http://localhost:8080",  # Vue/otros
     ]
 else:

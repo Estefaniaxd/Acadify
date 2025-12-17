@@ -406,6 +406,20 @@ class ApiClientTareas {
     );
     return response.data;
   }
+
+  /**
+   * Exportar reporte completo del curso en CSV
+   * GET /api/cursos/tareas/{curso_id}/reporte/export
+   */
+  async exportarReporteCurso(cursoId: string): Promise<Blob> {
+    const response = await this.axiosClient.get(
+      `${this.baseURL}/${cursoId}/reporte/export`,
+      {
+        responseType: 'blob', // Importante para archivos
+      }
+    );
+    return response.data;
+  }
 }
 
 // Instancia singleton del cliente API

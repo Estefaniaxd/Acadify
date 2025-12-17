@@ -272,7 +272,7 @@ export default function Login() {
                 transition={{ delay: 0.2, duration: 0.6 }}
               >
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2" htmlFor="identifier">
-                  Usuario o Email
+                  Usuario o Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -338,7 +338,7 @@ export default function Login() {
                 transition={{ delay: 0.3, duration: 0.6 }}
               >
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2" htmlFor="password">
-                  Contraseña
+                  Contraseña <span className="text-red-500">*</span>
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
